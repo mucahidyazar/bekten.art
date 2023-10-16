@@ -49,7 +49,7 @@ export function HomeSwiper({data}: HomeSwiperProps) {
             <ArtImage
               src={item.url}
               description={item.description}
-              className="w-full h-80 rounded-lg"
+              className="h-80 w-full rounded-lg"
             />
           </SwiperSlide>
         ))}
