@@ -15,7 +15,7 @@ export function Footer({className}: FooterProps) {
   return (
     <footer
       className={cn(
-        'text-xs text-gray-400 hidden lg:flex lg:flex-col lg:gap-2',
+        'hidden text-xs text-gray-400 lg:flex lg:flex-col lg:gap-2',
         className,
       )}
     >
@@ -27,7 +27,7 @@ export function Footer({className}: FooterProps) {
             <a
               key={link.icon}
               href={link.url}
-              className="flex items-center gap-2 hover:scale-125 transition-all duration-300 ease-in-out hover:text-primary-900"
+              className="flex items-center gap-2 transition-all duration-300 ease-in-out hover:scale-125 hover:text-primary-900"
             >
               {IconComponent && <IconComponent className="w-4" />}
             </a>

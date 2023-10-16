@@ -18,7 +18,7 @@ export function ArtImage({
 }: ArtImageProps) {
   return (
     <div
-      className={cn('w-full overflow-hidden relative group', className)}
+      className={cn('group relative w-full overflow-hidden', className)}
       onClick={onClick}
     >
       <Image
@@ -28,10 +28,10 @@ export function ArtImage({
         height={400}
         className={cn('w-full object-cover', imageClassName)}
       />
-      <p className="absolute bottom-0 left-0 text-xs text-white z-20 p-3 max-w-full wrap break-words">
+      <p className="wrap absolute bottom-0 left-0 z-20 max-w-full break-words p-3 text-xs text-white">
         {description}
       </p>
-      <div className="absolute bottom-0 right-0 left-0 h-16 bg-gradient-to-t from-black to-transparent z-10" />
+      <div className="absolute bottom-0 left-0 right-0 z-10 h-16 bg-gradient-to-t from-black to-transparent" />
     </div>
   )
 }
