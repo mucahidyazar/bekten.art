@@ -51,7 +51,7 @@ export function AppTools({className}: AppToolsProps) {
     <section
       id="app-tools"
       className={cn(
-        'bg-background fixed right-2 top-2 z-20 flex gap-1 rounded bg-opacity-60 lg:right-4',
+        'fixed right-2 top-2 z-20 flex gap-1 rounded bg-background bg-opacity-60 lg:right-4',
         className,
       )}
     >
