@@ -3,9 +3,9 @@ import Image from 'next/image'
 import {prepareMetadata} from '@/utils'
 
 export function generateMetadata() {
-  const title = '👋🏼 Home'
+  const title = '🎨 Art Detail - Bekten Usubaliev’s `Haver` Masterpiece'
   const description =
-    '👋🏼 Hi, it is Mucahid. I am a frontend developer and creator of some open source projects since 2017. I am h'
+    '🎨 Delve into `Haver`, a celebrated artwork by Bekten Usubaliev, encapsulating intricate layers of human emotions, dreams, and spirit. Explore the depths of artistic expression and the untold narratives of the soul.'
 
   return prepareMetadata({
     title,

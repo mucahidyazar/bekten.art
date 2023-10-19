@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 
-import { ME_DESCRIPTION_FULL } from "@/constants"
+import { ME_DESCRIPTION } from "@/constants"
 
 type TPrepareMetadata = Metadata & {
   title?: string
@@ -9,15 +9,15 @@ type TPrepareMetadata = Metadata & {
 }
 export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
   const DEFAULT_TITLE = {
-    default: 'Mucahid Yazar',
-    template: '%s - Frontend developer | mucahid.dev',
+    default: 'Bekten Usubaliev',
+    template: '%s - Painter | bekten.art',
   }
   const title = metadata.title || DEFAULT_TITLE
-  const description = metadata.description || ME_DESCRIPTION_FULL
+  const description = metadata.description || ME_DESCRIPTION
 
   const { authors, openGraph, twitter, ...rest } = metadata
 
-  const imagesUrl = new URL('https://mucahid.dev/api/og')
+  const imagesUrl = new URL('https://bekten.art/api/og')
   if (metadata.title) {
     imagesUrl.searchParams.set('title', metadata.title)
   }
@@ -33,7 +33,7 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
     title,
     description,
     viewport: 'width=device-width, initial-scale=1',
-    authors: [{ name: 'Mucahid Yazar', url: 'https://mucahid.dev' }],
+    authors: [{ name: 'Bekten Usubaliev', url: 'https://bekten.art' }],
     icons: { icon: '/favicon-32x32.png', apple: '/apple-touch-icon.png' },
     manifest: '/site.webmanifest',
     themeColor: '#ffffff',
@@ -44,7 +44,7 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
         'tr-TR': '/tr'
       },
     },
-    metadataBase: new URL('https://mucahid.dev'),
+    metadataBase: new URL('https://bekten.art'),
     openGraph: {
       title,
       description,
@@ -56,10 +56,10 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
       title,
       description,
       card: 'summary',
-      site: 'https://mucahid.dev',
-      creator: 'Mucahid Yazar',
-      siteId: 'mucahid.dev',
-      creatorId: 'mucahidyazar',
+      site: 'https://bekten.art',
+      creator: 'Bekten Usubaliev',
+      siteId: 'bekten.art',
+      creatorId: 'bektenusubaliev',
       images,
     },
     robots: {

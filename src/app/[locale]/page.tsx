@@ -3,9 +3,10 @@ import {HomeSwiper} from '@/components/organisms/HomeSwiper'
 import {prepareMetadata} from '@/utils'
 
 export function generateMetadata() {
-  const title = '👋🏼 Home'
+  const title =
+    '🎨 Bekten Usubaliev - Master Kyrgyz Painter Unveiling Human Emotions'
   const description =
-    '👋🏼 Hi, it is Mucahid. I am a frontend developer and creator of some open source projects since 2017. I am h'
+    '🎨 Discover the artistic world of Bekten Usubaliev, a renowned Kyrgyz painter known for his unique ability to unveil the hidden emotions and dreams encapsulated within the human spirit.'
 
   return prepareMetadata({
     title,

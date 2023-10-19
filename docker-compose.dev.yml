@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  mucahid-dev:
+  bekten-art:
     build:
       context: .
       dockerfile: Dockerfile.dev

@@ -1,8 +1,1 @@
-export const ME_COMPANY = {
-  title: 'smartgift',
-  url: 'https://smartgiftit.com',
-}
-
-export const ME_DESCRIPTION = '👋🏼 Hi, it is Mucahid. I am a frontend developer and creator of some open source projects since 2017. I create accessible, user-friendly web applications with the best efficient solutions and best practices of the frontend world for SAAS projects. I`m currently working'
-
-export const ME_DESCRIPTION_FULL = ME_DESCRIPTION + ' @' + ME_COMPANY.title
+export const ME_DESCRIPTION = '🎨 Greetings, I am Bekten Usubaliev, a passionate Kyrgyz painter who fervently believes that the essence of art lies in unveiling the concealed dreams, emotions, and sovereign spirit within every individual. Born in 1958, my journey in the magnificent world of art has been an exhilarating experience, marking my presence as a lecturer at the esteemed Kyrgyz State Art College since 1990. My artistic expressions have found their voice in numerous national and international exhibitions, eloquently narrating the unuttered, intricate nuances of the human soul. My creations, a harmonious blend of tradition and innovation, reside in the prestigious Kyrgyz State Museum of Fine Art and in cherished private collections across the globe.';

@@ -3,7 +3,7 @@
 # push it to AWS ECR hub service
 # then after push to ECR, ECS detect the changes and creates a new EC2 instance
 # and by the Elastic IP prod catch the changes immediately
-name: 'Release on tag @mucahid.dev'
+name: 'Release on tag @bekten.art'
 on:
   pull_request:
     branches:
@@ -14,7 +14,7 @@ on:
 
 env:
   AWS_REGION: eu-central-1
-  ECR_REPOSITORY: mucahid-dev
+  ECR_REPOSITORY: bekten-art
 
 jobs:
   vercel:

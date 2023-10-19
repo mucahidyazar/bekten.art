@@ -1,4 +1,4 @@
-name: 'Release on tag @mucahid.dev'
+name: 'Release on tag @bekten.art'
 on:
   pull_request:
     branches:

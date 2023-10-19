@@ -2,9 +2,9 @@ import {ArtImage} from '@/components'
 import {prepareMetadata} from '@/utils'
 
 export function generateMetadata() {
-  const title = '👋🏼 Home'
+  const title = '🎨 Art Gallery - Explore Bekten Usubaliev’s Masterpieces'
   const description =
-    '👋🏼 Hi, it is Mucahid. I am a frontend developer and creator of some open source projects since 2017. I am h'
+    '🎨 Step into the gallery of Bekten Usubaliev and witness a collection of art that transcends boundaries, each piece echoing the profound sentiments and dreams of the human spirit.'
 
   return prepareMetadata({
     title,
