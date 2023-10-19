@@ -1,7 +1,8 @@
 'use client'
+import {MoonIcon, SunIcon} from '@heroicons/react/24/outline'
 import {usePathname, useRouter} from 'next/navigation'
 import {useLocale, useTranslations} from 'next-intl'
-import {useTransition} from 'react'
+import {useState, useTransition} from 'react'
 
 import {
   DropdownMenu,
@@ -18,6 +19,7 @@ type AppToolsProps = {
   className?: string
 }
 export function AppTools({className}: AppToolsProps) {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   const [isPending, startTransition] = useTransition()
   const t = useTranslations()
   const locale = useLocale()
@@ -44,6 +46,8 @@ export function AppTools({className}: AppToolsProps) {
         className,
       )}
     >
+      <ReactPlayer />
+
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
@@ -65,7 +69,17 @@ export function AppTools({className}: AppToolsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ReactPlayer />
+      <button
+        className={cn(
+          'w-9 h-9 flex items-center justify-center border border-primary-500 border-opacity-10 rounded bg-primary-500 bg-opacity-5 shadow-soft-md hover:shadow-soft-lg text-primary-500 z-50 relative',
+        )}
+      >
+        {theme === 'dark' ? (
+          <SunIcon className="w-3" />
+        ) : (
+          <MoonIcon className="w-3" />
+        )}
+      </button>
     </section>
   )
 }
