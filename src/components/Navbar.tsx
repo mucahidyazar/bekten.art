@@ -1,4 +1,5 @@
 import {cookies} from 'next/headers'
+import {useTranslations} from 'next-intl'
 
 import {env} from '@/configs'
 import {cn} from '@/utils'
@@ -15,28 +16,30 @@ export function Navbar({className}: NavbarProps) {
   const dashboardEnv = String(env.DASHBOARD)
   const isAdmin = dashboardCookie === dashboardEnv
 
+  const t = useTranslations()
+
   const NAV_ITEMS = [
     {
-      label: 'Home',
+      label: t('home'),
       path: '/',
     },
     {
-      label: 'News',
+      label: t('news'),
       path: '/news',
     },
     {
-      label: 'About',
+      label: t('about'),
       path: '/about',
     },
     {
-      label: 'Gallery',
+      label: t('gallery'),
       path: '/gallery',
     },
     {
-      label: 'Contact',
+      label: t('contact'),
       path: '/contact',
     },
-    ...(isAdmin ? [{label: 'Dashboard', path: '/dashboard'}] : []),
+    ...(isAdmin && !1 ? [{label: 'Dashboard', path: '/dashboard'}] : []),
   ]
 
   return (
