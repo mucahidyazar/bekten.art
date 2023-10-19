@@ -1,15 +1,15 @@
 {
-  "home": "Ana Sayfa",
-  "news": "Haberler",
-  "about": "Hakkında",
-  "gallery": "Galeri",
-  "contact": "İletişim",
-  "addressHome": "Ev",
-  "addressStudio": "Stüdyo",
-  "copyRight": "© {year} Bekten. Tüm hakları saklıdır. mucahid.dev tarafından tasarlanmıştır.",
-  "slogan": "ÇAĞDAŞ YAĞLİBOYA ODAKLI RESSAM",
-  "biography1": "Bekten Usubaliev, sanatın insanın içindeki rüyaları, duyguları ve bağımsız ruhu ortaya çıkardığına inanan Kırgız bir ressamdır. Sadece eserleri değil, aynı zamanda 1990'dan beri Kırgız Devlet Sanat Koleji'nde öğretim görevlisi olarak görev yapan Bekten de büyük bir etkiye sahiptir. 1958 doğumlu olan Bekten, 1981'de Kırgız Devlet Sanat Koleji'nden mezun oldu ve 1989'da Rusya, St. Petersburg'daki Repin Mimarlık, Heykel ve Resim Enstitüsü'nden derece aldı. 1991'de Kırgız Cumhuriyeti Sanatçılar Birliği'ne katıldı.",
-  "biography2": "Bekten, eserlerini Almatı, Kazakistan'daki genç sanatçılar grup sergisinde (1995); Rusya, St. Petersburg'daki ikinci uluslararası bienal sergisi 'Diyaloglar'da (1995); Ch. Aitmatov'un 70. yıl dönümü kutlamasında Brüksel, Belçika'da (1997); Tahran, İran'daki uluslararası sergide (2000); ve Bişkek'teki solo sergide (2001) sergiledi.",
-  "biography3": "Eserleri Kırgız Devlet Güzel Sanatlar Müzesi'nde ve CIS, ABD, Almanya, Türkiye ve Büyük Britanya'daki özel koleksiyonlarda görülebilir.",
-  "locale": "{locale, select, en {İngilizce} tr {Türkçe} ru {Rusça} kg {Kırgızca} other {Bilinmeyen}}"
+  "home": "Главная",
+  "news": "Новости",
+  "about": "О нас",
+  "gallery": "Галерея",
+  "contact": "Контакты",
+  "addressHome": "Дом",
+  "addressStudio": "Студия",
+  "copyRight": "© {year} Бектен. Все права защищены. Разработано mucahid.dev.",
+  "slogan": "СОВРЕМЕННЫЙ ХУДОЖНИК, СОСРЕДОТОЧЕННЫЙ НА МАСЛЯНОЙ ЖИВОПИСИ",
+  "biography1": "Бектен Усубалиев - киргизский художник, который считает, что искусство раскрывает сны, чувства и независимый дух, скрытые в человеке. Не только его произведения говорят о многом, также как и Бектен, который является преподавателем Киргизского государственного художественного колледжа с 1990 года. Родившись в 1958 году, он окончил Киргизский государственный художественный колледж в 1981 году и позже получил степень в Институте архитектуры, скульптуры и живописи имени Репина в Санкт-Петербурге, Россия, в 1989 году. В 1991 году он вступил в Союз художников Киргизской Республики.",
+  "biography2": "Бектен показывал свои работы на многих национальных и международных выставках, включая групповую выставку молодых художников в Алматы, Казахстан (1995); вторую международную биеннале выставку `Диалоги` в Санкт-Петербурге, Россия (1995); празднование 70-летия Ч. Айтматова в Брюсселе, Бельгия (1997); международная выставка в Тегеране, Иран (2000); и сольное шоу в Бишкеке (2001).",
+  "biography3": "Его работы можно увидеть в Киргизском государственном музее изобразительных искусств и в частных коллекциях по всему СНГ, США, Германии, Турции и Великобритании.",
+  "locale": "{locale, select, en {Английский} tr {Турецкий} ru {Русский} kg {Киргизский} other {Неизвестно}}"
 }
