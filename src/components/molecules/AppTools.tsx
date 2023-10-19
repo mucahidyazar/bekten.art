@@ -75,9 +75,9 @@ export function AppTools({className}: AppToolsProps) {
         )}
       >
         {theme === 'dark' ? (
-          <SunIcon className="w-3" />
+          <SunIcon className="w-3" onClick={() => setTheme('light')} />
         ) : (
-          <MoonIcon className="w-3" />
+          <MoonIcon className="w-3" onClick={() => setTheme('dark')} />
         )}
       </button>
     </section>
