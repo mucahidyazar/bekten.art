@@ -1,3 +1,5 @@
+import {useTranslations} from 'next-intl'
+
 import {Icons} from '@/components/ui/icons'
 import {prepareMetadata} from '@/utils'
 
@@ -14,6 +16,8 @@ export function generateMetadata() {
 }
 
 export default function Home() {
+  const t = useTranslations()
+
   return (
     <div id="home" className="flex flex-col gap-6">
       <iframe
@@ -28,7 +32,7 @@ export default function Home() {
 
       <div className="flex gap-8">
         <div className="text-sm text-gray-500">
-          <h3 className="text-lg mb-2">Home</h3>
+          <h3 className="text-lg mb-2">{t('addressHome')}</h3>
           <div className="flex items-start gap-1 w-60">
             <Icons.location className="w-4 mt-[2px]" />
             <div>
@@ -38,7 +42,7 @@ export default function Home() {
           </div>
         </div>
         <div className="text-sm text-gray-500">
-          <h3 className="text-lg mb-2">Studio</h3>
+          <h3 className="text-lg mb-2">{t('addressStudio')}</h3>
           <div className="flex flex-col gap-1 w-60">
             <div className="flex items-start gap-1">
               <Icons.location className="w-4 mt-[2px]" />

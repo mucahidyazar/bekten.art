@@ -1,3 +1,5 @@
+import {useTranslations} from 'next-intl'
+
 import {LINKS} from '@/mocks'
 import {cn} from '@/utils'
 
@@ -8,6 +10,8 @@ type FooterProps = {
   className?: string
 }
 export function Footer({className}: FooterProps) {
+  const t = useTranslations()
+
   return (
     <footer
       className={cn(
@@ -31,15 +35,15 @@ export function Footer({className}: FooterProps) {
         })}
       </div>
       <p>
-        © {new Date().getFullYear()} Bekten. All rights reserved. Designed by{' '}
-        <a
+        © {t('copyRight', {year: new Date().getFullYear()})}{' '}
+        {/* <a
           href="https://mucahid.dev"
           target="_blank"
           rel="noreferrer"
           className="inline"
         >
           <span className="text-primary-500 text-opacity-50">mucahid.dev</span>
-        </a>
+        </a> */}
       </p>
     </footer>
   )

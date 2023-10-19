@@ -32,8 +32,8 @@ function CircularProgress({progress, className}: CircularProgressProps) {
         r={radius}
         stroke="currentColor"
         strokeWidth="2"
-        strokeDasharray={circumference}
-        strokeDashoffset={strokeDashoffset}
+        strokeDasharray={circumference || 0}
+        strokeDashoffset={strokeDashoffset || 0}
         fill="transparent"
         className="transition-all ease-out duration-300"
       />
