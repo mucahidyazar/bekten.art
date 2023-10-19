@@ -57,10 +57,6 @@ div[data-nextjs-scroll-focus-boundary] {
   height: 100%;
 }
 
-.react-images__view-image {
-  display: unset;
-}
-
 .swiper-button-next::after,
 .swiper-button-prev::after {
   font-size: 2rem !important;

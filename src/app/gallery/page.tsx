@@ -38,60 +38,70 @@ export function generateMetadata() {
 //   -H 'x-ig-www-claim: 0' \
 //   -H 'x-requested-with: XMLHttpRequest' \
 //   --compressed
-const getPhotos = async ({page = 1, perPage = 40}) => {
-  try {
-    const response = await fetch(
-      'https://www.instagram.com/api/v1/users/web_profile_info/?username=bekten_usubaliev',
-      {
-        method: 'GET',
-        headers: {
-          authority: 'www.instagram.com',
-          accept: '*/*',
-          'accept-language': 'en-US,en;q=0.9',
-          cookie:
-            'csrftoken=YND1rzQ1xQFsym8rXjDu2IT9RHWwrpjv; mid=ZSzaAgAEAAFDMHVngWFqcC3aKulj; ig_did=166370A9-C8EB-4DA7-AAF8-57768038E8ED',
-          dpr: '2',
-          referer: 'https://www.instagram.com/bekten_usubaliev/',
-          'sec-ch-prefers-color-scheme': 'dark',
-          'sec-ch-ua':
-            '"Microsoft Edge";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
-          'sec-ch-ua-full-version-list':
-            '"Microsoft Edge";v="117.0.2045.55", "Not;A=Brand";v="8.0.0.0", "Chromium";v="117.0.5938.150"',
-          'sec-ch-ua-mobile': '?0',
-          'sec-ch-ua-model': '""',
-          'sec-ch-ua-platform': 'macOS',
-          'sec-ch-ua-platform-version': '14.0.0',
-          'sec-fetch-dest': 'empty',
-          'sec-fetch-mode': 'cors',
-          'sec-fetch-site': 'same-origin',
-          user_agent:
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.55',
-          viewport_width: '1093',
-          'x-asbd-id': '129477',
-          x_csrftoken: 'YND1rzQ1xQFsym8rXjDu2IT9RHWwrpjv',
-          x_ig_app_id: '936619743392459',
-          x_ig_www_claim: '0',
-          'x-requested-with': 'XMLHttpRequest',
+const getPhotos = async () =>
+  // {page = 1, perPage = 40}
+  {
+    try {
+      const response = await fetch(
+        'https://www.instagram.com/api/v1/users/web_profile_info/?username=bekten_usubaliev',
+        {
+          method: 'GET',
+          headers: {
+            authority: 'www.instagram.com',
+            accept: '*/*',
+            'accept-language': 'en-US,en;q=0.9',
+            cookie:
+              'csrftoken=YND1rzQ1xQFsym8rXjDu2IT9RHWwrpjv; mid=ZSzaAgAEAAFDMHVngWFqcC3aKulj; ig_did=166370A9-C8EB-4DA7-AAF8-57768038E8ED',
+            dpr: '2',
+            referer: 'https://www.instagram.com/bekten_usubaliev/',
+            'sec-ch-prefers-color-scheme': 'dark',
+            'sec-ch-ua':
+              '"Microsoft Edge";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
+            'sec-ch-ua-full-version-list':
+              '"Microsoft Edge";v="117.0.2045.55", "Not;A=Brand";v="8.0.0.0", "Chromium";v="117.0.5938.150"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-model': '""',
+            'sec-ch-ua-platform': 'macOS',
+            'sec-ch-ua-platform-version': '14.0.0',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            user_agent:
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.55',
+            viewport_width: '1093',
+            'x-asbd-id': '129477',
+            x_csrftoken: 'YND1rzQ1xQFsym8rXjDu2IT9RHWwrpjv',
+            x_ig_app_id: '936619743392459',
+            x_ig_www_claim: '0',
+            'x-requested-with': 'XMLHttpRequest',
+          },
         },
-      },
-    )
-    const data = await response.json()
-    return data
-  } catch (error) {
-    console.error(error.response)
-    return {}
+      )
+      const data = await response.json()
+      return data
+    } catch (error) {
+      return {}
+    }
   }
+
+type ImageNodeType = {
+  display_url: string
+  shortcode: string
+}
+type ImageType = {
+  node: ImageNodeType
 }
 
 export default async function Home() {
-  const response = await getPhotos({page: 1, perPage: 40})
+  const response = await getPhotos()
   const data = response?.data
 
-  const images = data?.user?.edge_owner_to_timeline_media?.edges || []
+  const images =
+    (data?.user?.edge_owner_to_timeline_media?.edges as ImageType[]) || []
   const getThreeImageArray = () => {
-    const arrayOne = []
-    const arrayTwo = []
-    const arrayThree = []
+    const arrayOne: ImageType[] = []
+    const arrayTwo: ImageType[] = []
+    const arrayThree: ImageType[] = []
     // example
     // images = [1,2,3,4,5,6,7,8]
     // arrayOne = [1,4,7]

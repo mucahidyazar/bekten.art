@@ -13,7 +13,6 @@ import Link from 'next/link'
 import {Footer} from '@/components/Footer'
 import {AppTools} from '@/components/molecules/AppTools'
 import {Navbar} from '@/components/Navbar'
-import {TrpcProvider} from '@/trpc/TrpcProvider'
 import {cn, prepareMetadata} from '@/utils'
 
 const lora = Lora({subsets: ['latin']})
@@ -59,7 +58,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           </section>
           <section className="h-full relative px-4 lg:px-0 lg:min-w-[calc(100%-15rem)] lg:w-[calc(100%-15rem)] lg:ml-auto lg:pt-20 lg:pb-8">
             <div className="sticky top-0 left-0 w-full h-10 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none -mt-10" />
-            <TrpcProvider>{children}</TrpcProvider>
+            {children}
           </section>
         </main>
         <Footer className="flex flex-col items-center py-8 gap-4 lg:hidden" />
