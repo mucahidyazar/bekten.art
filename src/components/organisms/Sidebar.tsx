@@ -7,7 +7,11 @@ import {cn} from '@/utils'
 
 import {AppTools} from '../molecules/AppTools'
 
-const nanum = Nanum_Pen_Script({subsets: ['latin'], weight: ['400']})
+const nanum = Nanum_Pen_Script({
+  subsets: ['latin'],
+  weight: ['400'],
+  display: 'swap',
+})
 
 export function Sidebar() {
   return (
