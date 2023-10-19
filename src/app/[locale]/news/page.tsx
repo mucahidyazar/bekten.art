@@ -4,9 +4,9 @@ import {EventCard} from '@/components/cards'
 import {prepareMetadata} from '@/utils'
 
 export function generateMetadata() {
-  const title = '👋🏼 Home'
+  const title = '🎨 Latest Updates - Bekten Usubaliev`s Art Exhibitions & News'
   const description =
-    '👋🏼 Hi, it is Mucahid. I am a frontend developer and creator of some open source projects since 2017. I am h'
+    '🎨 Stay updated with the latest exhibitions, artworks, and journey of Bekten Usubaliev. Dive into a world where art and emotions intertwine gracefully.'
 
   return prepareMetadata({
     title,

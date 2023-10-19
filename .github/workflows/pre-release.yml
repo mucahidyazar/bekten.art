@@ -1,4 +1,4 @@
-name: 'Pre-release @mucahid.dev'
+name: 'Pre-release @bekten.art'
 on:
   workflow_dispatch:
     inputs:

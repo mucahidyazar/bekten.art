@@ -1,5 +1,5 @@
 {
-  "name": "mucahid.dev",
+  "name": "bekten.art",
   "version": "3.0.5",
   "engines": {
     "node": ">=16",
@@ -7,14 +7,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mucahidyazar/mucahid.dev.git"
+    "url": "git+https://github.com/mucahidyazar/bekten.art.git"
   },
   "author": {
     "name": "Mucahid Yazar",
     "email": "mucahidyazar@gmail.com",
-    "url": "https://mucahid.dev"
+    "url": "https://bekten.art"
   },
-  "homepage": "https://mucahid.dev",
+  "homepage": "https://bekten.art",
   "license": "MIT",
   "private": true,
   "scripts": {

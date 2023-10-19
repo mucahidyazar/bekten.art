@@ -4,9 +4,9 @@ import {useTranslations} from 'next-intl'
 import {prepareMetadata} from '@/utils'
 
 export function generateMetadata() {
-  const title = '👋🏼 Home'
+  const title = '🎨 About Bekten Usubaliev - Kyrgyz Painter & Art Lecturer'
   const description =
-    '👋🏼 Hi, it is Mucahid. I am a frontend developer and creator of some open source projects since 2017. I am h'
+    '🎨 Learn about Bekten Usubaliev’s artistic journey, his philosophy, and his contributions to art. A painter who believes in the power of art to unveil the hidden realms of human emotions and dreams.'
 
   return prepareMetadata({
     title,
