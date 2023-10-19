@@ -19,7 +19,7 @@ export function Footer({className}: FooterProps) {
         className,
       )}
     >
-      <AppTools />
+      <AppTools className="static" />
       <div className="flex gap-4">
         {LINKS.map(link => {
           const IconComponent = (Icons as any)[link?.icon]
