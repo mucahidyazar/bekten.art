@@ -11,6 +11,7 @@ import {notFound} from 'next/navigation'
 import {NextIntlClientProvider} from 'next-intl'
 
 import {Footer} from '@/components/Footer'
+import {AppTools} from '@/components/molecules/AppTools'
 import {Sidebar} from '@/components/organisms/Sidebar'
 import {prepareMetadata} from '@/utils'
 
@@ -56,6 +57,8 @@ export default async function RootLayout({
             </section>
           </main>
           <Footer className="flex flex-col items-center py-8 gap-4 lg:hidden" />
+
+          <AppTools />
         </NextIntlClientProvider>
       </body>
     </html>

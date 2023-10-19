@@ -7,15 +7,20 @@ type ArtImageProps = {
   description: string
   imageClassName?: string
   src: string
+  onClick?: () => void
 }
 export function ArtImage({
   className,
   description,
   imageClassName,
   src,
+  onClick,
 }: ArtImageProps) {
   return (
-    <div className={cn('w-full overflow-hidden relative group', className)}>
+    <div
+      className={cn('w-full overflow-hidden relative group', className)}
+      onClick={onClick}
+    >
       <Image
         src={src}
         alt="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"

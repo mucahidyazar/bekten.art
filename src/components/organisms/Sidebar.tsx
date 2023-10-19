@@ -5,8 +5,6 @@ import Link from 'next/link'
 import {Navbar} from '@/components/Navbar'
 import {cn} from '@/utils'
 
-import {AppTools} from '../molecules/AppTools'
-
 const nanum = Nanum_Pen_Script({
   subsets: ['latin'],
   weight: ['400'],
@@ -36,10 +34,6 @@ export function Sidebar() {
         </p>
       </aside>
       <Navbar />
-      <AppTools
-        className="lg:hidden absolute top-2 right-2 justify-end gap-1"
-        withoutBg
-      />
     </section>
   )
 }

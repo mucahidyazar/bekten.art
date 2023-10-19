@@ -11,7 +11,15 @@ import {Swiper, SwiperSlide} from 'swiper/react'
 
 import {ArtImage} from '@/components'
 
-export function HomeSwiper() {
+type SectionData = {
+  url: string
+  title: string
+  description: string
+}
+type HomeSwiperProps = {
+  data: SectionData[]
+}
+export function HomeSwiper({data}: HomeSwiperProps) {
   return (
     <div className="w-full">
       <Swiper
@@ -36,41 +44,15 @@ export function HomeSwiper() {
           A11y,
         ]}
       >
-        <SwiperSlide>
-          <ArtImage
-            src="/img/workshop/workshop-0.jpeg"
-            description="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-            className="w-full h-80 rounded-lg"
-          />
-        </SwiperSlide>
-        <SwiperSlide>
-          <ArtImage
-            src="/img/workshop/workshop-1.jpeg"
-            description="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-            className="w-full h-80 rounded-lg"
-          />
-        </SwiperSlide>
-        <SwiperSlide>
-          <ArtImage
-            src="/img/workshop/workshop-2.jpeg"
-            description="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-            className="w-full h-80 rounded-lg"
-          />
-        </SwiperSlide>
-        <SwiperSlide>
-          <ArtImage
-            src="/img/workshop/workshop-3.jpeg"
-            description="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-            className="w-full h-80 rounded-lg"
-          />
-        </SwiperSlide>
-        <SwiperSlide>
-          <ArtImage
-            src="/img/workshop/workshop-4.jpeg"
-            description="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-            className="w-full h-80 rounded-lg"
-          />
-        </SwiperSlide>
+        {data.map(item => (
+          <SwiperSlide key={item.url}>
+            <ArtImage
+              src={item.url}
+              description={item.description}
+              className="w-full h-80 rounded-lg"
+            />
+          </SwiperSlide>
+        ))}
       </Swiper>
     </div>
   )

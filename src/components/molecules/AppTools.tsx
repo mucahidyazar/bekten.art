@@ -16,9 +16,8 @@ import {ReactPlayer} from './ReactPlayer'
 
 type AppToolsProps = {
   className?: string
-  withoutBg?: boolean
 }
-export function AppTools({className, withoutBg}: AppToolsProps) {
+export function AppTools({className}: AppToolsProps) {
   const [isPending, startTransition] = useTransition()
   const t = useTranslations()
   const locale = useLocale()
@@ -39,13 +38,16 @@ export function AppTools({className, withoutBg}: AppToolsProps) {
   }
 
   return (
-    <section className={cn('flex gap-1', className)}>
+    <section
+      className={cn(
+        'flex gap-1 fixed rounded top-2 right-2 lg:right-4 z-20 bg-white bg-opacity-60',
+        className,
+      )}
+    >
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            'w-9 h-9 flex items-center justify-center border border-primary-500 border-opacity-10 rounded-full bg-primary-500 bg-opacity-5 shadow-soft-md hover:shadow-soft-lg text-primary-500 z-50 relative text-xs uppercase',
-            !!withoutBg &&
-              'hover:shadow-none shadow-none bg-none border-none bg-opacity-0 w-fit',
+            'w-9 h-9 flex items-center justify-center border border-primary-500 border-opacity-10 rounded bg-primary-500 bg-opacity-5 shadow-soft-md hover:shadow-soft-lg text-primary-500 z-50 relative text-xs uppercase',
           )}
         >
           {isPending ? '...' : locale}
@@ -55,7 +57,7 @@ export function AppTools({className, withoutBg}: AppToolsProps) {
             <DropdownMenuLabel
               key={cur}
               onClick={() => onSelectChange(cur)}
-              className="cursor-pointer"
+              className="cursor-pointer text-primary-500 font-thin text-xs text-center uppercase hover:bg-primary-500 hover:bg-opacity-5"
             >
               {t('locale', {locale: cur})}
             </DropdownMenuLabel>
@@ -63,7 +65,7 @@ export function AppTools({className, withoutBg}: AppToolsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ReactPlayer withoutBg={withoutBg} />
+      <ReactPlayer />
     </section>
   )
 }
