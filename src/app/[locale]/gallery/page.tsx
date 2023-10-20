@@ -1,4 +1,4 @@
-import {ArtImage} from '@/components'
+import {GalleryTemplate} from '@/components/templates/GalleryTemplate'
 import {prepareMetadata} from '@/utils'
 
 export function generateMetadata() {
@@ -87,113 +87,62 @@ const getPhotos = async () =>
 type ImageNodeType = {
   display_url: string
   shortcode: string
+  edge_media_to_caption: {
+    edges: {
+      node: {
+        text: string
+      }
+    }[]
+  }
 }
 type ImageType = {
   node: ImageNodeType
+}
+type ArtImage = {
+  url: string
+  title: string
+  description: string
 }
 
 export default async function Home() {
   const response = await getPhotos()
   const data = response?.data
 
-  const images =
-    (data?.user?.edge_owner_to_timeline_media?.edges as ImageType[]) || []
-  const getThreeImageArray = () => {
-    const arrayOne: ImageType[] = []
-    const arrayTwo: ImageType[] = []
-    const arrayThree: ImageType[] = []
-    // example
-    // images = [1,2,3,4,5,6,7,8]
-    // arrayOne = [1,4,7]
-    // arrayTwo = [2,5,8]
-    // arrayThree = [3,6]
+  const images = data?.user?.edge_owner_to_timeline_media?.edges as ImageType[]
+  console.log({
+    exampleImage: images[0].node,
+    exampleImageMessage:
+      images[0].node?.edge_media_to_caption?.edges[0]?.node?.text,
+  })
+
+  const getImageArrays = (): ArtImage[][] => {
+    const arrayOne: ArtImage[] = []
+    const arrayTwo: ArtImage[] = []
+    const arrayThree: ArtImage[] = []
+
     images.forEach((image, index) => {
+      console.log(image.node.display_url)
+      const artImage = {
+        url: image.node.display_url,
+        title: image.node.shortcode,
+        description:
+          image.node?.edge_media_to_caption?.edges[0]?.node?.text || '',
+      }
       if (index % 3 === 0) {
-        arrayOne.push(image)
+        arrayOne.push(artImage)
       } else if (index % 3 === 1) {
-        arrayTwo.push(image)
+        arrayTwo.push(artImage)
       } else if (index % 3 === 2) {
-        arrayThree.push(image)
+        arrayThree.push(artImage)
       }
     })
     return [arrayOne, arrayTwo, arrayThree]
   }
+  const imagesArrays = getImageArrays()
 
   return (
-    <div
-      id="home"
-      className="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-8 px-1 lg:px-4"
-    >
-      {getThreeImageArray()?.map((imageArray, imageArrayIndex) => (
-        <div
-          className="flex flex-col gap-4 lg:gap-8"
-          key={imageArrayIndex.toString()}
-        >
-          {imageArray.map((image, imageIndex) => (
-            <ArtImage
-              key={imageArrayIndex.toString() + imageIndex.toString()}
-              src={image?.node?.display_url}
-              description={`https://www.instagram.com/p/${image?.node?.shortcode}`}
-              className="h-auto w-full rounded-lg hover:scale-[103%] lg:hover:scale-110 duration-300 saturate-50 hover:saturate-100"
-            />
-          ))}
-        </div>
-      ))}
-      {/* <div className="flex flex-col gap-4">
-        <Image
-          src="/usubaliev_1.jpg"
-          alt="Bekten Usubaliev"
-          width={400}
-          height={400}
-          className="h-auto w-full"
-        />
-        <Image
-          src="/usubaliev_2.jpg"
-          alt="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-          width={400}
-          height={400}
-          className="h-48 w-auto"
-        />
-      </div>
-      <div className="flex flex-col gap-4">
-        <Image
-          src="/img/room/room-0.jpeg"
-          alt="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-          width={400}
-          height={400}
-          className="h-auto w-full"
-        />
-        <Image
-          src="/img/room/room-1.jpeg"
-          alt="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-          width={400}
-          height={400}
-          className="h-auto w-full"
-        />
-        <Image
-          src="/img/room/room-2.jpeg"
-          alt="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-          width={400}
-          height={400}
-          className="h-auto w-full"
-        />
-      </div>
-      <div className="flex flex-col gap-4">
-        <Image
-          src="/img/room/room-3.jpeg"
-          alt="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-          width={400}
-          height={400}
-          className="h-auto w-full"
-        />
-        <Image
-          src="/img/room/room-4.jpeg"
-          alt="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
-          width={400}
-          height={400}
-          className="h-auto w-full"
-        />
-      </div> */}
+    <div id="home" className="px-1 lg:px-4">
+      <GalleryTemplate imageArrays={imagesArrays} />
     </div>
   )
 }
