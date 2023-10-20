@@ -109,11 +109,6 @@ export default async function Home() {
   const data = response?.data
 
   const images = data?.user?.edge_owner_to_timeline_media?.edges as ImageType[]
-  console.log({
-    exampleImage: images[0].node,
-    exampleImageMessage:
-      images[0].node?.edge_media_to_caption?.edges[0]?.node?.text,
-  })
 
   const getImageArrays = (): ArtImage[][] => {
     const arrayOne: ArtImage[] = []
@@ -121,7 +116,6 @@ export default async function Home() {
     const arrayThree: ArtImage[] = []
 
     images.forEach((image, index) => {
-      console.log(image.node.display_url)
       const artImage = {
         url: image.node.display_url,
         title: image.node.shortcode,

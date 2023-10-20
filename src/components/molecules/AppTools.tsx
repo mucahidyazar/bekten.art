@@ -41,8 +41,9 @@ export function AppTools({className}: AppToolsProps) {
 
   return (
     <section
+      id="app-tools"
       className={cn(
-        'flex gap-1 fixed rounded top-2 right-2 lg:right-4 z-20 bg-white bg-opacity-60',
+        'fixed right-2 top-2 z-20 flex gap-1 rounded bg-white bg-opacity-60 lg:right-4',
         className,
       )}
     >
@@ -51,7 +52,7 @@ export function AppTools({className}: AppToolsProps) {
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            'w-9 h-9 flex items-center justify-center border border-primary-500 border-opacity-10 rounded bg-primary-500 bg-opacity-5 shadow-soft-md hover:shadow-soft-lg text-primary-500 z-50 relative text-xs uppercase',
+            'relative z-50 flex h-9 w-9 items-center justify-center rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-xs uppercase text-primary-500 shadow-soft-md hover:shadow-soft-lg',
           )}
         >
           {isPending ? '...' : locale}
@@ -61,7 +62,7 @@ export function AppTools({className}: AppToolsProps) {
             <DropdownMenuLabel
               key={cur}
               onClick={() => onSelectChange(cur)}
-              className="cursor-pointer text-primary-500 font-thin text-xs text-center uppercase hover:bg-primary-500 hover:bg-opacity-5"
+              className="cursor-pointer text-center text-xs font-thin uppercase text-primary-500 hover:bg-primary-500 hover:bg-opacity-5"
             >
               {t('locale', {locale: cur})}
             </DropdownMenuLabel>
@@ -71,7 +72,7 @@ export function AppTools({className}: AppToolsProps) {
 
       <button
         className={cn(
-          'w-9 h-9 flex items-center justify-center border border-primary-500 border-opacity-10 rounded bg-primary-500 bg-opacity-5 shadow-soft-md hover:shadow-soft-lg text-primary-500 z-50 relative',
+          'relative z-50 flex h-9 w-9 items-center justify-center rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
         )}
       >
         {theme === 'dark' ? (
