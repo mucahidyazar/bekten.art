@@ -13,7 +13,7 @@ const nanum = Nanum_Pen_Script({
 
 export function Sidebar() {
   return (
-    <section className="flex flex-col mx-auto w-full lg:h-full lg:min-h-[100vh] lg:max-h-[100vh] lg:w-[15rem] lg:min-w-[15rem] lg:pt-20 pb-4 lg:pb-8 pt-8 lg:fixed lg:top-0 lg:left-0 px-4">
+    <section className="lg:left-[calc(50% + 200px)] mx-auto flex w-full flex-col px-4 pb-4 pt-8 lg:fixed lg:top-0 lg:h-full lg:max-h-[100vh] lg:min-h-[100vh] lg:w-[15rem] lg:min-w-[15rem] lg:pb-8 lg:pt-20">
       <aside className="flex flex-col items-center lg:items-start">
         <Link href="/">
           <Image
@@ -27,7 +27,7 @@ export function Sidebar() {
         <p
           className={cn(
             nanum.className,
-            'text-gray-500 text-xs mb-4 lg:mb-8 text-center lg:text-left uppercase',
+            'mb-4 text-center text-xs uppercase text-gray-500 lg:mb-8 lg:text-left',
           )}
         >
           CONTEMPORARY OIL-FOCUSED PAINTER

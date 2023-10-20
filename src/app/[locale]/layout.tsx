@@ -46,17 +46,17 @@ export default async function RootLayout({
     <html lang={locale}>
       <head />
       <body
-        className={`${lora.className} flex flex-col overflow-x-hidden h-full`}
+        className={`${lora.className} flex h-full flex-col overflow-x-hidden`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <main className="w-full max-w-full lg:max-w-7xl mx-auto flex-grow flex flex-col lg:flex-row gap-5 h-full px-0 lg:px-4">
+          <main className="mx-auto flex h-full w-full max-w-full flex-grow flex-col gap-5 px-0 lg:max-w-7xl lg:flex-row lg:px-4">
             <Sidebar />
-            <section className="h-full relative px-4 lg:px-0 lg:min-w-[calc(100%-15rem)] lg:w-[calc(100%-15rem)] lg:ml-auto lg:pt-20 lg:pb-8">
-              <div className="sticky top-0 left-0 w-full h-10 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none -mt-10" />
+            <section className="relative h-full px-4 lg:ml-auto lg:w-[calc(100%-15rem)] lg:min-w-[calc(100%-15rem)] lg:px-0 lg:pb-8 lg:pt-20">
+              <div className="pointer-events-none sticky left-0 top-0 z-10 -mt-10 h-10 w-full bg-gradient-to-b from-white to-transparent" />
               {children}
             </section>
           </main>
-          <Footer className="flex flex-col items-center py-8 gap-4 lg:hidden" />
+          <Footer className="flex flex-col items-center gap-4 py-8 lg:hidden" />
 
           <AppTools />
         </NextIntlClientProvider>

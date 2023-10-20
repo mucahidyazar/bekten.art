@@ -32,7 +32,7 @@ export function ReactPlayer({}: ReactPlayerProps) {
         ]}
         playing={playing}
         controls={true}
-        muted={!playing}
+        muted={false}
         width={0}
         height={0}
         onProgress={progress => setProgress(progress)}
@@ -42,7 +42,7 @@ export function ReactPlayer({}: ReactPlayerProps) {
       <button
         onClick={togglePlayPause}
         className={cn(
-          'w-9 h-9 flex items-center justify-center border border-primary-500 border-opacity-10 rounded bg-primary-500 bg-opacity-5 shadow-soft-md hover:shadow-soft-lg text-primary-500 z-50 relative',
+          'relative z-50 flex h-9 w-9 items-center justify-center rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
         )}
       >
         {playing ? (
