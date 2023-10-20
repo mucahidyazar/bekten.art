@@ -1,27 +1,30 @@
 import Image from 'next/image'
 
-export function EventCard() {
+type EventCardProps = {
+  title: string
+  description: string
+  image: string
+}
+export function EventCard({title, description, image}: EventCardProps) {
   return (
-    <div className="flex gap-4 h-[10rem] p-2 group hover:cursor-pointer">
-      <div className="text-gray-500 font-bold">
+    <div className="group flex h-[12rem] gap-4 p-2 hover:cursor-pointer">
+      <div className="font-bold text-gray-500">
         <p className="">JUN</p>
-        <div className="w-4 h-[1px] bg-gray-500" />
+        <div className="h-[1px] w-4 bg-gray-500" />
         <p className="text-2xl">23</p>
       </div>
-      <div className="min-w-fit">
+      <div className="min-w-[264px]">
         <Image
-          src="/usubaliev_1.jpg"
+          src={image}
           alt="Bekten Usubaliev"
           width={400}
           height={400}
-          className="h-full w-auto min-w-fit"
+          className="h-full w-full object-cover"
         />
       </div>
       <div className="flex flex-col justify-between">
         <div>
-          <h3 className="font-semibold text-gray-500">
-            Title of the Risen Event
-          </h3>
+          <h3 className="font-semibold text-gray-500">{title}</h3>
           <div className="text-xs text-gray-500">
             {/* subtitle */}
             <p>1015 Chestnut St. Philadelphia, PA 19107</p>
@@ -30,19 +33,14 @@ export function EventCard() {
           </div>
         </div>
 
-        <p className="text-xs line-clamp-2">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quia
-          voluptatum, quibusdam, doloribus, quod voluptate quisquam voluptatibus
-          quos nemo accusamus doloremque voluptas. Quisquam voluptatibus quos
-          nemo accusamus doloremque voluptas.
-        </p>
+        <p className="line-clamp-2 text-xs">{description}</p>
 
         <div className="flex gap-4 text-sm font-semibold">
           {/* <button>Register</button>
             <button>Donate</button> */}
           <button className="group text-gray-500">
             View Event Details
-            <p className="w-0 h-[1px] bg-gray-300 group-hover:w-full group-hover:bg-gray-500 group-hover:h-[1px] transition-all duration-300 ease-in-out"></p>
+            <p className="h-[1px] w-0 bg-gray-300 transition-all duration-300 ease-in-out group-hover:h-[1px] group-hover:w-full group-hover:bg-gray-500"></p>
           </button>
         </div>
       </div>
