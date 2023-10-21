@@ -1,5 +1,4 @@
 import { load } from 'cheerio'
-import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
@@ -25,7 +24,7 @@ export async function POST(request: Request) {
     })
 
     const results = await Promise.all(promises)
-    return NextResponse.json({ data: results })
+    return (Response as any).json({ data: results })
   } catch (error) {
     console.error(`Error while fetching link preview data: ${error}`)
     return {}
