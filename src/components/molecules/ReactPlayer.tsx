@@ -27,8 +27,8 @@ export function ReactPlayer({}: ReactPlayerProps) {
       <YoutubePlayer
         ref={playerRef}
         url={[
+          'https://www.youtube.com/watch?v=uxLBxGloIGo',
           'https://youtu.be/cdIY8ZwI2no?si=4X2RfH_NGSCftkbP',
-          'https://youtu.be/JsZbiOkItHI?si=XRaAEB3CIf7cGYhB',
         ]}
         playing={playing}
         controls={true}

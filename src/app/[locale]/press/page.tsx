@@ -11,16 +11,16 @@ export function generateMetadata() {
   return prepareMetadata({
     title,
     description,
-    page: 'news',
+    page: 'press',
   })
 }
 
-const news = [
+const press = [
   'https://aksarayhaberci.com/haber/ressamlar-aksarayda-bulustu--13418.html',
   'http://acikerisim.akdeniz.edu.tr:8080/xmlui/handle/123456789/5561?show=full',
-  'https://www.turksoy.org/haberler/2015-08-25-turk-dunyasi-ndan-mimar-ve-heykeltiraslar-bolu-da-bir-araya-geldi',
-  'https://www.bishkekart.kg/news/10/',
-  'https://www.bishkekart.kg/news/30/',
+  // 'https://www.turksoy.org/haberler/2015-08-25-turk-dunyasi-ndan-mimar-ve-heykeltiraslar-bolu-da-bir-araya-geldi',
+  // 'https://www.bishkekart.kg/press/10/',
+  // 'https://www.bishkekart.kg/press/30/',
 ]
 const getLinkPreview = async () => {
   const host = headers().get('host')
@@ -28,9 +28,11 @@ const getLinkPreview = async () => {
 
   const reponse = await fetch(`${protocal}://${host}/api/link-preview`, {
     method: 'POST',
-    body: JSON.stringify({links: news}),
-    next: {revalidate: 60 * 60 * 24 * 7},
+    body: JSON.stringify({links: press}),
+    // next: {revalidate: 60 * 60 * 24 * 7},
+    next: {revalidate: 3},
   })
+  console.log('x1')
   const responseJson = await reponse.json()
   return responseJson.data
 }
@@ -44,7 +46,7 @@ export default async function Home() {
   const linkPreviews = (await getLinkPreview()) as LinkPreviewType[]
 
   return (
-    <div id="news" className="flex flex-col gap-4">
+    <div id="press" className="flex flex-col gap-4">
       <section>
         {linkPreviews.map((linkPreview, index) => {
           return (
@@ -61,7 +63,7 @@ export default async function Home() {
                   image={linkPreview.image}
                 />
               </a>
-              {index !== news.length - 1 && (
+              {index !== press.length - 1 && (
                 <hr className="my-2 w-[50%] sm:mx-auto sm:my-4" />
               )}
             </>
