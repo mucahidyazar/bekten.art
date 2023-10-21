@@ -1,5 +1,3 @@
-import {getLinkPreview} from 'link-preview-js'
-
 import {EventCard} from '@/components/cards'
 import {prepareMetadata} from '@/utils'
 
@@ -22,20 +20,40 @@ const news = [
   'https://www.bishkekart.kg/news/10/',
   'https://www.bishkekart.kg/news/30/',
 ]
-export default function Home() {
+const getLinkPreview = async () => {
+  const reponse = await fetch('http://localhost:3000/api/link-preview', {
+    method: 'POST',
+    body: JSON.stringify({links: news}),
+    // next: {revalidate: 3},
+  })
+  const responseJson = await reponse.json()
+  return responseJson.data
+}
+type LinkPreviewType = {
+  url: string
+  title: string
+  description: string
+  image: string
+}
+export default async function Home() {
+  const linkPreviews = (await getLinkPreview()) as LinkPreviewType[]
+
   return (
     <div id="home" className="flex flex-col gap-4">
       <section>
-        {news.map(async (item, index) => {
-          const data = (await getLinkPreview(item)) as any
-
+        {linkPreviews.map((linkPreview, index) => {
           return (
             <>
-              <a key={item} href={data.url} target="_blank" rel="noreferrer">
+              <a
+                key={linkPreview.url}
+                href={linkPreview.url}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <EventCard
-                  title={data.title}
-                  description={data.description}
-                  image={data.images[0]}
+                  title={linkPreview.title}
+                  description={linkPreview.description}
+                  image={linkPreview.image}
                 />
               </a>
               {index !== news.length - 1 && (
