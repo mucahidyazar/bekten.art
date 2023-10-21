@@ -29,8 +29,8 @@ const getLinkPreview = async () => {
   const reponse = await fetch(`${protocal}://${host}/api/link-preview`, {
     method: 'POST',
     body: JSON.stringify({links: press}),
-    // next: {revalidate: 60 * 60 * 24 * 7},
-    next: {revalidate: 3},
+    next: {revalidate: 60 * 60 * 24 * 7},
+    // next: {revalidate: 3},
   })
   console.log('x1')
   const responseJson = await reponse.json()

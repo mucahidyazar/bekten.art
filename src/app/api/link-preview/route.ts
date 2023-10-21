@@ -1,24 +1,24 @@
-import { load } from 'cheerio'
+import { CheerioAPI, load } from 'cheerio'
+
+function metaTagContent(doc: CheerioAPI, type: string, attr: string) {
+  return doc(`meta[${attr}='${type}']`).attr(`content`);
+}
+
+function getTitle(doc: CheerioAPI) {
+  let title =
+    metaTagContent(doc, `og:title`, `property`) ||
+    metaTagContent(doc, `og:title`, `name`);
+  if (!title) {
+    title = doc(`title`).text();
+  }
+  return title;
+}
 
 export async function POST(request: Request) {
   try {
     const res = await request.json()
 
     const links: string[] = res.links
-
-    function metaTagContent(doc: any, type: string, attr: string) {
-      return doc(`meta[${attr}='${type}']`).attr(`content`);
-    }
-
-    function getTitle(doc: any) {
-      let title =
-        metaTagContent(doc, `og:title`, `property`) ||
-        metaTagContent(doc, `og:title`, `name`);
-      if (!title) {
-        title = doc(`title`).text();
-      }
-      return title;
-    }
 
     const promises = links.map(async (link) => {
       const response = await fetch(link)
