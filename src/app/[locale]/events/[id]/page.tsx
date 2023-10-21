@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-import {prepareMetadata} from '@/utils'
+import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {
   const title = '🎨 Art Detail - Bekten Usubaliev’s `Haver` Masterpiece'
@@ -23,7 +23,7 @@ export default function Page() {
           alt="Bekten Usubaliev"
           width={400}
           height={400}
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
         />
       </div>
       <div>

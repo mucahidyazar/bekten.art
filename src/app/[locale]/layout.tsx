@@ -13,7 +13,7 @@ import {NextIntlClientProvider} from 'next-intl'
 import {Footer} from '@/components/Footer'
 import {AppTools} from '@/components/molecules/AppTools'
 import {Sidebar} from '@/components/organisms/Sidebar'
-import {prepareMetadata} from '@/utils'
+import {prepareMetadata} from '@/utils/prepareMetadata'
 
 const lora = Lora({subsets: ['latin']})
 

@@ -1,7 +1,7 @@
 import {useTranslations} from 'next-intl'
 
 import {Icons} from '@/components/ui/icons'
-import {prepareMetadata} from '@/utils'
+import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {
   const title = '🎨 Get in Touch - Connect with Bekten Usubalie'
@@ -32,9 +32,9 @@ export default function Home() {
 
       <div className="flex gap-8">
         <div className="text-sm text-gray-500">
-          <h3 className="text-lg mb-2">{t('addressHome')}</h3>
-          <div className="flex items-start gap-1 w-60">
-            <Icons.location className="w-4 mt-[2px]" />
+          <h3 className="mb-2 text-lg">{t('addressHome')}</h3>
+          <div className="flex w-60 items-start gap-1">
+            <Icons.location className="mt-[2px] w-4" />
             <div>
               <p>74 Timiryazev Street, Apartment 4, 720031, Bishkek</p>
               <p>Kyrgyz Republic</p>
@@ -42,10 +42,10 @@ export default function Home() {
           </div>
         </div>
         <div className="text-sm text-gray-500">
-          <h3 className="text-lg mb-2">{t('addressStudio')}</h3>
-          <div className="flex flex-col gap-1 w-60">
+          <h3 className="mb-2 text-lg">{t('addressStudio')}</h3>
+          <div className="flex w-60 flex-col gap-1">
             <div className="flex items-start gap-1">
-              <Icons.location className="w-4 mt-[2px]" />
+              <Icons.location className="mt-[2px] w-4" />
               <div>
                 <p>3 Druzhba Steet, 720031, Bishkek</p>
                 <p>Kyrgyz Republic</p>
@@ -59,7 +59,7 @@ export default function Home() {
               className="flex items-center gap-1"
               href="mailto:bekten@lycos.ru"
             >
-              <Icons.email className="w-4 h-fit" />
+              <Icons.email className="h-fit w-4" />
               bekten@lycos.ru
             </a>
           </div>

@@ -1,6 +1,6 @@
 import {HomeSection} from '@/components/organisms'
 import {HomeSwiper} from '@/components/organisms/HomeSwiper'
-import {prepareMetadata} from '@/utils'
+import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {
   const title =
@@ -95,7 +95,7 @@ const artworksData = [
 
 export default function Home() {
   return (
-    <div id="home" className="flex flex-col gap-8 w-full">
+    <div id="home" className="flex w-full flex-col gap-8">
       <HomeSwiper data={workshopData} />
       <HomeSection title="Memories" data={artworksData} />
       <HomeSection title="Workshop" data={workshopData} />

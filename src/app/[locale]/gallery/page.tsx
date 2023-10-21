@@ -1,5 +1,5 @@
 import {GalleryTemplate} from '@/components/templates/GalleryTemplate'
-import {prepareMetadata} from '@/utils'
+import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {
   const title = '🎨 Art Gallery - Explore Bekten Usubaliev’s Masterpieces'

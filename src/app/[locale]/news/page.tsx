@@ -1,7 +1,7 @@
 import {headers} from 'next/headers'
 
 import {EventCard} from '@/components/cards'
-import {prepareMetadata} from '@/utils'
+import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {
   const title = '🎨 Latest Updates - Bekten Usubaliev`s Art Exhibitions & News'

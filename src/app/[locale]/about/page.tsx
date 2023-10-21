@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import {useTranslations} from 'next-intl'
 
-import {prepareMetadata} from '@/utils'
+import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {
   const title = '🎨 About Bekten Usubaliev - Kyrgyz Painter & Art Lecturer'
