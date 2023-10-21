@@ -1,3 +1,5 @@
+import {headers} from 'next/headers'
+
 import {EventCard} from '@/components/cards'
 import {prepareMetadata} from '@/utils'
 
@@ -21,10 +23,13 @@ const news = [
   'https://www.bishkekart.kg/news/30/',
 ]
 const getLinkPreview = async () => {
-  const reponse = await fetch('http://localhost:3000/api/link-preview', {
+  const host = headers().get('host')
+  const protocal = process?.env.NODE_ENV === 'development' ? 'http' : 'https'
+
+  const reponse = await fetch(`${protocal}://${host}/api/link-preview`, {
     method: 'POST',
     body: JSON.stringify({links: news}),
-    // next: {revalidate: 3},
+    next: {revalidate: 60 * 60 * 24 * 7},
   })
   const responseJson = await reponse.json()
   return responseJson.data
