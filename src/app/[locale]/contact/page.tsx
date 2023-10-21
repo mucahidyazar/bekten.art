@@ -11,7 +11,7 @@ export function generateMetadata() {
   return prepareMetadata({
     title,
     description,
-    page: title,
+    page: 'contact',
   })
 }
 
@@ -19,7 +19,7 @@ export default function Home() {
   const t = useTranslations()
 
   return (
-    <div id="home" className="flex flex-col gap-6">
+    <div id="contact" className="flex flex-col gap-6">
       <iframe
         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2923.9242885428416!2d74.57942840825007!3d42.87444214827549!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x389ec83d105c4fc5%3A0x99db8d90daa9a8ef!2s74%20K.%20Timiryazev%20St%2C%20Bishkek%2C%20Kyrgyzstan!5e0!3m2!1sen!2str!4v1697283723841!5m2!1sen!2str"
         width="100%"

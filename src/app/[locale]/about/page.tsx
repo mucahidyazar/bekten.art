@@ -11,7 +11,7 @@ export function generateMetadata() {
   return prepareMetadata({
     title,
     description,
-    page: title,
+    page: 'about',
   })
 }
 
@@ -19,7 +19,7 @@ export default function Home() {
   const t = useTranslations()
 
   return (
-    <div id="home" className="flex flex-col gap-6">
+    <div id="about" className="flex flex-col gap-6">
       <Image
         src="/usubaliev_1.jpg"
         alt="Bekten Usubaliev"

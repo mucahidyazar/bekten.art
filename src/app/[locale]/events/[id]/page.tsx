@@ -10,13 +10,13 @@ export function generateMetadata() {
   return prepareMetadata({
     title,
     description,
-    page: title,
+    page: 'event detail',
   })
 }
 
 export default function Page() {
   return (
-    <div id="home" className="flex flex-col gap-4">
+    <div id="event-detail" className="flex flex-col gap-4">
       <div className="h-60">
         <Image
           src="/usubaliev_1.jpg"

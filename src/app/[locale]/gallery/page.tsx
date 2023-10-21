@@ -9,7 +9,7 @@ export function generateMetadata() {
   return prepareMetadata({
     title,
     description,
-    page: title,
+    page: 'gallery',
   })
 }
 
@@ -136,7 +136,7 @@ export default async function Home() {
   const imagesArrays = getImageArrays()
 
   return (
-    <div id="home" className="px-1 lg:px-4">
+    <div id="gallery" className="px-1 lg:px-4">
       <GalleryTemplate imageArrays={imagesArrays} />
     </div>
   )

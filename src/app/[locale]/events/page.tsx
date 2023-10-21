@@ -11,13 +11,13 @@ export function generateMetadata() {
   return prepareMetadata({
     title,
     description,
-    page: title,
+    page: 'events',
   })
 }
 
 export default function Home() {
   return (
-    <div id="home" className="flex flex-col gap-4">
+    <div id="events" className="flex flex-col gap-4">
       <Link href={`/news/1`}>
         <EventCard
           title="Bekten Usubaliev`s Art Exhibition"

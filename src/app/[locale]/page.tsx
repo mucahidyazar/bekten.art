@@ -11,7 +11,6 @@ export function generateMetadata() {
   return prepareMetadata({
     title,
     description,
-    page: title,
   })
 }
 
