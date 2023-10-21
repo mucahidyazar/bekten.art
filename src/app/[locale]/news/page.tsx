@@ -26,12 +26,15 @@ const getLinkPreview = async () => {
   const host = headers().get('host')
   const protocal = process?.env.NODE_ENV === 'development' ? 'http' : 'https'
 
+  console.log(`${protocal}://${host}/api/link-preview`)
   const reponse = await fetch(`${protocal}://${host}/api/link-preview`, {
     method: 'POST',
     body: JSON.stringify({links: news}),
     next: {revalidate: 60 * 60 * 24 * 7},
   })
+  console.log({reponse})
   const responseJson = await reponse.json()
+  console.log({responseJson})
   return responseJson.data
 }
 type LinkPreviewType = {
