@@ -75,6 +75,7 @@ const getPhotos = async () =>
             x_ig_www_claim: '0',
             'x-requested-with': 'XMLHttpRequest',
           },
+          next: {revalidate: 60 * 60 * 24},
         },
       )
       const data = await response.json()
