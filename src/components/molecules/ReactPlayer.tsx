@@ -37,6 +37,9 @@ export function ReactPlayer({}: ReactPlayerProps) {
         height={0}
         onProgress={progress => setProgress(progress)}
         onDuration={duration => setDuration(duration)}
+        style={{
+          position: 'fixed',
+        }}
       />
 
       <button
