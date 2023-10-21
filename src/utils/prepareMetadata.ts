@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { headers } from "next/headers"
 
 import { ME_DESCRIPTION } from "@/constants"
 
@@ -8,16 +9,20 @@ type TPrepareMetadata = Metadata & {
   page?: string
 }
 export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
+  const host = headers().get('host')
+  const protocal = process?.env.NODE_ENV === 'development' ? 'http' : 'https'
+  const domain = `${protocal}://${host}`
+
   const DEFAULT_TITLE = {
     default: 'Bekten Usubaliev',
-    template: '%s - Painter | bekten.art',
+    template: `%s - Painter | ${domain}`,
   }
   const title = metadata.title || DEFAULT_TITLE
   const description = metadata.description || ME_DESCRIPTION
 
   const { authors, openGraph, twitter, ...rest } = metadata
 
-  const imagesUrl = new URL('https://bekten.art/api/og')
+  const imagesUrl = new URL(`${domain}/api/og`)
   if (metadata.title) {
     imagesUrl.searchParams.set('title', metadata.title)
   }
@@ -33,7 +38,7 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
     title,
     description,
     viewport: 'width=device-width, initial-scale=1',
-    authors: [{ name: 'Bekten Usubaliev', url: 'https://bekten.art' }],
+    authors: [{ name: 'Bekten Usubaliev', url: `${domain}` }],
     icons: { icon: '/favicon-32x32.png', apple: '/apple-touch-icon.png' },
     manifest: '/site.webmanifest',
     themeColor: '#ffffff',
@@ -44,7 +49,7 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
         'tr-TR': '/tr'
       },
     },
-    metadataBase: new URL('https://bekten.art'),
+    metadataBase: new URL(`${domain}`),
     openGraph: {
       title,
       description,
@@ -56,9 +61,9 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
       title,
       description,
       card: 'summary',
-      site: 'https://bekten.art',
+      site: `${domain}`,
       creator: 'Bekten Usubaliev',
-      siteId: 'bekten.art',
+      siteId: `${domain}`,
       creatorId: 'bektenusubaliev',
       images,
     },

@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-import {prepareMetadata} from '@/utils'
+import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {
   const title = '🎨 Art Detail - Bekten Usubaliev’s `Haver` Masterpiece'
@@ -10,20 +10,20 @@ export function generateMetadata() {
   return prepareMetadata({
     title,
     description,
-    page: title,
+    page: 'event detail',
   })
 }
 
 export default function Page() {
   return (
-    <div id="home" className="flex flex-col gap-4">
+    <div id="event-detail" className="flex flex-col gap-4">
       <div className="h-60">
         <Image
           src="/usubaliev_1.jpg"
           alt="Bekten Usubaliev"
           width={400}
           height={400}
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
         />
       </div>
       <div>

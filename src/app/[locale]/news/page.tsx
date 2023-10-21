@@ -1,7 +1,7 @@
 import {headers} from 'next/headers'
 
 import {EventCard} from '@/components/cards'
-import {prepareMetadata} from '@/utils'
+import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {
   const title = '🎨 Latest Updates - Bekten Usubaliev`s Art Exhibitions & News'
@@ -11,7 +11,7 @@ export function generateMetadata() {
   return prepareMetadata({
     title,
     description,
-    page: title,
+    page: 'news',
   })
 }
 
@@ -44,7 +44,7 @@ export default async function Home() {
   const linkPreviews = (await getLinkPreview()) as LinkPreviewType[]
 
   return (
-    <div id="home" className="flex flex-col gap-4">
+    <div id="news" className="flex flex-col gap-4">
       <section>
         {linkPreviews.map((linkPreview, index) => {
           return (
