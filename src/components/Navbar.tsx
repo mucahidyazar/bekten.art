@@ -24,8 +24,8 @@ export function Navbar({className}: NavbarProps) {
       path: '/',
     },
     {
-      label: t('news'),
-      path: '/news',
+      label: t('press'),
+      path: '/press',
     },
     {
       label: t('about'),
@@ -43,8 +43,8 @@ export function Navbar({className}: NavbarProps) {
   ]
 
   return (
-    <nav className={cn('flex flex-col h-full', className)}>
-      <ul className="flex text-sm lg:text-base lg:flex-grow lg:flex-col lg:justify-start justify-center gap-4 text-gray-500 lg:mb-8">
+    <nav className={cn('flex h-full flex-col', className)}>
+      <ul className="flex justify-center gap-4 text-sm text-gray-500 lg:mb-8 lg:flex-grow lg:flex-col lg:justify-start lg:text-base">
         {NAV_ITEMS.map(item => (
           <NavbarItem key={item.label} {...item} />
         ))}

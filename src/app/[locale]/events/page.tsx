@@ -18,21 +18,21 @@ export function generateMetadata() {
 export default function Home() {
   return (
     <div id="events" className="flex flex-col gap-4">
-      <Link href={`/news/1`}>
+      <Link href={`/events/1`}>
         <EventCard
           title="Bekten Usubaliev`s Art Exhibition"
           description="Bekten Usubaliev`s Art Exhibition"
           image="/img/workshop/workshop-0.jpeg"
         />
       </Link>
-      <Link href={`/news/1`}>
+      <Link href={`/events/1`}>
         <EventCard
           title="Bekten Usubaliev`s Art Exhibition"
           description="Bekten Usubaliev`s Art Exhibition"
           image="/img/workshop/workshop-0.jpeg"
         />
       </Link>
-      <Link href={`/news/1`}>
+      <Link href={`/events/1`}>
         <EventCard
           title="Bekten Usubaliev`s Art Exhibition"
           description="Bekten Usubaliev`s Art Exhibition"
