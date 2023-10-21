@@ -19,13 +19,25 @@ export default function Home() {
   return (
     <div id="home" className="flex flex-col gap-4">
       <Link href={`/news/1`}>
-        <EventCard />
+        <EventCard
+          title="Bekten Usubaliev`s Art Exhibition"
+          description="Bekten Usubaliev`s Art Exhibition"
+          image="/img/workshop/workshop-0.jpeg"
+        />
       </Link>
       <Link href={`/news/1`}>
-        <EventCard />
+        <EventCard
+          title="Bekten Usubaliev`s Art Exhibition"
+          description="Bekten Usubaliev`s Art Exhibition"
+          image="/img/workshop/workshop-0.jpeg"
+        />
       </Link>
       <Link href={`/news/1`}>
-        <EventCard />
+        <EventCard
+          title="Bekten Usubaliev`s Art Exhibition"
+          description="Bekten Usubaliev`s Art Exhibition"
+          image="/img/workshop/workshop-0.jpeg"
+        />
       </Link>
     </div>
   )
