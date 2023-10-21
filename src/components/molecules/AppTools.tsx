@@ -2,7 +2,8 @@
 import {MoonIcon, SunIcon} from '@heroicons/react/24/outline'
 import {usePathname, useRouter} from 'next/navigation'
 import {useLocale, useTranslations} from 'next-intl'
-import {useState, useTransition} from 'react'
+import {useTheme} from 'next-themes'
+import {useTransition} from 'react'
 
 import {
   DropdownMenu,
@@ -19,12 +20,12 @@ type AppToolsProps = {
   className?: string
 }
 export function AppTools({className}: AppToolsProps) {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   const [isPending, startTransition] = useTransition()
   const t = useTranslations()
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
+  const {setTheme, theme} = useTheme()
 
   const locales = LOCALES.filter(l => l !== locale)
 
@@ -43,7 +44,7 @@ export function AppTools({className}: AppToolsProps) {
     <section
       id="app-tools"
       className={cn(
-        'fixed right-2 top-2 z-20 flex gap-1 rounded bg-white bg-opacity-60 lg:right-4',
+        'bg-background fixed right-2 top-2 z-20 flex gap-1 rounded bg-opacity-60 lg:right-4',
         className,
       )}
     >
@@ -74,11 +75,12 @@ export function AppTools({className}: AppToolsProps) {
         className={cn(
           'relative z-50 flex h-9 w-9 items-center justify-center rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
         )}
+        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
       >
         {theme === 'dark' ? (
-          <SunIcon className="w-3" onClick={() => setTheme('light')} />
+          <SunIcon className="w-3" />
         ) : (
-          <MoonIcon className="w-3" onClick={() => setTheme('dark')} />
+          <MoonIcon className="w-3" />
         )}
       </button>
     </section>

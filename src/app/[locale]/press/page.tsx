@@ -46,7 +46,7 @@ export default async function Home() {
   const linkPreviews = (await getLinkPreview()) as LinkPreviewType[]
 
   return (
-    <div id="press" className="flex flex-col gap-4">
+    <div id="press" className="bg-background flex flex-col gap-4">
       <section>
         {linkPreviews.map((linkPreview, index) => {
           return (

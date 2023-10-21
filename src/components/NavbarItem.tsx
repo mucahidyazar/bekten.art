@@ -30,8 +30,8 @@ export function NavbarItem(item: INavbarItemProps) {
       <Link href={item.path}>{item.label}</Link>
       <p
         className={cn(
-          'w-0 h-[1px] bg-gray-300 group-hover:w-full group-hover:bg-primary-700 group-hover:h-[1px] transition-all duration-300 ease-in-out',
-          isActive() && 'w-full bg-primary-900 h-[1px]',
+          'bg-foreground h-[1px] w-0 transition-all duration-300 ease-in-out group-hover:w-full group-hover:bg-primary-700',
+          isActive() && 'h-[1px] w-full bg-primary-900',
         )}
       />
     </li>
