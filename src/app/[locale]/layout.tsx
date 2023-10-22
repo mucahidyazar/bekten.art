@@ -54,7 +54,7 @@ export default async function RootLayout({
             <div className="bg-background mx-auto flex h-full w-full max-w-full flex-grow flex-col gap-5 px-0 lg:max-w-7xl lg:flex-row lg:px-4">
               <Sidebar />
               <div className="relative h-full px-4 lg:ml-auto lg:w-[calc(100%-15rem)] lg:min-w-[calc(100%-15rem)] lg:px-0 lg:pb-8 lg:pt-20">
-                <div className="from-background pointer-events-none sticky left-0 top-0 z-10 -mt-10 mb-10 h-10 w-full bg-gradient-to-b to-transparent" />
+                <div className="from-background pointer-events-none sticky left-0 top-0 z-10 -mt-10 h-10 w-full bg-gradient-to-b to-transparent lg:mb-10" />
                 {children}
               </div>
               <Footer className="flex flex-col items-center gap-4 py-8 lg:hidden" />
