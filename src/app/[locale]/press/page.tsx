@@ -32,7 +32,6 @@ const getLinkPreview = async () => {
     next: {revalidate: 60 * 60 * 24 * 7},
     // next: {revalidate: 3},
   })
-  console.log('x1')
   const responseJson = await reponse.json()
   return responseJson.data
 }

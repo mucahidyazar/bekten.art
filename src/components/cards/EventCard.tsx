@@ -33,7 +33,7 @@ export function EventCard({title, description, image}: EventCardProps) {
           </div>
         </div>
 
-        <p className="line-clamp-2 text-xs">{description}</p>
+        <p className="line-clamp-2 text-xs text-gray-500">{description}</p>
 
         <div className="flex gap-4 text-sm font-semibold">
           {/* <button>Register</button>

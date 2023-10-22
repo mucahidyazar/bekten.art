@@ -44,6 +44,7 @@ export function AppTools({className}: AppToolsProps) {
     dark: <SunIcon className="w-3" />,
     light: <MoonIcon className="w-3" />,
     navy: <BoltIcon className="w-3" />,
+    system: <BoltIcon className="w-3" />,
   } as {[key: string]: React.ReactNode}
 
   return (
