@@ -49,8 +49,10 @@ export function HomeSection({title, data}: HomeSectionProps) {
   return (
     <aside className="w-full">
       <Dialog>
-        <h3 className="text-2xl font-semibold mb-2">{title}</h3>
-        <div className="flex gap-2 w-full overflow-auto">
+        <h3 className="mb-2 text-2xl font-semibold text-primary-500">
+          {title}
+        </h3>
+        <div className="flex w-full gap-2 overflow-auto">
           {data.map(item => (
             <DialogTrigger key={item.url} onClick={() => setImage(item)}>
               <ArtImage
@@ -64,18 +66,18 @@ export function HomeSection({title, data}: HomeSectionProps) {
         </div>
 
         {image && (
-          <DialogContent className="bg-white lg:rounded h-full sm:h-auto flex flex-col p-2 sm:p-4 w-fit">
+          <DialogContent className="flex h-full w-fit flex-col bg-white p-2 sm:h-auto sm:p-4 lg:rounded">
             <DialogHeader>
               <DialogTitle>{image.title}</DialogTitle>
               <DialogDescription>{image.description}</DialogDescription>
             </DialogHeader>
-            <div className="flex flex-col items-center flex-grow h-full overflow-hidden">
+            <div className="flex h-full flex-grow flex-col items-center overflow-hidden">
               <Image
                 src={image.url}
                 alt={image.description}
                 width={1000}
                 height={1000}
-                className="max-h-[80vh] w-fit h-full"
+                className="h-full max-h-[80vh] w-fit"
               />
             </div>
           </DialogContent>

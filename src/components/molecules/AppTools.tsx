@@ -1,5 +1,5 @@
 'use client'
-import {MoonIcon, SunIcon} from '@heroicons/react/24/outline'
+import {BoltIcon, MoonIcon, SunIcon} from '@heroicons/react/24/outline'
 import {usePathname, useRouter} from 'next/navigation'
 import {useLocale, useTranslations} from 'next-intl'
 import {useTheme} from 'next-themes'
@@ -40,6 +40,12 @@ export function AppTools({className}: AppToolsProps) {
     })
   }
 
+  const themeIconMap = {
+    dark: <SunIcon className="w-3" />,
+    light: <MoonIcon className="w-3" />,
+    navy: <BoltIcon className="w-3" />,
+  } as {[key: string]: React.ReactNode}
+
   return (
     <section
       id="app-tools"
@@ -75,13 +81,19 @@ export function AppTools({className}: AppToolsProps) {
         className={cn(
           'relative z-50 flex h-9 w-9 items-center justify-center rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
         )}
-        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+        onClick={() => {
+          let selectedTheme
+          if (theme === 'dark') {
+            selectedTheme = 'light'
+          } else if (theme === 'light') {
+            selectedTheme = 'navy'
+          } else {
+            selectedTheme = 'dark'
+          }
+          setTheme(selectedTheme)
+        }}
       >
-        {theme === 'dark' ? (
-          <SunIcon className="w-3" />
-        ) : (
-          <MoonIcon className="w-3" />
-        )}
+        {theme && themeIconMap[theme]}
       </button>
     </section>
   )
