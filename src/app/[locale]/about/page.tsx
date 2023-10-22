@@ -28,9 +28,11 @@ export default function Home() {
         className="mx-auto"
       />
 
-      <p>{t('biography1')}</p>
-      <p>{t('biography2')}</p>
-      <p>{t('biography3')}</p>
+      <div className="text-gray-500">
+        <p>{t('biography1')}</p>
+        <p>{t('biography2')}</p>
+        <p>{t('biography3')}</p>
+      </div>
 
       <Image
         src="/usubaliev_2.jpg"

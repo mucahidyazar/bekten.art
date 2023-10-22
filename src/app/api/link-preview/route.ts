@@ -34,7 +34,6 @@ export async function POST(request: Request) {
         '/img/empty-press-image.png'
       const url = $('meta[property="og:url"]').attr('content')
 
-      console.log({ title, description, image, url })
       return { title, description, image, url }
     })
 

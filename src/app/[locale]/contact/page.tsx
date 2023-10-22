@@ -30,19 +30,9 @@ export default function Home() {
         referrerPolicy="no-referrer-when-downgrade"
       />
 
-      <div className="flex gap-8">
+      <div className="flex flex-col items-center gap-8 text-center sm:flex-row sm:items-start sm:text-start">
         <div className="text-sm text-gray-500">
-          <h3 className="mb-2 text-lg">{t('addressHome')}</h3>
-          <div className="flex w-60 items-start gap-1">
-            <Icons.location className="mt-[2px] w-4" />
-            <div>
-              <p>74 Timiryazev Street, Apartment 4, 720031, Bishkek</p>
-              <p>Kyrgyz Republic</p>
-            </div>
-          </div>
-        </div>
-        <div className="text-sm text-gray-500">
-          <h3 className="mb-2 text-lg">{t('addressStudio')}</h3>
+          <h3 className="mb-2 text-lg">{t('address')}</h3>
           <div className="flex w-60 flex-col gap-1">
             <div className="flex items-start gap-1">
               <Icons.location className="mt-[2px] w-4" />
@@ -51,6 +41,11 @@ export default function Home() {
                 <p>Kyrgyz Republic</p>
               </div>
             </div>
+          </div>
+        </div>
+        <div className="text-sm text-gray-500">
+          <h3 className="mb-2 text-lg">{t('social')}</h3>
+          <div className="flex w-60 flex-col items-center gap-1 text-center lg:items-start lg:text-start">
             <a className="flex items-center gap-1" href="tel:+996312530703">
               <Icons.phone className="w-4" />
               +996 312 530 703
@@ -61,6 +56,13 @@ export default function Home() {
             >
               <Icons.email className="h-fit w-4" />
               bekten@lycos.ru
+            </a>
+            <a
+              className="flex items-center gap-1"
+              href="mailto:bekten@lycos.ru"
+            >
+              <Icons.instagram className="h-fit w-4" />
+              bekten_usubaliev
             </a>
           </div>
         </div>
