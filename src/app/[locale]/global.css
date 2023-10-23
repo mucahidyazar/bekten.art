@@ -170,7 +170,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   width: 100%;
-  height: auto;
+  height: 100%;
 }
 
 div[data-nextjs-scroll-focus-boundary] {
