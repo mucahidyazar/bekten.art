@@ -1,7 +1,5 @@
-import {cookies} from 'next/headers'
 import {useTranslations} from 'next-intl'
 
-import {env} from '@/configs'
 import {cn} from '@/utils'
 
 import {Footer} from './Footer'
@@ -11,11 +9,6 @@ type NavbarProps = {
   className?: string
 }
 export function Navbar({className}: NavbarProps) {
-  const cookieStore = cookies()
-  const dashboardCookie = cookieStore.get('dashboard')?.value || ''
-  const dashboardEnv = String(env.DASHBOARD)
-  const isAdmin = dashboardCookie === dashboardEnv
-
   const t = useTranslations()
 
   const NAV_ITEMS = [
@@ -39,7 +32,7 @@ export function Navbar({className}: NavbarProps) {
       label: t('contact'),
       path: '/contact',
     },
-    ...(isAdmin && !1 ? [{label: 'Dashboard', path: '/dashboard'}] : []),
+    // ...(isAdmin && !1 ? [{label: 'Dashboard', path: '/dashboard'}] : []),
   ]
 
   return (
