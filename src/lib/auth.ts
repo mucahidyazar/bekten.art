@@ -50,17 +50,29 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ token, session }) {
+
+      let userData;
       if (token && session.user) {
-        const userData = {
-          id: token.id,
-          name: token.name,
-          email: token.email,
-          image: token.picture,
+        userData = {
+          id: token.id as string,
+          name: token.name ?? null,
+          email: token.email ?? null,
+          image: token.image as string ?? null,
+          isAdmin: token.isAdmin as boolean,
         }
+
         session.user = userData
       }
 
-      return session
+      const mySession = {
+        ...session,
+        user: {
+          ...session.user,
+          ...userData
+        },
+      }
+
+      return mySession
     },
     async jwt({ token, user }) {
       const dbUser = await db.user.findFirst({
@@ -80,7 +92,8 @@ export const authOptions: NextAuthOptions = {
         id: dbUser.id,
         name: dbUser.name,
         email: dbUser.email,
-        picture: dbUser.image,
+        image: dbUser.image,
+        isAdmin: dbUser.isAdmin,
       }
     },
     async redirect({ baseUrl }) { return baseUrl },

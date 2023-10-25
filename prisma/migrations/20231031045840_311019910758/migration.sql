@@ -53,16 +53,28 @@ CREATE TABLE "verification_tokens" (
 );
 
 -- CreateTable
-CREATE TABLE "posts" (
+CREATE TABLE "artwork_likes" (
     "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "content" JSONB,
-    "published" BOOLEAN NOT NULL DEFAULT false,
+    "userId" TEXT NOT NULL,
+    "artworkId" TEXT NOT NULL,
+
+    CONSTRAINT "artwork_likes_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "artworks" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "images" TEXT[],
+    "price" DOUBLE PRECISION NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "authorId" TEXT NOT NULL,
+    "nftLink" TEXT,
+    "artistId" TEXT NOT NULL,
+    "quantity" INTEGER NOT NULL DEFAULT 1,
 
-    CONSTRAINT "posts_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "artworks_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -93,4 +105,10 @@ ALTER TABLE "accounts" ADD CONSTRAINT "accounts_userId_fkey" FOREIGN KEY ("userI
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "posts" ADD CONSTRAINT "posts_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "artwork_likes" ADD CONSTRAINT "artwork_likes_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "artwork_likes" ADD CONSTRAINT "artwork_likes_artworkId_fkey" FOREIGN KEY ("artworkId") REFERENCES "artworks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "artworks" ADD CONSTRAINT "artworks_artistId_fkey" FOREIGN KEY ("artistId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
