@@ -64,5 +64,6 @@ export const authorize = async (credentials: Record<"credential", string> | unde
       type: "credentials",
     });
   }
+
   return user;
 };
