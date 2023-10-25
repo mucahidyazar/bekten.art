@@ -32,6 +32,10 @@ export function Navbar({className}: NavbarProps) {
       label: t('contact'),
       path: '/contact',
     },
+    {
+      label: t('store'),
+      path: '/store',
+    },
     // ...(isAdmin && !1 ? [{label: 'Dashboard', path: '/dashboard'}] : []),
   ]
 
