@@ -2,10 +2,13 @@ import './global.css'
 
 import {Lora} from 'next/font/google'
 import {notFound} from 'next/navigation'
+import {getServerSession} from 'next-auth'
 import {NextIntlClientProvider} from 'next-intl'
 
 import {ThemeProvider} from '@/components/providers/ThemeProvider'
 import {prepareMetadata} from '@/utils/prepareMetadata'
+
+import {SessionProvider} from './SessionProvider'
 
 const lora = Lora({subsets: ['latin']})
 
@@ -32,6 +35,7 @@ export default async function RootLayout({
   children,
   params: {locale},
 }: LayoutProps) {
+  const session = await getServerSession()
   const messages = await getMessages(locale)
 
   return (
@@ -40,16 +44,18 @@ export default async function RootLayout({
       <body
         className={`${lora.className} flex flex-col overflow-x-hidden bg-background`}
       >
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            themes={['dark', 'light', 'navy']}
-          >
-            {children}
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <SessionProvider session={session}>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              themes={['dark', 'light', 'navy']}
+            >
+              {children}
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </SessionProvider>
       </body>
     </html>
   )
