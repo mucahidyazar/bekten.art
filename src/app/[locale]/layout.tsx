@@ -47,7 +47,7 @@ export default async function RootLayout({
     <html lang={locale}>
       <head />
       <body
-        className={`${lora.className} bg-background flex h-full flex-col overflow-x-hidden`}
+        className={`${lora.className} flex flex-col overflow-x-hidden bg-background`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider
@@ -58,8 +58,8 @@ export default async function RootLayout({
           >
             <div className="mx-auto flex h-full w-full max-w-full flex-grow flex-col gap-5 px-0 lg:max-w-7xl lg:flex-row lg:px-4">
               <Sidebar />
-              <div className="relative h-full px-4 lg:ml-auto lg:w-[calc(100%-15rem)] lg:min-w-[calc(100%-15rem)] lg:px-0 lg:pb-8 lg:pt-20">
-                <div className="from-background pointer-events-none sticky left-0 top-0 z-10 -mt-10 h-10 w-full bg-gradient-to-b to-transparent lg:mb-10" />
+              <div className="relative h-full px-4 lg:ml-auto lg:w-[calc(100%-15rem)] lg:min-w-[calc(100%-15rem)] lg:px-0 lg:pb-8 lg:pt-10">
+                <div className="pointer-events-none sticky left-0 top-0 z-10 -mt-10 h-10 w-full bg-gradient-to-b from-background to-transparent lg:mb-10" />
                 {children}
               </div>
               <Footer className="flex flex-col items-center gap-4 py-8 lg:hidden" />
