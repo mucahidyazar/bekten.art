@@ -13,7 +13,7 @@ export default function Component() {
 
   if (session) {
     return (
-      <section className="mt-[30%] flex w-full flex-col gap-2 sm:w-80">
+      <section className="mx-auto mt-[20%] flex w-full flex-col gap-2 sm:w-80">
         <aside className="flex flex-col items-center gap-2">
           <Image
             src={session.user?.image || ''}
@@ -31,7 +31,7 @@ export default function Component() {
   return (
     <div>
       <OneTapComponent />
-      <section className="mt-[30%] flex w-full flex-col gap-2 sm:w-80">
+      <section className="mx-auto mt-[30%] flex w-full flex-col gap-2 sm:w-80">
         <Button onClick={() => signIn('github')}>Sign in by Github</Button>
         <Button onClick={() => signIn('google')}>Sign in by Google</Button>
       </section>

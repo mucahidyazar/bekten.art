@@ -1,6 +1,8 @@
 'use client'
 import {BoltIcon, MoonIcon, SunIcon} from '@heroicons/react/24/outline'
+import Image from 'next/image'
 import {usePathname, useRouter} from 'next/navigation'
+import {useSession} from 'next-auth/react'
 import {useLocale, useTranslations} from 'next-intl'
 import {useTheme} from 'next-themes'
 import {useTransition} from 'react'
@@ -26,6 +28,7 @@ export function AppTools({className}: AppToolsProps) {
   const router = useRouter()
   const pathname = usePathname()
   const {setTheme, theme} = useTheme()
+  const session = useSession()
 
   const locales = LOCALES.filter(l => l !== locale)
 
@@ -51,7 +54,7 @@ export function AppTools({className}: AppToolsProps) {
     <section
       id="app-tools"
       className={cn(
-        'bg-background fixed right-2 top-2 z-20 flex gap-1 rounded bg-opacity-60 lg:right-4',
+        'fixed right-2 top-2 z-20 flex gap-1 rounded bg-background bg-opacity-60 lg:right-4',
         className,
       )}
     >
@@ -96,6 +99,21 @@ export function AppTools({className}: AppToolsProps) {
       >
         {theme && themeIconMap[theme]}
       </button>
+      {session.data?.user && (
+        <button
+          className={cn(
+            'relative z-50 flex h-9 w-9 items-center justify-center overflow-hidden rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
+          )}
+        >
+          <Image
+            src={session.data?.user?.image || '/img/cinema.png'}
+            width={24}
+            height={24}
+            alt="user avatar"
+            className="h-full w-full rounded border border-primary-500 object-cover"
+          />
+        </button>
+      )}
     </section>
   )
 }
