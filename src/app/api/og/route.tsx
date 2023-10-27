@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import {headers} from 'next/headers'
-import {ImageResponse} from 'next/server'
+import {ImageResponse} from 'next/og'
 
 import {ME_DESCRIPTION} from '@/constants'
 
