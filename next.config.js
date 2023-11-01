@@ -7,7 +7,6 @@ const withNextIntl = require('next-intl/plugin')(
 const nextConfig = {
   ...withNextIntl(),
   images: {
-    domains: ['img.icons8.com', 'img.buymeacoffee.com'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -18,6 +17,9 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+  },
+  experimental: {
+    webpackBuildWorker: true,
   },
 }
 

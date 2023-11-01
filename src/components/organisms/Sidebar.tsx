@@ -1,14 +1,13 @@
-import {Nanum_Pen_Script} from 'next/font/google'
+import {Nanum_Brush_Script} from 'next/font/google'
 import Image from 'next/image'
 import Link from 'next/link'
 
 import {Navbar} from '@/components/Navbar'
 import {cn} from '@/utils'
 
-const nanum = Nanum_Pen_Script({
+const nanum = Nanum_Brush_Script({
   subsets: ['latin'],
   weight: ['400'],
-  display: 'swap',
 })
 
 export function Sidebar() {

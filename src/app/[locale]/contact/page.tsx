@@ -21,7 +21,7 @@ export default function Home() {
   return (
     <div id="contact" className="flex flex-col gap-6">
       <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2923.9242885428416!2d74.57942840825007!3d42.87444214827549!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x389ec83d105c4fc5%3A0x99db8d90daa9a8ef!2s74%20K.%20Timiryazev%20St%2C%20Bishkek%2C%20Kyrgyzstan!5e0!3m2!1sen!2str!4v1697283723841!5m2!1sen!2str"
+        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d493.1278057658173!2d74.6271216902512!3d42.854381310663065!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2str!4v1698814073315!5m2!1sen!2str"
         width="100%"
         height="320"
         style={{border: 0}}
@@ -37,7 +37,7 @@ export default function Home() {
             <div className="flex items-start gap-1">
               <Icons.location className="mt-[2px] w-4" />
               <div>
-                <p>3 Druzhba Steet, 720031, Bishkek</p>
+                <p>Карасаева, 3 Бишкек, 720031</p>
                 <p>Kyrgyz Republic</p>
               </div>
             </div>
@@ -45,7 +45,7 @@ export default function Home() {
         </div>
         <div className="text-sm text-gray-500">
           <h3 className="mb-2 text-lg">{t('social')}</h3>
-          <div className="flex w-60 flex-col items-center gap-1 text-center lg:items-start lg:text-start">
+          <div className="flex w-60 flex-col items-center gap-1 text-center sm:items-start sm:text-start">
             <a className="flex items-center gap-1" href="tel:+996312530703">
               <Icons.phone className="w-4" />
               +996 312 530 703
