@@ -6,11 +6,27 @@ import Link from 'next/link'
 import {useParams} from 'next/navigation'
 import {useSession} from 'next-auth/react'
 
+import {updatePermission} from '@/actions'
+
 import {Button} from '../ui/button'
 import {Switch} from '../ui/switch'
 
 import {Social} from './Social'
 
+const permissions = [
+  {
+    id: 'shareData',
+    title: 'Public Profile',
+    description:
+      'This will make your profile visible to everyone on the internet.',
+  },
+  {
+    id: 'shareSomeData',
+    title: 'Show Some Datas',
+    description:
+      'This will allow you to show your likes, comments, profile photo to everyone on the showcase, arts, and blog',
+  },
+]
 type ProfileCardProps = {
   user: User & {
     socials: SocialType[]
@@ -58,39 +74,31 @@ export function ProfileCard({user, showPermissions = false}: ProfileCardProps) {
         <>
           <div className="my-2 h-[1px] bg-background" />
           <div className="flex flex-col gap-2 px-2">
-            {/* permissions */}
-            {/* 1. Kullanici profili public olsun mu */}
-            <div className="flex gap-2">
-              <Switch id="public-profile" />
-              <div className="flex flex-col">
-                <label
-                  htmlFor="public-profile"
-                  className="text-sm font-medium leading-6 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Public Profile
-                </label>
-                <span className="text-[10px]">
-                  This will make your profile visible to everyone on the
-                  internet.
-                </span>
+            {permissions.map(permission => (
+              <div className="flex gap-2" key={permission.id}>
+                <Switch
+                  id="public-profile"
+                  defaultChecked={(user as any)[permission.id]}
+                  onCheckedChange={value => {
+                    updatePermission(me.data?.user.id as string, {
+                      [permission.id]: value,
+                    })
+                  }}
+                />
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="public-profile"
+                    className="text-sm font-medium leading-6 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Public Profile
+                  </label>
+                  <span className="text-[10px]">
+                    This will make your profile visible to everyone on the
+                    internet.
+                  </span>
+                </div>
               </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Switch id="show-some-datas" />
-              <div className="flex flex-col">
-                <label
-                  htmlFor="show-some-datas"
-                  className="text-sm font-medium leading-6 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Show Some Datas
-                </label>
-                <span className="text-[10px]">
-                  This will allow you to show your likes, comments, profile
-                  photo to everyone on the showcase, arts, and blog
-                </span>
-              </div>
-            </div>
+            ))}
           </div>
         </>
       )}
