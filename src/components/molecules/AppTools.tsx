@@ -105,7 +105,7 @@ export function AppTools({className}: AppToolsProps) {
           className={cn(
             'relative z-50 flex h-9 w-9 items-center justify-center overflow-hidden rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
           )}
-          href="/me"
+          href={`/profile/${session.data.user.id}`}
         >
           <Image
             src={session.data?.user?.image || '/img/cinema.png'}
