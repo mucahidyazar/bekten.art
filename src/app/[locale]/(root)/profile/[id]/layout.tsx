@@ -8,6 +8,7 @@ type GetUserDetailArgs = {
 const getUserDetail = async ({id}: GetUserDetailArgs) => {
   return await db.user.findUnique({
     where: {id},
+    include: {socials: true},
   })
 }
 
