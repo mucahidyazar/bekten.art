@@ -4,6 +4,7 @@ import {redirect} from 'next/navigation'
 import {ProfileCard} from '@/components/molecules/ProfileCard'
 import {SignOutButton} from '@/components/molecules/SignOutButton'
 import {db} from '@/lib/db'
+import {getCurrentUser} from '@/lib/session'
 
 type GetUserDetailArgs = {
   id: string
@@ -19,6 +20,7 @@ type PageProps = {
   params: {id: string}
 }
 export default async function Page({params}: PageProps) {
+  const me = await getCurrentUser()
   if (!params.id) {
     return redirect('/')
   }
@@ -53,8 +55,8 @@ export default async function Page({params}: PageProps) {
 
   return (
     <section className="mx-auto flex w-full flex-col gap-2 sm:w-80">
-      <ProfileCard user={userData} />
-      <SignOutButton />
+      <ProfileCard user={userData} showPermissions />
+      {me?.id === params.id && <SignOutButton />}
     </section>
   )
 }
