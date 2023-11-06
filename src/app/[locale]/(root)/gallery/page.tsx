@@ -13,6 +13,8 @@ export function generateMetadata() {
   })
 }
 
+export const revalidate = 3600
+
 const getPhotos = async () =>
   // {page = 1, perPage = 40}
   {
