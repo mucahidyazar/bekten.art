@@ -75,6 +75,7 @@ model User {
   stripePriceId          String?       @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd DateTime?     @map(name: "stripe_current_period_end")
   artworkLikes           ArtworkLike[]
+  socials                Social[]
 
   @@map(name: "users")
 }
@@ -99,6 +100,21 @@ model ArtworkLike {
   @@map(name: "artwork_likes")
 }
 
+// keep the social media accounts of the users
+model Social {
+  id        String   @id @default(cuid())
+  userId    String
+  platform  String
+  username  String
+  url       String
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map(name: "socials")
+}
+
 model Artwork {
   id          String        @id @default(cuid())
   name        String // Eserin adı
@@ -107,9 +123,10 @@ model Artwork {
   price       Float // Eserin fiyatı (İsterseniz Decimal tipini de kullanabilirsiniz daha hassas bir fiyatlandırma için)
   createdAt   DateTime      @default(now()) @map(name: "created_at")
   updatedAt   DateTime      @default(now()) @map(name: "updated_at")
+  buyLink     String? // Eserin satın alınabileceği link
   nftLink     String? // OpenSea'daki NFT linki
   artistId    String // Sanatçıya referans vermek için
-  quantity    Int           @default(1) // Eserin kaç adet olduğu
+  quantity    Int?          @default(1) // Eserin kaç adet olduğu
   likes       ArtworkLike[]
 
   artist User @relation(fields: [artistId], references: [id])
