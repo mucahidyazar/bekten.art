@@ -2,14 +2,11 @@ export type Artwork = {
   name: string
   description: string | null
   images: string[]
+  buyLink: string
   nftLink?: string | null
   price: number
   likes: Like[]
   artist: User
-}
-
-export type ArtworkCardProps = {
-  artwork: Artwork
 }
 
 export type Like = {
