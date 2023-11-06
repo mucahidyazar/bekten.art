@@ -5,7 +5,7 @@ interface User extends DefaultSession["user"] {
   name: string | null
   email: string | null
   image: string | null
-  isAdmin: boolean
+  role: 'ADMIN' | 'USER' | 'ARTIST'
 
 }
 declare module "next-auth" {
