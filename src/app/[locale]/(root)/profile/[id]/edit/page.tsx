@@ -1,7 +1,6 @@
 import {Social, User} from '@prisma/client'
 import {redirect} from 'next/navigation'
 
-import {SignOutButton} from '@/components/molecules/SignOutButton'
 import {ProfileForm} from '@/components/organisms/ProfileForm'
 import {db} from '@/lib/db'
 import {getCurrentUser} from '@/lib/session'
@@ -36,7 +35,6 @@ export default async function Page({params}: PageProps) {
   return (
     <section className="mx-auto flex w-full flex-col gap-2 sm:w-80">
       <ProfileForm userDetail={userDetail as User & {socials: Social[]}} />
-      <SignOutButton />
     </section>
   )
 }

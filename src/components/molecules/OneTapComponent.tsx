@@ -12,10 +12,14 @@ interface OneTapSigninOptions {
 const PARENT_CONTAINER_ID = 'oneTap'
 
 export const OneTapComponent = () => {
-  const {isLoading} = useOneTapSignin({
+  const {isLoading, status} = useOneTapSignin({
     redirect: false,
     parentContainerId: PARENT_CONTAINER_ID,
   })
+
+  if (status === 'authenticated') {
+    window.location.href = '/'
+  }
 
   // This is done with tailwind. Update with system of choice
   return (
