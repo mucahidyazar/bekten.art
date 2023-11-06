@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN', 'ARTIST');
+
 -- CreateTable
 CREATE TABLE "accounts" (
     "id" TEXT NOT NULL,
@@ -35,6 +38,7 @@ CREATE TABLE "users" (
     "email" TEXT,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
+    "role" "Role" NOT NULL DEFAULT 'USER',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "stripe_customer_id" TEXT,
@@ -62,6 +66,18 @@ CREATE TABLE "artwork_likes" (
 );
 
 -- CreateTable
+CREATE TABLE "socials" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "platform" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "socials_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "artworks" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -72,7 +88,7 @@ CREATE TABLE "artworks" (
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "nftLink" TEXT,
     "artistId" TEXT NOT NULL,
-    "quantity" INTEGER NOT NULL DEFAULT 1,
+    "quantity" INTEGER DEFAULT 1,
 
     CONSTRAINT "artworks_pkey" PRIMARY KEY ("id")
 );
@@ -109,6 +125,9 @@ ALTER TABLE "artwork_likes" ADD CONSTRAINT "artwork_likes_userId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "artwork_likes" ADD CONSTRAINT "artwork_likes_artworkId_fkey" FOREIGN KEY ("artworkId") REFERENCES "artworks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "socials" ADD CONSTRAINT "socials_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "artworks" ADD CONSTRAINT "artworks_artistId_fkey" FOREIGN KEY ("artistId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
