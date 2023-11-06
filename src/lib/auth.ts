@@ -58,7 +58,7 @@ export const authOptions: NextAuthOptions = {
           name: token.name ?? null,
           email: token.email ?? null,
           image: token.image as string ?? null,
-          isAdmin: token.isAdmin as boolean,
+          role: token.role as 'ADMIN' | 'USER' | 'ARTIST',
         }
 
         session.user = userData
@@ -93,7 +93,7 @@ export const authOptions: NextAuthOptions = {
         name: dbUser.name,
         email: dbUser.email,
         image: dbUser.image,
-        isAdmin: dbUser.isAdmin,
+        role: dbUser.role,
       }
     },
     async redirect({ baseUrl }) { return baseUrl },
