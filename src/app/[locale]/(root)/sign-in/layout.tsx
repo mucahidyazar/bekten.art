@@ -12,7 +12,7 @@ export default async function Layout({children}: Props) {
   const user = await getCurrentUser()
 
   if (user) {
-    redirect('/me')
+    redirect(`/profile/${user.id}`)
   }
 
   return children as JSX.Element

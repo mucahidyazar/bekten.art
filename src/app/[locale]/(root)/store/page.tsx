@@ -32,14 +32,13 @@ export default async function Page() {
 
   return (
     <div id="press" className="flex flex-col gap-4 bg-background">
-      {user?.isAdmin && (
+      {user?.role === 'ADMIN' && (
         <section className="flex justify-end">
           <Button variant="destructive">
             <Link href="/store/create">Add New Artwork</Link>
           </Button>
         </section>
       )}
-      {/* it should be auto fit grid with min max */}
       <section className="flex flex-wrap gap-4">
         {artworks.map(artwork => (
           <ArtworkCard key={artwork.id} artwork={artwork} />
