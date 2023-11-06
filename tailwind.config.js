@@ -64,6 +64,10 @@ module.exports = {
           from: {height: 'var(--radix-accordion-content-height)'},
           to: {height: 0},
         },
+        border: {
+          '0%, 100%': {backgroundPosition: '0% 50%'},
+          '50%': {backgroundPosition: '100% 50%'},
+        },
         'open-menu': {
           '0%': {transform: 'scaleY(0)'},
           '80%': {transform: 'scaleY(1.2)'},
@@ -73,6 +77,7 @@ module.exports = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        border: 'border 4s ease infinite',
         'open-menu': 'open-menu 0.3s ease-in-out forwards',
       },
     },
