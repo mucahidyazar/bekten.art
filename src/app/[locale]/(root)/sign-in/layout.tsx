@@ -10,7 +10,6 @@ type Props = {
 // is required, even if it's just passing children through.
 export default async function Layout({children}: Props) {
   const user = await getCurrentUser()
-  console.log({user})
 
   if (user) {
     redirect(`/profile/${user.id}`)

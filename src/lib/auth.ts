@@ -1,4 +1,5 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
+import { User } from "@prisma/client"
 import { NextAuthOptions } from "next-auth"
 import Providers from "next-auth/providers/credentials"
 import GithubProvider from "next-auth/providers/github"
@@ -23,6 +24,7 @@ export const authOptions: NextAuthOptions = {
   secret: env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   providers: [
     GithubProvider({
@@ -51,28 +53,12 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ token, session }) {
 
-      let userData;
-      if (token && session.user) {
-        userData = {
-          id: token.id as string,
-          name: token.name ?? null,
-          email: token.email ?? null,
-          image: token.image as string ?? null,
-          role: token.role as 'ADMIN' | 'USER' | 'ARTIST',
-        }
-
-        session.user = userData
+      if (token) {
+        session.user = token.user as User
       }
 
-      const mySession = {
-        ...session,
-        user: {
-          ...session.user,
-          ...userData
-        },
-      }
 
-      return mySession
+      return session
     },
     async jwt({ token, user }) {
       const dbUser = await db.user.findFirst({
@@ -81,20 +67,20 @@ export const authOptions: NextAuthOptions = {
         },
       })
 
-      if (!dbUser) {
-        if (user) {
-          token.id = user?.id
+
+      if (user) {
+        token.user = user
+      } else if (dbUser) {
+        token.user = {
+          id: dbUser.id,
+          name: dbUser.name,
+          email: dbUser.email,
+          image: dbUser.image,
+          role: dbUser.role,
         }
-        return token
       }
 
-      return {
-        id: dbUser.id,
-        name: dbUser.name,
-        email: dbUser.email,
-        image: dbUser.image,
-        role: dbUser.role,
-      }
+      return token
     },
     async redirect({ baseUrl }) { return baseUrl },
   },

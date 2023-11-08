@@ -8,6 +8,7 @@ import {Suspense} from 'react'
 
 import Analytics from '@/components/Analytics'
 import {ThemeProvider} from '@/components/providers/ThemeProvider'
+import {authOptions} from '@/lib/auth'
 import {prepareMetadata} from '@/utils/prepareMetadata'
 
 import {SessionProvider} from './SessionProvider'
@@ -37,7 +38,7 @@ export default async function RootLayout({
   children,
   params: {locale},
 }: LayoutProps) {
-  const session = await getServerSession()
+  const session = await getServerSession(authOptions)
   const messages = await getMessages(locale)
 
   return (
@@ -46,7 +47,7 @@ export default async function RootLayout({
       <body
         className={`${lora.className} flex flex-col overflow-x-hidden bg-background`}
       >
-        <SessionProvider session={session}>
+        <SessionProvider session={session} refetchOnWindowFocus>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ThemeProvider
               attribute="class"
