@@ -38,7 +38,7 @@ export default async function RootLayout({
   children,
   params: {locale},
 }: LayoutProps) {
-  const session = await getServerSession()
+  const session = await getServerSession(authOptions)
   const messages = await getMessages(locale)
   const session = await getServerSession(authOptions)
 

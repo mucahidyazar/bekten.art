@@ -102,7 +102,6 @@ export function ProfileForm({userDetail}: ProfileFormProps) {
     control,
     name: 'socials',
   })
-  console.log({socials, fields})
 
   return (
     <form
