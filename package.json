@@ -91,7 +91,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/google-one-tap": "^1.2.4",
+    "@types/google-one-tap": "^1.2.5",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "autoprefixer": "^10.4.13",
     "encoding": "^0.1.13",
