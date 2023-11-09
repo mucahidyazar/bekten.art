@@ -9,7 +9,7 @@ import {
 } from 'swiper/modules'
 import {Swiper, SwiperSlide} from 'swiper/react'
 
-import {ArtImage} from '@/components'
+import {ArtImage} from '@/components/molecules/ArtImage'
 
 type SectionData = {
   url: string

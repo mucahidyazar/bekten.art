@@ -2,7 +2,7 @@
 import Image from 'next/image'
 import {useState} from 'react'
 
-import {ArtImage} from '@/components'
+import {ArtImage} from '@/components/molecules/ArtImage'
 import {useEventListener} from '@/hooks/useEventListener'
 
 import {
@@ -47,7 +47,7 @@ export function GalleryTemplate({imageArrays = []}: GalleryTemplateProps) {
   useEventListener('keydown', handleKeyPress)
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-8">
+    <div className="grid grid-cols-2 gap-2 lg:grid-cols-3 lg:gap-8">
       <Dialog>
         {imageArrays.map((imageArray, imageArrayIndex) => (
           <div
@@ -62,7 +62,7 @@ export function GalleryTemplate({imageArrays = []}: GalleryTemplateProps) {
                 <ArtImage
                   src={image.url}
                   description={image.description}
-                  className="h-auto w-full rounded-lg hover:scale-[103%] lg:hover:scale-110 duration-300 saturate-50 hover:saturate-100"
+                  className="h-auto w-full rounded-lg saturate-50 duration-300 hover:scale-[103%] hover:saturate-100 lg:hover:scale-110"
                 />
               </DialogTrigger>
             ))}
@@ -70,18 +70,18 @@ export function GalleryTemplate({imageArrays = []}: GalleryTemplateProps) {
         ))}
 
         {image && (
-          <DialogContent className="bg-white lg:rounded h-full sm:h-auto flex flex-col p-2 sm:p-4 w-fit">
+          <DialogContent className="flex h-full w-fit flex-col bg-white p-2 sm:h-auto sm:p-4 lg:rounded">
             <DialogHeader>
               <DialogTitle>{image.title}</DialogTitle>
               <DialogDescription>{image.description}</DialogDescription>
             </DialogHeader>
-            <div className="flex flex-col flex-grow h-full overflow-hidden">
+            <div className="flex h-full flex-grow flex-col overflow-hidden">
               <Image
                 src={image.url}
                 alt={image.description}
                 width={1000}
                 height={1000}
-                className="max-h-[80vh] w-fit h-full"
+                className="h-full max-h-[80vh] w-fit"
               />
             </div>
           </DialogContent>

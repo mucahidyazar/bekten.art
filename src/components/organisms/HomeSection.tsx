@@ -4,7 +4,7 @@ import {useState} from 'react'
 
 import {useEventListener} from '@/hooks/useEventListener'
 
-import {ArtImage} from '../molecules'
+import {ArtImage} from '../molecules/ArtImage'
 import {
   Dialog,
   DialogContent,
