@@ -1,6 +1,6 @@
 import {headers} from 'next/headers'
 
-import {EventCard} from '@/components/cards'
+import {EventCard} from '@/components/cards/EventCard'
 import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {
@@ -45,7 +45,7 @@ export default async function Home() {
   const linkPreviews = (await getLinkPreview()) as LinkPreviewType[]
 
   return (
-    <div id="press" className="bg-background flex flex-col gap-4">
+    <div id="press" className="flex flex-col gap-4 bg-background">
       <section>
         {linkPreviews.map((linkPreview, index) => {
           return (

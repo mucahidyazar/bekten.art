@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import {EventCard} from '@/components/cards'
+import {EventCard} from '@/components/cards/EventCard'
 import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {

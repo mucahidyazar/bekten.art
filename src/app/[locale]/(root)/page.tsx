@@ -1,4 +1,4 @@
-import {HomeSection} from '@/components/organisms'
+import {HomeSection} from '@/components/organisms/HomeSection'
 import {HomeSwiper} from '@/components/organisms/HomeSwiper'
 import {prepareMetadata} from '@/utils/prepareMetadata'
 
