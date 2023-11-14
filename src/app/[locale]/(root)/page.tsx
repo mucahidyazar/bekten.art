@@ -1,5 +1,7 @@
+import {ArtworkCard} from '@/components/molecules/ArtworkCard'
 import {HomeSection} from '@/components/organisms/HomeSection'
 import {HomeSwiper} from '@/components/organisms/HomeSwiper'
+import {db} from '@/lib/db'
 import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export function generateMetadata() {
@@ -92,11 +94,36 @@ const artworksData = [
   },
 ]
 
-export default function Home() {
+export default async function Home() {
+  const onSaleArtworks = await db.artwork.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      artist: {
+        include: {socials: true},
+      },
+      likes: true,
+    },
+    where: {artist: {email: 'mucahidyazar@gmail.com'}},
+  })
+
   return (
     <div id="home" className="flex w-full flex-col gap-8">
       <HomeSwiper data={workshopData} />
       <HomeSection title="Memories" data={artworksData} />
+
+      <aside className="w-full">
+        <h3 className="mb-2 text-2xl font-semibold text-primary-500">
+          Bekten`s Artworks on Sale
+        </h3>
+        <div className="flex w-full gap-2 overflow-auto">
+          {onSaleArtworks.map(item => (
+            <ArtworkCard key={item.id} artwork={item} />
+          ))}
+        </div>
+      </aside>
+
       <HomeSection title="Workshop" data={workshopData} />
     </div>
   )

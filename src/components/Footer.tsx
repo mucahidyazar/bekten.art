@@ -28,6 +28,7 @@ export function Footer({className}: FooterProps) {
               key={link.icon}
               href={link.url}
               className="flex items-center gap-2 transition-all duration-300 ease-in-out hover:scale-125 hover:text-primary-900"
+              target="_blank"
             >
               {IconComponent && <IconComponent className="w-4" />}
             </a>

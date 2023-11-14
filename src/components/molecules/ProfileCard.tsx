@@ -7,7 +7,9 @@ import {useParams} from 'next/navigation'
 import {useSession} from 'next-auth/react'
 
 import {updatePermission} from '@/actions'
+import {cn} from '@/utils'
 
+import {Badge} from '../ui/badge'
 import {Button} from '../ui/button'
 import {Switch} from '../ui/switch'
 
@@ -32,8 +34,13 @@ type ProfileCardProps = {
     socials: SocialType[]
   }
   showPermissions?: boolean
+  className?: string
 }
-export function ProfileCard({user, showPermissions = false}: ProfileCardProps) {
+export function ProfileCard({
+  user,
+  showPermissions = false,
+  className,
+}: ProfileCardProps) {
   const me = useSession()
   const params = useParams()
 
@@ -41,7 +48,12 @@ export function ProfileCard({user, showPermissions = false}: ProfileCardProps) {
   const isAdmin = me.data?.user.role === 'ADMIN'
 
   return (
-    <div className="relative rounded bg-foreground text-background">
+    <div
+      className={cn(
+        'relative rounded border border-gray-200 text-foreground',
+        className,
+      )}
+    >
       {/* <div className="absolute left-0 top-0 h-1/2 w-1/2 rounded-full bg-primary-500 bg-opacity-40 blur-md" />
       <div className="absolute right-0 top-0 h-1/2 w-1/2 rounded-full bg-primary-500 bg-opacity-40 blur-md" />
       <div className="absolute bottom-0 left-0 h-1/2 w-1/2 rounded-full bg-primary-500 bg-opacity-40 blur-md" /> */}
@@ -54,9 +66,10 @@ export function ProfileCard({user, showPermissions = false}: ProfileCardProps) {
           height={200}
           className="h-60 w-full rounded-sm object-cover"
         />
+        <Badge className="absolute bottom-2 right-2">{user.role}</Badge>
       </div>
 
-      <div className="mt-2 flex flex-col px-8 py-2 text-center">
+      <div className="mt-2 flex flex-col px-4 text-center">
         <h2 className="font-bold">{user.name}</h2>
         <p className="text-sm">
           {user.profession} @{user.name}
@@ -72,8 +85,8 @@ export function ProfileCard({user, showPermissions = false}: ProfileCardProps) {
 
       {showPermissions && isMe && (
         <>
-          <div className="my-2 h-[1px] bg-background" />
-          <div className="flex flex-col gap-2 px-2">
+          <div className="mx-auto my-8 h-[1px] w-[calc(100%-2rem)] bg-gray-200" />
+          <div className="flex flex-col gap-2 px-4">
             {permissions.map(permission => (
               <div className="flex gap-2" key={permission.id}>
                 <Switch
@@ -102,11 +115,8 @@ export function ProfileCard({user, showPermissions = false}: ProfileCardProps) {
           </div>
         </>
       )}
-      <div className="my-2 h-[1px] bg-background" />
-      <Social
-        socials={user.socials}
-        className="my-2 justify-center text-background"
-      />
+      <div className="mx-auto mb-6 mt-8 h-[1px] w-[calc(100%-2rem)] bg-gray-200" />
+      <Social socials={user.socials} className="my-2 justify-center" />
 
       {(isAdmin || isMe) && (
         <Link href={`/profile/${user.id}/edit`}>

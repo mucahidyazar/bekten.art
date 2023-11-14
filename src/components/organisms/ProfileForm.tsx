@@ -105,7 +105,7 @@ export function ProfileForm({userDetail}: ProfileFormProps) {
 
   return (
     <form
-      className="mb-8 flex flex-col items-center gap-2"
+      className="mb-8 flex flex-col items-center gap-2 text-foreground"
       onSubmit={handleSubmit(data => {
         updateUser(user?.id || '', {
           ...data,
@@ -128,31 +128,26 @@ export function ProfileForm({userDetail}: ProfileFormProps) {
       <Input
         type="text"
         placeholder="Name"
-        className="bg-foreground text-background"
         {...register('name', {required: true})}
       />
       <Input
         type="text"
         placeholder="Image"
-        className="bg-foreground text-background"
         {...register('image', {required: true})}
       />
       <Input
         type="text"
         placeholder="Profession"
-        className="bg-foreground text-background"
         {...register('profession', {required: true})}
       />
       <Input
         type="text"
         placeholder="Description"
-        className="bg-foreground text-background"
         {...register('description', {required: true})}
       />
       <Input
         type="text"
         placeholder="Location"
-        className="bg-foreground text-background"
         {...register('location', {required: true})}
       />
       {userDetail.role === 'ADMIN' && (
@@ -160,7 +155,7 @@ export function ProfileForm({userDetail}: ProfileFormProps) {
           name="role"
           render={({field}) => (
             <Select onValueChange={field.onChange} {...field}>
-              <SelectTrigger className="bg-foreground text-background">
+              <SelectTrigger>
                 <SelectValue placeholder={values.role || 'Role'} />
               </SelectTrigger>
               <SelectContent>
@@ -185,7 +180,7 @@ export function ProfileForm({userDetail}: ProfileFormProps) {
               className="relative flex w-full items-center overflow-hidden rounded border"
               key={social.id}
             >
-              <div className="h-8 w-8 bg-white p-2 text-xs text-background">
+              <div className="h-8 w-8  p-2 text-xs">
                 {Icon && <Icon className="h-full w-fit" />}
               </div>
               <div className="h-full w-[0.1rem] bg-white" />
@@ -194,7 +189,7 @@ export function ProfileForm({userDetail}: ProfileFormProps) {
                 render={({field}) => {
                   return (
                     <Input
-                      className="h-8 w-20 min-w-[3rem] max-w-[8rem] rounded-none border-none bg-foreground text-background outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="h-8 w-20 min-w-[3rem] max-w-[8rem] rounded-none border-none bg-gray-400 text-background outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                       placeholder="Enter your Twitter handle"
                       type="text"
                       style={{
@@ -237,7 +232,7 @@ export function ProfileForm({userDetail}: ProfileFormProps) {
         <Button
           type="button"
           variant="link"
-          className="flex items-center gap-2 text-xs text-background"
+          className="flex items-center gap-2 text-xs"
           onClick={() =>
             append({id: Date.now().toString(), platform: '', value: ''})
           }

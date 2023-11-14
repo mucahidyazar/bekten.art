@@ -14,8 +14,12 @@ export function SignOutButton() {
         signOut()
         router.push('/')
       }}
+      variant="destructive"
+      // size="icon"
+      className="w-full"
     >
-      Sign out
+      {/* <PowerIcon size={24} /> */}
+      Sign Out
     </Button>
   )
 }

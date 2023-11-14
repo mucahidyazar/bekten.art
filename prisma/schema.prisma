@@ -74,8 +74,10 @@ model User {
   stripePriceId          String?   @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
 
-  artworkLikes ArtworkLike[]
-  socials      Social[]
+  artworkLikes      ArtworkLike[]
+  socials           Social[]
+  senderFeedbacks   Feedback[]    @relation("sender")
+  receiverFeedbacks Feedback[]    @relation("receiver")
 
   @@map(name: "users")
 }
@@ -115,6 +117,12 @@ model Social {
   @@map(name: "socials")
 }
 
+enum ArtworkStatus {
+  ON_SALE
+  ARCHIVED
+  SOLD
+}
+
 model Artwork {
   id          String        @id @default(cuid())
   name        String // Eserin adı
@@ -128,8 +136,30 @@ model Artwork {
   artistId    String // Sanatçıya referans vermek için
   quantity    Int?          @default(1) // Eserin kaç adet olduğu
   likes       ArtworkLike[]
+  status      ArtworkStatus @default(ON_SALE)
 
   artist User @relation(fields: [artistId], references: [id])
 
   @@map(name: "artworks")
+}
+
+enum Status {
+  IN_PROGRESS
+  ACCEPTED
+}
+
+model Feedback {
+  id         String   @id @default(cuid())
+  message    String
+  createdAt  DateTime @default(now()) @map(name: "created_at")
+  updatedAt  DateTime @default(now()) @map(name: "updated_at")
+  senderId   String
+  receiverId String
+
+  sender   User? @relation("sender", fields: [senderId], references: [id])
+  receiver User  @relation("receiver", fields: [receiverId], references: [id])
+
+  status Status @default(IN_PROGRESS)
+
+  @@map(name: "feedbacks")
 }

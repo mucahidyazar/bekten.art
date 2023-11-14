@@ -24,7 +24,9 @@ export default async function Page() {
       createdAt: 'desc',
     },
     include: {
-      artist: true,
+      artist: {
+        include: {socials: true},
+      },
       likes: true,
     },
   })

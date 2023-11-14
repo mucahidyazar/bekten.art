@@ -1,7 +1,6 @@
 'use client'
 import {TrashIcon} from '@heroicons/react/24/outline'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {User} from '@prisma/client'
 import {useSession} from 'next-auth/react'
 import {Controller, useFieldArray, useForm} from 'react-hook-form'
 import {z} from 'zod'
@@ -101,7 +100,8 @@ export default function Page() {
                 name: session.data?.user?.name as string,
                 image: session.data?.user?.image as string,
                 email: session.data?.user?.email as string,
-              } as User,
+                socials: [],
+              } as any,
               likes: [],
             }}
           />

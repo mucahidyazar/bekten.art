@@ -19,6 +19,11 @@ export const LINKS: TLink[] = [
     url: 'tel:+996312530703',
     icon: 'phone',
   },
+  {
+    label: 'Whatsapp',
+    url: "https://wa.me/+996705515258?text=I'm%20interested%20in%20your%20artworks%20for%20sale",
+    icon: 'whatsapp',
+  },
 ]
 
 export type TLink = {

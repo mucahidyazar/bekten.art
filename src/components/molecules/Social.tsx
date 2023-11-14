@@ -1,19 +1,16 @@
+import {Social} from '@prisma/client'
+
 import {cn} from '@/utils'
 
 import {Icons} from '../ui/icons'
 
-type Social = {
-  username: string
-  platform: string
-  url: string
-}
 type SocialProps = {
   socials: Social[]
   className?: string
 }
 export function Social({className, socials}: SocialProps) {
   return (
-    <div className={cn('flex gap-4', className)}>
+    <div className={cn('flex gap-4 text-foreground', className)}>
       {socials.map(social => {
         const IconComponent = (Icons as any)[social.platform]
         return (
