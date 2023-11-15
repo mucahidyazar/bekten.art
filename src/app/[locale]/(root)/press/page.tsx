@@ -26,7 +26,7 @@ const getLinkPreview = async () => {
   const host = headers().get('host')
   const protocal = process?.env.NODE_ENV === 'development' ? 'http' : 'https'
 
-  const HTTP_TIMEOUT = 3000
+  const HTTP_TIMEOUT = 10000
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), HTTP_TIMEOUT)
 

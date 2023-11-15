@@ -14,7 +14,7 @@ function getTitle(doc: CheerioAPI) {
   return title;
 }
 
-const HTTP_TIMEOUT = 3000;
+const HTTP_TIMEOUT = 2000;
 export async function POST(request: Request) {
 
   let controller: AbortController;

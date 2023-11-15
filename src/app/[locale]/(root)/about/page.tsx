@@ -21,7 +21,7 @@ export default function Home() {
   return (
     <div id="about" className="flex flex-col gap-6">
       <Image
-        src="/usubaliev_1.jpg"
+        src="/me.jpg"
         alt="Bekten Usubaliev"
         width={400}
         height={400}
@@ -35,7 +35,7 @@ export default function Home() {
       </div>
 
       <Image
-        src="/usubaliev_2.jpg"
+        src="/img/workshop/workshop-0.jpeg"
         alt="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
         width={400}
         height={400}
