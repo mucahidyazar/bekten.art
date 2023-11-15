@@ -58,7 +58,8 @@ export default async function Home() {
     let allPreviews: LinkPreviewType[] = []
     const linkPreviewPromises = pressLinks.map(async link => {
       const linkPreview = await getLinkPreview(link)
-      if (linkPreview) return linkPreview
+      console.log({linkPreview})
+      if (linkPreview) return linkPreview.data
     })
     allPreviews = await Promise.all(linkPreviewPromises)
     return allPreviews

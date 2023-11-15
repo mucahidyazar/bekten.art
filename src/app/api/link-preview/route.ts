@@ -40,10 +40,12 @@ export async function POST(request: Request) {
     const url = $('meta[property="og:url"]').attr('content')
 
     return Response.json({
-      title,
-      description,
-      image,
-      url
+      data: {
+        title,
+        description,
+        image,
+        url
+      }
     })
   } catch (error) {
     console.error(`Error while fetching link preview data: ${error}`)
