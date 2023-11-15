@@ -39,17 +39,10 @@ export async function POST(request: Request) {
       '/img/empty-press-image.png'
     const url = $('meta[property="og:url"]').attr('content')
 
-    return Response.json({
-      data: {
-        title,
-        description,
-        image,
-        url
-      }
-    })
+    return Response.json({ data: { title, description, image, url } })
   } catch (error) {
     console.error(`Error while fetching link preview data: ${error}`)
-    return {}
+    return Response.json({})
   } finally {
     clearTimeout(timeoutId);
   }

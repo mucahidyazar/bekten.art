@@ -35,11 +35,11 @@ const getLinkPreview = async (link: string) => {
       method: 'POST',
       body: JSON.stringify({link}),
       next: {revalidate: 60 * 60 * 24 * 7},
-      signal: controller.signal,
       // next: {revalidate: 3},
+      signal: controller.signal,
     })
     const responseJson = await reponse.json()
-    return responseJson
+    return responseJson.data
   } catch (error) {
     console.log(error)
     return null
@@ -58,8 +58,7 @@ export default async function Home() {
     let allPreviews: LinkPreviewType[] = []
     const linkPreviewPromises = pressLinks.map(async link => {
       const linkPreview = await getLinkPreview(link)
-      console.log({linkPreview})
-      if (linkPreview) return linkPreview.data
+      if (linkPreview) return linkPreview
     })
     allPreviews = await Promise.all(linkPreviewPromises)
     return allPreviews
