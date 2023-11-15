@@ -64,6 +64,7 @@ export default async function Home() {
     return allPreviews
   }
   const linkPreviews = await getAllLinkPreviews()
+  console.log({linkPreviews})
 
   return (
     <div id="press" className="flex flex-col gap-4 bg-background">
@@ -72,8 +73,8 @@ export default async function Home() {
           return (
             <>
               <a
-                key={linkPreview.url}
-                href={linkPreview.url}
+                key={linkPreview?.url}
+                href={linkPreview?.url}
                 target="_blank"
                 rel="noreferrer"
               >
