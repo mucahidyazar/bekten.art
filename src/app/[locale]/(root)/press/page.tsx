@@ -26,14 +26,26 @@ const getLinkPreview = async () => {
   const host = headers().get('host')
   const protocal = process?.env.NODE_ENV === 'development' ? 'http' : 'https'
 
-  const reponse = await fetch(`${protocal}://${host}/api/link-preview`, {
-    method: 'POST',
-    body: JSON.stringify({links: press}),
-    next: {revalidate: 60 * 60 * 24 * 7},
-    // next: {revalidate: 3},
-  })
-  const responseJson = await reponse.json()
-  return responseJson.data
+  const HTTP_TIMEOUT = 3000
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), HTTP_TIMEOUT)
+
+  try {
+    const reponse = await fetch(`${protocal}://${host}/api/link-preview`, {
+      method: 'POST',
+      body: JSON.stringify({links: press}),
+      next: {revalidate: 60 * 60 * 24 * 7},
+      signal: controller.signal,
+      // next: {revalidate: 3},
+    })
+    const responseJson = await reponse.json()
+    return responseJson.data
+  } catch (error) {
+    console.log(error)
+    return []
+  } finally {
+    clearTimeout(timeoutId)
+  }
 }
 type LinkPreviewType = {
   url: string
