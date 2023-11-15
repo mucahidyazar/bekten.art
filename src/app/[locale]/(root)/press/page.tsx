@@ -15,14 +15,14 @@ export function generateMetadata() {
   })
 }
 
-const press = [
+const pressLinks = [
   'https://aksarayhaberci.com/haber/ressamlar-aksarayda-bulustu--13418.html',
   'http://acikerisim.akdeniz.edu.tr:8080/xmlui/handle/123456789/5561?show=full',
   'https://www.turksoy.org/haberler/2015-08-25-turk-dunyasi-ndan-mimar-ve-heykeltiraslar-bolu-da-bir-araya-geldi',
   'https://www.bishkekart.kg/news/10/',
   'https://www.bishkekart.kg/news/30/',
 ]
-const getLinkPreview = async () => {
+const getLinkPreview = async (link: string) => {
   const host = headers().get('host')
   const protocal = process?.env.NODE_ENV === 'development' ? 'http' : 'https'
 
@@ -33,16 +33,16 @@ const getLinkPreview = async () => {
   try {
     const reponse = await fetch(`${protocal}://${host}/api/link-preview`, {
       method: 'POST',
-      body: JSON.stringify({links: press}),
+      body: JSON.stringify({link}),
       next: {revalidate: 60 * 60 * 24 * 7},
       signal: controller.signal,
       // next: {revalidate: 3},
     })
     const responseJson = await reponse.json()
-    return responseJson.data
+    return responseJson
   } catch (error) {
     console.log(error)
-    return []
+    return null
   } finally {
     clearTimeout(timeoutId)
   }
@@ -54,7 +54,16 @@ type LinkPreviewType = {
   image: string
 }
 export default async function Home() {
-  const linkPreviews = (await getLinkPreview()) as LinkPreviewType[]
+  const getAllLinkPreviews = async () => {
+    let allPreviews: LinkPreviewType[] = []
+    const linkPreviewPromises = pressLinks.map(async link => {
+      const linkPreview = await getLinkPreview(link)
+      if (linkPreview) return linkPreview
+    })
+    allPreviews = await Promise.all(linkPreviewPromises)
+    return allPreviews
+  }
+  const linkPreviews = await getAllLinkPreviews()
 
   return (
     <div id="press" className="flex flex-col gap-4 bg-background">
@@ -74,7 +83,7 @@ export default async function Home() {
                   image={linkPreview.image}
                 />
               </a>
-              {index !== press.length - 1 && (
+              {index !== pressLinks.length - 1 && (
                 <hr className="my-2 w-[50%] sm:mx-auto sm:my-4" />
               )}
             </>

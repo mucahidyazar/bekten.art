@@ -14,39 +14,37 @@ function getTitle(doc: CheerioAPI) {
   return title;
 }
 
-const HTTP_TIMEOUT = 2000;
+const HTTP_TIMEOUT = 3000;
 export async function POST(request: Request) {
 
-  let controller: AbortController;
-  let timeoutId: NodeJS.Timeout = setTimeout(() => controller.abort(), HTTP_TIMEOUT);
+  const controller = new AbortController();
+  const timeoutId: NodeJS.Timeout = setTimeout(() => controller.abort(), HTTP_TIMEOUT);
   try {
     const res = await request.json()
 
-    const links: string[] = res.links
-    const promises = links.map(async (link) => {
-      controller = new AbortController();
-      timeoutId = setTimeout(() => controller.abort(), HTTP_TIMEOUT);
+    const link: string = res.link
 
-      const response = await fetch(link, {
-        signal: controller.signal
-      })
-      const data = await response.text()
-      const $ = load(data as any)
-
-      const title = getTitle($)
-      const description = $('meta[name="description"]').attr('content')
-      const image =
-        $('meta[property="og:image"]').attr('content') ||
-        $('meta[name="twitter:image"]').attr('content') ||
-        $('meta[itemprop="image"]').attr('content') ||
-        '/img/empty-press-image.png'
-      const url = $('meta[property="og:url"]').attr('content')
-
-      return { title, description, image, url }
+    const response = await fetch(link, {
+      signal: controller.signal
     })
+    const data = await response.text()
+    const $ = load(data as any)
 
-    const results = await Promise.all(promises)
-    return (Response as any).json({ data: results })
+    const title = getTitle($)
+    const description = $('meta[name="description"]').attr('content')
+    const image =
+      $('meta[property="og:image"]').attr('content') ||
+      $('meta[name="twitter:image"]').attr('content') ||
+      $('meta[itemprop="image"]').attr('content') ||
+      '/img/empty-press-image.png'
+    const url = $('meta[property="og:url"]').attr('content')
+
+    return Response.json({
+      title,
+      description,
+      image,
+      url
+    })
   } catch (error) {
     console.error(`Error while fetching link preview data: ${error}`)
     return {}
