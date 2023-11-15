@@ -61,10 +61,9 @@ export default async function Home() {
       if (linkPreview) return linkPreview
     })
     allPreviews = await Promise.all(linkPreviewPromises)
-    return allPreviews
+    return allPreviews.filter(Boolean)
   }
   const linkPreviews = await getAllLinkPreviews()
-  console.log({linkPreviews})
 
   return (
     <div id="press" className="flex flex-col gap-4 bg-background">
@@ -79,9 +78,9 @@ export default async function Home() {
                 rel="noreferrer"
               >
                 <EventCard
-                  title={linkPreview.title}
-                  description={linkPreview.description}
-                  image={linkPreview.image}
+                  title={linkPreview?.title}
+                  description={linkPreview?.description}
+                  image={linkPreview?.image}
                 />
               </a>
               {index !== pressLinks.length - 1 && (
