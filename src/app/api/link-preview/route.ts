@@ -14,14 +14,22 @@ function getTitle(doc: CheerioAPI) {
   return title;
 }
 
+const HTTP_TIMEOUT = 3000;
 export async function POST(request: Request) {
+
+  let controller: AbortController;
+  let timeoutId: NodeJS.Timeout = setTimeout(() => controller.abort(), HTTP_TIMEOUT);
   try {
     const res = await request.json()
 
     const links: string[] = res.links
-
     const promises = links.map(async (link) => {
-      const response = await fetch(link)
+      controller = new AbortController();
+      timeoutId = setTimeout(() => controller.abort(), HTTP_TIMEOUT);
+
+      const response = await fetch(link, {
+        signal: controller.signal
+      })
       const data = await response.text()
       const $ = load(data as any)
 
@@ -42,5 +50,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(`Error while fetching link preview data: ${error}`)
     return {}
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

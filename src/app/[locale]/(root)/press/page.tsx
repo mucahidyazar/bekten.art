@@ -18,9 +18,9 @@ export function generateMetadata() {
 const press = [
   'https://aksarayhaberci.com/haber/ressamlar-aksarayda-bulustu--13418.html',
   'http://acikerisim.akdeniz.edu.tr:8080/xmlui/handle/123456789/5561?show=full',
-  // 'https://www.turksoy.org/haberler/2015-08-25-turk-dunyasi-ndan-mimar-ve-heykeltiraslar-bolu-da-bir-araya-geldi',
-  // 'https://www.bishkekart.kg/press/10/',
-  // 'https://www.bishkekart.kg/press/30/',
+  'https://www.turksoy.org/haberler/2015-08-25-turk-dunyasi-ndan-mimar-ve-heykeltiraslar-bolu-da-bir-araya-geldi',
+  'https://www.bishkekart.kg/news/10/',
+  'https://www.bishkekart.kg/news/30/',
 ]
 const getLinkPreview = async () => {
   const host = headers().get('host')
