@@ -36,7 +36,7 @@ export function Footer({className}: FooterProps) {
         })}
       </div>
       <p>
-        © {t('copyRight', {year: new Date().getFullYear()})}{' '}
+        {t('copyRight', {year: new Date().getFullYear()})}{' '}
         {/* <a
           href="https://mucahid.dev"
           target="_blank"
@@ -46,6 +46,14 @@ export function Footer({className}: FooterProps) {
           <span className="text-primary-500 text-opacity-50">mucahid.dev</span>
         </a> */}
       </p>
+      <ul className="flex flex-wrap items-center gap-2 text-[10px]">
+        <li className="duration-150 hover:text-primary-500">
+          <a href="/privacy-policy">{t('privacyPolicy')}</a>
+        </li>
+        <li className="duration-150 hover:text-primary-500">
+          <a href="/terms-of-use">{t('termsOfUse')}</a>
+        </li>
+      </ul>
     </footer>
   )
 }
