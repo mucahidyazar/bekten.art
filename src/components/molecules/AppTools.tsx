@@ -1,5 +1,6 @@
 'use client'
 import {BoltIcon, MoonIcon, SunIcon} from '@heroicons/react/24/outline'
+import {UserIcon} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {usePathname, useRouter} from 'next/navigation'
@@ -100,7 +101,7 @@ export function AppTools({className}: AppToolsProps) {
       >
         {theme && themeIconMap[theme]}
       </button>
-      {session.data?.user && (
+      {session.data?.user ? (
         <Link
           className={cn(
             'relative z-50 flex h-9 w-9 items-center justify-center overflow-hidden rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
@@ -114,6 +115,15 @@ export function AppTools({className}: AppToolsProps) {
             alt="user avatar"
             className="h-full w-full rounded border border-primary-500 object-cover"
           />
+        </Link>
+      ) : (
+        <Link
+          className={cn(
+            'relative z-50 flex h-9 w-9 items-center justify-center overflow-hidden rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
+          )}
+          href="/sign-in"
+        >
+          <UserIcon className="h-4 w-4" />
         </Link>
       )}
     </section>
