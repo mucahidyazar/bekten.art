@@ -37,9 +37,8 @@ export async function POST(request: Request) {
       $('meta[name="twitter:image"]').attr('content') ||
       $('meta[itemprop="image"]').attr('content') ||
       '/img/empty-press-image.png'
-    const url = $('meta[property="og:url"]').attr('content')
 
-    return Response.json({ data: { title, description, image, url } })
+    return Response.json({ data: { title, description, image, url: res.link } })
   } catch (error) {
     console.error(`Error while fetching link preview data: ${error}`)
     return Response.json({})

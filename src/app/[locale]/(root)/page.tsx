@@ -113,16 +113,18 @@ export default async function Home() {
       <HomeSwiper data={workshopData} />
       <HomeSection title="Memories" data={artworksData} />
 
-      <aside className="w-full">
-        <h3 className="mb-2 text-2xl font-semibold text-primary-500">
-          Bekten`s Artworks on Sale
-        </h3>
-        <div className="flex w-full gap-2 overflow-auto">
-          {onSaleArtworks.map(item => (
-            <ArtworkCard key={item.id} artwork={item} />
-          ))}
-        </div>
-      </aside>
+      {!!onSaleArtworks.length && (
+        <aside className="w-full">
+          <h3 className="mb-2 text-2xl font-semibold text-primary-500">
+            Bekten`s Artworks on Sale
+          </h3>
+          <div className="flex w-full gap-2 overflow-auto">
+            {onSaleArtworks.map(item => (
+              <ArtworkCard key={item.id} artwork={item} />
+            ))}
+          </div>
+        </aside>
+      )}
 
       <HomeSection title="Workshop" data={workshopData} />
     </div>

@@ -28,7 +28,6 @@ export function ArtworkCard({artwork}: ArtworkCardProps) {
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
-  console.log({artwork})
   return (
     // <div className="box-border inline-block w-60 rounded-md bg-white bg-[length:400%_400%] p-[0.1rem] duration-150 hover:animate-border hover:bg-gradient-to-r hover:from-primary-500 hover:to-purple-500">
     <div className="relative w-60 min-w-[15rem] rounded border border-gray-300 bg-white p-2 hover:shadow-sm">
@@ -113,7 +112,7 @@ export function ArtworkCard({artwork}: ArtworkCardProps) {
         </section>
       )}
 
-      {!(buyLink || nftLink) && (
+      {!(buyLink || nftLink) && !!artwork.artist?.socials.length && (
         <>
           <div className="mb-2 mt-4 border-b border-gray-300" />
           <Social

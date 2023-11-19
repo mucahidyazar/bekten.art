@@ -78,6 +78,8 @@ model User {
   socials           Social[]
   senderFeedbacks   Feedback[]    @relation("sender")
   receiverFeedbacks Feedback[]    @relation("receiver")
+  press             Press[]
+  news              News[]
 
   @@map(name: "users")
 }
@@ -162,4 +164,38 @@ model Feedback {
   status Status @default(IN_PROGRESS)
 
   @@map(name: "feedbacks")
+}
+
+model Press {
+  id    String @id @default(cuid())
+  title String
+  link  String
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+  userId    String
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map(name: "press")
+}
+
+model News {
+  id          String    @id @default(cuid())
+  title       String
+  subtitle    String
+  location    String?
+  address     String?
+  date        DateTime?
+  note        String?
+  image       String
+  description String
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+  userId    String
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map(name: "news")
 }

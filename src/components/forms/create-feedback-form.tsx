@@ -19,12 +19,11 @@ type CreateFeedbackProps = {
   receiverId: string
   image: string
 }
-export default function CreateFeedbackForm({
+export default function CreateFeedback({
   senderId,
   receiverId,
   image,
 }: CreateFeedbackProps) {
-  console.log({image})
   const validationSchema = z.object({
     message: z.string().min(4).max(500),
   })

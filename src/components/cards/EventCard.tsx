@@ -4,10 +4,15 @@ type EventCardProps = {
   title: string
   description: string
   image: string
+  url: string
 }
-export function EventCard({title, description, image}: EventCardProps) {
+export function EventCard({title, description, image, url}: EventCardProps) {
   return (
-    <div className="group flex h-[12rem] gap-4 p-2 hover:cursor-pointer">
+    <a
+      className="group flex h-[12rem] gap-4 p-2 hover:cursor-pointer"
+      href={url}
+      target="_blank"
+    >
       <div className="font-bold text-gray-500">
         <p className="">JUN</p>
         <div className="h-[1px] w-4 bg-gray-500" />
@@ -44,6 +49,6 @@ export function EventCard({title, description, image}: EventCardProps) {
           </button>
         </div>
       </div>
-    </div>
+    </a>
   )
 }

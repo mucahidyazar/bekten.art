@@ -17,8 +17,8 @@ export function Navbar({className}: NavbarProps) {
       path: '/',
     },
     {
-      label: t('press'),
-      path: '/press',
+      label: t('news'),
+      path: '/news',
     },
     {
       label: t('about'),
