@@ -14,7 +14,7 @@ export function SignOutButton() {
         signOut()
         router.push('/')
       }}
-      variant="destructive"
+      variant="outline"
       // size="icon"
       className="w-full"
     >

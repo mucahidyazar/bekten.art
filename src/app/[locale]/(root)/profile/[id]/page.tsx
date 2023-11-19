@@ -4,6 +4,7 @@ import {redirect} from 'next/navigation'
 import CreateFeedbackForm from '@/components/forms/create-feedback-form'
 import {FeedbackItem} from '@/components/molecules/feedback-item'
 import {ProfileCard} from '@/components/molecules/ProfileCard'
+import {RemoveUserButton} from '@/components/molecules/RemoveUserButton'
 import {SignOutButton} from '@/components/molecules/SignOutButton'
 import {db} from '@/lib/db'
 import {getCurrentUser} from '@/lib/session'
@@ -69,17 +70,21 @@ export default async function Page({params}: PageProps) {
     socials: socials as Social[],
   }
 
+  const isMe = me?.id === params.id
+  const isAdmin = me?.role === 'ADMIN'
+
   return (
     <section className="mx-auto flex h-fit w-full flex-col gap-4 md:flex-row">
       <aside className="mx-auto flex w-full flex-col sm:w-80 sm:min-w-[20rem]">
         <ProfileCard
           user={userData}
           showPermissions
-          className={cn(me?.id === params.id && 'rounded-b-none border-b-0')}
+          className={cn(isMe && 'rounded-b-none border-b-0')}
         />
-        {me?.id === params.id && (
-          <div className="flex items-center justify-center rounded-b border border-t-0 border-gray-200 p-4">
-            <SignOutButton />
+        {(isMe || isAdmin) && (
+          <div className="flex flex-col justify-center gap-2 rounded-b border border-t-0 border-gray-200 p-4">
+            <RemoveUserButton />
+            {isMe && <SignOutButton />}
           </div>
         )}
       </aside>
