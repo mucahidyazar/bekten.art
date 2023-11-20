@@ -1,6 +1,7 @@
 'use client'
 import {Press} from '@prisma/client'
 import {TrashIcon} from 'lucide-react'
+import {useSession} from 'next-auth/react'
 
 import {removePress} from '@/actions'
 
@@ -10,6 +11,8 @@ type PressListProps = {
   pressList: (Press & {link: string})[]
 }
 export function PressList({pressList}: PressListProps) {
+  const session = useSession()
+
   return (
     <section>
       <PressListHeader />
@@ -25,12 +28,14 @@ export function PressList({pressList}: PressListProps) {
               </a>
               <div className="flex items-center gap-2">
                 {/* <PencilIcon className="inline h-3 w-3 cursor-pointer text-gray-500 hover:scale-110 hover:text-primary-500" /> */}
-                <TrashIcon
-                  className="inline h-3 w-3 cursor-pointer text-gray-500 hover:scale-110 hover:text-primary-500"
-                  onClick={() => {
-                    removePress({id: press.id})
-                  }}
-                />
+                {session.data?.user.role === 'ADMIN' && (
+                  <TrashIcon
+                    className="inline h-3 w-3 cursor-pointer text-gray-500 hover:scale-110 hover:text-primary-500"
+                    onClick={() => {
+                      removePress({id: press.id})
+                    }}
+                  />
+                )}
               </div>
             </li>
           ))}

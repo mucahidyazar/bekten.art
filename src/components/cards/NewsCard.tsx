@@ -1,9 +1,14 @@
+'use client'
 import {News, User} from '@prisma/client'
-import {ClockIcon, HomeIcon, MapIcon, PencilIcon} from 'lucide-react'
+import {ClockIcon, HomeIcon, MapIcon, PencilIcon, TrashIcon} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import {useSession} from 'next-auth/react'
 
+import {removeNews} from '@/actions'
 import {cn} from '@/utils'
+
+import {Button} from '../ui/button'
 
 type NewsCardProps = {
   news: News & {
@@ -12,10 +17,12 @@ type NewsCardProps = {
   className?: string
 }
 export function NewsCard({news, className}: NewsCardProps) {
+  const session = useSession()
+
   return (
     <Link
       className={cn(
-        'group flex h-[19.5rem] w-96 flex-col overflow-hidden rounded bg-primary-500 bg-opacity-5 pb-2 shadow hover:shadow-md',
+        'group relative flex h-[19.5rem] w-96 flex-col overflow-hidden rounded bg-primary-500 bg-opacity-5 pb-2 shadow hover:shadow-md',
         className,
       )}
       href={`/news/${news.id}`}
@@ -66,6 +73,20 @@ export function NewsCard({news, className}: NewsCardProps) {
           )}
         </div>
       </div>
+
+      {session.data?.user.role === 'ADMIN' && (
+        <Button
+          size="icon"
+          variant="destructive"
+          className="absolute right-2 top-2 z-10 h-8 w-8"
+          onClick={e => {
+            e.preventDefault()
+            removeNews({id: news.id})
+          }}
+        >
+          <TrashIcon className="inline h-4 w-4" />
+        </Button>
+      )}
     </Link>
   )
 }

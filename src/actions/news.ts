@@ -103,6 +103,7 @@ export async function removeNews(passedData: ActionRemoveNews) {
   } catch (error) {
     return {
       message: 'Database Error: Failed to Create Invoice.',
+      error
     };
   }
 }
