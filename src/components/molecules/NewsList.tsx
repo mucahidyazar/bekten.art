@@ -12,7 +12,7 @@ export async function NewsList({newsList}: NewsListProps) {
     <section>
       <NewsListHeader />
       {/* {/* grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));  */}
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {newsList.map(news => (
           <NewsCard key={news.id} news={news} className="w-full" />
         ))}
