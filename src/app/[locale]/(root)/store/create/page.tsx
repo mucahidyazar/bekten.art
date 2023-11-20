@@ -119,7 +119,6 @@ export default function Page() {
               price: data.price,
               images: data.images.map(image => image.value),
               nftLink: data.nftLink,
-              artistId: session.data?.user?.id,
             })
           })}
         >

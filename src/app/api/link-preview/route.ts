@@ -40,8 +40,10 @@ export async function POST(request: Request) {
 
     return Response.json({ data: { title, description, image, url: res.link } })
   } catch (error) {
-    console.error(`Error while fetching link preview data: ${error}`)
-    return Response.json({})
+    return Response.json({
+      message: 'Failed to fetch link preview.',
+      error
+    })
   } finally {
     clearTimeout(timeoutId);
   }

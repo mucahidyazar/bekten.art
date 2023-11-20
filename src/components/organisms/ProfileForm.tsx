@@ -107,7 +107,7 @@ export function ProfileForm({userDetail}: ProfileFormProps) {
     <form
       className="mb-8 flex flex-col items-center gap-2 text-foreground"
       onSubmit={handleSubmit(data => {
-        updateUser(user?.id || '', {
+        updateUser({
           ...data,
           socials: data.socials.map(social => ({
             id: social.platform,

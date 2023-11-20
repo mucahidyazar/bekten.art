@@ -43,7 +43,10 @@ const getPhotos = async () =>
       const data = await response.json()
       return data
     } catch (error) {
-      console.log('error', error)
+      return {
+        message: 'We could not fetch the photos. Please try again later.',
+        error,
+      }
     }
   }
 

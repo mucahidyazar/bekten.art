@@ -44,7 +44,6 @@ export default function CreateFeedback({
       className="relative flex flex-col gap-2 rounded-b py-4"
       onSubmit={handleSubmit(data => {
         createFeedback({
-          senderId,
           receiverId,
           message: data.message,
         })

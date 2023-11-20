@@ -1,10 +1,9 @@
 'use client'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {useSession} from 'next-auth/react'
 import {useForm} from 'react-hook-form'
 import {z} from 'zod'
 
-import {createPress} from '@/actions/createPress'
+import {createPress} from '@/actions/press'
 import {Button} from '@/components/ui/button'
 
 import {Input} from '../ui/input'
@@ -18,8 +17,6 @@ type CreatePressProps = {
   onRequestClose: () => void
 }
 export default function CreatePress({onRequestClose}: CreatePressProps) {
-  const session = useSession()
-
   const validationSchema = z.object({
     title: z.string().min(4).max(120),
     link: z.string().min(4).max(500),
@@ -41,11 +38,7 @@ export default function CreatePress({onRequestClose}: CreatePressProps) {
     <form
       className="relative flex flex-col gap-2"
       onSubmit={handleSubmit(data => {
-        createPress({
-          title: data.title,
-          link: data.link,
-          userId: session?.data?.user.id as string,
-        })
+        createPress(data)
         onRequestClose && onRequestClose()
         reset()
       })}

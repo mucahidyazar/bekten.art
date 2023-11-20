@@ -2,11 +2,10 @@
 import {zodResolver} from '@hookform/resolvers/zod'
 import {format} from 'date-fns'
 import {CalendarIcon} from 'lucide-react'
-import {useSession} from 'next-auth/react'
 import {Controller, useForm} from 'react-hook-form'
 import {z} from 'zod'
 
-import {createNews} from '@/actions/createNews'
+import {createNews} from '@/actions/news'
 import {Button} from '@/components/ui/button'
 import {cn} from '@/utils'
 
@@ -30,8 +29,6 @@ type CreateNewsProps = {
   onRequestClose: () => void
 }
 export default function CreateNews({onRequestClose}: CreateNewsProps) {
-  const session = useSession()
-
   const validationSchema = z.object({
     title: z.string().min(4).max(120),
     subtitle: z.string().min(4).max(120),
@@ -66,10 +63,7 @@ export default function CreateNews({onRequestClose}: CreateNewsProps) {
     <form
       className="relative flex flex-col gap-2"
       onSubmit={handleSubmit(data => {
-        createNews({
-          ...data,
-          userId: session?.data?.user.id as string,
-        })
+        createNews(data)
         onRequestClose && onRequestClose()
         reset()
       })}

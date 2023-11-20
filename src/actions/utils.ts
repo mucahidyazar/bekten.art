@@ -1,22 +1,38 @@
 'use server'
+import { User } from "@prisma/client";
+
 import { CREATOR_ROLES } from "@/constants"
+import { getCurrentUser } from "@/lib/session"
 
 import { db } from "../lib/db"
 
-async function creatorMiddleware(userId: string) {
+async function creatorMiddleware(): Promise<User> {
   try {
-    const user = await db.user.findUnique({
-      where: { id: userId },
-    })
-    if (!user) {
-      throw new Error('User not found')
-    }
-    if (!CREATOR_ROLES.includes(user.role)) {
+    const user = await userMiddleware();
+
+    if (!CREATOR_ROLES.includes(user?.role as string)) {
       throw new Error('User not authorized')
     }
+
+    return user
   } catch (error) {
-    return error
+    throw error
   }
 }
 
-export { creatorMiddleware }
+async function userMiddleware(): Promise<User> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) throw new Error('User not found')
+
+    const id = user.id;
+    const dbUser = await db.user.findUnique({ where: { id } });
+    if (!dbUser) throw new Error('User not found')
+
+    return dbUser
+  } catch (error) {
+    throw error
+  }
+}
+
+export { creatorMiddleware, userMiddleware }

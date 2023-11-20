@@ -14,14 +14,15 @@ const SchemaCreatePress = z.object({
 });
 
 type ActionCreatePress = {
-  userId: string,
   title: string,
   link: string,
 }
 export async function createPress(passedData: ActionCreatePress) {
   try {
-    const { title = '', link = '', userId = '' } = passedData as ActionCreatePress;
-    creatorMiddleware(userId)
+    const user = await creatorMiddleware()
+    await redirect(`/user/${user.id}`);
+
+    const { title = '', link = '' } = passedData as ActionCreatePress;
 
     const validatedFields1 = SchemaCreatePress.safeParse({
       title,
@@ -35,45 +36,40 @@ export async function createPress(passedData: ActionCreatePress) {
         message: 'Missing Fields. Failed to Create Invoice.',
       };
     }
-    console.log({
-      title,
-      link,
-      userId,
-    })
 
     await db.press.create({
       data: {
         title,
         link,
-        user: { connect: { id: userId } },
+        user: { connect: { id: user.id } },
       }
     })
-    revalidatePath('/news');
+    await revalidatePath('/news');
+    await redirect('/news');
   } catch (error) {
     return {
       message: 'Database Error: Failed to Create Invoice.',
     };
   }
-  redirect('/news');
 }
 
 type ActionRemovePress = {
   id: string,
-  userId: string,
 }
 export async function removePress(passedData: ActionRemovePress) {
   try {
-    const { id, userId } = passedData;
-    creatorMiddleware(userId)
+    await creatorMiddleware()
+
+    const { id } = passedData;
     const press = await db.press.findUnique({ where: { id } });
     if (!press) return { message: 'Press not found.' };
 
     await db.press.delete({ where: { id } })
-    revalidatePath('/news');
+    await revalidatePath('/news');
+    await redirect('/news');
   } catch (error) {
     return {
       message: 'Database Error: Failed to Create Invoice.',
     };
   }
-  redirect('/news');
 }

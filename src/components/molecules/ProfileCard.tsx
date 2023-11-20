@@ -93,7 +93,7 @@ export function ProfileCard({
                   id="public-profile"
                   defaultChecked={(user as any)[permission.id]}
                   onCheckedChange={value => {
-                    updatePermission(me.data?.user.id as string, {
+                    updatePermission({
                       [permission.id]: value,
                     })
                   }}

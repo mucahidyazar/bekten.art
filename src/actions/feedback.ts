@@ -11,24 +11,21 @@ import { creatorMiddleware } from "./utils"
 
 const SchemaCreateFeedback = z.object({
   receiverId: z.string(),
-  senderId: z.string().optional(),
   status: z.enum(['PAID', 'PENDING', 'FAILED']).optional(),
 });
 
 type ActionCreateFeedback = {
   message: string,
   receiverId: string,
-  senderId: string
 }
 export async function createFeedback(passedData: ActionCreateFeedback) {
   try {
-    creatorMiddleware(passedData.senderId)
-    const { message, receiverId, senderId } = passedData;
+    const user = await creatorMiddleware()
 
+    const { message, receiverId } = passedData;
     const validatedFields = SchemaCreateFeedback.safeParse({
       message,
-      receiverId,
-      senderId,
+      receiverId
     });
 
     // If form validation fails, return errors early. Otherwise, continue.
@@ -43,48 +40,48 @@ export async function createFeedback(passedData: ActionCreateFeedback) {
       data: {
         message,
         receiver: { connect: { id: receiverId } },
-        sender: { connect: { id: senderId } },
+        sender: { connect: { id: user.id } },
       }
     })
-    revalidatePath(`/profile/${receiverId}`);
+    await revalidatePath(`/profile/${receiverId}`);
+    await redirect(`/profile/${passedData.receiverId}`);
   } catch (error) {
     return {
       message: 'Database Error: Failed to Create Invoice.',
     };
   }
-  redirect(`/profile/${passedData.receiverId}`);
 }
 
 type ActionUpdateFeedback = {
   id: string,
   status: Feedback['status'],
-  senderId: string,
 }
 export async function removeFeedback(passedData: ActionRemoveFeedback) {
   try {
-    const { id, senderId } = passedData;
-    creatorMiddleware(senderId)
+    await creatorMiddleware()
+
+    const { id } = passedData;
     const feedback = await db.feedback.findUnique({ where: { id } });
     if (!feedback) return { message: 'Feedback not found.' };
 
     await db.feedback.delete({ where: { id } })
-    revalidatePath(`/profile/${senderId}`);
+    await revalidatePath(`/profile/${feedback.receiverId}`);
+    await redirect(`/profile/${feedback.receiverId}`);
   } catch (error) {
     return {
       message: 'Database Error: Failed to Create Invoice.',
     };
   }
-  redirect(`/profile/${passedData.senderId}`);
 }
 
 type ActionRemoveFeedback = {
   id: string,
-  senderId: string,
 }
 export async function updateFeedback(passedData: ActionUpdateFeedback) {
   try {
-    const { id, status, senderId } = passedData;
-    creatorMiddleware(senderId)
+    const user = await creatorMiddleware()
+
+    const { id, status } = passedData;
     const feedback = await db.feedback.findUnique({ where: { id } });
     if (!feedback) return { message: 'Feedback not found.' };
 
@@ -92,13 +89,13 @@ export async function updateFeedback(passedData: ActionUpdateFeedback) {
       where: { id },
       data: { status },
     })
-    revalidatePath(`/profile/${senderId}`);
+    await revalidatePath(`/profile/${user.id}`);
+    await redirect(`/profile/${feedback.receiverId}`);
   } catch (error) {
     return {
       message: 'Database Error: Failed to Create Invoice.',
     };
   }
-  redirect(`/profile/${passedData.senderId}`);
 }
 
 // or without form
@@ -119,7 +116,6 @@ export async function updateFeedback(passedData: ActionUpdateFeedback) {
 //     })
 //     revalidatePath(`/profile/${feedback.receiverId}`);
 //   } catch (error) {
-//     console.log(error)
 //     return error
 //   }
 //   redirect(`/profile/${feedback.receiverId}`);

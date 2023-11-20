@@ -44,8 +44,6 @@ export function FeedbackItem({feedback}: FeedbackItemProps) {
           onClick={() => {
             removeFeedback({
               id: feedback.id,
-              // status: 'REJECTED',
-              senderId: feedback.senderId,
             })
           }}
         >
@@ -60,7 +58,6 @@ export function FeedbackItem({feedback}: FeedbackItemProps) {
               updateFeedback({
                 id: feedback.id,
                 status: 'ACCEPTED',
-                senderId: feedback.senderId,
               })
             }}
           >

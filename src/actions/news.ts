@@ -20,7 +20,6 @@ const SchemaCreateNews = z.object({
 });
 
 type ActionCreateNews = {
-  userId: string,
   title: string,
   date: Date | null,
   subtitle: string,
@@ -32,6 +31,8 @@ type ActionCreateNews = {
 }
 export async function createNews(passedData: ActionCreateNews) {
   try {
+    const user = await creatorMiddleware()
+
     const {
       title = '',
       date,
@@ -41,9 +42,7 @@ export async function createNews(passedData: ActionCreateNews) {
       address = '',
       description = '',
       note = '',
-      userId = ''
     } = passedData as ActionCreateNews;
-    creatorMiddleware(userId)
 
     const validatedFields = SchemaCreateNews.safeParse({
       title,
@@ -58,13 +57,11 @@ export async function createNews(passedData: ActionCreateNews) {
 
     // If form validation fails, return errors early. Otherwise, continue.
     if (!(validatedFields.success)) {
-      console.log('x1')
       return {
         errors: validatedFields.error.flatten().fieldErrors,
         message: 'Missing Fields. Failed to Create Invoice.',
       };
     }
-    console.log('x2')
 
     await db.news.create({
       data: {
@@ -76,37 +73,36 @@ export async function createNews(passedData: ActionCreateNews) {
         address,
         description,
         note,
-        user: { connect: { id: userId } },
+        user: { connect: { id: user.id } },
       }
     })
-    console.log('x3')
-    revalidatePath('/news');
+    await revalidatePath('/news');
+    await redirect('/news');
   } catch (error) {
-    console.log(error)
     return {
       message: 'Database Error: Failed to Create Invoice.',
+      error,
     };
   }
-  redirect('/news');
 }
 
 type ActionRemoveNews = {
   id: string,
-  userId: string,
 }
 export async function removeNews(passedData: ActionRemoveNews) {
   try {
-    const { id, userId } = passedData;
-    creatorMiddleware(userId)
+    await creatorMiddleware()
+
+    const { id } = passedData;
     const news = await db.news.findUnique({ where: { id } });
     if (!news) return { message: 'News not found.' };
 
     await db.news.delete({ where: { id } })
-    revalidatePath('/news');
+    await revalidatePath('/news');
+    await redirect('/news');
   } catch (error) {
     return {
       message: 'Database Error: Failed to Create Invoice.',
     };
   }
-  redirect('/news');
 }
