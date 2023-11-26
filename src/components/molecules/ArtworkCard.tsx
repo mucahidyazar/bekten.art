@@ -35,13 +35,13 @@ export function ArtworkCard({artwork}: ArtworkCardProps) {
       <div className="absolute right-0 top-0 h-1/2 w-1/2 rounded-full bg-primary-500 bg-opacity-40 blur-md" />
       <div className="absolute bottom-0 left-0 h-1/2 w-1/2 rounded-full bg-primary-500 bg-opacity-40 blur-md" /> */}
 
-      <div className="relative">
+      <div className="relative h-60 shadow">
         <Image
           src={images?.[selectedImageIndex] || '/usubaliev_2.jpg'}
           alt="Placeholder"
-          width={200}
-          height={200}
-          className="h-60 w-full rounded-sm object-cover"
+          width={240}
+          height={240}
+          className="h-full w-full rounded-sm object-cover"
         />
         <Badge
           className={cn(
@@ -80,12 +80,15 @@ export function ArtworkCard({artwork}: ArtworkCardProps) {
       </div> */}
       </div>
       {artist && (
-        <div className="mb-2 mt-1 flex items-center justify-between text-xs text-foreground">
-          <p className="group flex cursor-pointer items-center gap-1">
-            <HeartIcon className="w-4 duration-150 hover:animate-pulse group-hover:scale-125 group-hover:text-primary-500" />
+        <div className="group mb-2 mt-1 flex items-center justify-between text-xs  text-black">
+          <p className="flex cursor-pointer items-center gap-1">
+            <HeartIcon className="w-4 duration-150 hover:animate-pulse hover:text-primary-500 group-hover:scale-125" />
             {likes && <p>{likes.length}</p>}
           </p>
-          <Link href={`/profile/${artist.id}`}>
+          <Link
+            href={`/profile/${artist.id}`}
+            className="hover:text-primary-500"
+          >
             by <span className="underline">{artist.name}</span>
           </Link>
         </div>
@@ -100,12 +103,12 @@ export function ArtworkCard({artwork}: ArtworkCardProps) {
         <section className="mt-4 flex flex-col gap-2">
           {buyLink && (
             <Button variant="outline" className="flex-grow">
-              <Link href={buyLink}>Buy as NFT Only ${price}</Link>
+              <Link href={buyLink}>Only ${price}</Link>
             </Button>
           )}
 
           {nftLink && (
-            <Button variant="outline" className="!text-white">
+            <Button variant="outline">
               <Link href={nftLink}>Buy as NFT</Link>
             </Button>
           )}

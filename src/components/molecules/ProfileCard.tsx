@@ -103,12 +103,9 @@ export function ProfileCard({
                     htmlFor="public-profile"
                     className="text-sm font-medium leading-6 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    Public Profile
+                    {permission.title}
                   </label>
-                  <span className="text-[10px]">
-                    This will make your profile visible to everyone on the
-                    internet.
-                  </span>
+                  <span className="text-[10px]">{permission.description}</span>
                 </div>
               </div>
             ))}

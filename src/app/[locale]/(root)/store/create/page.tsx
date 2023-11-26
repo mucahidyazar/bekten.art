@@ -81,6 +81,9 @@ export default function Page() {
     isValidImageUrl(image.value),
   )
 
+  console.log({
+    values: values,
+  })
   return (
     <div id="store-create" className="flex flex-col gap-4 bg-background">
       <section className="flex justify-between gap-4">
@@ -119,6 +122,7 @@ export default function Page() {
               price: data.price,
               images: data.images.map(image => image.value),
               nftLink: data.nftLink,
+              buyLink: data.buyLink,
             })
           })}
         >
@@ -204,7 +208,9 @@ export default function Page() {
               type="number"
               id="price"
               placeholder="Price"
-              {...register('price')}
+              {...register('price', {
+                valueAsNumber: true,
+              })}
             />
           )}
           <Input

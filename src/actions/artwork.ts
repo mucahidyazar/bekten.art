@@ -13,6 +13,7 @@ type CreateArtworkInput = {
   price: number,
   images: string[],
   nftLink: string,
+  buyLink: string,
 }
 async function createArtwork(artwork: CreateArtworkInput) {
   try {
