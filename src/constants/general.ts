@@ -1,3 +1,1 @@
-const CREATOR_ROLES = ['ADMIN', 'ARTIST']
-
-export { CREATOR_ROLES }
+export const CREATOR_ROLES = ['ADMIN', 'ARTIST']

@@ -18,7 +18,7 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
     template: `%s - Painter | ${domain}`,
   }
   const title = metadata.title || DEFAULT_TITLE
-  const description = metadata.description || ME.description
+  const description = metadata.description || ME.descriptionFull
 
   const { authors, openGraph, twitter, ...rest } = metadata
 

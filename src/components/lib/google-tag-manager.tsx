@@ -4,9 +4,10 @@ import {usePathname, useSearchParams} from 'next/navigation'
 import Script from 'next/script'
 import {useEffect} from 'react'
 
+import {configs} from '@/configs'
 import {GTM_ID, pageview} from '@/lib/gtag'
 
-export default function Analytics() {
+export function GoogleTagManager() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
@@ -16,16 +17,18 @@ export default function Analytics() {
     }
   }, [pathname, searchParams])
 
-  if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production' || !GTM_ID) {
-    return null
-  }
+  if (!configs.isProduction || !GTM_ID) return null
 
   return (
     <>
-      <Script
-        async
-        src={`https://www.googletagmanager.com/gtag/js?id=${GTM_ID}`}
-      />
+      <noscript>
+        <iframe
+          src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+          height="0"
+          width="0"
+          style={{display: 'none', visibility: 'hidden'}}
+        />
+      </noscript>
       <Script
         id="gtm-script"
         strategy="afterInteractive"
