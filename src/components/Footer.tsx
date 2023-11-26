@@ -51,7 +51,7 @@ export function Footer({className}: FooterProps) {
           <a href="/privacy-policy">{t('privacyPolicy')}</a>
         </li>
         <li className="duration-150 hover:text-primary-500">
-          <a href="/terms-of-use">{t('termsOfUse')}</a>
+          <a href="/terms-of-service">{t('termsOfService')}</a>
         </li>
       </ul>
     </footer>
