@@ -30,21 +30,40 @@ type ActionCreateNews = {
   note: string,
 }
 export async function createNews(passedData: ActionCreateNews) {
-  try {
-    const user = await creatorMiddleware()
+  const user = await creatorMiddleware()
 
-    const {
-      title = '',
-      date,
-      subtitle = '',
-      image = '',
-      location = '',
-      address = '',
-      description = '',
-      note = '',
-    } = passedData as ActionCreateNews;
+  const {
+    title = '',
+    date,
+    subtitle = '',
+    image = '',
+    location = '',
+    address = '',
+    description = '',
+    note = '',
+  } = passedData as ActionCreateNews;
 
-    const validatedFields = SchemaCreateNews.safeParse({
+  const validatedFields = SchemaCreateNews.safeParse({
+    title,
+    date,
+    subtitle,
+    image,
+    location,
+    address,
+    description,
+    note,
+  });
+
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!(validatedFields.success)) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Invoice.',
+    };
+  }
+
+  await db.news.create({
+    data: {
       title,
       date,
       subtitle,
@@ -53,57 +72,24 @@ export async function createNews(passedData: ActionCreateNews) {
       address,
       description,
       note,
-    });
-
-    // If form validation fails, return errors early. Otherwise, continue.
-    if (!(validatedFields.success)) {
-      return {
-        errors: validatedFields.error.flatten().fieldErrors,
-        message: 'Missing Fields. Failed to Create Invoice.',
-      };
+      user: { connect: { id: user.id } },
     }
-
-    await db.news.create({
-      data: {
-        title,
-        date,
-        subtitle,
-        image,
-        location,
-        address,
-        description,
-        note,
-        user: { connect: { id: user.id } },
-      }
-    })
-    await revalidatePath('/news');
-    await redirect('/news');
-  } catch (error) {
-    return {
-      message: 'Database Error: Failed to Create Invoice.',
-      error,
-    };
-  }
+  })
+  await revalidatePath('/news');
+  await redirect('/news');
 }
 
 type ActionRemoveNews = {
   id: string,
 }
 export async function removeNews(passedData: ActionRemoveNews) {
-  try {
-    await creatorMiddleware()
+  await creatorMiddleware()
 
-    const { id } = passedData;
-    const news = await db.news.findUnique({ where: { id } });
-    if (!news) return { message: 'News not found.' };
+  const { id } = passedData;
+  const news = await db.news.findUnique({ where: { id } });
+  if (!news) return { message: 'News not found.' };
 
-    await db.news.delete({ where: { id } })
-    await revalidatePath('/news');
-    await redirect('/news');
-  } catch (error) {
-    return {
-      message: 'Database Error: Failed to Create Invoice.',
-      error
-    };
-  }
+  await db.news.delete({ where: { id } })
+  await revalidatePath('/news');
+  await redirect('/news');
 }

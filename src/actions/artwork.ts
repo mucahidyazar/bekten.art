@@ -16,20 +16,16 @@ type CreateArtworkInput = {
   buyLink: string,
 }
 async function createArtwork(artwork: CreateArtworkInput) {
-  try {
-    const user = await creatorMiddleware()
+  const user = await creatorMiddleware()
 
-    await db.artwork.create({
-      data: {
-        ...artwork,
-        artist: { connect: { id: user.id } },
-      }
-    })
-    await revalidatePath('/store');
-    await redirect('/store');
-  } catch (error) {
-    return error
-  }
+  await db.artwork.create({
+    data: {
+      ...artwork,
+      artist: { connect: { id: user.id } },
+    }
+  })
+  await revalidatePath('/store');
+  await redirect('/store');
 }
 
 

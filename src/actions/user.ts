@@ -27,71 +27,55 @@ type SignUpUser = {
   password: string
 }
 export async function signUpUser(body: SignUpUser) {
+  const dbUser = await db.user.findUnique({ where: { email: body.email } });
+  if (dbUser) return { message: 'User already exists.' };
 
-  try {
-    const dbUser = await db.user.findUnique({ where: { email: body.email } });
-    if (dbUser) return { message: 'User already exists.' };
+  await db.user.create({
+    data: {
+      email: body.email,
+      password: await bcrypt.hash(body.password, 10),
+    },
+  });
 
-    await db.user.create({
-      data: {
-        email: body.email,
-        password: await bcrypt.hash(body.password, 10),
-      },
-    });
-
-    await revalidatePath(`/sign-in`);
-    await redirect('/sign-in');
-  } catch (error) {
-    return {
-      message: 'Database Error: Failed to Create Invoice.',
-    };
-  }
+  await revalidatePath(`/sign-in`);
+  await redirect('/sign-in');
 }
 
 
 export async function updatePermission(updates: any) {
-  try {
-    const user = await getCurrentUser()
-    if (!user) return { message: 'User not found.' };
+  const user = await getCurrentUser()
+  if (!user) return { message: 'User not found.' };
 
-    const id = user.id;
-    const dbUser = await db.user.findUnique({ where: { id } });
-    if (!dbUser) return { message: 'User not found.' };
+  const id = user.id;
+  const dbUser = await db.user.findUnique({ where: { id } });
+  if (!dbUser) return { message: 'User not found.' };
 
-    const data = JSON.parse(JSON.stringify(updates))
-    await db.user.update({
-      data, where: { id }
-    })
-    await revalidatePath(`/profile/${id}`);
-    await redirect(`/profile/${id}`);
-  } catch (error) {
-    return error
-  }
+  const data = JSON.parse(JSON.stringify(updates))
+  await db.user.update({
+    data, where: { id }
+  })
+  await revalidatePath(`/profile/${id}`);
+  await redirect(`/profile/${id}`);
 }
 
 export async function updateUser(updates: any) {
-  try {
+  const user = await getCurrentUser()
+  if (!user) return { message: 'User not found.' };
 
-    const user = await getCurrentUser()
-    if (!user) return { message: 'User not found.' };
+  const id = user.id;
+  const dbUser = await db.user.findUnique({ where: { id } });
+  if (!dbUser) return { message: 'User not found.' };
 
-    const id = user.id;
-    const dbUser = await db.user.findUnique({ where: { id } });
-    if (!dbUser) return { message: 'User not found.' };
-
-    const data = JSON.parse(JSON.stringify(updates))
-    await db.user.update({
-      data: {
-        ...data,
-        socials: {
-          deleteMany: {},
-          create: data.socials
-        }
-      }, where: { id }
-    })
-    await revalidatePath(`/profile/${id}`);
-    await redirect(`/profile/${id}`);
-  } catch (error) {
-    return error
-  }
+  const data = JSON.parse(JSON.stringify(updates))
+  await db.user.update({
+    data: {
+      ...data,
+      socials: {
+        deleteMany: {},
+        create: data.socials
+      }
+    }, where: { id }
+  })
+  await revalidatePath(`/profile/${id}`);
+  await redirect(`/profile/${id}`);
 }

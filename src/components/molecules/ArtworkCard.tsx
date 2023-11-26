@@ -102,15 +102,19 @@ export function ArtworkCard({artwork}: ArtworkCardProps) {
       {(buyLink || nftLink) && (
         <section className="mt-4 flex flex-col gap-2">
           {buyLink && (
-            <Button variant="outline" className="flex-grow">
-              <Link href={buyLink}>Only ${price}</Link>
-            </Button>
+            <a href={buyLink} target="_blank">
+              <Button variant="outline" className="w-full flex-grow">
+                Only ${price}
+              </Button>
+            </a>
           )}
 
           {nftLink && (
-            <Button variant="outline">
-              <Link href={nftLink}>Buy as NFT</Link>
-            </Button>
+            <a href={nftLink} target="_blank">
+              <Button variant="outline" className="w-full">
+                Buy as NFT
+              </Button>
+            </a>
           )}
         </section>
       )}

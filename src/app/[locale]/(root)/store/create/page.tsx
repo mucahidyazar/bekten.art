@@ -61,7 +61,7 @@ export default function Page() {
     nftLink: string
   }>({
     defaultValues: {
-      images: [{id: '1', value: ''}],
+      images: [],
       name: 'Pride and Prejudice',
       description: 'This is the most impeccable artwork you will ever see.',
       price: 9,
@@ -81,9 +81,6 @@ export default function Page() {
     isValidImageUrl(image.value),
   )
 
-  console.log({
-    values: values,
-  })
   return (
     <div id="store-create" className="flex flex-col gap-4 bg-background">
       <section className="flex justify-between gap-4">
@@ -113,9 +110,6 @@ export default function Page() {
         <form
           className="flex w-full flex-col gap-4"
           onSubmit={handleSubmit(data => {
-            // const images = Array.from(data.images).map(image => {
-            //   return URL.createObjectURL(image)
-            // })
             createArtwork({
               name: data.name,
               description: data.description,
