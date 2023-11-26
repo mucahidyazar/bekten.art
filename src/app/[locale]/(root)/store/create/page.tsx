@@ -1,6 +1,6 @@
 'use client'
-import {TrashIcon} from '@heroicons/react/24/outline'
 import {zodResolver} from '@hookform/resolvers/zod'
+import {TrashIcon} from 'lucide-react'
 import {useSession} from 'next-auth/react'
 import {Controller, useFieldArray, useForm} from 'react-hook-form'
 import {z} from 'zod'

@@ -1,6 +1,6 @@
 'use client'
-import {MapIcon, PencilIcon} from '@heroicons/react/24/outline'
 import {Social as SocialType, User} from '@prisma/client'
+import {MapIcon, PencilIcon} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {useParams} from 'next/navigation'

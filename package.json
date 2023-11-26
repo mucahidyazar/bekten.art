@@ -31,7 +31,6 @@
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
-    "@heroicons/react": "^2.0.13",
     "@hookform/resolvers": "^3.3.2",
     "@next-auth/prisma-adapter": "^1.0.7",
     "@next/bundle-analyzer": "^13.0.5",
