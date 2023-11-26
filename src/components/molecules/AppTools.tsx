@@ -1,6 +1,6 @@
 'use client'
 import {BoltIcon, MoonIcon, SunIcon} from '@heroicons/react/24/outline'
-import {UserIcon} from 'lucide-react'
+import {LaptopIcon, UserIcon} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {usePathname, useRouter} from 'next/navigation'
@@ -49,7 +49,7 @@ export function AppTools({className}: AppToolsProps) {
     dark: <SunIcon className="w-3" />,
     light: <MoonIcon className="w-3" />,
     navy: <BoltIcon className="w-3" />,
-    system: <BoltIcon className="w-3" />,
+    system: <LaptopIcon className="w-3" />,
   } as {[key: string]: React.ReactNode}
 
   return (
@@ -92,6 +92,8 @@ export function AppTools({className}: AppToolsProps) {
           if (theme === 'dark') {
             selectedTheme = 'light'
           } else if (theme === 'light') {
+            selectedTheme = 'navy'
+          } else if (theme === 'system') {
             selectedTheme = 'navy'
           } else {
             selectedTheme = 'dark'
