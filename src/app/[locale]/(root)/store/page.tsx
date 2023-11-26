@@ -36,9 +36,9 @@ export default async function Page() {
     <div id="press" className="flex flex-col gap-4 bg-background">
       {user?.role === 'ADMIN' && (
         <section className="flex justify-end">
-          <Button variant="destructive">
-            <Link href="/store/create">Add New Artwork</Link>
-          </Button>
+          <Link href="/store/create">
+            <Button variant="destructive">Add New Artwork</Button>
+          </Link>
         </section>
       )}
       <section className="flex flex-wrap gap-4">

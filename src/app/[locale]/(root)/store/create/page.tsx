@@ -9,6 +9,7 @@ import {createArtwork} from '@/actions'
 import {ArtworkCard} from '@/components/molecules/ArtworkCard'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
+import {useServerAction} from '@/hooks/useServerAction'
 import {isValidImage, isValidImageUrl} from '@/utils/validation'
 // import {db} from '@/lib/db'
 // import {prepareMetadata} from '@/utils/prepareMetadata'
@@ -45,6 +46,7 @@ const validationSchema = z.object({
 
 export default function Page() {
   const session = useSession()
+  const [action, isPending] = useServerAction(createArtwork)
 
   const {
     control,
@@ -110,7 +112,7 @@ export default function Page() {
         <form
           className="flex w-full flex-col gap-4"
           onSubmit={handleSubmit(data => {
-            createArtwork({
+            action({
               name: data.name,
               description: data.description,
               price: data.price,
@@ -213,7 +215,7 @@ export default function Page() {
             placeholder="NFT Link (optional)"
             {...register('nftLink')}
           />
-          <Button variant="default" type="submit">
+          <Button variant="default" type="submit" disabled={isPending}>
             Create
           </Button>
         </form>
