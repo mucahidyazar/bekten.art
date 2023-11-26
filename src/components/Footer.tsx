@@ -1,7 +1,8 @@
 import {useTranslations} from 'next-intl'
 
-import {LINKS} from '@/mocks'
+import {ME, SocialLinks} from '@/constants'
 import {cn} from '@/utils'
+import {getSocialLink} from '@/utils/getSocialLink'
 
 import {AppTools} from './molecules/AppTools'
 import {Icons} from './ui/icons'
@@ -20,13 +21,13 @@ export function Footer({className}: FooterProps) {
       )}
     >
       <AppTools className="static lg:hidden" />
-      <div className="flex gap-4">
-        {LINKS.map(link => {
-          const IconComponent = (Icons as any)[link?.icon]
+      <div className="flex gap-4 py-2">
+        {Object.entries(ME.social).map(([platform, id]) => {
+          const IconComponent = (Icons as any)[platform]
           return (
             <a
-              key={link.icon}
-              href={link.url}
+              key={platform}
+              href={getSocialLink(platform as SocialLinks, id)}
               className="flex items-center gap-2 transition-all duration-300 ease-in-out hover:scale-125 hover:text-primary-900"
               target="_blank"
             >
