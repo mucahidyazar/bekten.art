@@ -46,7 +46,7 @@ export function NewsCard({news, className}: NewsCardProps) {
               {news.address}
             </p>
           )}
-          <p className="line-clamp-3 h-0 overflow-hidden text-xs duration-150 group-hover:h-[4rem] group-hover:pt-2">
+          <p className="line-clamp-3 h-0 overflow-hidden text-xs text-foreground duration-150 group-hover:h-[4rem] group-hover:pt-2">
             {news.description}
           </p>
         </div>

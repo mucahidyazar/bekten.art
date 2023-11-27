@@ -1,14 +1,22 @@
 'use client'
 import {Artwork, ArtworkLike, Social as SocialType, User} from '@prisma/client'
-import {HeartIcon} from 'lucide-react'
+import {HeartIcon, MoreVerticalIcon, PencilIcon, TrashIcon} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import {useSession} from 'next-auth/react'
 import {useState} from 'react'
 
+import {removeArtwork} from '@/actions'
+import {useServerAction} from '@/hooks/useServerAction'
 import {cn} from '@/utils'
 
 import {Badge} from '../ui/badge'
 import {Button} from '../ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu'
 
 import {Social} from './Social'
 
@@ -23,6 +31,8 @@ type ArtworkCardProps = {
   >
 }
 export function ArtworkCard({artwork}: ArtworkCardProps) {
+  const session = useSession()
+  const [action, isPending] = useServerAction(removeArtwork)
   const {name, description, price, images, artist, likes, buyLink, nftLink} =
     artwork
 
@@ -127,6 +137,32 @@ export function ArtworkCard({artwork}: ArtworkCardProps) {
             className="justify-center text-foreground"
           />
         </>
+      )}
+
+      {session.data?.user.role === 'ADMIN' && (
+        <DropdownMenu>
+          <DropdownMenuTrigger className="absolute right-4 top-4 z-20 grid h-8 w-6 place-items-center rounded bg-white p-0 shadow">
+            <MoreVerticalIcon className="w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <Button variant="ghost" className="w-full justify-start gap-2 p-2">
+              <PencilIcon className="w-4" />
+              Edit
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 p-2"
+              onClick={() => {
+                action({id: artwork.id as string})
+              }}
+              disabled={isPending}
+              isLoading={isPending}
+            >
+              <TrashIcon className="w-4" />
+              Delete
+            </Button>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
     // </div>

@@ -9,6 +9,7 @@ import {z} from 'zod'
 import {createFeedback} from '@/actions'
 import {Button} from '@/components/ui/button'
 import {Textarea} from '@/components/ui/textarea'
+import {useServerAction} from '@/hooks/useServerAction'
 
 type CreateFeedbackForm = {
   message: string
@@ -24,6 +25,8 @@ export default function CreateFeedback({
   receiverId,
   image,
 }: CreateFeedbackProps) {
+  const [action, isPending] = useServerAction(createFeedback)
+
   const validationSchema = z.object({
     message: z.string().min(4).max(500),
   })
@@ -43,11 +46,17 @@ export default function CreateFeedback({
     <form
       className="relative flex flex-col gap-2 rounded-b py-4"
       onSubmit={handleSubmit(data => {
-        createFeedback({
-          receiverId,
-          message: data.message,
-        })
-        reset()
+        action(
+          {
+            receiverId,
+            message: data.message,
+          },
+          {
+            onSuccess: () => {
+              reset()
+            },
+          },
+        )
       })}
     >
       <div className="flex w-full gap-2 px-4">
@@ -78,6 +87,8 @@ export default function CreateFeedback({
         variant="link"
         size="sm"
         type="submit"
+        isLoading={isPending}
+        disabled={isPending}
       >
         {/* <p>Send</p> */}
         <SendIcon className="h-4 w-4" />

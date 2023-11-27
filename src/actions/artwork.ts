@@ -28,8 +28,22 @@ async function createArtwork(artwork: CreateArtworkInput) {
   await redirect('/store');
 }
 
+type ActionRemoveArtwork = {
+  id: string,
+}
+async function removeArtwork(passedData: ActionRemoveArtwork) {
+  await creatorMiddleware()
 
+  const { id } = passedData;
+  const artwork = await db.artwork.findUnique({ where: { id } });
+  if (!artwork) return { message: 'artwork not found.' };
+
+  await db.artwork.delete({ where: { id } })
+  await revalidatePath('/store');
+  await redirect('/store');
+}
 
 export {
   createArtwork,
+  removeArtwork
 }

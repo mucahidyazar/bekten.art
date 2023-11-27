@@ -4,6 +4,9 @@ import {TrashIcon} from 'lucide-react'
 import {useSession} from 'next-auth/react'
 
 import {removePress} from '@/actions'
+import {useServerAction} from '@/hooks/useServerAction'
+
+import {Button} from '../ui/button'
 
 import {PressListHeader} from './PressListHeader'
 
@@ -11,6 +14,7 @@ type PressListProps = {
   pressList: (Press & {link: string})[]
 }
 export function PressList({pressList}: PressListProps) {
+  const [action, isPending] = useServerAction(removePress)
   const session = useSession()
 
   return (
@@ -29,12 +33,17 @@ export function PressList({pressList}: PressListProps) {
               <div className="flex items-center gap-2">
                 {/* <PencilIcon className="inline h-3 w-3 cursor-pointer text-gray-500 hover:scale-110 hover:text-primary-500" /> */}
                 {session.data?.user.role === 'ADMIN' && (
-                  <TrashIcon
-                    className="inline h-3 w-3 cursor-pointer text-gray-500 hover:scale-110 hover:text-primary-500"
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    isLoading={isPending}
+                    disabled={isPending}
                     onClick={() => {
-                      removePress({id: press.id})
+                      action({id: press.id})
                     }}
-                  />
+                  >
+                    <TrashIcon className="inline h-3 w-3 cursor-pointer text-gray-500 hover:scale-110 hover:text-primary-500" />
+                  </Button>
                 )}
               </div>
             </li>

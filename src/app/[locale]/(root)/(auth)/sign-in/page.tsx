@@ -10,6 +10,7 @@ export default function Component() {
   return (
     <>
       <SignInForm />
+      <div className="my-4 h-[1px] w-full bg-white bg-opacity-20" />
       <AuthSection />
       <Script
         src="https://accounts.google.com/gsi/client"

@@ -5,6 +5,7 @@ import {z} from 'zod'
 
 import {createPress} from '@/actions/press'
 import {Button} from '@/components/ui/button'
+import {useServerAction} from '@/hooks/useServerAction'
 
 import {Input} from '../ui/input'
 
@@ -17,6 +18,7 @@ type CreatePressProps = {
   onRequestClose: () => void
 }
 export default function CreatePress({onRequestClose}: CreatePressProps) {
+  const [action, isPending] = useServerAction(createPress)
   const validationSchema = z.object({
     title: z.string().min(4).max(120),
     link: z.string().min(4).max(500),
@@ -37,10 +39,13 @@ export default function CreatePress({onRequestClose}: CreatePressProps) {
   return (
     <form
       className="relative flex flex-col gap-2"
-      onSubmit={handleSubmit(data => {
-        createPress(data)
-        onRequestClose && onRequestClose()
-        reset()
+      onSubmit={handleSubmit(async data => {
+        action(data, {
+          onSuccess: () => {
+            onRequestClose && onRequestClose()
+            reset()
+          },
+        })
       })}
     >
       <Input
@@ -53,7 +58,9 @@ export default function CreatePress({onRequestClose}: CreatePressProps) {
         placeholder="Link"
         {...register('link', {required: true})}
       />
-      <Button type="submit">Create</Button>
+      <Button type="submit" isLoading={isPending} disabled={isPending}>
+        Create
+      </Button>
 
       {!!Object.entries(errors).length && (
         <ul className="text-xs text-red-500">

@@ -7,6 +7,7 @@ import {z} from 'zod'
 
 import {createNews} from '@/actions/news'
 import {Button} from '@/components/ui/button'
+import {useServerAction} from '@/hooks/useServerAction'
 import {cn} from '@/utils'
 
 import {Calendar} from '../ui/calendar'
@@ -29,6 +30,8 @@ type CreateNewsProps = {
   onRequestClose: () => void
 }
 export default function CreateNews({onRequestClose}: CreateNewsProps) {
+  const [action, isPending] = useServerAction(createNews)
+
   const validationSchema = z.object({
     title: z.string().min(4).max(120),
     subtitle: z.string().min(4).max(120),
@@ -63,9 +66,12 @@ export default function CreateNews({onRequestClose}: CreateNewsProps) {
     <form
       className="relative flex flex-col gap-2"
       onSubmit={handleSubmit(data => {
-        createNews(data)
-        onRequestClose && onRequestClose()
-        reset()
+        action(data, {
+          onSuccess: () => {
+            onRequestClose && onRequestClose()
+            reset()
+          },
+        })
       })}
     >
       <Input
@@ -139,7 +145,9 @@ export default function CreateNews({onRequestClose}: CreateNewsProps) {
         placeholder="Description*"
         {...register('description', {required: true})}
       />
-      <Button type="submit">Create</Button>
+      <Button type="submit" isLoading={isPending} disabled={isPending}>
+        Create
+      </Button>
 
       {!!Object.entries(errors).length && (
         <ul className="text-xs text-red-500">

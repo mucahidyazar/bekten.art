@@ -9,6 +9,7 @@ import {createArtwork} from '@/actions'
 import {ArtworkCard} from '@/components/molecules/ArtworkCard'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
+import {useToast} from '@/components/ui/use-toast'
 import {useServerAction} from '@/hooks/useServerAction'
 import {isValidImage, isValidImageUrl} from '@/utils/validation'
 // import {db} from '@/lib/db'
@@ -46,7 +47,20 @@ const validationSchema = z.object({
 
 export default function Page() {
   const session = useSession()
-  const [action, isPending] = useServerAction(createArtwork)
+  const {toast} = useToast()
+  const [action, isPending, isSuccess, isError] = useServerAction(createArtwork)
+
+  if (isSuccess) {
+    toast({
+      title: 'Artwork created successfully',
+      description: 'Your artwork is now listed on the website.',
+    })
+  } else if (isError) {
+    toast({
+      title: 'Failed to create artwork',
+      description: 'Please try again later.',
+    })
+  }
 
   const {
     control,
@@ -63,7 +77,7 @@ export default function Page() {
     nftLink: string
   }>({
     defaultValues: {
-      images: [],
+      images: [{id: Date.now(), value: ''}],
       name: 'Pride and Prejudice',
       description: 'This is the most impeccable artwork you will ever see.',
       price: 9,
@@ -215,7 +229,12 @@ export default function Page() {
             placeholder="NFT Link (optional)"
             {...register('nftLink')}
           />
-          <Button variant="default" type="submit" disabled={isPending}>
+          <Button
+            variant="default"
+            type="submit"
+            disabled={isPending}
+            isLoading={isPending}
+          >
             Create
           </Button>
         </form>

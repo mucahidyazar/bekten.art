@@ -19,7 +19,6 @@ type ActionCreatePress = {
 }
 export async function createPress(passedData: ActionCreatePress) {
   const user = await creatorMiddleware()
-  await redirect(`/user/${user.id}`);
 
   const { title = '', link = '' } = passedData as ActionCreatePress;
 
@@ -44,7 +43,6 @@ export async function createPress(passedData: ActionCreatePress) {
     }
   })
   await revalidatePath('/news');
-  await redirect('/news');
 }
 
 type ActionRemovePress = {

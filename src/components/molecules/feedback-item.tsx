@@ -5,6 +5,7 @@ import {CheckIcon, TrashIcon} from 'lucide-react'
 import Image from 'next/image'
 
 import {removeFeedback, updateFeedback} from '@/actions'
+import {useServerAction} from '@/hooks/useServerAction'
 import {cn, formatDate} from '@/utils'
 
 import {Button} from '../ui/button'
@@ -15,6 +16,11 @@ type FeedbackItemProps = {
   }
 }
 export function FeedbackItem({feedback}: FeedbackItemProps) {
+  const [removeFeedbackAction, removeFeedbackIsPending] =
+    useServerAction(removeFeedback)
+  const [updateFeedbackAction, updateFeedbackIsPending] =
+    useServerAction(updateFeedback)
+
   return (
     <li className={cn('relative flex gap-2 px-4 py-2')} key={feedback.id}>
       <Image
@@ -42,10 +48,12 @@ export function FeedbackItem({feedback}: FeedbackItemProps) {
           className="h-6 w-6 rounded text-red-700"
           variant="outline"
           onClick={() => {
-            removeFeedback({
+            removeFeedbackAction({
               id: feedback.id,
             })
           }}
+          isLoading={removeFeedbackIsPending}
+          disabled={removeFeedbackIsPending}
         >
           <TrashIcon size={12} />
         </Button>
@@ -55,11 +63,13 @@ export function FeedbackItem({feedback}: FeedbackItemProps) {
             className="h-6 w-6 rounded text-green-700"
             variant="outline"
             onClick={() => {
-              updateFeedback({
+              updateFeedbackAction({
                 id: feedback.id,
                 status: 'ACCEPTED',
               })
             }}
+            isLoading={updateFeedbackIsPending}
+            disabled={updateFeedbackIsPending}
           >
             <CheckIcon size={12} />
           </Button>

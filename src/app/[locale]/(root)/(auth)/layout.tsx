@@ -25,7 +25,7 @@ export default async function Layout({children}: Props) {
           {value: 'sign-up', label: 'Sign up'},
         ]}
       />
-      <article className="mt-2 rounded-sm bg-gray-400 bg-opacity-25 p-2">
+      <article className="rounded border border-primary-500 border-opacity-20 bg-primary-500 bg-opacity-5 p-4 text-primary-500 shadow-soft-md">
         {children}
       </article>
     </section>

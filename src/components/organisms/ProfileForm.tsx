@@ -11,6 +11,7 @@ import {updateUser} from '@/actions'
 import {Button} from '@/components/ui/button'
 import {Icons} from '@/components/ui/icons'
 import {Input} from '@/components/ui/input'
+import {useServerAction} from '@/hooks/useServerAction'
 import {getSocialLink} from '@/utils/getSocialLink'
 
 import {
@@ -27,6 +28,8 @@ type ProfileFormProps = {
   }
 }
 export function ProfileForm({userDetail}: ProfileFormProps) {
+  const [action, isPending] = useServerAction(updateUser)
+
   const session = useSession()
   const user = session.data?.user
 
@@ -107,7 +110,7 @@ export function ProfileForm({userDetail}: ProfileFormProps) {
     <form
       className="mb-8 flex flex-col items-center gap-2 text-foreground"
       onSubmit={handleSubmit(data => {
-        updateUser({
+        action({
           ...data,
           socials: data.socials.map(social => ({
             id: social.platform,
@@ -239,7 +242,13 @@ export function ProfileForm({userDetail}: ProfileFormProps) {
         >
           Add social link
         </Button>
-        <Button variant="destructive" type="submit" className="w-full text-xs">
+        <Button
+          variant="destructive"
+          type="submit"
+          className="w-full text-xs"
+          isLoading={isPending}
+          disabled={isPending}
+        >
           Save
         </Button>
 

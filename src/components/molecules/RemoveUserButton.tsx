@@ -4,6 +4,7 @@ import {useRouter} from 'next/navigation'
 import {signOut} from 'next-auth/react'
 
 import {Button} from '@/components/ui/button'
+import {useServerAction} from '@/hooks/useServerAction'
 
 import {removeUser} from '../../actions'
 import {
@@ -19,6 +20,7 @@ import {
 } from '../ui/alert-dialog'
 
 export function RemoveUserButton() {
+  const [action, isPending] = useServerAction(removeUser)
   const router = useRouter()
 
   return (
@@ -28,6 +30,8 @@ export function RemoveUserButton() {
           variant="destructive"
           // size="icon"
           className="w-full"
+          isLoading={isPending}
+          disabled={isPending}
         >
           Remove User
         </Button>
@@ -44,10 +48,14 @@ export function RemoveUserButton() {
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={async () => {
-              await removeUser()
-              await signOut()
-              router.push('/')
+              await action(undefined, {
+                onSuccess: async () => {
+                  await signOut()
+                  router.push('/')
+                },
+              })
             }}
+            disabled={isPending}
           >
             Continue
           </AlertDialogAction>

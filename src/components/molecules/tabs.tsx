@@ -16,16 +16,15 @@ export function Tabs({tabs}: TabsProps) {
   const pathname = usePathname()
 
   return (
-    <div className="flex items-center gap-2 rounded-sm bg-foreground p-1.5 text-sm">
+    <div className="mb-4 flex items-center gap-2 rounded-sm border-primary-500 border-opacity-80 bg-primary-500 bg-opacity-20 text-sm">
       {tabs.map(tab => (
         <div
           key={tab.value}
           onClick={() => router.push(tab.value)}
           className={cn(
-            'flex-grow cursor-pointer rounded-sm px-3 py-1 text-center',
-            pathname.includes(tab.value)
-              ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-950 dark:text-slate-50'
-              : 'text-slate-500 dark:text-slate-400',
+            'flex-grow cursor-pointer rounded-sm p-3 text-center text-foreground',
+            pathname.includes(tab.value) &&
+              'bg-primary-500 bg-opacity-20 shadow-sm',
           )}
         >
           {tab.label}

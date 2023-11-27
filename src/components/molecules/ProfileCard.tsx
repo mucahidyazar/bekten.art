@@ -7,6 +7,7 @@ import {useParams} from 'next/navigation'
 import {useSession} from 'next-auth/react'
 
 import {updatePermission} from '@/actions'
+import {useServerAction} from '@/hooks/useServerAction'
 import {cn} from '@/utils'
 
 import {Badge} from '../ui/badge'
@@ -41,6 +42,7 @@ export function ProfileCard({
   showPermissions = false,
   className,
 }: ProfileCardProps) {
+  const [action, isPending] = useServerAction(updatePermission)
   const me = useSession()
   const params = useParams()
 
@@ -93,10 +95,11 @@ export function ProfileCard({
                   id="public-profile"
                   defaultChecked={(user as any)[permission.id]}
                   onCheckedChange={value => {
-                    updatePermission({
+                    action({
                       [permission.id]: value,
                     })
                   }}
+                  disabled={isPending}
                 />
                 <div className="flex flex-col">
                   <label
