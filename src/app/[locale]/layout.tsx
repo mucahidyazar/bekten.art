@@ -4,6 +4,7 @@ import {Lora} from 'next/font/google'
 import {notFound} from 'next/navigation'
 import {getServerSession} from 'next-auth'
 import {NextIntlClientProvider} from 'next-intl'
+import {ViewTransitions} from 'next-view-transitions'
 import {Suspense} from 'react'
 
 import {GoogleTagManager} from '@/components/lib/google-tag-manager'
@@ -43,31 +44,33 @@ export default async function RootLayout({
   const messages = await getMessages(locale)
 
   return (
-    <html lang={locale}>
-      <head />
-      <body
-        className={`${lora.className} flex flex-col overflow-x-hidden bg-background`}
-      >
-        <SessionProvider session={session} refetchOnWindowFocus>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              themes={['dark', 'light', 'navy']}
-            >
-              {children}
-            </ThemeProvider>
-          </NextIntlClientProvider>
-        </SessionProvider>
+    <ViewTransitions>
+      <html lang={locale}>
+        <head />
+        <body
+          className={`${lora.className} flex flex-col overflow-x-hidden bg-background`}
+        >
+          <SessionProvider session={session} refetchOnWindowFocus>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                themes={['dark', 'light', 'navy']}
+              >
+                {children}
+              </ThemeProvider>
+            </NextIntlClientProvider>
+          </SessionProvider>
 
-        <ProgressbarProvider />
-        <Toaster />
+          <ProgressbarProvider />
+          <Toaster />
 
-        <Suspense>
-          <GoogleTagManager />
-        </Suspense>
-      </body>
-    </html>
+          <Suspense>
+            <GoogleTagManager />
+          </Suspense>
+        </body>
+      </html>
+    </ViewTransitions>
   )
 }
