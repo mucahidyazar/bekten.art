@@ -1,61 +1,13 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
-import { z } from "zod"
-
-import { db } from "@/lib/db"
-
-import { creatorMiddleware } from "./utils"
-
-const SchemaCreatePress = z.object({
-  title: z.string(),
-  link: z.string(),
-});
-
-type ActionCreatePress = {
-  title: string,
-  link: string,
-}
-export async function createPress(passedData: ActionCreatePress) {
-  const user = await creatorMiddleware()
-
-  const { title = '', link = '' } = passedData as ActionCreatePress;
-
-  const validatedFields1 = SchemaCreatePress.safeParse({
-    title,
-    link,
-  });
-
-  // If form validation fails, return errors early. Otherwise, continue.
-  if (!(validatedFields1.success)) {
-    return {
-      errors: validatedFields1.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Create Invoice.',
-    };
-  }
-
-  await db.press.create({
-    data: {
-      title,
-      link,
-      user: { connect: { id: user.id } },
-    }
-  })
-  await revalidatePath('/news');
+export async function createPress() {
+  // TODO: Implement with Supabase
+  console.log('Press creation will be implemented with Supabase')
+  return { message: 'Press creation not implemented yet.' }
 }
 
-type ActionRemovePress = {
-  id: string,
-}
-export async function removePress(passedData: ActionRemovePress) {
-  await creatorMiddleware()
-
-  const { id } = passedData;
-  const press = await db.press.findUnique({ where: { id } });
-  if (!press) return { message: 'Press not found.' };
-
-  await db.press.delete({ where: { id } })
-  await revalidatePath('/news');
-  await redirect('/news');
+export async function removePress() {
+  // TODO: Implement with Supabase
+  console.log('Press removal will be implemented with Supabase')
+  return { message: 'Press removal not implemented yet.' }
 }

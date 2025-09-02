@@ -1,11 +1,16 @@
 {
-  "extends": "next/core-web-vitals",
+  "extends": ["next/core-web-vitals"],
+  "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint", "unused-imports", "sort-exports"],
+  "parserOptions": {
+    "ecmaVersion": 2023,
+    "sourceType": "module"
+  },
   "rules": {
     "react-hooks/exhaustive-deps": 0,
     "no-console": 0,
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-unused-vars": ["error", {"argsIgnorePattern": "^_"}],
     "unused-imports/no-unused-imports": "error",
     "sort-exports/sort-exports": ["error", {"sortDir": "asc"}],
     "import/order": [
@@ -31,6 +36,7 @@
       }
     ],
     "react/display-name": 0,
+    "react/no-unescaped-entities": 0,
     "@typescript-eslint/no-empty-function": 0
   }
 }

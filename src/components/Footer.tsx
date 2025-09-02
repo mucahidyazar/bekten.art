@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import {useTranslations} from 'next-intl'
 
 import {ME, SocialLinks} from '@/constants'
@@ -38,21 +39,21 @@ export function Footer({className}: FooterProps) {
       </div>
       <p>
         {t('copyRight', {year: new Date().getFullYear()})}{' '}
-        {/* <a
+        <a
           href="https://mucahid.dev"
           target="_blank"
           rel="noreferrer"
-          className="inline"
+          className="inline text-primary hover:text-primary/80 transition-colors duration-200 hover:underline"
         >
-          <span className="text-primary-500 text-opacity-50">mucahid.dev</span>
-        </a> */}
+          mucahid.dev
+        </a>
       </p>
       <ul className="flex flex-wrap items-center gap-2 text-[10px]">
         <li className="duration-150 hover:text-primary-500">
-          <a href="/privacy-policy">{t('privacyPolicy')}</a>
+          <Link href="/privacy-policy">{t('privacyPolicy')}</Link>
         </li>
         <li className="duration-150 hover:text-primary-500">
-          <a href="/terms-of-service">{t('termsOfService')}</a>
+          <Link href="/terms-of-service">{t('termsOfService')}</Link>
         </li>
       </ul>
     </footer>

@@ -19,7 +19,7 @@ export const useServerAction = <P, R>(
   const [result, setResult] = useState<R>()
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<Error | undefined>(undefined)
-  const resolver = useRef<(value?: R | PromiseLike<R>) => void>()
+  const resolver = useRef<(value?: R | PromiseLike<R>) => void>(undefined)
 
   useEffect(() => {
     if (!isSuccess || error === undefined) return

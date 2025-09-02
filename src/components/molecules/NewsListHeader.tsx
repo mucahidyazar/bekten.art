@@ -1,5 +1,5 @@
 'use client'
-import {useSession} from 'next-auth/react'
+
 import {useState} from 'react'
 
 import CreateNews from '../forms/create-news'
@@ -15,7 +15,8 @@ import {
 
 export function NewsListHeader() {
   const [open, setOpen] = useState(false)
-  const session = useSession()
+  // TODO: Replace with Supabase auth
+  const session: any = { data: null }
 
   const onRequestClose = () => setOpen(false)
 

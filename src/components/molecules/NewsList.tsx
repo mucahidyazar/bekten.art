@@ -1,22 +1,24 @@
-import {News, User} from '@prisma/client'
-
 import {NewsCard} from '../cards/NewsCard'
 
-import {NewsListHeader} from './NewsListHeader'
-
+// TODO: Define proper types with Supabase
 type NewsListProps = {
-  newsList: (News & {user: User})[]
+  newsList: any[]
 }
+
 export async function NewsList({newsList}: NewsListProps) {
   return (
-    <section>
-      <NewsListHeader />
-      {/* {/* grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));  */}
-      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {newsList.map(news => (
-          <NewsCard key={news.id} news={news} className="w-full" />
-        ))}
-      </ul>
-    </section>
+    <div className="flex flex-col gap-4">
+      {newsList?.length > 0 ? (
+        newsList.map((news) => (
+          <NewsCard key={news.id} news={news} />
+        ))
+      ) : (
+        <div className="mx-auto flex h-40 w-full items-center justify-center rounded bg-gray-100 dark:bg-slate-950">
+          <p className="text-sm text-gray-500">
+            News list will be implemented with Supabase
+          </p>
+        </div>
+      )}
+    </div>
   )
 }

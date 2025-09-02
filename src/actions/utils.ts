@@ -1,10 +1,12 @@
 'use server'
-import { User } from "@prisma/client";
 
 import { CREATOR_ROLES } from "@/constants"
-import { getCurrentUser } from "@/lib/session"
 
-import { db } from "../lib/db"
+type User = {
+  id: string
+  email: string
+  role: string
+}
 
 async function creatorMiddleware(): Promise<User> {
   try {
@@ -22,14 +24,8 @@ async function creatorMiddleware(): Promise<User> {
 
 async function userMiddleware(): Promise<User> {
   try {
-    const user = await getCurrentUser()
-    if (!user) throw new Error('User not found')
-
-    const id = user.id;
-    const dbUser = await db.user.findUnique({ where: { id } });
-    if (!dbUser) throw new Error('User not found')
-
-    return dbUser
+    // TODO: Implement with Supabase
+    throw new Error('User authentication not implemented yet')
   } catch (error) {
     throw error
   }

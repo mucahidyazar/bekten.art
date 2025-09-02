@@ -4,7 +4,7 @@ import {cn} from '@/utils'
 
 type ArtImageProps = {
   className?: string
-  description: string
+  description?: string
   imageClassName?: string
   src: string
   onClick?: () => void
@@ -28,10 +28,14 @@ export function ArtImage({
         height={400}
         className={cn('w-full object-cover', imageClassName)}
       />
-      <p className="wrap absolute bottom-0 left-0 z-20 max-w-full break-words p-3 text-xs text-white">
-        {description}
-      </p>
-      <div className="absolute bottom-0 left-0 right-0 z-10 h-16 bg-gradient-to-t from-black to-transparent" />
+      {description && (
+        <>
+          <p className="wrap absolute bottom-0 left-0 z-20 max-w-full break-words m-3 text-xs text-white line-clamp-3 overflow-hidden">
+            {description}
+          </p>
+          <div className="absolute bottom-0 left-0 right-0 z-10 h-16 bg-gradient-to-t from-black to-transparent" />
+        </>
+      )}
     </div>
   )
 }

@@ -1,40 +1,19 @@
-import {Social, User} from '@prisma/client'
-import {redirect} from 'next/navigation'
 
-import {ProfileForm} from '@/components/organisms/ProfileForm'
-import {db} from '@/lib/db'
-import {getCurrentUser} from '@/lib/session'
-
-type GetUserDetailArgs = {
-  id: string
-}
-const getUserDetail = async ({id}: GetUserDetailArgs) => {
-  return await db.user.findUnique({
-    where: {id},
-    include: {socials: true},
-  })
-}
 
 type PageProps = {
-  params: {id: string}
+  params: Promise<{id: string}>
 }
+
 export default async function Page({params}: PageProps) {
-  const user = await getCurrentUser()
-
-  if (!user) {
-    return redirect('/sign-in')
-  }
-
-  const isAdmin = user.role === 'ADMIN'
-  if (!isAdmin && user.id !== params.id) {
-    return redirect(`/profile/${user?.id}`)
-  }
-
-  const userDetail = await getUserDetail({id: params.id})
+  const {id} = await params
 
   return (
     <section className="mx-auto flex w-full flex-col gap-2 sm:w-80">
-      <ProfileForm userDetail={userDetail as User & {socials: Social[]}} />
+      <div className="mx-auto flex h-40 w-full items-center justify-center rounded bg-gray-100 dark:bg-slate-950">
+        <p className="text-sm text-gray-500">
+          Profile edit page will be implemented with Supabase. User ID: {id}
+        </p>
+      </div>
     </section>
   )
 }

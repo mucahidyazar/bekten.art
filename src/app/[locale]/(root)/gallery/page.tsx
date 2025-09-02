@@ -1,12 +1,12 @@
 import {GalleryTemplate} from '@/components/templates/GalleryTemplate'
 import {prepareMetadata} from '@/utils/prepareMetadata'
 
-export function generateMetadata() {
-  const title = '🎨 Art Gallery - Explore Bekten Usubaliev’s Masterpieces'
+export async function generateMetadata() {
+  const title = '🎨 Art Gallery - Explore Bekten Usubaliev&apos;s Masterpieces'
   const description =
     '🎨 Step into the gallery of Bekten Usubaliev and witness a collection of art that transcends boundaries, each piece echoing the profound sentiments and dreams of the human spirit.'
 
-  return prepareMetadata({
+  return await prepareMetadata({
     title,
     description,
     page: 'gallery',
@@ -102,8 +102,21 @@ export default async function Home() {
   const imagesArrays = getImageArrays()
 
   return (
-    <div id="gallery" className="px-1 lg:px-4">
-      <GalleryTemplate imageArrays={imagesArrays} />
+    <div className="container">
+      {/* Header */}
+      {/* <div className="text-center space-y-4">
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+          Art Gallery
+        </h1>
+        <p className="text-base text-muted-foreground max-w-2xl mx-auto">
+          Explore a curated collection of artworks that capture emotions, dreams, and the essence of human experience
+        </p>
+      </div> */}
+
+      {/* Gallery Grid */}
+      <div id="gallery" className="px-1 lg:px-4">
+        <GalleryTemplate imageArrays={imagesArrays} />
+      </div>
     </div>
   )
 }

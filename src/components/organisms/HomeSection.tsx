@@ -49,9 +49,11 @@ export function HomeSection({title, data}: HomeSectionProps) {
   return (
     <aside className="w-full">
       <Dialog>
-        <h3 className="mb-2 text-2xl font-semibold text-primary-500">
-          {title}
-        </h3>
+        {title && (
+          <h3 className="mb-2 text-2xl font-semibold text-primary-500">
+            {title}
+          </h3>
+        )}
         <div className="flex w-full gap-2 overflow-auto">
           {data.map(item => (
             <DialogTrigger key={item.url} onClick={() => setImage(item)}>

@@ -1,7 +1,8 @@
 'use client'
 
 import {zodResolver} from '@hookform/resolvers/zod'
-import {signIn} from 'next-auth/react'
+import {EyeIcon, EyeOffIcon, MailIcon} from 'lucide-react'
+import {useState} from 'react'
 import {useForm} from 'react-hook-form'
 import {z} from 'zod'
 
@@ -11,17 +12,24 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form'
 import {Input} from '@/components/ui/input'
+import {createClient} from '@/utils/supabase/client'
 
 const validationSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 })
+
 type FormValues = z.infer<typeof validationSchema>
+
 export function SignInForm() {
-  const form = useForm({
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const form = useForm<FormValues>({
     defaultValues: {
       email: '',
       password: '',
@@ -30,42 +38,121 @@ export function SignInForm() {
   })
 
   const submitHandler = async ({email, password}: FormValues) => {
-    await signIn('credentials', {email, password})
+    setIsLoading(true)
+    const supabase = createClient()
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      
+      if (error) {
+        console.error('Error signing in:', error.message)
+        // TODO: Show error toast
+      } else {
+        // Redirect or refresh will be handled by auth state change
+        window.location.href = '/'
+      }
+    } catch (error) {
+      console.error('Sign in error:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(submitHandler)}
-        className="flex flex-col gap-2"
+        className="space-y-4"
       >
         <FormField
           name="email"
           control={form.control}
           render={({field}) => (
             <FormItem>
+              <FormLabel className="text-sm font-medium text-foreground">
+                Email Address
+              </FormLabel>
               <FormControl>
-                <Input placeholder="example@gmail.com" {...field} />
+                <div className="relative">
+                  <MailIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input 
+                    placeholder="Enter your email" 
+                    className="pl-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
+                    {...field} 
+                  />
+                </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xs" />
             </FormItem>
           )}
         />
+
         <FormField
           name="password"
           control={form.control}
           render={({field}) => (
             <FormItem>
+              <FormLabel className="text-sm font-medium text-foreground">
+                Password
+              </FormLabel>
               <FormControl>
-                <Input placeholder="12345678" type="password" {...field} />
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password" 
+                    className="pr-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
+                    {...field} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-4 w-4" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xs" />
             </FormItem>
           )}
         />
 
-        <Button type="submit" className="mt-2 w-full">
-          Sign In
+        <div className="flex items-center justify-between text-sm">
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="rounded border-muted text-primary focus:ring-primary"
+            />
+            <span className="text-muted-foreground">Remember me</span>
+          </label>
+          <a 
+            href="#" 
+            className="text-primary hover:text-primary/80 transition-colors font-medium"
+          >
+            Forgot password?
+          </a>
+        </div>
+
+        <Button 
+          type="submit" 
+          className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4  border-white/20 border-t-white rounded-full animate-spin" />
+              <span>Signing in...</span>
+            </div>
+          ) : (
+            'Sign In'
+          )}
         </Button>
       </form>
     </Form>

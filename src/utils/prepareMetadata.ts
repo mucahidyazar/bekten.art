@@ -8,8 +8,9 @@ type TPrepareMetadata = Metadata & {
   description?: string
   page?: string
 }
-export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
-  const host = headers().get('host')
+export async function prepareMetadata(metadata: TPrepareMetadata = {}): Promise<Metadata> {
+  const headersList = await headers()
+  const host = headersList.get('host')
   const protocal = process?.env.NODE_ENV === 'development' ? 'http' : 'https'
   const domain = `${protocal}://${host}`
 

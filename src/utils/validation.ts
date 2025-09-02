@@ -24,7 +24,7 @@ export function isValidUrl(urlString: string) {
 
   try {
     url = new URL(urlString);
-  } catch (_) {
+  } catch {
     return false;
   }
 

@@ -16,10 +16,19 @@ const nextConfig = {
         protocol: 'http',
         hostname: '**',
       },
+      {
+        protocol: 'https',
+        hostname: 'xsgames.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
     ],
   },
   experimental: {
     webpackBuildWorker: true,
+    viewTransition: true,
   },
 }
 

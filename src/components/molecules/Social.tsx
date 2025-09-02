@@ -1,28 +1,25 @@
-import {Social} from '@prisma/client'
-
 import {cn} from '@/utils'
 
-import {Icons} from '../ui/icons'
+// TODO: Define proper type with Supabase
+type Social = {
+  id: string
+  platform: string
+  url: string
+}
 
 type SocialProps = {
-  socials: Social[]
   className?: string
+  socials: Social[]
 }
+
 export function Social({className, socials}: SocialProps) {
   return (
-    <div className={cn('flex gap-4 text-foreground', className)}>
-      {socials.map(social => {
-        const IconComponent = (Icons as any)[social.platform]
-        return (
-          <a
-            key={social.platform}
-            href={social.url}
-            className="flex items-center gap-2 transition-all duration-300 ease-in-out hover:scale-125 hover:text-primary-900"
-          >
-            {IconComponent && <IconComponent className="w-4" />}
-          </a>
-        )
-      })}
+    <div className={cn("flex gap-2", className)}>
+      <div className="mx-auto flex h-20 w-full items-center justify-center rounded bg-gray-100 dark:bg-slate-950">
+        <p className="text-sm text-gray-500">
+          Social links will be implemented with Supabase. Count: {socials?.length || 0}
+        </p>
+      </div>
     </div>
   )
 }

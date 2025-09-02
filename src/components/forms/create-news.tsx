@@ -20,7 +20,7 @@ type CreateNewsForm = {
   subtitle: string
   image: string
   location: string
-  date: Date | null
+  date?: Date | null | undefined
   note: string
   address: string
   description: string
@@ -37,7 +37,7 @@ export default function CreateNews({onRequestClose}: CreateNewsProps) {
     subtitle: z.string().min(4).max(120),
     image: z.string().min(4).max(120),
     location: z.string().min(4).max(60),
-    date: z.date().optional(),
+    date: z.date().nullable().optional(),
     note: z.string().min(4).max(240),
     address: z.string().min(4).max(240),
     description: z.string().min(4).max(480),
@@ -54,7 +54,7 @@ export default function CreateNews({onRequestClose}: CreateNewsProps) {
       subtitle: '',
       image: '',
       location: '',
-      date: null,
+      date: undefined,
       note: '',
       address: '',
       description: '',

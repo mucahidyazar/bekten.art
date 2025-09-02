@@ -1,12 +1,11 @@
 'use client'
-import {LaptopIcon, MoonIcon, PillIcon, SunIcon, UserIcon} from 'lucide-react'
+import {LaptopIcon, LogInIcon, MoonIcon, SunIcon, WavesIcon} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {usePathname, useRouter} from 'next/navigation'
-import {useSession} from 'next-auth/react'
 import {useLocale, useTranslations} from 'next-intl'
 import {useTheme} from 'next-themes'
-import {useTransition} from 'react'
+import {useEffect, useState, useTransition} from 'react'
 
 import {
   DropdownMenu,
@@ -17,19 +16,27 @@ import {
 import {LOCALE, LOCALES} from '@/constants'
 import {cn} from '@/utils'
 
-import {ReactPlayer} from './ReactPlayer'
+import { Button } from '../ui/button'
+
+
 
 type AppToolsProps = {
   className?: string
+  user?: any
 }
-export function AppTools({className}: AppToolsProps) {
+export function AppTools({className, user}: AppToolsProps) {
   const [isPending, startTransition] = useTransition()
+  const [mounted, setMounted] = useState(false)
   const t = useTranslations()
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
   const {setTheme, theme} = useTheme()
-  const session = useSession()
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const locales = LOCALES.filter(l => l !== locale)
 
@@ -45,26 +52,63 @@ export function AppTools({className}: AppToolsProps) {
   }
 
   const themeIconMap = {
-    dark: <SunIcon className="w-3" />,
-    light: <MoonIcon className="w-3" />,
-    navy: <PillIcon className="w-3" />,
+    light: <SunIcon className="w-3" />,
+    dark: <MoonIcon className="w-3" />,
+    navy: <WavesIcon className="w-3" />,
     system: <LaptopIcon className="w-3" />,
   } as {[key: string]: React.ReactNode}
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <section
+        id="app-tools"
+        className={cn(
+          'fixed right-2 top-2 z-[60] flex gap-1 rounded bg-background/80 backdrop-blur-sm lg:right-4',
+          className,
+        )}
+      >
+        <div className="h-9 w-9 rounded border border-border bg-card" />
+        <div className="h-9 w-9 rounded border border-border bg-card" />
+        <div className="h-9 w-9 rounded border border-border bg-card" />
+      </section>
+    )
+  }
 
   return (
     <section
       id="app-tools"
       className={cn(
-        'fixed right-2 top-2 z-20 flex gap-1 rounded bg-background bg-opacity-60 lg:right-4',
+        'fixed right-2 top-2 z-[60] flex gap-1 rounded bg-background/80 backdrop-blur-sm lg:right-4',
         className,
       )}
     >
-      <ReactPlayer />
+      {user ? (
+        <Link href={`/profile/${user.id}`} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+          <span className="hidden md:block text-sm text-muted-foreground">
+            {user.user_metadata?.full_name || user.user_metadata?.name || 'Profile'}
+          </span>
+          <Image
+            src={user?.user_metadata?.avatar_url || '/img/cinema.png'}
+            width={24}
+            height={24}
+            alt="user avatar"
+            className="h-9 w-9 rounded border border-border object-cover"
+          />
+        </Link>
+      ) : (
+        <Link href="/sign-in">
+          <Button variant="outline" size="sm" className="flex items-center space-x-2">
+            <LogInIcon className="w-4 h-4" />
+            <span>Sign In</span>
+          </Button>
+        </Link>
+      )}
 
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            'relative z-50 flex h-9 w-9 items-center justify-center rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-xs uppercase text-primary-500 shadow-soft-md hover:shadow-soft-lg',
+            'relative z-50 flex h-9 w-9 items-center justify-center rounded border border-border bg-card text-xs uppercase text-foreground hover:bg-muted transition-colors',
           )}
         >
           {isPending ? '...' : locale}
@@ -74,7 +118,7 @@ export function AppTools({className}: AppToolsProps) {
             <DropdownMenuLabel
               key={cur}
               onClick={() => onSelectChange(cur)}
-              className="cursor-pointer text-center text-xs font-thin uppercase text-primary-500 hover:bg-primary-500 hover:bg-opacity-5"
+              className="cursor-pointer text-center text-xs font-thin uppercase text-foreground hover:bg-muted"
             >
               {t('locale', {locale: cur})}
             </DropdownMenuLabel>
@@ -84,49 +128,25 @@ export function AppTools({className}: AppToolsProps) {
 
       <button
         className={cn(
-          'relative z-50 flex h-9 w-9 items-center justify-center rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
+          'relative z-50 flex h-9 w-9 items-center justify-center rounded border border-border bg-card text-foreground hover:bg-muted transition-colors',
         )}
-        onClick={() => {
-          let selectedTheme
-          if (theme === 'dark') {
-            selectedTheme = 'light'
-          } else if (theme === 'light') {
-            selectedTheme = 'navy'
-          } else if (theme === 'system') {
-            selectedTheme = 'navy'
-          } else {
-            selectedTheme = 'dark'
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          
+          const themes = ['light', 'dark', 'navy', 'system']
+          const currentIndex = themes.indexOf(theme || 'system')
+          const nextIndex = (currentIndex + 1) % themes.length
+          const nextTheme = themes[nextIndex]
+          
+          if (setTheme) {
+            setTheme(nextTheme)
           }
-          setTheme(selectedTheme)
         }}
+        title={`Current theme: ${theme || 'system'}`}
       >
-        {theme && themeIconMap[theme]}
+        {themeIconMap[theme || 'system'] || <LaptopIcon className="w-3" />}
       </button>
-      {session.data?.user ? (
-        <Link
-          className={cn(
-            'relative z-50 flex h-9 w-9 items-center justify-center overflow-hidden rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
-          )}
-          href={`/profile/${session.data.user.id}`}
-        >
-          <Image
-            src={session.data?.user?.image || '/img/cinema.png'}
-            width={24}
-            height={24}
-            alt="user avatar"
-            className="h-full w-full rounded border border-primary-500 object-cover"
-          />
-        </Link>
-      ) : (
-        <Link
-          className={cn(
-            'relative z-50 flex h-9 w-9 items-center justify-center overflow-hidden rounded border border-primary-500 border-opacity-10 bg-primary-500 bg-opacity-5 text-primary-500 shadow-soft-md hover:shadow-soft-lg',
-          )}
-          href="/sign-in"
-        >
-          <UserIcon className="h-4 w-4" />
-        </Link>
-      )}
     </section>
   )
 }

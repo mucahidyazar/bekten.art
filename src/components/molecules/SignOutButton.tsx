@@ -1,25 +1,16 @@
-'use client'
-
-import {useRouter} from 'next/navigation'
-import {signOut} from 'next-auth/react'
-
-import {Button} from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
+import { signOut } from '@/lib/auth-actions'
 
 export function SignOutButton() {
-  const router = useRouter()
-
   return (
-    <Button
-      onClick={async () => {
-        signOut()
-        router.push('/')
-      }}
-      variant="outline"
-      // size="icon"
-      className="w-full"
-    >
-      {/* <PowerIcon size={24} /> */}
-      Sign Out
-    </Button>
+    <form action={signOut}>
+      <Button
+        type="submit"
+        variant="outline"
+        className="w-full"
+      >
+        Sign Out
+      </Button>
+    </form>
   )
 }

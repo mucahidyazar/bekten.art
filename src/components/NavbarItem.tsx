@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 
-import {cn} from '@/utils'
+import {cn} from '@/utils/cn'
 
 interface INavbarItemProps {
   label: string
@@ -13,25 +13,40 @@ export function NavbarItem(item: INavbarItemProps) {
   const pathname = usePathname()
 
   const isActive = () => {
-    if (item.path === '/' && pathname === '/') return true
-    if (item.path === '/' && pathname !== '/') return false
+    // Remove locale prefix from pathname for comparison (e.g., /tr/about -> /about)
+    const segments = pathname.split('/').filter(Boolean)
+    const cleanPathname =
+      segments.length > 0 &&
+      segments[0].length === 2 &&
+      segments[0].match(/^[a-z]{2}$/)
+        ? '/' + segments.slice(1).join('/')
+        : pathname
+    const normalizedPath = cleanPathname || '/'
 
-    return pathname.includes(item.path)
+    // Exact match for home page
+    if (item.path === '/') {
+      return normalizedPath === '/'
+    }
+
+    // For other pages, check exact match or sub-path match
+    return (
+      normalizedPath === item.path || normalizedPath.startsWith(item.path + '/')
+    )
   }
 
   return (
     <li
       key={item.label}
       className={cn(
-        'group w-fit hover:text-primary-700',
-        isActive() && 'text-primary-900',
+        'group hover:text-primary w-fit transition-colors duration-200',
+        isActive() && 'text-primary font-medium',
       )}
     >
       <Link href={item.path}>{item.label}</Link>
-      <p
+      <div
         className={cn(
-          'h-[1px] w-0 bg-foreground transition-all duration-300 ease-in-out group-hover:w-full group-hover:bg-primary-700',
-          isActive() && 'h-[1px] w-full bg-primary-900',
+          'bg-primary h-[2px] w-0 transition-all duration-300 ease-in-out group-hover:w-full',
+          isActive() && 'bg-primary h-[2px] w-full',
         )}
       />
     </li>
