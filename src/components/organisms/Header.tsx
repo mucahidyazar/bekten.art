@@ -30,6 +30,8 @@ export async function Header() {
               alt={t('header.logoAlt')}
               width={120}
               height={40}
+              priority
+              style={{ width: 'auto', height: 'auto' }}
               className="mb-4 cursor-pointer"
             />
           </Link>

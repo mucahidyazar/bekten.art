@@ -1,21 +1,6 @@
 'use client'
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-} from 'react'
-
-// YouTube Player API types
-declare global {
-  interface Window {
-    YT: any
-    onYouTubeIframeAPIReady: () => void
-  }
-}
+import {createContext, useContext, useState, useRef, useCallback} from 'react'
 
 interface Track {
   id: string
@@ -55,135 +40,12 @@ export function MusicProvider({
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
   const [tracks, setTracks] = useState<Track[]>(defaultTracks)
-  const [volume, setVolume] = useState(30) // 0-100 scale for YouTube
+  const [volume, setVolume] = useState(30) // 0-100
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isYTReady, setIsYTReady] = useState(false)
   const [youtubeTitle, setYoutubeTitle] = useState<string | null>(null)
 
-  const playerRef = useRef<any>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  // Initialize YouTube API
-  useEffect(() => {
-    // Check if YouTube API is already loaded
-    if (window.YT && window.YT.Player) {
-      setIsYTReady(true)
-      return
-    }
-
-    // Load YouTube API
-    const loadYouTubeAPI = () => {
-      if (document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-        return
-      }
-
-      const script = document.createElement('script')
-      script.src = 'https://www.youtube.com/iframe_api'
-      script.async = true
-      document.body.appendChild(script)
-    }
-
-    // Set up global callback
-    window.onYouTubeIframeAPIReady = () => {
-      setIsYTReady(true)
-    }
-
-    loadYouTubeAPI()
-
-    return () => {
-      if (playerRef.current && playerRef.current.destroy) {
-        playerRef.current.destroy()
-      }
-    }
-  }, [])
-
-  // Initialize player when YouTube API is ready
-  useEffect(() => {
-    if (!isYTReady || !containerRef.current || playerRef.current) return
-
-    try {
-      playerRef.current = new window.YT.Player(containerRef.current, {
-        height: '0',
-        width: '0',
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          modestbranding: 1,
-          rel: 0,
-          showinfo: 0,
-          iv_load_policy: 3,
-          playsinline: 1,
-          enablejsapi: 1,
-          origin: window.location.origin,
-          widget_referrer: window.location.href,
-        },
-        events: {
-          onReady: (event: any) => {
-            event.target.setVolume(volume)
-            // Get video title when ready
-            try {
-              const videoData = event.target.getVideoData()
-              if (videoData && videoData.title) {
-                setYoutubeTitle(videoData.title)
-                // Update current track with YouTube title
-                setCurrentTrack(prev =>
-                  prev ? {...prev, youtubeTitle: videoData.title} : prev,
-                )
-              }
-            } catch (err) {
-              console.log('Could not get video title:', err)
-            }
-          },
-          onStateChange: (event: any) => {
-            const state = event.data
-            if (state === window.YT.PlayerState.PLAYING) {
-              setIsPlaying(true)
-              setIsLoading(false)
-              setError(null)
-              // Try to get title again when playing
-              try {
-                const videoData = event.target.getVideoData()
-                if (videoData && videoData.title) {
-                  setYoutubeTitle(videoData.title)
-                  setCurrentTrack(prev =>
-                    prev ? {...prev, youtubeTitle: videoData.title} : prev,
-                  )
-                }
-              } catch (err) {
-                console.log('Could not get video title:', err)
-              }
-            } else if (state === window.YT.PlayerState.PAUSED) {
-              setIsPlaying(false)
-              setIsLoading(false)
-            } else if (state === window.YT.PlayerState.ENDED) {
-              setIsPlaying(false)
-              setIsLoading(false)
-              // Auto-play next track if available
-              playNextTrack()
-            } else if (state === window.YT.PlayerState.BUFFERING) {
-              setIsLoading(true)
-            }
-          },
-          onError: (_event: any) => {
-            setError('Failed to load video')
-            setIsLoading(false)
-            setIsPlaying(false)
-          },
-        },
-      })
-    } catch (err) {
-      setError('Failed to initialize player')
-      console.error('YouTube player initialization error:', err)
-    }
-  }, [isYTReady, volume])
-
-  // Update volume when changed
-  useEffect(() => {
-    if (playerRef.current && playerRef.current.setVolume) {
-      playerRef.current.setVolume(volume)
-    }
-  }, [volume])
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   const extractYouTubeId = (url: string): string => {
     const regExp =
@@ -193,61 +55,56 @@ export function MusicProvider({
   }
 
   const playTrack = useCallback(async (track: Track) => {
-    if (!playerRef.current || !playerRef.current.loadVideoById) {
-      setError('Player not ready')
-      return
-    }
+    // console.log('MusicProvider: playTrack called with:', track.url)
 
     try {
       setIsLoading(true)
       setError(null)
       setCurrentTrack(track)
+      setYoutubeTitle(track.title)
 
       const videoId = track.youtubeId || extractYouTubeId(track.url)
       if (!videoId) {
         throw new Error('Invalid YouTube URL')
       }
 
-      playerRef.current.loadVideoById(videoId)
-      // Note: playVideo() will be called automatically after loadVideoById
+      if (iframeRef.current) {
+        // Use nocookie domain and minimal parameters to reduce tracking
+        const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&loop=1&playlist=${videoId}&enablejsapi=0&disablekb=1&fs=0&cc_load_policy=0&origin=${window.location.origin}`
+        // console.log('Loading embed URL:', embedUrl)
+        iframeRef.current.src = embedUrl
+        setIsPlaying(true)
+        setIsLoading(false)
+      }
     } catch (err) {
+      console.error('Error playing track:', err)
       setError('Failed to load track')
       setIsLoading(false)
-      console.error('Error playing track:', err)
+      setIsPlaying(false)
     }
   }, [])
 
   const pauseMusic = useCallback(() => {
-    if (playerRef.current && playerRef.current.pauseVideo) {
-      playerRef.current.pauseVideo()
+    // console.log('MusicProvider: pauseMusic called')
+    if (iframeRef.current) {
+      iframeRef.current.src = 'about:blank'
     }
+    setIsPlaying(false)
   }, [])
 
   const toggleMusic = useCallback(async () => {
-    if (!playerRef.current) return
+    // console.log('MusicProvider: toggleMusic called, isPlaying:', isPlaying, 'currentTrack:', currentTrack?.title)
 
     if (isPlaying) {
       pauseMusic()
     } else {
       if (currentTrack) {
-        // Resume current track
-        if (playerRef.current.playVideo) {
-          playerRef.current.playVideo()
-        }
+        await playTrack(currentTrack)
       } else if (tracks.length > 0) {
-        // Play first track
         await playTrack(tracks[0])
       }
     }
   }, [isPlaying, currentTrack, tracks, playTrack, pauseMusic])
-
-  const playNextTrack = useCallback(() => {
-    if (!currentTrack || tracks.length === 0) return
-
-    const currentIndex = tracks.findIndex(t => t.id === currentTrack.id)
-    const nextIndex = (currentIndex + 1) % tracks.length
-    playTrack(tracks[nextIndex])
-  }, [currentTrack, tracks, playTrack])
 
   const addTrack = useCallback((track: Track) => {
     setTracks(prev => [...prev, track])
@@ -283,13 +140,37 @@ export function MusicProvider({
   return (
     <MusicContext.Provider value={contextValue}>
       {children}
-      {/* Hidden YouTube player container */}
-      <div ref={containerRef} style={{display: 'none'}} aria-hidden="true" />
+
+      {/* Hidden YouTube iframe */}
+      <iframe
+        ref={iframeRef}
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: '-9999px',
+          width: '1px',
+          height: '1px',
+          border: 'none',
+        }}
+        title="YouTube Music Player"
+        allow="autoplay; encrypted-media"
+        sandbox="allow-scripts allow-same-origin allow-presentation"
+        onLoad={() => {
+          // console.log('Iframe loaded')
+          setIsLoading(false)
+        }}
+        onError={() => {
+          console.error('Iframe error')
+          setError('Failed to load music')
+          setIsLoading(false)
+          setIsPlaying(false)
+        }}
+      />
     </MusicContext.Provider>
   )
 }
 
-// Default tracks - can be moved to a separate config file later
+// Default tracks
 export const defaultTracks: Track[] = [
   {
     id: '1',
