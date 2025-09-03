@@ -1,6 +1,7 @@
 'use client'
 
 import { MailIcon, ArrowRightIcon, CheckIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -13,13 +14,15 @@ interface NewsletterCTAProps {
 }
 
 export function NewsletterCTA({ 
-  title = "Stay Updated",
-  description = "Never miss an exhibition, workshop, or artistic milestone.",
+  title,
+  description,
   className = ""
 }: NewsletterCTAProps) {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const t = useTranslations('cta.newsletter')
+  const tForms = useTranslations('forms')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,8 +47,8 @@ export function NewsletterCTA({
             <CheckIcon className="w-6 h-6 text-white" />
           </div>
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">Successfully subscribed!</h3>
-            <p className="text-sm text-green-600 dark:text-green-300">You'll receive our latest updates soon.</p>
+            <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">{tForms('messages.subscribeSuccess')}</h3>
+            <p className="text-sm text-green-600 dark:text-green-300">{tForms('messages.subscribeDescription')}</p>
           </div>
         </div>
         {/* Decorative elements */}
@@ -68,9 +71,9 @@ export function NewsletterCTA({
           <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/25">
             <MailIcon className="w-7 h-7 text-primary-foreground" />
           </div>
-          <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
+          <h3 className="text-xl font-bold text-foreground mb-2">{title || t('title')}</h3>
           <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
-            {description}
+            {description || t('description')}
           </p>
         </div>
 
@@ -80,7 +83,7 @@ export function NewsletterCTA({
             <div className="relative flex-1">
               <Input
                 type="email"
-                placeholder="Enter your email address"
+                placeholder={t('placeholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-12 pl-4 pr-4 bg-background/80 backdrop-blur-sm border-ring/30 focus:border-primary/50 focus:bg-background shadow-sm"
@@ -95,11 +98,11 @@ export function NewsletterCTA({
               {isSubmitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
-                  Subscribing...
+                  {tForms('buttons.subscribing')}
                 </>
               ) : (
                 <>
-                  Subscribe
+                  {tForms('buttons.subscribe')}
                   <ArrowRightIcon className="w-4 h-4 ml-2" />
                 </>
               )}
@@ -109,15 +112,15 @@ export function NewsletterCTA({
           <div className="flex items-center justify-center space-x-6 text-xs text-muted-foreground">
             <div className="flex items-center space-x-1">
               <div className="w-1 h-1 bg-green-500 rounded-full" />
-              <span>No spam</span>
+              <span>{tForms('messages.noSpam')}</span>
             </div>
             <div className="flex items-center space-x-1">
               <div className="w-1 h-1 bg-blue-500 rounded-full" />
-              <span>Unsubscribe anytime</span>
+              <span>{tForms('messages.unsubscribeAnytime')}</span>
             </div>
             <div className="flex items-center space-x-1">
               <div className="w-1 h-1 bg-purple-500 rounded-full" />
-              <span>Weekly updates</span>
+              <span>{tForms('messages.weeklyUpdates')}</span>
             </div>
           </div>
         </form>

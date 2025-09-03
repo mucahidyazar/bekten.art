@@ -1,18 +1,457 @@
 {
-  "home": "Ana Sayfa",
-  "news": "Haberler",
-  "about": "Hakkında",
-  "gallery": "Galeri",
-  "contact": "İletişim",
-  "social": "Sosyal Medya",
-  "address": "Stüdyo",
-  "privacyPolicy": "Gizlilik Politikası",
-  "termsOfService": "Kullanım Koşulları",
-  "copyRight": "© {year} Bekten. Tüm hakları saklıdır",
-  "slogan": "ÇAĞDAŞ YAĞLİBOYA ODAKLI RESSAM",
-  "biography1": "Bekten Usubaliev, sanatın insanın içindeki rüyaları, duyguları ve bağımsız ruhu ortaya çıkardığına inanan Kırgız bir ressamdır. Sadece eserleri değil, aynı zamanda 1990'dan beri Kırgız Devlet Sanat Koleji'nde öğretim görevlisi olarak görev yapan Bekten de büyük bir etkiye sahiptir. 1958 doğumlu olan Bekten, 1981'de Kırgız Devlet Sanat Koleji'nden mezun oldu ve 1989'da Rusya, St. Petersburg'daki Repin Mimarlık, Heykel ve Resim Enstitüsü'nden derece aldı. 1991'de Kırgız Cumhuriyeti Sanatçılar Birliği'ne katıldı.",
-  "biography2": "Bekten, eserlerini Almatı, Kazakistan'daki genç sanatçılar grup sergisinde (1995); Rusya, St. Petersburg'daki ikinci uluslararası bienal sergisi 'Diyaloglar'da (1995); Ch. Aitmatov'un 70. yıl dönümü kutlamasında Brüksel, Belçika'da (1997); Tahran, İran'daki uluslararası sergide (2000); ve Bişkek'teki solo sergide (2001) sergiledi.",
-  "biography3": "Eserleri Kırgız Devlet Güzel Sanatlar Müzesi'nde ve CIS, ABD, Almanya, Türkiye ve Büyük Britanya'daki özel koleksiyonlarda görülebilir.",
-  "locale": "{locale, select, en {İngilizce} tr {Türkçe} ru {Rusça} kg {Kırgızca} other {Bilinmeyen}}",
-  "store": "Mağaza"
+  "about": {
+    "achievements": "Başarılar",
+    "biography": "Biyografi",
+    "dimensions": "Boyutlar",
+    "emotion": "Duygu",
+    "exhibitions": "Sergiler",
+    "masterpiece": "Başyapıt",
+    "medium": "Teknik",
+    "philosophy": "Felsefe",
+    "teaching": "Öğretim",
+    "technique": "Teknik",
+    "year": "Yıl",
+
+    "artisticPhilosophy": "Sanat Felsefesi",
+    "artworkDescription": "Bu eser yaşamın yolculuğunu temsil ediyor; her fırça darbesi hareket, büyüme ve anlam arayışının ebedi yolculuğunun hikayesini anlatıyor. Renklerin etkileşimi, hem fiziksel hem de duygusal manzaralarda dolaşmanın özünü yakalıyor.",
+    "artworksCreated": "Yaratılan Sanat Eserleri",
+    "biographyCollections": "Eserleri Kırgızistan Devlet Güzel Sanatlar Müzesi'nde ve BDT, ABD, Almanya, Türkiye ve Büyük Britanya'daki özel koleksiyonlarda görülebilir.",
+    "biographyEducation": "Bekten Usubaliev, sanatın insanın içindeki gizli hayalleri, duyguları ve bağımsız ruhu ortaya çıkardığına inanan Kırgız bir ressamdır. Sadece sanat eserleri değil, Kırgız Devlet Sanat Koleji'nde 1990'dan beri öğretmenlik yapan Bekten de çok şey anlatır. 1958'de doğan sanatçı, 1981'de Kırgız Devlet Sanat Koleji'nden mezun oldu ve daha sonra 1989'da St. Petersburg, Rusya'daki Repin Mimarlık, Heykel ve Resim Enstitüsü'nden diploma aldı. 1991'de Kırgızistan Cumhuriyeti Sanatçılar Birliği'ne katıldı.",
+    "biographyExhibitions": "Bekten eserlerini çok sayıda ulusal ve uluslararası sergide sergiledi; bunlar arasında Almaty, Kazakistan'da genç sanatçılar grup sergisi (1995); St. Petersburg, Rusya'da ikinci uluslararası bienal sergisi 'Diyaloglar' (1995); Brüksel, Belçika'da Ch. Aitmatov için 70. yıl kutlaması (1997); Tahran, İran'da uluslararası sergi (2000) ve Bişkek'te kişisel sergi (2001) yer alır.",
+    "connectDescription": "Sanat hakkında konuşmaya, bir eser sipariş etmeye ya da sadece düşüncelerinizi paylaşmaya hazır mısınız? Sizden haber almayı ve sanatsal vizyonunuzu hayata geçirmek için neler yapabileceğimizi keşfetmeyi çok isterim.",
+    "emotionDescription": "Her fırça darbesi insan duygusunun ağırlığını taşır",
+    "featuredWork": "Öne Çıkan Eser",
+    "journeyDescription": "Bugünkü sanatçı olmama götüren yolu keşfedin",
+    "letsConnect": "Hadi Bağlanalım",
+    "metaDescription": "🎨 Bekten Usubaliev'in sanatsal yolculuğu, felsefesi ve sanata katkıları hakkında bilgi edinin. Sanatın gücüyle insan duygularının ve hayallerinin gizli alanlarını ortaya çıkarmaya inanan bir ressam.",
+    "metaTitle": "🎨 Bekten Usubaliev Hakkında - Kırgız Ressam ve Sanat Eğitmeni",
+    "myJourney": "Benim Yolculuğum",
+    "philosophyDescription": "Anlamlı sanat yaratmaya yaklaşımım ve inançlarım",
+    "philosophyText": "Sanat sadece güzel görüntüler yaratmakla ilgili değildir; insan deneyimlerini birbirine bağlayan görünmez iplikleri ortaya çıkarmakla ilgilidir. Çalışmalarımda, çoğu zaman söylenmemiş olan duyguların özünü yakalamaya ve bunları ruhla rezonansa giren görsel anlatılara dönüştürmeye çalışıyorum.",
+    "teachingDescription": "Bilgiyi paylaşmak ve gelecek nesil sanatçılara ilham vermek",
+    "techniqueDescription": "Geleneksel yöntemlerde ustalaşırken yeniliği kucaklamak",
+    "viewGallery": "Galeriyi Görüntüle",
+
+    "featuredWorkDescription": "İnsan duygusunun derinliğini renk ve form aracılığıyla sergileyen en çok takdir edilen eserlerimden biri",
+    "getInTouch": "İletişime Geç",
+    "yearsOfExperience": "Yıllık Deneyim"
+  },
+  "artist": {
+    "badgeArtist": "Sanatçı",
+    "badgeLecturer": "Eğitmen",
+    "badgePassionate": "Tutkulu",
+    "defaultName": "Bekten Usubaliev",
+    "defaultQuote": "Sanat ruhun dilidir, kelimelerin ifade edemediği gerçekleri söyler.",
+    "defaultTitle": "Kırgız Ressam ve Sanat Eğitmeni"
+  },
+  "auth": {
+    "signIn": {
+      "subtitle": "Devam etmek için hesabınıza giriş yapın",
+      "title": "Tekrar Hoş Geldiniz",
+
+      "googleButton": "Google ile Devam Et",
+      "noAccount": "Hesabınız yok mu?",
+      "orContinue": "Veya e-posta ile devam et",
+      "signUp": "Kaydol"
+    },
+    "signUp": {
+      "subtitle": "Bugün Bekten Art topluluğuna katılın",
+      "title": "Hesap Oluştur",
+
+      "hasAccount": "Zaten hesabınız var mı?",
+      "orContinue": "Veya e-posta ile hesap oluştur",
+      "signIn": "Giriş yap"
+    }
+  },
+  "branding": {
+    "locale": "{locale, select, en {İngilizce} tr {Türkçe} ru {Rusça} kg {Kırgızca} other {Bilinmeyen}}",
+    "slogan": "ÇAĞDAŞ YAĞLI BOYA ODAKLI RESSAM"
+  },
+  "cards": {
+    "artworkCard": {
+      "by": "tarafından",
+      "like": "beğeni",
+      "likes": "beğeni",
+      "untitled": "Başlıksız",
+
+      "defaultAlt": "Sanat Eseri",
+      "noDescription": "Açıklama mevcut değil"
+    },
+    "eventCard": {
+      "free": "Ücretsiz",
+
+      "defaultAddress": "1015 Chestnut St. Philadelphia, PA 19107",
+      "defaultTime": "19:00 - 21:00",
+      "viewDetails": "Etkinlik Detaylarını Gör",
+
+      "months": {
+        "apr": "NİS",
+        "aug": "AĞU",
+        "dec": "ARA",
+        "feb": "ŞUB",
+        "jan": "OCA",
+        "jul": "TEM",
+        "jun": "HAZ",
+        "mar": "MAR",
+        "may": "MAY",
+        "nov": "KAS",
+        "oct": "EKİ",
+        "sep": "EYL"
+      }
+    },
+    "newsCard": {
+      "defaultAlt": "Haber",
+      "readMore": "Devamını Oku"
+    }
+  },
+  "common": {
+    "back": "Geri",
+    "cancel": "İptal",
+    "close": "Kapat",
+    "confirm": "Onayla",
+    "copy": "Kopyala",
+    "delete": "Sil",
+    "download": "İndir",
+    "edit": "Düzenle",
+    "error": "Hata",
+    "filter": "Filtrele",
+    "less": "Daha Az",
+    "loading": "Yükleniyor...",
+    "more": "Daha Fazla",
+    "next": "Sonraki",
+    "previous": "Önceki",
+    "save": "Kaydet",
+    "search": "Ara",
+    "share": "Paylaş",
+    "sort": "Sırala",
+    "success": "Başarılı",
+    "upload": "Yükle",
+    "view": "Görüntüle",
+
+    "learnMore": "Daha Fazla Öğren",
+    "showLess": "Daha Az Göster",
+    "showMore": "Daha Fazla Göster"
+  },
+  "contact": {
+    "address": "Stüdyo",
+    "description": "Bir eser sipariş etmek, sanat hakkında konuşmak veya sadece bağlantı kurmakla ilgileniyorsanız, sizden haber almayı ve olasılıkları keşfetmeyi çok isterim.",
+    "email": "E-posta",
+    "instagram": "Instagram",
+    "phone": "Telefon",
+    "subtitle": "Birlikte Güzel Bir Şey Yaratalım",
+    "title": "İletişime Geçin",
+
+    "callNow": "Şimdi Ara",
+    "contactUnavailable": "İletişim Bilgileri",
+    "findStudio": "Stüdyomu Bul",
+    "metaDescription": "🎨 Bekten Usubaliev ile iletişime geçin, düşüncelerinizi paylaşın veya büyüleyici sanat eserleri hakkında bilgi edinin. İnsan duygularının derinliklerini sanat yoluyla keşfetme yolculuğuna katılın.",
+    "metaTitle": "🎨 İletişime Geçin - Bekten Usubaliev ile Bağlantı Kurun",
+    "readyDescription": "İletişime geçmekten çekinmeyin. Her büyük sanat eseri basit bir konuşmayla başlar.",
+    "sendEmail": "E-posta Gönder",
+    "studioHours": "Stüdyo Saatleri",
+    "studioInfo": "Stüdyo Bilgileri",
+    "studioLocation": "Bişkek, Kırgızistan",
+    "studioName": "Bekten'in Sanat Stüdyosu",
+
+    "contactUnavailableDescription": "İletişim bilgileri şu anda mevcut değil. Lütfen daha sonra tekrar deneyin.",
+    "readyToTalk": "Konuşmaya Başlamaya Hazır mısınız?",
+
+    "defaultWorkingHours": {
+      "Saturday": "10:00 - 16:00",
+      "Sunday": "Randevu ile",
+
+      "Monday - Friday": "09:00 - 18:00"
+    }
+  },
+  "cta": {
+    "default": {
+      "button1": "Tam Galeriyi Görüntüle",
+      "button2": "İletişime Geç",
+      "description": "Bekten'in başyapıtlarının tam koleksiyonunu keşfedin ve çağdaş sanatın ruhuyla bağlantı kurun.",
+      "title": "Sanat Yolculuğunuza Başlamaya Hazır mısınız?"
+    },
+    "newsletter": {
+      "description": "Hiçbir sergiden, atölyeden veya sanatsal kilometre taşından kaçırmayın. Sanat tutkunları topluluğumuza katılın.",
+      "placeholder": "E-posta adresinizi girin",
+      "title": "Güncel Kalın"
+    }
+  },
+  "forms": {
+    "buttons": {
+      "create": "Oluştur",
+      "subscribe": "Abone Ol",
+      "subscribing": "Abone oluyor...",
+
+      "createAccount": "Hesap Oluştur",
+      "creatingAccount": "Hesap oluşturuluyor...",
+      "signIn": "Giriş Yap",
+      "signingIn": "Giriş yapılıyor..."
+    },
+    "labels": {
+      "address": "Adres",
+      "description": "Açıklama",
+      "email": "E-posta Adresi",
+      "image": "Resim",
+      "link": "Bağlantı",
+      "message": "Mesaj",
+      "note": "Not",
+      "password": "Şifre",
+      "subtitle": "Alt Başlık",
+      "title": "Başlık",
+
+      "confirmPassword": "Şifreyi Onayla",
+      "fullName": "Ad Soyad"
+    },
+    "messages": {
+      "forgotPassword": "Şifremi unuttum?",
+      "noSpam": "Spam yok",
+      "rememberMe": "Beni hatırla",
+      "subscribeDescription": "En son güncellemelerimizi yakında alacaksınız.",
+      "subscribeSuccess": "Başarıyla abone oldunuz!",
+      "termsAgreement": "Hesap oluşturarak Hizmet Şartlarımızı ve Gizlilik Politikamızı kabul etmiş olursunuz",
+      "unsubscribeAnytime": "İstediğiniz zaman abonelikten çıkın",
+      "weeklyUpdates": "Haftalık güncellemeler",
+
+      "signInSuccess": "Başarıyla giriş yapıldı"
+    },
+    "placeholders": {
+      "confirmPassword": "Şifrenizi onaylayın",
+      "createPassword": "Bir şifre oluşturun",
+      "enterAddress": "Adres",
+      "enterDescription": "Açıklama",
+      "enterEmail": "E-postanızı girin",
+      "enterLink": "Bağlantı",
+      "enterLocation": "Konum: Bişkek, Kırgızistan veya Moskova, Rusya",
+      "enterName": "Ad soyadınızı girin",
+      "enterNote": "Not",
+      "enterPassword": "Şifrenizi girin",
+      "enterSubtitle": "Alt başlık",
+      "enterTitle": "Başlık",
+      "pickDate": "Bir tarih seçin",
+      "typeMessage": "Mesajınızı buraya yazın."
+    },
+    "validation": {
+      "emailInvalid": "Lütfen geçerli bir e-posta adresi girin",
+      "loginRequired": "Geri bildirim göndermek için giriş yapmalısınız.",
+      "nameRequired": "İsim en az 2 karakter olmalıdır",
+      "passwordConfirm": "Lütfen şifrenizi onaylayın",
+      "passwordLength": "Şifre en az 8 karakter olmalıdır",
+      "passwordsMatch": "Şifreler eşleşmiyor"
+    }
+  },
+  "gallery": {
+    "fetchError": "Fotoğraflar alınamadı. Lütfen daha sonra tekrar deneyin.",
+    "metaDescription": "🎨 Bekten Usubaliev'in galerisine adım atın ve sınırları aşan, her biri insan ruhunun derin duygularını ve hayallerini yansıtan bir sanat koleksiyonuna tanık olun.",
+    "metaTitle": "🎨 Sanat Galerisi - Bekten Usubaliev'in Başyapıtlarını Keşfedin"
+  },
+  "header": {
+    "logoAlt": "logo"
+  },
+  "homepage": {
+    "artistBadge": "Usta Kırgız Sanatçı",
+    "artistDescription": "Ustaca fırça darbeleriyle insan ruhundaki gizli duyguları ve hayalleri ortaya çıkarıyor",
+    "artistName": "Bekten Usubaliev",
+    "collectionBadge": "Öne Çıkan Koleksiyon",
+    "collectionDescription": "Her sanat eseri benzersiz bir hikaye anlatır, insan duygusunun anlarını ve Kırgız kültürünün güzelliğini yakalar",
+    "collectionTitle": "Boyada Anılar",
+    "heroButton1": "Sanatı Keşfet",
+    "heroButton2": "Sanatçıyla Tanış",
+    "heroDescription": "İnsan duygusunun özünü yakalayan zamansız başyapıtlar yaratıyor",
+    "heroSubtitle": "Ruhun tuvatle buluştuğu yer",
+    "heroTitle": "Çağdaş Usta",
+    "metaDescription": "🎨 İnsan ruhunun içindeki gizli duyguları ve hayalleri ortaya çıkarma konusundaki benzersiz yeteneğiyle tanınan ünlü Kırgız ressam Bekten Usubaliev'in sanatsal dünyasını keşfedin.",
+    "metaTitle": "🎨 Bekten Usubaliev - İnsan Duygularını Ortaya Çıkaran Usta Kırgız Ressam",
+    "stat1Description": "Tutku ve hassasiyetle yaratılmış",
+    "stat1Title": "50+ Ustaca Sanat Eseri",
+    "stat2Description": "Sanatsal mükemmelliğe adanmış",
+    "stat2Title": "25+ Yıllık Deneyim",
+    "stat3Description": "Dünya çapında sanat tutkunları",
+    "stat3Title": "100+ Mutlu Koleksiyoncu",
+    "statsButton1": "Galeriyi Keşfet",
+    "statsButton2": "Sanatçı Hakkında",
+    "storeBadge": "Sınırlı Koleksiyon",
+    "storeDescription": "Orijinal Bekten Usubaliev başyapıtına sahip olma özel fırsatı",
+    "storeTitle": "Satılık Sanat Eserleri",
+    "workshopBadge": "Sanatın Arkasında",
+    "workshopDescription": "Başyapıtların hayat bulduğu, geleneğin yenilikle buluştuğu yaratıcı sığınağa adım atın",
+    "workshopTitle": "Yaratıcı Atölye"
+  },
+  "legal": {
+    "copyRight": "© {year} Bekten. Tüm hakları saklıdır. Tasarlayan:",
+    "privacyPolicy": "Gizlilik Politikası",
+
+    "termsOfService": "Hizmet Şartları",
+
+    "privacyPolicyPage": {
+      "introduction": "Giriş",
+      "title": "Gizlilik Politikası",
+      "website": "Web sitesi: bekten.art",
+
+      "additionalData": "Ek ilişkilerden veriler: Hesaplar, Oturumlar, Sanat Eserleri, Sanat Eseri Beğenileri, Sosyal Medya, Geri Bildirimler, Basın ve Haberler.",
+      "changesNotification": "Gizlilik politikasındaki herhangi bir değişiklik e-posta yoluyla bildirilecektir.",
+      "contactEmail": "İletişim E-postası: mucahidyazar@gmail.com",
+      "dataSecurity": "Veri Güvenliği",
+      "dataSharing": "Veri Paylaşımı ve İfşası",
+      "informationCollected": "Toplanan Bilgiler",
+      "policyChanges": "Politika Değişiklikleri",
+      "rightsDescription": "Kullanıcılar kişisel bilgilerine erişme, değiştirme ve silme hakkına sahiptir.",
+      "securityDescription": "Web sitesi güvenlik ve operasyonel işlevsellik için Supabase, Prisma ve Vercel gibi hizmetlere dayanır. bekten.art tarafından ek özel güvenlik önlemleri alınmamıştır.",
+      "servicesPurpose": "Sanatçılara geri bildirim sağlama ve sanatçıların eserlerini web sitesinde sergileme gibi hizmetleri kolaylaştırmak için.",
+      "userDetails": "Kullanıcı modelinden ayrıntılar: ID, İsim, E-posta, E-posta Doğrulandı, Resim, Meslek, Açıklama, Konum, Rol, Oluşturulma Tarihi, Güncellenme Tarihi, Veri Paylaşım Tercihleri ve E-posta Abonelik Tercihleri.",
+      "userRights": "Kullanıcı Hakları",
+
+      "noThirdParty": "Kişisel veriler hiçbir üçüncü tarafla paylaşılmaz ve yalnızca bekten.art'ın işleyişi için kullanılır.",
+      "purposeOfCollection": "Veri Toplama Amacı"
+    },
+
+    "termsOfServicePage": {
+      "introduction": "Giriş",
+      "title": "Hizmet Şartları",
+      "website": "Web sitesi: bekten.art",
+
+      "contactEmail": "İletişim E-postası: mucahidyazar@gmail.com",
+      "disputeDescription": "Anlaşmazlıklar veya endişeler web sitesi yöneticisine veya sağlanan iletişim bilgileri aracılığıyla iletilmelidir.",
+      "disputeResolution": "Anlaşmazlık Çözümü",
+      "generalInformation": "Site Hakkında Genel Bilgiler",
+      "intellectualProperty": "Fikri Mülkiyet",
+      "liabilityDescription": "bekten.art, sitedeki kullanıcı faaliyetlerinin doğrudan veya dolaylı sonuçlarından sorumlu değildir.",
+      "liabilityLimitations": "Sorumluluk Sınırlamaları",
+      "propertyDescription": "Sitede görüntülenen sanat eserleri ve içerik, ilgili sanatçıların mülkiyetindedir ve telif hakkı yasalarıyla korunmaktadır.",
+      "responsibilitiesDescription": "Kullanıcıların sitedeki davranış kurallarına uyması, sanatçıların fikri mülkiyet haklarına saygı göstermesi ve her türlü taciz veya kötü muameleden kaçınması beklenir.",
+      "siteDescription": "bekten.art, babanız da dahil olmak üzere çeşitli sanatçıların eserlerini sergileyen bir platformdur. Kullanıcıların sanatçı profillerine geri bildirim bırakmasına ve mağaza bölümünde sanat eserlerini görüntülemesine olanak tanır. Sanat eserlerinin satın alınması sanatçılarla doğrudan iletişim yoluyla kolaylaştırılır ve web sitesi üzerinden çevrimiçi işlem yapılmaz.",
+      "usageDescription": "Web sitesi sanat eserlerini sergilemek ve sanatçılara geri bildirim sağlamak için tasarlanmıştır. Kullanıcıların nefret söylemi, pornografi ve küfürlü dil dahil ancak bunlarla sınırlı olmayan saldırgan içerik yayınlaması yasaktır.",
+      "usageTerms": "Kullanım Şartları",
+      "userResponsibilities": "Kullanıcı Sorumlulukları"
+    }
+  },
+  "navigation": {
+    "about": "Hakkında",
+    "contact": "İletişim",
+    "gallery": "Galeri",
+    "home": "Ana Sayfa",
+    "news": "Haberler",
+    "store": "Mağaza"
+  },
+  "news": {
+    "address": "Adres",
+    "featured": "Öne Çıkan",
+    "location": "Konum",
+    "published": "Yayınlanan",
+
+    "dateTime": "Tarih ve Saat",
+    "extendedContent1": "Bu etkinlik, Kırgızistan'ın en tanınmış çağdaş sanatçılarından biri olan Bekten Usubaliev'in seçkin kariyerindeki bir başka kilometre taşını temsil ediyor. Sanat dünyasında 25 yılı aşkın deneyime sahip Usubaliev, kültürel mirasını onurlandırırken geleneksel resmin sınırlarını zorlamaya devam ediyor.",
+    "extendedContent2": "Sanatçının eserleri Lüksemburg ve Macaristan'dan Türkiye'ye kadar çok sayıda uluslararası sergide yer aldı; burada resimleri TÜRKSOY plein air programının bir parçası olarak sergilendi. Yağlı boya resme benzersiz yaklaşımı, klasik teknikleri modern duyarlılıklarla birleştirerek hem yerel hem de küresel izleyicilere hitap eden eserler yaratıyor.",
+    "extendedContent3": "Ziyaretçiler sadece görsel sanat değil, Kırgız kültürünün zengin dokusundaki bir yolculuk ve tüm insanlığı birbirine bağlayan evrensel temaları deneyimlemeyi bekleyebilirler. Koleksiyondaki her parça bir hikaye anlatır ve izleyicileri sanatçının renk, ışık ve kompozisyon konusundaki ustaca kullanımı aracılığıyla kendi duygularını ve anılarını keşfetmeye davet eder.",
+    "followDescription": "Bekten Usubaliev'in sanatsal yolculuğunu takip edin ve hiçbir güncellemeyi kaçırmayın.",
+    "importantNote": "Önemli Not",
+    "latestUpdates": "Son Güncellemeler",
+    "metaDescription": "🎨 Bekten Usubaliev'in son haberleri, sergileri ve sanatsal çabalarıyla güncel kalın. Yaklaşan etkinlikleri, sanat gösterilerini ve çağdaş Kırgız sanat dünyasının perde arkası görüşlerini keşfedin.",
+    "metaTitle": "🎨 Son Sanat Haberleri - Bekten Usubaliev'in Sergileri ve Güncellemeleri",
+    "newsDescription": "Bekten'in son sergileri, etkinlikleri ve sanatsal yolculuğuyla güncel kalın",
+    "readMore": "Devamını Oku",
+    "relatedNews": "İlgili Haberler",
+    "stayConnected": "Bağlantıda Kalın",
+
+    "allNewsEvents": "Tüm Haberler ve Etkinlikler",
+    "backToNews": "Haberlere Dön",
+    "newsNotFound": "Haber Bulunamadı",
+
+    "newsNotFoundDescription": "İstenen haber makalesi bulunamadı."
+  },
+  "profile": {
+    "defaultBio": "Sanat tutkunu ve koleksiyoncu. Çağdaş ve dijital sanata tutkulu.",
+    "defaultInterests": [
+      "Çağdaş Sanat",
+      "Dijital Sanat",
+      "Resimler",
+      "Heykeller",
+      "Fotoğrafçılık"
+    ],
+    "defaultLocation": "Bişkek, Kırgızistan",
+    "defaultWebsite": "https://bekten.art",
+    "metaDescription": "Bekten Art profilinizi, sanat eserlerinizi ve koleksiyonlarınızı görüntüleyin ve yönetin.",
+    "metaTitle": "Kullanıcı Profili - Bekten Art",
+
+    "activities": {
+      "liked": "\"{title}\" sanat eserini beğendi",
+      "subscribed": "Bültene abone oldu",
+
+      "addedToCollection": "\"{collection}\" koleksiyonuna ekledi"
+    },
+    "labels": {
+      "bio": "Biyografi",
+      "email": "E-posta",
+      "location": "Konum",
+      "name": "İsim",
+      "role": "Rol",
+      "website": "Web sitesi",
+
+      "editProfile": "Profili Düzenle",
+      "memberSince": "Üyelik tarihi",
+      "signOut": "Çıkış Yap",
+
+      "lastSignIn": "Son giriş"
+    },
+    "messages": {
+      "anonymousUser": "Anonim Kullanıcı",
+      "noActivities": "Son aktivite yok",
+      "noInterests": "Henüz ilgi alanı eklenmemiş",
+
+      "profileNotFound": "Profil bulunamadı",
+
+      "profileNotFoundDescription": "İstenen profil bulunamadı."
+    },
+    "roles": {
+      "administrator": "Yönetici",
+      "artist": "Sanatçı",
+      "user": "Kullanıcı"
+    },
+    "sections": {
+      "interests": "İlgi Alanları",
+
+      "accountStats": "Hesap İstatistikleri",
+      "profileInfo": "Profil Bilgileri",
+      "recentActivity": "Son Aktiviteler"
+    },
+    "stats": {
+      "collections": "Koleksiyonlar",
+      "followers": "Takipçiler",
+      "following": "Takip Edilenler",
+
+      "artworksLiked": "Beğenilen Sanat Eserleri"
+    }
+  },
+  "store": {
+    "available": "Mevcut",
+    "inquire": "Sorgula",
+    "reserved": "Rezerve",
+    "sold": "Satıldı",
+    "unavailable": "Mevcut Değil",
+
+    "adjustFilters": "Filtrelerinizi ayarlamayı deneyin veya tüm kategorilere göz atın.",
+    "featuredFirst": "Önce Öne Çıkanlar",
+    "newestFirst": "Önce En Yeniler",
+    "newsletterDescription": "Yeni sanat eserleri, özel koleksiyonlar ve özel sergiler hakkında ilk bilgi sahibi olun.",
+    "oldestFirst": "Önce En Eskiler",
+    "quickView": "Hızlı Görünüm",
+    "sortBy": "Sırala",
+
+    "filterByCategory": "Kategoriye Göre Filtrele",
+    "noArtworksFound": "Sanat eseri bulunamadı",
+    "priceHighLow": "Fiyat: Yüksekten Düşüğe",
+    "priceLowHigh": "Fiyat: Düşükten Yükseğe"
+  },
+  "testimonials": {
+    "description": "Sanat dünyasından önemli şahsiyetlerin ve toplumun farklı kesimlerinin Bekten Usubaliev hakkındaki düşünceleri",
+    "title": "Değerli Görüşler",
+
+    "autoPlaying": "Otomatik Oynatma",
+    "badgeText": "Sanatçı Hakkında",
+    "categoryArtist": "Sanatçı",
+    "categoryBusinessman": "İşadamı",
+    "categoryCollector": "Koleksiyoncu",
+    "categoryCritic": "Sanat Eleştirmeni",
+    "categoryPolitician": "Devlet Adamı",
+    "manualControl": "Manuel Kontrol"
+  }
 }

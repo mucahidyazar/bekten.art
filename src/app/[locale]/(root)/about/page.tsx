@@ -13,13 +13,12 @@ import {SectionHeader} from '@/components/molecules/SectionHeader'
 import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export async function generateMetadata() {
-  const title = '🎨 About Bekten Usubaliev - Kyrgyz Painter & Art Lecturer'
-  const description =
-    "🎨 Learn about Bekten Usubaliev's artistic journey, his philosophy, and his contributions to art. A painter who believes in the power of art to unveil the hidden realms of human emotions and dreams."
+  const {getTranslations} = await import('next-intl/server')
+  const t = await getTranslations('about')
 
   return await prepareMetadata({
-    title,
-    description,
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     page: 'about',
   })
 }
@@ -35,10 +34,10 @@ export default function AboutPage() {
       {/* Biography Section */}
       <div className="space-y-12">
         <SectionHeader
-          badgeText="Biography"
+          badgeText={t('about.biography')}
           badgeIcon="heart"
-          title="My Journey"
-          description="Discover the path that led me to become the artist I am today"
+          title={t('about.myJourney')}
+          description={t('about.journeyDescription')}
         />
 
         <div className="grid gap-8 md:grid-cols-3">
@@ -47,13 +46,13 @@ export default function AboutPage() {
             <div className="prose prose-lg max-w-none">
               <div className="bg-card border-ring/20 space-y-4 rounded-xl border p-6">
                 <p className="text-foreground leading-relaxed">
-                  {t('biography1')}
+                  {t('about.biographyEducation')}
                 </p>
                 <p className="text-foreground leading-relaxed">
-                  {t('biography2')}
+                  {t('about.biographyExhibitions')}
                 </p>
                 <p className="text-foreground leading-relaxed">
-                  {t('biography3')}
+                  {t('about.biographyCollections')}
                 </p>
               </div>
             </div>
@@ -64,25 +63,25 @@ export default function AboutPage() {
             <div className="bg-card border-ring/20 rounded-xl border p-6">
               <h3 className="text-foreground mb-4 flex items-center text-xl font-semibold">
                 <AwardIcon className="text-primary mr-2 h-5 w-5" />
-                Achievements
+                {t('about.achievements')}
               </h3>
               <div className="space-y-4">
                 <div className="bg-primary/5 rounded-lg p-4 text-center">
                   <div className="text-primary text-2xl font-bold">25+</div>
                   <div className="text-muted-foreground text-sm">
-                    Years of Experience
+                    {t('about.yearsOfExperience')}
                   </div>
                 </div>
                 <div className="bg-primary/5 rounded-lg p-4 text-center">
                   <div className="text-primary text-2xl font-bold">100+</div>
                   <div className="text-muted-foreground text-sm">
-                    Artworks Created
+                    {t('about.artworksCreated')}
                   </div>
                 </div>
                 <div className="bg-primary/5 rounded-lg p-4 text-center">
                   <div className="text-primary text-2xl font-bold">50+</div>
                   <div className="text-muted-foreground text-sm">
-                    Exhibitions
+                    {t('about.exhibitions')}
                   </div>
                 </div>
               </div>
@@ -94,10 +93,10 @@ export default function AboutPage() {
       {/* Featured Artwork */}
       <div className="mt-16 space-y-8">
         <SectionHeader
-          badgeText="Masterpiece"
+          badgeText={t('about.masterpiece')}
           badgeIcon="palette"
-          title="Featured Work"
-          description="One of my most celebrated pieces, showcasing the depth of human emotion through color and form"
+          title={t('about.featuredWork')}
+          description={t('about.featuredWorkDescription')}
         />
 
         <div className="bg-card border-ring/20 relative rounded-2xl border p-6">
@@ -108,22 +107,26 @@ export default function AboutPage() {
               </h3>
               <div className="text-muted-foreground space-y-2 text-sm">
                 <p>
-                  <strong className="text-foreground">Medium:</strong> Canvas,
-                  Oil
+                  <strong className="text-foreground">
+                    {t('about.medium')}:
+                  </strong>{' '}
+                  Canvas, Oil
                 </p>
                 <p>
-                  <strong className="text-foreground">Dimensions:</strong> 70x85
-                  cm
+                  <strong className="text-foreground">
+                    {t('about.dimensions')}:
+                  </strong>{' '}
+                  70x85 cm
                 </p>
                 <p>
-                  <strong className="text-foreground">Year:</strong> 2001
+                  <strong className="text-foreground">
+                    {t('about.year')}:
+                  </strong>{' '}
+                  2001
                 </p>
               </div>
               <p className="text-foreground leading-relaxed">
-                This piece represents the journey of life, where each
-                brushstroke tells a story of movement, growth, and the eternal
-                quest for meaning. The interplay of colors captures the essence
-                of wandering through both physical and emotional landscapes.
+                {t('about.artworkDescription')}
               </p>
             </div>
 
@@ -146,20 +149,16 @@ export default function AboutPage() {
       {/* Philosophy Section */}
       <div className="from-primary/5 mt-16 rounded-3xl bg-gradient-to-br to-transparent p-8 md:p-12">
         <SectionHeader
-          badgeText="Philosophy"
+          badgeText={t('about.philosophy')}
           badgeIcon="graduation"
-          title="Artistic Philosophy"
-          description="My beliefs and approach to creating meaningful art"
+          title={t('about.artisticPhilosophy')}
+          description={t('about.philosophyDescription')}
           className="mb-6"
         />
         <div className="space-y-6 text-center">
           <div className="mx-auto max-w-3xl">
             <p className="text-foreground text-lg leading-relaxed">
-              Art is not merely about creating beautiful images; it&apos;s about
-              revealing the invisible threads that connect human experiences.
-              Through my work, I strive to capture the essence of emotions that
-              often remain unspoken, transforming them into visual narratives
-              that resonate with the soul.
+              {t('about.philosophyText')}
             </p>
           </div>
 
@@ -168,9 +167,11 @@ export default function AboutPage() {
               <div className="bg-primary/20 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
                 <HeartIcon className="text-primary h-8 w-8" />
               </div>
-              <h3 className="text-foreground font-semibold">Emotion</h3>
+              <h3 className="text-foreground font-semibold">
+                {t('about.emotion')}
+              </h3>
               <p className="text-muted-foreground text-sm">
-                Every brushstroke carries the weight of human feeling
+                {t('about.emotionDescription')}
               </p>
             </div>
 
@@ -178,9 +179,11 @@ export default function AboutPage() {
               <div className="bg-primary/20 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
                 <PaletteIcon className="text-primary h-8 w-8" />
               </div>
-              <h3 className="text-foreground font-semibold">Technique</h3>
+              <h3 className="text-foreground font-semibold">
+                {t('about.technique')}
+              </h3>
               <p className="text-muted-foreground text-sm">
-                Mastering traditional methods while embracing innovation
+                {t('about.techniqueDescription')}
               </p>
             </div>
 
@@ -188,9 +191,11 @@ export default function AboutPage() {
               <div className="bg-primary/20 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
                 <GraduationCapIcon className="text-primary h-8 w-8" />
               </div>
-              <h3 className="text-foreground font-semibold">Teaching</h3>
+              <h3 className="text-foreground font-semibold">
+                {t('about.teaching')}
+              </h3>
               <p className="text-muted-foreground text-sm">
-                Sharing knowledge and inspiring the next generation of artists
+                {t('about.teachingDescription')}
               </p>
             </div>
           </div>
@@ -198,11 +203,11 @@ export default function AboutPage() {
       </div>
 
       <CallToAction
-        title="Let's Connect"
-        description="Ready to discuss art, commission a piece, or simply share your thoughts? I'd love to hear from you and explore how we can bring your artistic vision to life."
-        primaryButtonText="Get in Touch"
+        title={t('about.letsConnect')}
+        description={t('about.connectDescription')}
+        primaryButtonText={t('about.getInTouch')}
         primaryButtonHref="/contact"
-        secondaryButtonText="View Gallery"
+        secondaryButtonText={t('about.viewGallery')}
         secondaryButtonHref="/gallery"
         iconName="mail"
       />

@@ -15,27 +15,27 @@ export function Navbar({className, user}: NavbarProps) {
 
   const NAV_ITEMS = [
     {
-      label: t('home'),
+      label: t('navigation.home'),
       path: '/',
     },
     {
-      label: t('news'),
+      label: t('navigation.news'),
       path: '/news',
     },
     {
-      label: t('about'),
+      label: t('navigation.about'),
       path: '/about',
     },
     {
-      label: t('gallery'),
+      label: t('navigation.gallery'),
       path: '/gallery',
     },
     {
-      label: t('contact'),
+      label: t('navigation.contact'),
       path: '/contact',
     },
     {
-      label: t('store'),
+      label: t('navigation.store'),
       path: '/store',
     },
     ...(user?.profile?.role?.toLowerCase() === 'admin' ? [{label: 'Admin', path: '/admin'}] : []),

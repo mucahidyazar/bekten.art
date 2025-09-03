@@ -1,3 +1,4 @@
+import {getTranslations} from 'next-intl/server'
 import { Suspense } from 'react'
 
 import {SignInForm} from '@/components/forms/sign-in-form'
@@ -5,6 +6,8 @@ import {AuthSection} from '@/components/molecules/auth-section'
 import { ErrorDisplay } from '@/components/molecules/ErrorDisplay'
 
 export default async function SignInPage() {
+  const t = await getTranslations('auth.signIn')
+  
   return (
     <div className="w-full space-y-4">
       {/* Error Message */}
@@ -15,10 +18,10 @@ export default async function SignInPage() {
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Welcome Back
+          {t('auth.signIn.title')}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Sign in to your account to continue
+          {t('auth.signIn.subtitle')}
         </p>
       </div>
 
@@ -32,7 +35,7 @@ export default async function SignInPage() {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-card px-3 py-1 text-muted-foreground font-medium">
-            Or continue with email
+            {t('auth.signIn.orContinue')}
           </span>
         </div>
       </div>
@@ -43,12 +46,12 @@ export default async function SignInPage() {
       {/* Footer */}
       <div className="text-center text-sm text-muted-foreground">
         <p>
-          Don&apos;t have an account?{' '}
+          {t('auth.signIn.noAccount')}{' '}
           <a 
             href="/sign-up" 
             className="font-medium text-primary hover:text-primary/80 transition-colors"
           >
-            Sign up
+            {t('auth.signIn.signUp')}
           </a>
         </p>
       </div>

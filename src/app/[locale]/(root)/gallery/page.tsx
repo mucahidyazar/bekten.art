@@ -2,13 +2,12 @@ import {GalleryTemplate} from '@/components/templates/GalleryTemplate'
 import {prepareMetadata} from '@/utils/prepareMetadata'
 
 export async function generateMetadata() {
-  const title = '🎨 Art Gallery - Explore Bekten Usubaliev&apos;s Masterpieces'
-  const description =
-    '🎨 Step into the gallery of Bekten Usubaliev and witness a collection of art that transcends boundaries, each piece echoing the profound sentiments and dreams of the human spirit.'
-
+  const {getTranslations} = await import('next-intl/server')
+  const t = await getTranslations('gallery')
+  
   return await prepareMetadata({
-    title,
-    description,
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     page: 'gallery',
   })
 }
@@ -44,7 +43,7 @@ const getPhotos = async () =>
       return data
     } catch (error) {
       return {
-        message: 'We could not fetch the photos. Please try again later.',
+        message: 'gallery.fetchError',
         error,
       }
     }

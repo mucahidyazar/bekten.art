@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import {useEffect, useRef} from 'react'
 
 export function HeroVideo() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -13,7 +13,7 @@ export function HeroVideo() {
   }, [])
 
   return (
-    <div className="w-full aspect-video overflow-hidden">
+    <div className="aspect-video w-full overflow-hidden">
       <video
         ref={videoRef}
         width="100%"
@@ -23,7 +23,7 @@ export function HeroVideo() {
         playsInline
         controls={false}
         preload="auto"
-        className="w-[calc(100%+7.5rem)] max-w-[calc(100%+7.5rem)] -ml-15 h-full object-cover"
+        className="h-full w-full max-w-full object-cover"
         src="/video/hero-video.mp4"
       />
     </div>

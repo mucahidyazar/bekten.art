@@ -2,6 +2,7 @@
 import {ClockIcon, HomeIcon, MapIcon} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import {useTranslations} from 'next-intl'
 
 import {cn} from '@/utils'
 
@@ -11,6 +12,8 @@ type NewsCardProps = {
 }
 
 export function NewsCard({news, className}: NewsCardProps) {
+  const t = useTranslations('cards.newsCard')
+  
   return (
     <div
       className={cn(
@@ -21,7 +24,7 @@ export function NewsCard({news, className}: NewsCardProps) {
       <div className="relative h-60 w-full overflow-hidden rounded">
         <Image
           src={news?.image || '/img/empty-event-image.png'}
-          alt={news?.title || 'News'}
+          alt={news?.title || t('defaultAlt')}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
@@ -70,7 +73,7 @@ export function NewsCard({news, className}: NewsCardProps) {
             href={`/news/${news?.id}`}
             className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
           >
-            Read More
+            {t('readMore')}
           </Link>
         </div>
       </div>

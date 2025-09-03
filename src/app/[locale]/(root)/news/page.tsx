@@ -12,18 +12,20 @@ import {prepareMetadata} from '@/utils/prepareMetadata'
 import {PressSection} from './components/PressSection'
 
 export async function generateMetadata() {
-  const title = "🎨 Latest Art News - Bekten Usubaliev's Exhibitions & Updates"
-  const description =
-    '🎨 Stay updated with the latest news, exhibitions, and artistic endeavors of Bekten Usubaliev. Discover upcoming events, art showcases, and behind-the-scenes insights into the world of contemporary Kyrgyz art.'
+  const {getTranslations} = await import('next-intl/server')
+  const t = await getTranslations('news')
 
   return await prepareMetadata({
-    title,
-    description,
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     page: 'news',
   })
 }
 
 export default async function NewsPage() {
+  const {getTranslations} = await import('next-intl/server')
+  const t = await getTranslations()
+
   // Sort news by date (newest first)
   const sortedNews = mockNewsData.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -52,7 +54,7 @@ export default async function NewsPage() {
                   />
                   <div className="absolute top-4 left-4 z-20">
                     <span className="bg-primary text-primary-foreground rounded-full px-3 py-1 text-sm font-medium">
-                      Featured
+                      {t('news.featured')}
                     </span>
                   </div>
                 </div>
@@ -97,7 +99,7 @@ export default async function NewsPage() {
                         href={`/news/${featuredNews.id}`}
                         className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
                       >
-                        <span>Read More</span>
+                        <span>{t('news.readMore')}</span>
                         <ClockIcon className="h-3 w-3" />
                       </Link>
                     </ViewTransition>
@@ -119,10 +121,10 @@ export default async function NewsPage() {
       {/* News Grid */}
       <div className="space-y-8">
         <SectionHeader
-          badgeText="Latest Updates"
+          badgeText={t('news.latestUpdates')}
           badgeIcon="newspaper"
-          title="All News & Events"
-          description="Stay updated with Bekten's latest exhibitions, events, and artistic journey"
+          title={t('news.allNewsEvents')}
+          description={t('news.newsDescription')}
           className="mb-8"
         />
 
@@ -177,7 +179,7 @@ export default async function NewsPage() {
                     href={`/news/${news.id}`}
                     className="text-primary hover:text-primary/80 inline-flex items-center text-sm font-medium transition-colors"
                   >
-                    Read More →
+                    {t('news.readMore')} →
                   </Link>
                 </div>
               </article>

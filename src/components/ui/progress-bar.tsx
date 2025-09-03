@@ -16,10 +16,6 @@ interface ProgressBarProps {
    */
   color?: string
   /**
-   * Whether to show a shimmer effect
-   */
-  shimmer?: boolean
-  /**
    * Whether to show a glow effect
    */
   glow?: boolean
@@ -74,7 +70,6 @@ const updateGlobalProgress = (updates: Partial<typeof globalProgressState>) => {
 export function ProgressBar({
   height = '4px',
   color = 'var(--color-primary)',
-  shimmer = true,
   glow = true,
   duration = 300,
   className,
@@ -140,18 +135,7 @@ export function ProgressBar({
           transitionDuration: `${duration}ms`,
           boxShadow: glow ? `0 0 10px ${color}, 0 0 5px ${color}` : undefined,
         }}
-      >
-        {/* Shimmer Effect */}
-        {shimmer && (
-          <div
-            className="absolute top-0 right-0 h-full w-24 opacity-60"
-            style={{
-              background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)`,
-              transform: 'rotate(3deg) translate(0px, -4px)',
-            }}
-          />
-        )}
-      </div>
+      />
     </div>
   )
 }

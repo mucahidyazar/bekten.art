@@ -18,19 +18,17 @@ import {prepareMetadata} from '@/utils/prepareMetadata'
 export async function generateMetadata(): Promise<
   ReturnType<typeof prepareMetadata>
 > {
-  const title = '🎨 Get in Touch - Connect with Bekten Usubaliev'
-  const description =
-    '🎨 Reach out to Bekten Usubaliev, share your thoughts, or inquire about his mesmerizing artwork. Join the journey of exploring the depths of human emotions through art.'
+  const t = await getTranslations('contact')
 
   return await prepareMetadata({
-    title,
-    description,
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     page: 'contact',
   })
 }
 
 export default async function ContactPage() {
-  const t = await getTranslations()
+  const t = await getTranslations('contact')
   const contactInfo = await getContactInfo()
 
   if (!contactInfo) {
@@ -38,11 +36,10 @@ export default async function ContactPage() {
       <div className="w-full pt-8">
         <div className="container space-y-6 text-center">
           <h1 className="text-4xl font-bold lg:text-6xl">
-            Contact Information
+            {t('contactUnavailable')}
           </h1>
           <p className="text-muted-foreground text-xl">
-            Contact information is currently unavailable. Please try again
-            later.
+            {t('contactUnavailableDescription')}
           </p>
         </div>
       </div>
@@ -51,9 +48,9 @@ export default async function ContactPage() {
 
   // Parse working hours JSON
   let workingHours: Record<string, string> = {
-    'Monday - Friday': '9:00 AM - 6:00 PM',
-    Saturday: '10:00 AM - 4:00 PM',
-    Sunday: 'By Appointment',
+    'Monday - Friday': t('defaultWorkingHours.Monday - Friday'),
+    Saturday: t('defaultWorkingHours.Saturday'),
+    Sunday: t('defaultWorkingHours.Sunday'),
   }
 
   try {
@@ -81,16 +78,11 @@ export default async function ContactPage() {
             className="bg-primary/10 text-primary border-primary/20"
           >
             <MailIcon className="mr-2 h-3 w-3" />
-            Get in Touch
+            {t('title')}
           </Badge>
-          <h1 className="text-4xl font-bold lg:text-6xl">
-            Let's Create Something
-            <span className="text-primary block">Beautiful Together</span>
-          </h1>
+          <h1 className="text-4xl font-bold lg:text-6xl">{t('subtitle')}</h1>
           <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
-            Whether you're interested in commissioning a piece, discussing art,
-            or simply want to connect, I'd love to hear from you and explore the
-            possibilities.
+            {t('description')}
           </p>
         </div>
       </div>
@@ -105,7 +97,7 @@ export default async function ContactPage() {
                 <div className="bg-primary/20 flex h-8 w-8 items-center justify-center rounded-lg">
                   <PaletteIcon className="text-primary h-4 w-4" />
                 </div>
-                <span>Studio Information</span>
+                <span>{t('studioInfo')}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 p-6">
@@ -136,7 +128,7 @@ export default async function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-foreground mb-1 font-semibold">
-                      Phone
+                      {t('phone')}
                     </h3>
                     <a
                       href={`tel:${contactInfo.phone.replace(/\s/g, '')}`}
@@ -156,7 +148,7 @@ export default async function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-foreground mb-1 font-semibold">
-                      Email
+                      {t('email')}
                     </h3>
                     <a
                       href={`mailto:${contactInfo.email}`}
@@ -176,7 +168,7 @@ export default async function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-foreground mb-1 font-semibold">
-                      Instagram
+                      {t('instagram')}
                     </h3>
                     <a
                       href={contactInfo.instagram_url}
@@ -200,7 +192,7 @@ export default async function ContactPage() {
                   </div>
                   <div className="w-full">
                     <h3 className="text-foreground mb-2 font-semibold">
-                      Studio Hours
+                      {t('studioHours')}
                     </h3>
                     <div className="text-muted-foreground w-full space-y-1 text-sm">
                       {Object.entries(workingHours).map(([day, hours]) => (
@@ -225,7 +217,7 @@ export default async function ContactPage() {
                 <div className="bg-primary/20 flex h-8 w-8 items-center justify-center rounded-lg">
                   <MapPinIcon className="text-primary h-4 w-4" />
                 </div>
-                <span>Find My Studio</span>
+                <span>{t('findStudio')}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -242,10 +234,10 @@ export default async function ContactPage() {
                 />
                 <div className="border-border/50 absolute top-10 left-2 rounded-sm border bg-white px-4 py-1 backdrop-blur-sm">
                   <p className="text-xs font-medium text-blue-700">
-                    Bekten's Art Studio
+                    {t('studioName')}
                   </p>
                   <p className="text-[0.6rem] text-blue-700">
-                    Bishkek, Kyrgyzstan
+                    {t('studioLocation')}
                   </p>
                 </div>
               </div>
@@ -255,11 +247,11 @@ export default async function ContactPage() {
       </div>
 
       <CallToAction
-        title="Ready to Start a Conversation?"
-        description="Don't hesitate to reach out. Every great artwork begins with a simple conversation."
-        primaryButtonText="Send Email"
+        title={t('readyToTalk')}
+        description={t('readyDescription')}
+        primaryButtonText={t('sendEmail')}
         primaryButtonHref={`mailto:${contactInfo.email}`}
-        secondaryButtonText="Call Now"
+        secondaryButtonText={t('callNow')}
         secondaryButtonHref={`tel:${contactInfo.phone.replace(/\s/g, '')}`}
         iconName="mail"
         className="py-0"

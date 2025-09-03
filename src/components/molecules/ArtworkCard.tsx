@@ -1,6 +1,7 @@
 'use client'
 import {HeartIcon} from 'lucide-react'
 import Image from 'next/image'
+import {useTranslations} from 'next-intl'
 import {useState} from 'react'
 
 import {cn} from '@/utils'
@@ -21,6 +22,7 @@ export function ArtworkCard({
 }: ArtworkCardProps) {
   const [isLiked, setIsLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(artwork?.likes?.length || 0)
+  const t = useTranslations('cards.artworkCard')
 
   const handleLike = () => {
     // TODO: Implement with Supabase
@@ -38,7 +40,7 @@ export function ArtworkCard({
       <div className="relative aspect-square overflow-hidden">
         <Image
           src={artwork?.image || '/img/art/art-0.png'}
-          alt={artwork?.title || 'Artwork'}
+          alt={artwork?.title || t('defaultAlt')}
           fill
           priority={priority}
           className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
@@ -69,11 +71,11 @@ export function ArtworkCard({
       <div className="flex flex-col gap-3 p-6">
         <div className="space-y-2">
           <h3 className="font-bold text-lg text-foreground line-clamp-1 group-hover:text-primary transition-colors duration-300">
-            {artwork?.title || 'Untitled'}
+            {artwork?.title || t('untitled')}
           </h3>
           
           <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-            {artwork?.description || 'No description available'}
+            {artwork?.description || t('noDescription')}
           </p>
         </div>
 
@@ -81,13 +83,13 @@ export function ArtworkCard({
           <div className="flex items-center gap-1">
             <HeartIcon className="h-3 w-3 text-muted-foreground" />
             <span className="text-xs text-muted-foreground font-medium">
-              {likeCount} {likeCount === 1 ? 'like' : 'likes'}
+              {likeCount} {likeCount === 1 ? t('like') : t('likes')}
             </span>
           </div>
           
           {artwork?.artist?.name && (
             <span className="text-xs text-muted-foreground font-medium">
-              by {artwork.artist.name}
+              {t('by')} {artwork.artist.name}
             </span>
           )}
         </div>

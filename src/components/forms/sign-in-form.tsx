@@ -2,6 +2,7 @@
 
 import {zodResolver} from '@hookform/resolvers/zod'
 import {EyeIcon, EyeOffIcon, MailIcon} from 'lucide-react'
+import {useTranslations} from 'next-intl'
 import {useState} from 'react'
 import {useForm} from 'react-hook-form'
 import {z} from 'zod'
@@ -18,16 +19,20 @@ import {
 import {Input} from '@/components/ui/input'
 import {createClient} from '@/utils/supabase/client'
 
-const validationSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-})
-
-type FormValues = z.infer<typeof validationSchema>
+type FormValues = {
+  email: string
+  password: string
+}
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const t = useTranslations('forms')
+
+  const validationSchema = z.object({
+    email: z.string().email(t('validation.emailInvalid')),
+    password: z.string().min(8, t('validation.passwordLength')),
+  })
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -73,13 +78,13 @@ export function SignInForm() {
           render={({field}) => (
             <FormItem>
               <FormLabel className="text-sm font-medium text-foreground">
-                Email Address
+                {t('labels.email')}
               </FormLabel>
               <FormControl>
                 <div className="relative">
                   <MailIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input 
-                    placeholder="Enter your email" 
+                    placeholder={t('placeholders.enterEmail')} 
                     className="pl-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
                     {...field} 
                   />
@@ -96,13 +101,13 @@ export function SignInForm() {
           render={({field}) => (
             <FormItem>
               <FormLabel className="text-sm font-medium text-foreground">
-                Password
+                {t('labels.password')}
               </FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input 
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password" 
+                    placeholder={t('placeholders.enterPassword')} 
                     className="pr-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
                     {...field} 
                   />
@@ -130,13 +135,13 @@ export function SignInForm() {
               type="checkbox" 
               className="rounded border-muted text-primary focus:ring-primary"
             />
-            <span className="text-muted-foreground">Remember me</span>
+            <span className="text-muted-foreground">{t('messages.rememberMe')}</span>
           </label>
           <a 
             href="#" 
             className="text-primary hover:text-primary/80 transition-colors font-medium"
           >
-            Forgot password?
+            {t('messages.forgotPassword')}
           </a>
         </div>
 
@@ -148,10 +153,10 @@ export function SignInForm() {
           {isLoading ? (
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4  border-white/20 border-t-white rounded-full animate-spin" />
-              <span>Signing in...</span>
+              <span>{t('buttons.signingIn')}</span>
             </div>
           ) : (
-            'Sign In'
+            t('buttons.signIn')
           )}
         </Button>
       </form>

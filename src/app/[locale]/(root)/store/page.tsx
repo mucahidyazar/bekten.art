@@ -10,6 +10,7 @@ import {
   XCircleIcon,
 } from 'lucide-react'
 import Image from 'next/image'
+import {useTranslations} from 'next-intl'
 import {useState, useMemo} from 'react'
 import {unstable_ViewTransition as ViewTransition} from 'react'
 
@@ -32,6 +33,7 @@ import {
 type SortOption = 'featured' | 'price-low' | 'price-high' | 'newest' | 'oldest'
 
 export default function StorePage() {
+  const t = useTranslations()
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortOption>('featured')
 
@@ -70,13 +72,13 @@ export default function StorePage() {
       case 'available':
         return {
           icon: CheckCircleIcon,
-          text: 'Available',
+          text: t('store.available'),
           color: 'text-green-500',
         }
       case 'reserved':
-        return {icon: ClockIcon, text: 'Reserved', color: 'text-yellow-500'}
+        return {icon: ClockIcon, text: t('store.reserved'), color: 'text-yellow-500'}
       case 'sold':
-        return {icon: XCircleIcon, text: 'Sold', color: 'text-red-500'}
+        return {icon: XCircleIcon, text: t('store.sold'), color: 'text-red-500'}
     }
   }
 
@@ -115,7 +117,7 @@ export default function StorePage() {
         <div className="space-y-3">
           <div className="text-muted-foreground flex items-center space-x-2 text-sm">
             <FilterIcon className="h-4 w-4" />
-            <span>Filter by Category</span>
+            <span>{t('store.filterByCategory')}</span>
           </div>
           <div className="flex flex-wrap gap-3">
             {storeCategories.map(category => (
@@ -151,7 +153,7 @@ export default function StorePage() {
         <div className="space-y-3">
           <div className="text-muted-foreground flex items-center space-x-2 text-sm">
             <SortAscIcon className="h-4 w-4" />
-            <span>Sort by</span>
+            <span>{t('store.sortBy')}</span>
           </div>
           <Select
             value={sortBy}
@@ -161,11 +163,11 @@ export default function StorePage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="featured">Featured First</SelectItem>
-              <SelectItem value="price-low">Price: Low to High</SelectItem>
-              <SelectItem value="price-high">Price: High to Low</SelectItem>
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="featured">{t('store.featuredFirst')}</SelectItem>
+              <SelectItem value="price-low">{t('store.priceLowHigh')}</SelectItem>
+              <SelectItem value="price-high">{t('store.priceHighLow')}</SelectItem>
+              <SelectItem value="newest">{t('store.newestFirst')}</SelectItem>
+              <SelectItem value="oldest">{t('store.oldestFirst')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -221,7 +223,7 @@ export default function StorePage() {
                       size="sm"
                       className="bg-white text-black hover:bg-white/90"
                     >
-                      Quick View
+                      {t('store.quickView')}
                     </Button>
                   </div>
                 </div>
@@ -276,8 +278,8 @@ export default function StorePage() {
                     className="mt-3 w-full"
                   >
                     {artwork.availability === 'available'
-                      ? 'Inquire'
-                      : 'Unavailable'}
+                      ? t('store.inquire')
+                      : t('store.unavailable')}
                   </Button>
                 </div>
               </article>
@@ -291,16 +293,16 @@ export default function StorePage() {
         <div className="py-16 text-center">
           <PaletteIcon className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
           <h3 className="text-foreground mb-2 text-xl font-semibold">
-            No artworks found
+            {t('store.noArtworksFound')}
           </h3>
           <p className="text-muted-foreground">
-            Try adjusting your filters or browse all categories.
+            {t('store.adjustFilters')}
           </p>
         </div>
       )}
 
       {/* Newsletter CTA */}
-      <NewsletterCTA description="Be the first to know about new artworks, exclusive collections, and special exhibitions." />
+      <NewsletterCTA description={t('store.newsletterDescription')} />
     </div>
   )
 }

@@ -7,8 +7,13 @@ import {ViewTransitions} from 'next-view-transitions'
 import {Suspense} from 'react'
 
 import {GoogleTagManager} from '@/components/lib/google-tag-manager'
+import {
+  MusicProvider,
+  defaultTracks,
+} from '@/components/providers/MusicProvider'
 import {QueryProvider} from '@/components/providers/QueryProvider'
 import {ThemeProvider} from '@/components/providers/ThemeProvider'
+import {MusicPlayer} from '@/components/ui/MusicPlayer'
 import {Toaster} from '@/components/ui/toaster'
 import {prepareMetadata} from '@/utils/prepareMetadata'
 
@@ -80,7 +85,10 @@ export default async function RootLayout({children, params}: LayoutProps) {
                 enableSystem
                 themes={['light', 'dark', 'navy', 'system']}
               >
-                {children}
+                <MusicProvider defaultTracks={defaultTracks}>
+                  {children}
+                  <MusicPlayer />
+                </MusicProvider>
               </ThemeProvider>
             </QueryProvider>
           </NextIntlClientProvider>

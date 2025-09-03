@@ -2,6 +2,7 @@
 
 import {ChevronLeftIcon, ChevronRightIcon, QuoteIcon} from 'lucide-react'
 import Image from 'next/image'
+import {useTranslations} from 'next-intl'
 import {useState, useEffect} from 'react'
 
 import {SectionHeader} from '@/components/molecules/SectionHeader'
@@ -10,13 +11,6 @@ import {Button} from '@/components/ui/button'
 import {Card, CardContent} from '@/components/ui/card'
 import {testimonialsData} from '@/mocks/testimonials'
 
-const categoryLabels = {
-  artist: 'Sanatçı',
-  businessman: 'İş İnsanı',
-  politician: 'Devlet Adamı',
-  collector: 'Koleksiyoner',
-  critic: 'Sanat Eleştirmeni',
-}
 
 const categoryColors = {
   artist:
@@ -33,6 +27,15 @@ const categoryColors = {
 export function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const t = useTranslations('testimonials')
+
+  const categoryLabels = {
+    artist: t('categoryArtist'),
+    businessman: t('categoryBusinessman'),
+    politician: t('categoryPolitician'),
+    collector: t('categoryCollector'),
+    critic: t('categoryCritic'),
+  }
 
   // Auto-play functionality
   useEffect(() => {
@@ -68,10 +71,10 @@ export function TestimonialsSection() {
     <section className="from-background via-muted/20 to-background bg-gradient-to-br py-20">
       <div className="container lg:px-0">
         <SectionHeader
-          badgeText="Sanatçı Hakkında"
+          badgeText={t('badgeText')}
           badgeIcon="heart"
-          title="Değerli Görüşler"
-          description="Sanat dünyasından ve toplumun farklı kesimlerinden önemli isimlerin Bekten Usubaliev hakkındaki düşünceleri"
+          title={t('title')}
+          description={t('description')}
           className="mb-16"
         />
 
@@ -293,7 +296,7 @@ export function TestimonialsSection() {
                   }`}
                 ></div>
                 <span className="text-muted-foreground group-hover:text-foreground transition-colors duration-300">
-                  {isAutoPlaying ? 'Otomatik Oynatılıyor' : 'Manuel Kontrol'}
+                  {isAutoPlaying ? t('autoPlaying') : t('manualControl')}
                 </span>
                 <div className="text-primary/60 ml-1">
                   {isAutoPlaying ? '⏸️' : '▶️'}

@@ -9,6 +9,7 @@ import {
   BadgeCheckIcon,
 } from 'lucide-react'
 import Image from 'next/image'
+import {useTranslations} from 'next-intl'
 
 import {Badge} from '@/components/ui/badge'
 
@@ -38,30 +39,37 @@ interface ArtistHeroProps {
 }
 
 export function ArtistHero({
-  name = 'Bekten Usubaliev',
-  title = 'Kyrgyz Painter & Art Lecturer',
-  quote = 'Art is the language of the soul, speaking truths that words cannot express.',
+  name,
+  title,
+  quote,
   imageUrl = '/me.jpg',
-  badges = [
-    {icon: 'palette', label: 'Artist'},
-    {icon: 'graduation', label: 'Lecturer'},
-    {icon: 'heart', label: 'Passionate'},
-  ],
+  badges,
   className = '',
 }: ArtistHeroProps) {
-  const [firstName, lastName] = name.split(' ')
+  const t = useTranslations()
+  
+  const displayName = name || t('artist.defaultName')
+  const displayTitle = title || t('artist.defaultTitle')
+  const displayQuote = quote || t('artist.defaultQuote')
+  const displayBadges = badges || [
+    {icon: 'palette', label: t('artist.badgeArtist')},
+    {icon: 'graduation', label: t('artist.badgeLecturer')},
+    {icon: 'heart', label: t('artist.badgePassionate')},
+  ]
+
+  const [firstName, lastName] = displayName.split(' ')
 
   return (
     <div className={`mb-16 ${className}`}>
       <div className="grid items-center gap-12 md:grid-cols-3">
         {/* Profile Image - Clean and Simple */}
-        <div className="relative col-span-1 w-full">
+        <div className="relative col-span-1 h-full w-full">
           <Image
             src={imageUrl}
-            alt={name}
+            alt={displayName}
             width={400}
             height={400}
-            className="h-auto w-full rounded-2xl object-cover shadow-lg"
+            className="h-full w-auto rounded-2xl object-cover shadow-lg"
             priority
           />
         </div>
@@ -76,12 +84,12 @@ export function ArtistHero({
               )}
             </h1>
             <p className="text-muted-foreground text-xl leading-relaxed font-light md:text-2xl">
-              {title}
+              {displayTitle}
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            {badges.map((badge, index) => {
+            {displayBadges.map((badge, index) => {
               const IconComponent = iconMap[badge.icon]
               return (
                 <Badge
@@ -96,9 +104,9 @@ export function ArtistHero({
             })}
           </div>
 
-          {quote && (
+          {displayQuote && (
             <blockquote className="text-muted-foreground border-primary/30 border-l-4 pl-6 text-lg leading-relaxed italic">
-              &ldquo;{quote}&rdquo;
+              &ldquo;{displayQuote}&rdquo;
             </blockquote>
           )}
         </div>

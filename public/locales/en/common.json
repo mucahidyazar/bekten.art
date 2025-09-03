@@ -1,18 +1,457 @@
 {
-  "home": "Home",
-  "news": "News",
-  "about": "About",
-  "gallery": "Gallery",
-  "contact": "Contact",
-  "social": "Social",
-  "address": "Studio",
-  "privacyPolicy": "Privacy Policy",
-  "termsOfService": "Terms of Service",
-  "copyRight": "© {year} Bekten. All rights reserved. Designed by",
-  "slogan": "CONTEMPORARY OIL-FOCUSED PAINTER",
-  "biography1": "Bekten Usubaliev is a Kyrgyz painter who believes that art reveals the dreams, feelings, and independent spirit hidden within man. Not only does his artwork speak volumes, so does Bekten as a lecturer at the Kyrgyz State Art College, where he has taught since 1990. Born in 1958, he graduated from the Kyrgyz State Art College in 1981 and later earned a degree from the Repin Institute of Architecture, Sculpture, and Painting in St. Petersburg, Russia in 1989. He joined the Artists` Union of the Kyrgyz Republic in 1991.",
-  "biography2": "Bekten has shown his works in numerous national and international exhibitions, including a group exhibition of young artists in Almaty, Kazakhstan (1995); the second international biennale exhibition `Dialogues` in St. Petersburg, Russia (1995); the 70th anniversary celebration for Ch. Aitmatov in Brussels, Belgium (1997); an international exhibition in Teheran, Iran (2000); and a solo show in Bishkek (2001).",
-  "biography3": "His works can be seen at the Kyrgyz State Museum of Fine Art and in private collections throughout the CIS, USA, Germany, Turkey, and Great Britain.",
-  "locale": "{locale, select, en {English} tr {Turkish} ru {Russian} kg {Kyrgyz} other {Unknown}}",
-  "store": "Store"
+  "about": {
+    "achievements": "Achievements",
+    "biography": "Biography",
+    "dimensions": "Dimensions",
+    "emotion": "Emotion",
+    "exhibitions": "Exhibitions",
+    "masterpiece": "Masterpiece",
+    "medium": "Medium",
+    "philosophy": "Philosophy",
+    "teaching": "Teaching",
+    "technique": "Technique",
+    "year": "Year",
+
+    "artisticPhilosophy": "Artistic Philosophy",
+    "artworkDescription": "This piece represents the journey of life, where each brushstroke tells a story of movement, growth, and the eternal quest for meaning. The interplay of colors captures the essence of wandering through both physical and emotional landscapes.",
+    "artworksCreated": "Artworks Created",
+    "biographyCollections": "His works can be seen at the Kyrgyz State Museum of Fine Art and in private collections throughout the CIS, USA, Germany, Turkey, and Great Britain.",
+    "biographyEducation": "Bekten Usubaliev is a Kyrgyz painter who believes that art reveals the dreams, feelings, and independent spirit hidden within man. Not only does his artwork speak volumes, so does Bekten as a lecturer at the Kyrgyz State Art College, where he has taught since 1990. Born in 1958, he graduated from the Kyrgyz State Art College in 1981 and later earned a degree from the Repin Institute of Architecture, Sculpture, and Painting in St. Petersburg, Russia in 1989. He joined the Artists` Union of the Kyrgyz Republic in 1991.",
+    "biographyExhibitions": "Bekten has shown his works in numerous national and international exhibitions, including a group exhibition of young artists in Almaty, Kazakhstan (1995); the second international biennale exhibition `Dialogues` in St. Petersburg, Russia (1995); the 70th anniversary celebration for Ch. Aitmatov in Brussels, Belgium (1997); an international exhibition in Teheran, Iran (2000); and a solo show in Bishkek (2001).",
+    "connectDescription": "Ready to discuss art, commission a piece, or simply share your thoughts? I'd love to hear from you and explore how we can bring your artistic vision to life.",
+    "emotionDescription": "Every brushstroke carries the weight of human feeling",
+    "featuredWork": "Featured Work",
+    "journeyDescription": "Discover the path that led me to become the artist I am today",
+    "letsConnect": "Let's Connect",
+    "metaDescription": "🎨 Learn about Bekten Usubaliev's artistic journey, his philosophy, and his contributions to art. A painter who believes in the power of art to unveil the hidden realms of human emotions and dreams.",
+    "metaTitle": "🎨 About Bekten Usubaliev - Kyrgyz Painter & Art Lecturer",
+    "myJourney": "My Journey",
+    "philosophyDescription": "My beliefs and approach to creating meaningful art",
+    "philosophyText": "Art is not merely about creating beautiful images; it's about revealing the invisible threads that connect human experiences. Through my work, I strive to capture the essence of emotions that often remain unspoken, transforming them into visual narratives that resonate with the soul.",
+    "teachingDescription": "Sharing knowledge and inspiring the next generation of artists",
+    "techniqueDescription": "Mastering traditional methods while embracing innovation",
+    "viewGallery": "View Gallery",
+
+    "featuredWorkDescription": "One of my most celebrated pieces, showcasing the depth of human emotion through color and form",
+    "getInTouch": "Get in Touch",
+    "yearsOfExperience": "Years of Experience"
+  },
+  "artist": {
+    "badgeArtist": "Artist",
+    "badgeLecturer": "Lecturer",
+    "badgePassionate": "Passionate",
+    "defaultName": "Bekten Usubaliev",
+    "defaultQuote": "Art is the language of the soul, speaking truths that words cannot express.",
+    "defaultTitle": "Kyrgyz Painter & Art Lecturer"
+  },
+  "auth": {
+    "signIn": {
+      "subtitle": "Sign in to your account to continue",
+      "title": "Welcome Back",
+
+      "googleButton": "Continue with Google",
+      "noAccount": "Don't have an account?",
+      "orContinue": "Or continue with email",
+      "signUp": "Sign up"
+    },
+    "signUp": {
+      "subtitle": "Join Bekten Art community today",
+      "title": "Create Account",
+
+      "hasAccount": "Already have an account?",
+      "orContinue": "Or create account with email",
+      "signIn": "Sign in"
+    }
+  },
+  "branding": {
+    "locale": "{locale, select, en {English} tr {Turkish} ru {Russian} kg {Kyrgyz} other {Unknown}}",
+    "slogan": "CONTEMPORARY OIL-FOCUSED PAINTER"
+  },
+  "cards": {
+    "artworkCard": {
+      "by": "by",
+      "like": "like",
+      "likes": "likes",
+      "untitled": "Untitled",
+
+      "defaultAlt": "Artwork",
+      "noDescription": "No description available"
+    },
+    "eventCard": {
+      "free": "Free",
+
+      "defaultAddress": "1015 Chestnut St. Philadelphia, PA 19107",
+      "defaultTime": "7:00 PM - 9:00 PM",
+      "viewDetails": "View Event Details",
+
+      "months": {
+        "apr": "APR",
+        "aug": "AUG",
+        "dec": "DEC",
+        "feb": "FEB",
+        "jan": "JAN",
+        "jul": "JUL",
+        "jun": "JUN",
+        "mar": "MAR",
+        "may": "MAY",
+        "nov": "NOV",
+        "oct": "OCT",
+        "sep": "SEP"
+      }
+    },
+    "newsCard": {
+      "defaultAlt": "News",
+      "readMore": "Read More"
+    }
+  },
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "copy": "Copy",
+    "delete": "Delete",
+    "download": "Download",
+    "edit": "Edit",
+    "error": "Error",
+    "filter": "Filter",
+    "less": "Less",
+    "loading": "Loading...",
+    "more": "More",
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save",
+    "search": "Search",
+    "share": "Share",
+    "sort": "Sort",
+    "success": "Success",
+    "upload": "Upload",
+    "view": "View",
+
+    "learnMore": "Learn More",
+    "showLess": "Show Less",
+    "showMore": "Show More"
+  },
+  "contact": {
+    "address": "Studio",
+    "description": "Whether you're interested in commissioning a piece, discussing art, or simply want to connect, I'd love to hear from you and explore the possibilities.",
+    "email": "Email",
+    "instagram": "Instagram",
+    "phone": "Phone",
+    "subtitle": "Let's Create Something Beautiful Together",
+    "title": "Get in Touch",
+
+    "callNow": "Call Now",
+    "contactUnavailable": "Contact Information",
+    "findStudio": "Find My Studio",
+    "metaDescription": "🎨 Reach out to Bekten Usubaliev, share your thoughts, or inquire about his mesmerizing artwork. Join the journey of exploring the depths of human emotions through art.",
+    "metaTitle": "🎨 Get in Touch - Connect with Bekten Usubaliev",
+    "readyDescription": "Don't hesitate to reach out. Every great artwork begins with a simple conversation.",
+    "sendEmail": "Send Email",
+    "studioHours": "Studio Hours",
+    "studioInfo": "Studio Information",
+    "studioLocation": "Bishkek, Kyrgyzstan",
+    "studioName": "Bekten's Art Studio",
+
+    "contactUnavailableDescription": "Contact information is currently unavailable. Please try again later.",
+    "readyToTalk": "Ready to Start a Conversation?",
+
+    "defaultWorkingHours": {
+      "Saturday": "10:00 AM - 4:00 PM",
+      "Sunday": "By Appointment",
+
+      "Monday - Friday": "9:00 AM - 6:00 PM"
+    }
+  },
+  "cta": {
+    "default": {
+      "button1": "View Full Gallery",
+      "button2": "Get in Touch",
+      "description": "Discover the full collection of Bekten's masterpieces and connect with the soul of contemporary art.",
+      "title": "Ready to Start Your Art Journey?"
+    },
+    "newsletter": {
+      "description": "Never miss an exhibition, workshop, or artistic milestone. Join our community of art enthusiasts.",
+      "placeholder": "Enter your email address",
+      "title": "Stay Updated"
+    }
+  },
+  "forms": {
+    "buttons": {
+      "create": "Create",
+      "subscribe": "Subscribe",
+      "subscribing": "Subscribing...",
+
+      "createAccount": "Create Account",
+      "creatingAccount": "Creating account...",
+      "signIn": "Sign In",
+      "signingIn": "Signing in..."
+    },
+    "labels": {
+      "address": "Address",
+      "description": "Description",
+      "email": "Email Address",
+      "image": "Image",
+      "link": "Link",
+      "message": "Message",
+      "note": "Note",
+      "password": "Password",
+      "subtitle": "Subtitle",
+      "title": "Title",
+
+      "confirmPassword": "Confirm Password",
+      "fullName": "Full Name"
+    },
+    "messages": {
+      "forgotPassword": "Forgot password?",
+      "noSpam": "No spam",
+      "rememberMe": "Remember me",
+      "subscribeDescription": "You'll receive our latest updates soon.",
+      "subscribeSuccess": "Successfully subscribed!",
+      "termsAgreement": "By creating an account, you agree to our Terms of Service and Privacy Policy",
+      "unsubscribeAnytime": "Unsubscribe anytime",
+      "weeklyUpdates": "Weekly updates",
+
+      "signInSuccess": "Successfully signed in"
+    },
+    "placeholders": {
+      "confirmPassword": "Confirm your password",
+      "createPassword": "Create a password",
+      "enterAddress": "Address",
+      "enterDescription": "Description",
+      "enterEmail": "Enter your email",
+      "enterLink": "Link",
+      "enterLocation": "Location: Bishkek, Kyrgyzstan or Moscow, Russia",
+      "enterName": "Enter your full name",
+      "enterNote": "Note",
+      "enterPassword": "Enter your password",
+      "enterSubtitle": "Subtitle",
+      "enterTitle": "Title",
+      "pickDate": "Pick a date",
+      "typeMessage": "Type your message here."
+    },
+    "validation": {
+      "emailInvalid": "Please enter a valid email address",
+      "loginRequired": "You must be logged in to send feedback.",
+      "nameRequired": "Name must be at least 2 characters",
+      "passwordConfirm": "Please confirm your password",
+      "passwordLength": "Password must be at least 8 characters",
+      "passwordsMatch": "Passwords don't match"
+    }
+  },
+  "gallery": {
+    "fetchError": "We could not fetch the photos. Please try again later.",
+    "metaDescription": "🎨 Step into the gallery of Bekten Usubaliev and witness a collection of art that transcends boundaries, each piece echoing the profound sentiments and dreams of the human spirit.",
+    "metaTitle": "🎨 Art Gallery - Explore Bekten Usubaliev's Masterpieces"
+  },
+  "header": {
+    "logoAlt": "logo"
+  },
+  "homepage": {
+    "artistBadge": "Master Kyrgyz Artist",
+    "artistDescription": "Unveiling the hidden emotions and dreams within the human spirit through masterful brushstrokes",
+    "artistName": "Bekten Usubaliev",
+    "collectionBadge": "Featured Collection",
+    "collectionDescription": "Each artwork tells a unique story, capturing moments of human emotion and the beauty of Kyrgyz culture",
+    "collectionTitle": "Memories in Paint",
+    "heroButton1": "Discover Art",
+    "heroButton2": "Meet Artist",
+    "heroDescription": "Creating timeless masterpieces that capture the essence of human emotion",
+    "heroSubtitle": "Where soul meets canvas",
+    "heroTitle": "Contemporary Master",
+    "metaDescription": "🎨 Discover the artistic world of Bekten Usubaliev, a renowned Kyrgyz painter known for his unique ability to unveil the hidden emotions and dreams encapsulated within the human spirit.",
+    "metaTitle": "🎨 Bekten Usubaliev - Master Kyrgyz Painter Unveiling Human Emotions",
+    "stat1Description": "Created with passion and precision",
+    "stat1Title": "50+ Masterful Artworks",
+    "stat2Description": "Dedicated to artistic excellence",
+    "stat2Title": "25+ Years of Experience",
+    "stat3Description": "Worldwide art enthusiasts",
+    "stat3Title": "100+ Happy Collectors",
+    "statsButton1": "Explore Gallery",
+    "statsButton2": "About Artist",
+    "storeBadge": "Limited Collection",
+    "storeDescription": "Exclusive opportunity to own an original Bekten Usubaliev masterpiece",
+    "storeTitle": "Artworks on Sale",
+    "workshopBadge": "Behind the Art",
+    "workshopDescription": "Step into the creative sanctuary where masterpieces come to life, where tradition meets innovation",
+    "workshopTitle": "The Creative Workshop"
+  },
+  "legal": {
+    "copyRight": "© {year} Bekten. All rights reserved. Designed by",
+    "privacyPolicy": "Privacy Policy",
+
+    "termsOfService": "Terms of Service",
+
+    "privacyPolicyPage": {
+      "introduction": "Introduction",
+      "title": "Privacy Policy",
+      "website": "Website: bekten.art",
+
+      "additionalData": "Data from additional relations: Accounts, Sessions, Artworks, Artwork Likes, Socials, Feedbacks, Press, and News.",
+      "changesNotification": "Any changes to the privacy policy will be communicated via email.",
+      "contactEmail": "Contact Email: mucahidyazar@gmail.com",
+      "dataSecurity": "Data Security",
+      "dataSharing": "Data Sharing and Disclosure",
+      "informationCollected": "Information Collected",
+      "policyChanges": "Policy Changes",
+      "rightsDescription": "Users have the right to access, modify, and delete their personal information.",
+      "securityDescription": "The website relies on services like Supabase, Prisma, and Vercel for security and operational functionality. No additional specific security measures are taken by bekten.art itself.",
+      "servicesPurpose": "To facilitate services such as providing feedback to artists and showcasing artists' artworks on the website.",
+      "userDetails": "Details from the User model: ID, Name, Email, Email Verified, Image, Profession, Description, Location, Role, Created At, Updated At, Share Data Preferences, and Email Subscription Preferences.",
+      "userRights": "User Rights",
+
+      "noThirdParty": "Personal data is not shared with any third parties and is exclusively used for the functioning of bekten.art.",
+      "purposeOfCollection": "Purpose of Data Collection"
+    },
+
+    "termsOfServicePage": {
+      "introduction": "Introduction",
+      "title": "Terms of Service",
+      "website": "Website: bekten.art",
+
+      "contactEmail": "Contact Email: mucahidyazar@gmail.com",
+      "disputeDescription": "Disputes or concerns should be addressed to the website administrator or through the contact information provided.",
+      "disputeResolution": "Dispute Resolution",
+      "generalInformation": "General Information about the Site",
+      "intellectualProperty": "Intellectual Property",
+      "liabilityDescription": "bekten.art is not liable for any direct or indirect consequences of user activities on the site.",
+      "liabilityLimitations": "Liability Limitations",
+      "propertyDescription": "Artworks and content displayed on the site are the property of their respective artists and protected under copyright laws.",
+      "responsibilitiesDescription": "Users are expected to abide by the rules of conduct on the site, respecting the intellectual property rights of artists and refraining from any form of harassment or abusive behavior.",
+      "siteDescription": "bekten.art is a platform showcasing artworks by various artists, including your father. It allows users to leave feedback on artist profiles and view artworks in a store section. The purchase of artworks is facilitated through direct communication with the artists, and no online transactions are conducted through the website.",
+      "usageDescription": "The website is designed for showcasing artworks and providing feedback to artists. Users are prohibited from posting offensive content, including but not limited to hate speech, pornography, and abusive language.",
+      "usageTerms": "Usage Terms",
+      "userResponsibilities": "User Responsibilities"
+    }
+  },
+  "navigation": {
+    "about": "About",
+    "contact": "Contact",
+    "gallery": "Gallery",
+    "home": "Home",
+    "news": "News",
+    "store": "Store"
+  },
+  "news": {
+    "address": "Address",
+    "featured": "Featured",
+    "location": "Location",
+    "published": "Published",
+
+    "dateTime": "Date & Time",
+    "extendedContent1": "This event represents another milestone in Bekten Usubaliev's distinguished career as one of Kyrgyzstan's most celebrated contemporary artists. With over 25 years of experience in the art world, Usubaliev continues to push the boundaries of traditional painting while honoring his cultural heritage.",
+    "extendedContent2": "The artist's work has been featured in numerous international exhibitions, from Luxembourg and Hungary to Turkey, where his paintings were showcased as part of the TÜRKSOY plein air program. His unique approach to oil painting combines classical techniques with modern sensibilities, creating works that speak to both local and global audiences.",
+    "extendedContent3": "Visitors can expect to experience not just visual art, but a journey through the rich tapestry of Kyrgyz culture and the universal themes that connect all humanity. Each piece in the collection tells a story, inviting viewers to explore their own emotions and memories through the artist's masterful use of color, light, and composition.",
+    "followDescription": "Follow Bekten Usubaliev's artistic journey and never miss an update.",
+    "importantNote": "Important Note",
+    "latestUpdates": "Latest Updates",
+    "metaDescription": "🎨 Stay updated with the latest news, exhibitions, and artistic endeavors of Bekten Usubaliev. Discover upcoming events, art showcases, and behind-the-scenes insights into the world of contemporary Kyrgyz art.",
+    "metaTitle": "🎨 Latest Art News - Bekten Usubaliev's Exhibitions & Updates",
+    "newsDescription": "Stay updated with Bekten's latest exhibitions, events, and artistic journey",
+    "readMore": "Read More",
+    "relatedNews": "Related News",
+    "stayConnected": "Stay Connected",
+
+    "allNewsEvents": "All News & Events",
+    "backToNews": "Back to News",
+    "newsNotFound": "News Not Found",
+
+    "newsNotFoundDescription": "The requested news article could not be found."
+  },
+  "profile": {
+    "defaultBio": "Art enthusiast and collector. Passionate about contemporary and digital art.",
+    "defaultInterests": [
+      "Contemporary Art",
+      "Digital Art",
+      "Paintings",
+      "Sculptures",
+      "Photography"
+    ],
+    "defaultLocation": "Bishkek, Kyrgyzstan",
+    "defaultWebsite": "https://bekten.art",
+    "metaDescription": "View and manage your Bekten Art profile, artworks, and collections.",
+    "metaTitle": "User Profile - Bekten Art",
+
+    "activities": {
+      "liked": "Liked \"{title}\" artwork",
+      "subscribed": "Subscribed to newsletter",
+
+      "addedToCollection": "Added to \"{collection}\" collection"
+    },
+    "labels": {
+      "bio": "Bio",
+      "email": "Email",
+      "location": "Location",
+      "name": "Name",
+      "role": "Role",
+      "website": "Website",
+
+      "editProfile": "Edit Profile",
+      "memberSince": "Member since",
+      "signOut": "Sign Out",
+
+      "lastSignIn": "Last sign in"
+    },
+    "messages": {
+      "anonymousUser": "Anonymous User",
+      "noActivities": "No recent activities",
+      "noInterests": "No interests added yet",
+
+      "profileNotFound": "Profile not found",
+
+      "profileNotFoundDescription": "The requested profile could not be found."
+    },
+    "roles": {
+      "administrator": "Administrator",
+      "artist": "Artist",
+      "user": "User"
+    },
+    "sections": {
+      "interests": "Interests",
+
+      "accountStats": "Account Statistics",
+      "profileInfo": "Profile Information",
+      "recentActivity": "Recent Activity"
+    },
+    "stats": {
+      "collections": "Collections",
+      "followers": "Followers",
+      "following": "Following",
+
+      "artworksLiked": "Artworks Liked"
+    }
+  },
+  "store": {
+    "available": "Available",
+    "inquire": "Inquire",
+    "reserved": "Reserved",
+    "sold": "Sold",
+    "unavailable": "Unavailable",
+
+    "adjustFilters": "Try adjusting your filters or browse all categories.",
+    "featuredFirst": "Featured First",
+    "newestFirst": "Newest First",
+    "newsletterDescription": "Be the first to know about new artworks, exclusive collections, and special exhibitions.",
+    "oldestFirst": "Oldest First",
+    "quickView": "Quick View",
+    "sortBy": "Sort by",
+
+    "filterByCategory": "Filter by Category",
+    "noArtworksFound": "No artworks found",
+    "priceHighLow": "Price: High to Low",
+    "priceLowHigh": "Price: Low to High"
+  },
+  "testimonials": {
+    "description": "Thoughts about Bekten Usubaliev from important figures in the art world and different segments of society",
+    "title": "Valued Opinions",
+
+    "autoPlaying": "Auto Playing",
+    "badgeText": "About Artist",
+    "categoryArtist": "Artist",
+    "categoryBusinessman": "Businessman",
+    "categoryCollector": "Collector",
+    "categoryCritic": "Art Critic",
+    "categoryPolitician": "Statesman",
+    "manualControl": "Manual Control"
+  }
 }

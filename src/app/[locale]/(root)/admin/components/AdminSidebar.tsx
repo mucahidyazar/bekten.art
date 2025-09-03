@@ -7,7 +7,6 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  Palette,
   LogOut,
   MessageSquare,
 } from 'lucide-react'

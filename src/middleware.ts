@@ -4,7 +4,7 @@ import createMiddleware from 'next-intl/middleware'
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware({
-  locales: ['en', 'tr'],
+  locales: ['en', 'tr', 'ru', 'kg'],
   defaultLocale: 'en',
   localePrefix: 'never' // This will keep URLs without locale prefix
 })

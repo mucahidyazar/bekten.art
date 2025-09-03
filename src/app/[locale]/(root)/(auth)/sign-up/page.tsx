@@ -1,16 +1,20 @@
+import {getTranslations} from 'next-intl/server'
+
 import {SignUpForm} from '@/components/forms/sign-up-form'
 import {AuthSection} from '@/components/molecules/auth-section'
 
 export default async function SignUpPage() {
+  const t = await getTranslations('auth.signUp')
+  
   return (
     <div className="w-full space-y-4">
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Create Account
+          {t('auth.signUp.title')}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Join Bekten Art community today
+          {t('auth.signUp.subtitle')}
         </p>
       </div>
 
@@ -24,7 +28,7 @@ export default async function SignUpPage() {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-card px-3 py-1 text-muted-foreground font-medium">
-            Or create account with email
+            {t('auth.signUp.orContinue')}
           </span>
         </div>
       </div>
@@ -35,12 +39,12 @@ export default async function SignUpPage() {
       {/* Footer */}
       <div className="text-center text-sm text-muted-foreground">
         <p>
-          Already have an account?{' '}
+          {t('auth.signUp.hasAccount')}{' '}
           <a 
             href="/sign-in" 
             className="font-medium text-primary hover:text-primary/80 transition-colors"
           >
-            Sign in
+            {t('auth.signUp.signIn')}
           </a>
         </p>
       </div>

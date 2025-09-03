@@ -1,61 +1,55 @@
+import {useTranslations} from 'next-intl'
+
 export default function Page() {
+  const t = useTranslations()
+
   return (
     <section className="flex flex-col gap-2 text-xs">
-      <h1 className="text-lg font-bold">Terms of Service</h1>
+      <h1 className="text-lg font-bold">
+        {t('legal.termsOfServicePage.title')}
+      </h1>
       <ul>
-        <h2 className="text-base font-semibold">Introduction</h2>
-        <li>Website: bekten.art</li>
-        <li>Contact Email: mucahidyazar@gmail.com</li>
-      </ul>
-      <ul>
-        <h2 className="text-base font-semibold">Usage Terms</h2>
-        <li>
-          The website is designed for showcasing artworks and providing feedback
-          to artists. Users are prohibited from posting offensive content,
-          including but not limited to hate speech, pornography, and abusive
-          language.
-        </li>
-      </ul>
-      <ul>
-        <h2 className="text-base font-semibold">Intellectual Property</h2>
-        <li>
-          Artworks and content displayed on the site are the property of their
-          respective artists and protected under copyright laws.
-        </li>
-      </ul>
-      <ul>
-        <h2 className="text-base font-semibold">User Responsibilities</h2>
-        <li>
-          Users are expected to abide by the rules of conduct on the site,
-          respecting the intellectual property rights of artists and refraining
-          from any form of harassment or abusive behavior.
-        </li>
-      </ul>
-      <ul>
-        <h2 className="text-base font-semibold">Liability Limitations</h2>
-        <li>
-          bekten.art is not liable for any direct or indirect consequences of
-          user activities on the site.
-        </li>
-      </ul>
-      <ul>
-        <h2 className="text-base font-semibold">Dispute Resolution</h2>
-        <li>
-          Disputes or concerns should be addressed to the website administrator
-          or through the contact information provided.
-        </li>
+        <h2 className="text-base font-semibold">
+          {t('legal.termsOfServicePage.introduction')}
+        </h2>
+        <li>{t('legal.termsOfServicePage.website')}</li>
+        <li>{t('legal.termsOfServicePage.contactEmail')}</li>
       </ul>
       <ul>
         <h2 className="text-base font-semibold">
-          General Information about the Site
+          {t('legal.termsOfServicePage.usageTerms')}
         </h2>
-        <li>
-          bekten.art is a platform showcasing artworks by various artists,
-          including your father. It allows users to leave feedback on artist
-          profiles and view artworks in a store section. The purchase of
-          artworks is facilitated through direct communication with the artists,
-          and no online transactions are conducted through the website.
-        </li>
+        <li>{t('legal.termsOfServicePage.usageDescription')}</li>
+      </ul>
+      <ul>
+        <h2 className="text-base font-semibold">
+          {t('legal.termsOfServicePage.intellectualProperty')}
+        </h2>
+        <li>{t('legal.termsOfServicePage.propertyDescription')}</li>
+      </ul>
+      <ul>
+        <h2 className="text-base font-semibold">
+          {t('legal.termsOfServicePage.userResponsibilities')}
+        </h2>
+        <li>{t('legal.termsOfServicePage.responsibilitiesDescription')}</li>
+      </ul>
+      <ul>
+        <h2 className="text-base font-semibold">
+          {t('legal.termsOfServicePage.liabilityLimitations')}
+        </h2>
+        <li>{t('legal.termsOfServicePage.liabilityDescription')}</li>
+      </ul>
+      <ul>
+        <h2 className="text-base font-semibold">
+          {t('legal.termsOfServicePage.disputeResolution')}
+        </h2>
+        <li>{t('legal.termsOfServicePage.disputeDescription')}</li>
+      </ul>
+      <ul>
+        <h2 className="text-base font-semibold">
+          {t('legal.termsOfServicePage.generalInformation')}
+        </h2>
+        <li>{t('legal.termsOfServicePage.siteDescription')}</li>
       </ul>
     </section>
   )

@@ -2,6 +2,7 @@
 
 import {ArrowRightIcon, PaletteIcon, MailIcon, HeartIcon} from 'lucide-react'
 import Link from 'next/link'
+import {useTranslations} from 'next-intl'
 
 import {Button} from '@/components/ui/button'
 
@@ -17,15 +18,16 @@ interface CallToActionProps {
 }
 
 export function CallToAction({
-  title = 'Ready to Start Your Art Journey?',
-  description = "Discover the full collection of Bekten's masterpieces and find the perfect piece that speaks to your soul",
-  primaryButtonText = 'View Full Gallery',
+  title,
+  description,
+  primaryButtonText,
   primaryButtonHref = '/gallery',
-  secondaryButtonText = 'Get in Touch',
+  secondaryButtonText,
   secondaryButtonHref = '/contact',
   iconName = 'palette',
   className = '',
 }: CallToActionProps) {
+  const t = useTranslations('cta.default')
   const iconMap = {
     palette: PaletteIcon,
     mail: MailIcon,
@@ -48,9 +50,9 @@ export function CallToAction({
               <div className="from-primary to-primary/80 shadow-primary/25 mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg">
                 <IconComponent className="text-primary-foreground h-7 w-7" />
               </div>
-              <h2 className="mb-4 text-3xl font-bold lg:text-4xl">{title}</h2>
+              <h2 className="mb-4 text-3xl font-bold lg:text-4xl">{title || t('title')}</h2>
               <p className="text-muted-foreground mx-auto max-w-2xl text-lg leading-relaxed">
-                {description}
+                {description || t('description')}
               </p>
             </div>
 
@@ -61,7 +63,7 @@ export function CallToAction({
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-primary/25 shadow-lg transition-all duration-300 hover:shadow-xl"
                 >
-                  {primaryButtonText}
+                  {primaryButtonText || t('button1')}
                   <ArrowRightIcon className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -71,7 +73,7 @@ export function CallToAction({
                   size="lg"
                   className="border-ring/30 text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                 >
-                  {secondaryButtonText}
+                  {secondaryButtonText || t('button2')}
                 </Button>
               </Link>
             </div>
