@@ -4,7 +4,7 @@ import {prepareMetadata} from '@/utils/prepareMetadata'
 export async function generateMetadata() {
   const {getTranslations} = await import('next-intl/server')
   const t = await getTranslations('gallery')
-  
+
   return await prepareMetadata({
     title: t('metaTitle'),
     description: t('metaDescription'),
