@@ -1,9 +1,9 @@
 import {Badge} from '@/components/ui/badge'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 
-import DashboardStats from '../components/DashboardStats'
-import QuickActions from '../components/QuickActions'
-import RecentActivity from '../components/RecentActivity'
+import DashboardStats from '../components/dashboard-stats'
+import QuickActions from '../components/quick-actions'
+import RecentActivity from '../components/recent-activity'
 
 export default function AdminOverviewPage() {
   return (

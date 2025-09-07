@@ -84,7 +84,9 @@ export function ProgressBar({
     const listener = (state: {isLoading: boolean; progress: number}) => {
       setLocalState(state)
     }
+
     globalProgressState.listeners.add(listener)
+
     return () => {
       globalProgressState.listeners.delete(listener)
     }
@@ -155,6 +157,7 @@ ProgressBar.set = (progress: number) => {
 }
 ProgressBar.inc = (amount: number = 0.1) => {
   const newProgress = Math.min(100, globalProgressState.progress + amount * 100)
+
   updateGlobalProgress({progress: newProgress})
 }
 

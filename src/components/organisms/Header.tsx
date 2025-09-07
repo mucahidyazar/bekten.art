@@ -3,11 +3,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import {getTranslations} from 'next-intl/server'
 
-import {Navbar} from '@/components/Navbar'
+import {Navbar} from '@/components/navbar'
 import {cn} from '@/utils'
 import {getUser} from '@/utils/supabase/server'
 
-import {AppTools} from '../molecules/AppTools'
+import {AppTools} from '../molecules/app-tools'
 
 const nanum = Nanum_Brush_Script({
   subsets: ['latin'],
@@ -31,8 +31,7 @@ export async function Header() {
               width={120}
               height={40}
               priority
-              style={{ width: 'auto', height: 'auto' }}
-              className="mb-4 cursor-pointer"
+              className="mb-4 h-auto w-30 cursor-pointer"
             />
           </Link>
           <p

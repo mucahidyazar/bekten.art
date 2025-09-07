@@ -1,4 +1,5 @@
 'use client'
+
 import {zodResolver} from '@hookform/resolvers/zod'
 import {format} from 'date-fns'
 import {CalendarIcon} from 'lucide-react'
@@ -7,7 +8,7 @@ import {z} from 'zod'
 
 import {createNews} from '@/actions/news'
 import {Button} from '@/components/ui/button'
-import {useServerAction} from '@/hooks/useServerAction'
+import {useServerAction} from '@/hooks/use-server-action'
 import {cn} from '@/utils'
 
 import {Calendar} from '../ui/calendar'

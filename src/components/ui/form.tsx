@@ -1,4 +1,5 @@
-import * as LabelPrimitive from '@radix-ui/react-label'
+'use client'
+
 import {Slot} from '@radix-ui/react-slot'
 import * as React from 'react'
 import {
@@ -82,11 +83,12 @@ const FormItem = React.forwardRef<
     </FormItemContext.Provider>
   )
 })
+
 FormItem.displayName = 'FormItem'
 
 const FormLabel = React.forwardRef<
-  React.ElementRef<typeof LabelPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+  React.ElementRef<typeof Label>,
+  React.ComponentPropsWithoutRef<typeof Label>
 >(({className, ...props}, ref) => {
   const {error, formItemId} = useFormField()
 
@@ -99,6 +101,7 @@ const FormLabel = React.forwardRef<
     />
   )
 })
+
 FormLabel.displayName = 'FormLabel'
 
 const FormControl = React.forwardRef<
@@ -121,6 +124,7 @@ const FormControl = React.forwardRef<
     />
   )
 })
+
 FormControl.displayName = 'FormControl'
 
 const FormDescription = React.forwardRef<
@@ -138,6 +142,7 @@ const FormDescription = React.forwardRef<
     />
   )
 })
+
 FormDescription.displayName = 'FormDescription'
 
 const FormMessage = React.forwardRef<
@@ -162,6 +167,7 @@ const FormMessage = React.forwardRef<
     </p>
   )
 })
+
 FormMessage.displayName = 'FormMessage'
 
 export {

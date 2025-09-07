@@ -16,6 +16,7 @@ const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
     />
   )
 )
+
 Label.displayName = "Label"
 
 export interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {}

@@ -21,6 +21,7 @@ export function Tabs({tabs}: TabsProps) {
     <div className="grid grid-cols-2 gap-1">
       {tabs.map(tab => {
         const isActive = pathname.includes(tab.value)
+
         return (
           <button
             key={tab.value}

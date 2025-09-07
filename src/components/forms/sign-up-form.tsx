@@ -38,6 +38,7 @@ export function SignUpForm() {
   const t = useTranslations('forms')
 
   const validationSchema = createValidationSchema(t)
+
   type FormValues = z.infer<typeof validationSchema>
 
   const form = useForm<FormValues>({
@@ -62,7 +63,7 @@ export function SignUpForm() {
           }
         }
       })
-      
+
       if (error) {
         console.error('Error signing up:', error.message)
         // TODO: Show error toast
@@ -94,10 +95,10 @@ export function SignUpForm() {
               <FormControl>
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input 
-                    placeholder={t('placeholders.enterName')} 
+                  <Input
+                    placeholder={t('placeholders.enterName')}
                     className="pl-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
-                    {...field} 
+                    {...field}
                   />
                 </div>
               </FormControl>
@@ -117,10 +118,10 @@ export function SignUpForm() {
               <FormControl>
                 <div className="relative">
                   <MailIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input 
-                    placeholder={t('placeholders.enterEmail')} 
+                  <Input
+                    placeholder={t('placeholders.enterEmail')}
                     className="pl-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
-                    {...field} 
+                    {...field}
                   />
                 </div>
               </FormControl>
@@ -139,11 +140,11 @@ export function SignUpForm() {
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Input 
+                  <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder={t('placeholders.createPassword')} 
+                    placeholder={t('placeholders.createPassword')}
                     className="pr-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
-                    {...field} 
+                    {...field}
                   />
                   <button
                     type="button"
@@ -173,11 +174,11 @@ export function SignUpForm() {
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Input 
+                  <Input
                     type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder={t('placeholders.confirmPassword')} 
+                    placeholder={t('placeholders.confirmPassword')}
                     className="pr-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
-                    {...field} 
+                    {...field}
                   />
                   <button
                     type="button"
@@ -201,8 +202,8 @@ export function SignUpForm() {
           <p dangerouslySetInnerHTML={{ __html: t('messages.termsAgreement') }} />
         </div>
 
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors"
           disabled={isLoading}
         >

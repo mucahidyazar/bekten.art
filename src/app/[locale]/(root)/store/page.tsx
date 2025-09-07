@@ -1,20 +1,23 @@
 'use client'
 
 import {
-  FilterIcon,
-  SortAscIcon,
-  StarIcon,
-  PaletteIcon,
   CheckCircleIcon,
   ClockIcon,
+  FilterIcon,
+  PaletteIcon,
+  SortAscIcon,
+  StarIcon,
   XCircleIcon,
 } from 'lucide-react'
 import Image from 'next/image'
 import {useTranslations} from 'next-intl'
-import {useState, useMemo} from 'react'
-import {unstable_ViewTransition as ViewTransition} from 'react'
+import {
+  useMemo,
+  useState,
+  unstable_ViewTransition as ViewTransition,
+} from 'react'
 
-import {NewsletterCTA} from '@/components/molecules/NewsletterCTA'
+import {NewsletterCTA} from '@/components/molecules/newsletter-cta'
 import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
 import {
@@ -48,6 +51,7 @@ export default function StorePage() {
         case 'featured':
           if (a.featured && !b.featured) return -1
           if (!a.featured && b.featured) return 1
+
           return b.year - a.year
         case 'price-low':
           return a.price - b.price
@@ -76,7 +80,11 @@ export default function StorePage() {
           color: 'text-green-500',
         }
       case 'reserved':
-        return {icon: ClockIcon, text: t('store.reserved'), color: 'text-yellow-500'}
+        return {
+          icon: ClockIcon,
+          text: t('store.reserved'),
+          color: 'text-yellow-500',
+        }
       case 'sold':
         return {icon: XCircleIcon, text: t('store.sold'), color: 'text-red-500'}
     }
@@ -91,11 +99,11 @@ export default function StorePage() {
             Art Store
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Discover and collect original artworks by Bekten Usubaliev. Each piece tells a story of Kyrgyz culture, 
+            Discover and collect original artworks by Bekten Usubaliev. Each piece tells a story of Kyrgyz culture,
             contemporary expression, and artistic mastery.
           </p>
         </div>
-        
+
         <div className="flex items-center justify-center space-x-8 text-sm text-muted-foreground">
           <div className="flex items-center space-x-2">
             <PaletteIcon className="w-4 h-4" />
@@ -163,9 +171,15 @@ export default function StorePage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="featured">{t('store.featuredFirst')}</SelectItem>
-              <SelectItem value="price-low">{t('store.priceLowHigh')}</SelectItem>
-              <SelectItem value="price-high">{t('store.priceHighLow')}</SelectItem>
+              <SelectItem value="featured">
+                {t('store.featuredFirst')}
+              </SelectItem>
+              <SelectItem value="price-low">
+                {t('store.priceLowHigh')}
+              </SelectItem>
+              <SelectItem value="price-high">
+                {t('store.priceHighLow')}
+              </SelectItem>
               <SelectItem value="newest">{t('store.newestFirst')}</SelectItem>
               <SelectItem value="oldest">{t('store.oldestFirst')}</SelectItem>
             </SelectContent>
@@ -295,9 +309,7 @@ export default function StorePage() {
           <h3 className="text-foreground mb-2 text-xl font-semibold">
             {t('store.noArtworksFound')}
           </h3>
-          <p className="text-muted-foreground">
-            {t('store.adjustFilters')}
-          </p>
+          <p className="text-muted-foreground">{t('store.adjustFilters')}</p>
         </div>
       )}
 

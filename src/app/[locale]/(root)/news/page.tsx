@@ -1,15 +1,15 @@
-import {CalendarIcon, MapPinIcon, ClockIcon} from 'lucide-react'
+import {CalendarIcon, ClockIcon, MapPinIcon} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {unstable_ViewTransition as ViewTransition} from 'react'
 
-import {NewsletterCTA} from '@/components/molecules/NewsletterCTA'
-import {SectionHeader} from '@/components/molecules/SectionHeader'
+import {NewsletterCTA} from '@/components/molecules/newsletter-cta'
+import {SectionHeader} from '@/components/molecules/section-header'
 import {mockNewsData} from '@/mocks/news'
-import {formatDate} from '@/utils/formatDate'
-import {prepareMetadata} from '@/utils/prepareMetadata'
+import {formatDate} from '@/utils/format-date'
+import {prepareMetadata} from '@/utils/prepare-metadata'
 
-import {PressSection} from './components/PressSection'
+import {PressSection} from './components/press-section'
 
 export async function generateMetadata() {
   const {getTranslations} = await import('next-intl/server')

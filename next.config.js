@@ -20,24 +20,7 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'xsgames.co',
       },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
     ],
-  },
-  async headers() {
-    return [
-      {
-        source: '/site.webmanifest',
-        headers: [
-          {
-            key: 'Content-Type',
-            value: 'application/manifest+json',
-          },
-        ],
-      },
-    ]
   },
   experimental: {
     webpackBuildWorker: true,

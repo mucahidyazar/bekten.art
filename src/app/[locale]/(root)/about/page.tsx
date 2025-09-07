@@ -1,16 +1,16 @@
 import {
-  PaletteIcon,
   AwardIcon,
   GraduationCapIcon,
   HeartIcon,
+  PaletteIcon,
 } from 'lucide-react'
 import Image from 'next/image'
 import {useTranslations} from 'next-intl'
 
-import {ArtistHero} from '@/components/molecules/ArtistHero'
-import {CallToAction} from '@/components/molecules/CallToAction'
-import {SectionHeader} from '@/components/molecules/SectionHeader'
-import {prepareMetadata} from '@/utils/prepareMetadata'
+import {ArtistHero} from '@/components/molecules/artist-hero'
+import {CallToAction} from '@/components/molecules/call-to-action'
+import {SectionHeader} from '@/components/molecules/section-header'
+import {prepareMetadata} from '@/utils/prepare-metadata'
 
 export async function generateMetadata() {
   const {getTranslations} = await import('next-intl/server')

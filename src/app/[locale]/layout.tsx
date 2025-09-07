@@ -10,12 +10,14 @@ import {GoogleTagManager} from '@/components/lib/google-tag-manager'
 import {
   MusicProvider,
   defaultTracks,
-} from '@/components/providers/MusicProvider'
-import {QueryProvider} from '@/components/providers/QueryProvider'
-import {ThemeProvider} from '@/components/providers/ThemeProvider'
-import {MusicPlayer} from '@/components/ui/MusicPlayer'
+} from '@/components/providers/music-provider'
+import {QueryProvider} from '@/components/providers/query-provider'
+import {ThemeProvider} from '@/components/providers/theme-provider'
+import {UserProvider} from '@/components/providers/user-provider'
+import {MusicPlayer} from '@/components/ui/music-player'
 import {Toaster} from '@/components/ui/toaster'
-import {prepareMetadata} from '@/utils/prepareMetadata'
+import {prepareMetadata} from '@/utils/prepare-metadata'
+import {getUser} from '@/utils/supabase/server'
 
 const lora = Lora({subsets: ['latin']})
 
@@ -41,6 +43,9 @@ type LayoutProps = {
 export default async function RootLayout({children, params}: LayoutProps) {
   const {locale} = await params
   const messages = await getMessages(locale)
+
+  // Get initial user data for UserProvider
+  const user = await getUser()
 
   return (
     <ViewTransitions>
@@ -85,10 +90,12 @@ export default async function RootLayout({children, params}: LayoutProps) {
                 enableSystem
                 themes={['light', 'dark', 'navy', 'system']}
               >
-                <MusicProvider defaultTracks={defaultTracks}>
-                  {children}
-                  <MusicPlayer />
-                </MusicProvider>
+                <UserProvider initialUser={user}>
+                  <MusicProvider defaultTracks={defaultTracks}>
+                    {children}
+                    <MusicPlayer />
+                  </MusicProvider>
+                </UserProvider>
               </ThemeProvider>
             </QueryProvider>
           </NextIntlClientProvider>

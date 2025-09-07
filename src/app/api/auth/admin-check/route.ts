@@ -22,6 +22,7 @@ export async function GET(_request: NextRequest) {
 
     if (profileError && profileError.code !== 'PGRST116') {
       console.error('Profile check error:', profileError)
+
       return NextResponse.json({ isAdmin: false, error: 'Database error' }, { status: 500 })
     }
 
@@ -35,6 +36,7 @@ export async function GET(_request: NextRequest) {
     })
   } catch (error) {
     console.error('Admin check API error:', error)
+
     return NextResponse.json({ isAdmin: false, error: 'Server error' }, { status: 500 })
   }
 }

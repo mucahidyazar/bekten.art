@@ -1,5 +1,5 @@
-import {GalleryTemplate} from '@/components/templates/GalleryTemplate'
-import {prepareMetadata} from '@/utils/prepareMetadata'
+import {GalleryTemplate} from '@/components/templates/gallery-template'
+import {prepareMetadata} from '@/utils/prepare-metadata'
 
 export async function generateMetadata() {
   const {getTranslations} = await import('next-intl/server')
@@ -18,6 +18,7 @@ const getPhotos = async () =>
   // {page = 1, perPage = 40}
   {
     var myHeaders = new Headers()
+
     myHeaders.append('sec-fetch-site', 'same-origin')
     myHeaders.append(
       'user-agent',
@@ -34,12 +35,14 @@ const getPhotos = async () =>
       method: 'GET',
       headers: myHeaders,
     }
+
     try {
       const response = await fetch(
         'https://www.instagram.com/api/v1/users/web_profile_info/?username=bekten_usubaliev',
         requestOptions,
       )
       const data = await response.json()
+
       return data
     } catch (error) {
       return {
@@ -88,6 +91,7 @@ export default async function Home() {
         description:
           image.node?.edge_media_to_caption?.edges[0]?.node?.text || '',
       }
+
       if (index % 3 === 0) {
         arrayOne.push(artImage)
       } else if (index % 3 === 1) {
@@ -96,6 +100,7 @@ export default async function Home() {
         arrayThree.push(artImage)
       }
     })
+
     return [arrayOne, arrayTwo, arrayThree]
   }
   const imagesArrays = getImageArrays()

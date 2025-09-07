@@ -8,17 +8,21 @@ function getTitle(doc: CheerioAPI) {
   let title =
     metaTagContent(doc, `og:title`, `property`) ||
     metaTagContent(doc, `og:title`, `name`);
+
   if (!title) {
     title = doc(`title`).text();
   }
+
   return title;
 }
 
 const HTTP_TIMEOUT = 3000;
+
 export async function POST(request: Request) {
 
   const controller = new AbortController();
   const timeoutId: NodeJS.Timeout = setTimeout(() => controller.abort(), HTTP_TIMEOUT);
+
   try {
     const res = await request.json()
 

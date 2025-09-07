@@ -11,6 +11,7 @@ export function useToast() {
 
   const toast = ({ title, description, variant = 'default' }: Toast) => {
     const newToast = { title, description, variant }
+
     setToasts(prev => [...prev, newToast])
 
     // Auto remove after 5 seconds

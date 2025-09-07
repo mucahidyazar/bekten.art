@@ -45,13 +45,13 @@ export function SignInForm() {
   const submitHandler = async ({email, password}: FormValues) => {
     setIsLoading(true)
     const supabase = createClient()
-    
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-      
+
       if (error) {
         console.error('Error signing in:', error.message)
         // TODO: Show error toast
@@ -83,10 +83,10 @@ export function SignInForm() {
               <FormControl>
                 <div className="relative">
                   <MailIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input 
-                    placeholder={t('placeholders.enterEmail')} 
+                  <Input
+                    placeholder={t('placeholders.enterEmail')}
                     className="pl-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
-                    {...field} 
+                    {...field}
                   />
                 </div>
               </FormControl>
@@ -105,11 +105,11 @@ export function SignInForm() {
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Input 
+                  <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder={t('placeholders.enterPassword')} 
+                    placeholder={t('placeholders.enterPassword')}
                     className="pr-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
-                    {...field} 
+                    {...field}
                   />
                   <button
                     type="button"
@@ -131,22 +131,22 @@ export function SignInForm() {
 
         <div className="flex items-center justify-between text-sm">
           <label className="flex items-center space-x-2 cursor-pointer">
-            <input 
-              type="checkbox" 
+            <input
+              type="checkbox"
               className="rounded border-muted text-primary focus:ring-primary"
             />
             <span className="text-muted-foreground">{t('messages.rememberMe')}</span>
           </label>
-          <a 
-            href="#" 
+          <a
+            href="#"
             className="text-primary hover:text-primary/80 transition-colors font-medium"
           >
             {t('messages.forgotPassword')}
           </a>
         </div>
 
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors"
           disabled={isLoading}
         >

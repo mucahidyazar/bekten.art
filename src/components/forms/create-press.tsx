@@ -1,11 +1,12 @@
 'use client'
+
 import {zodResolver} from '@hookform/resolvers/zod'
 import {useForm} from 'react-hook-form'
 import {z} from 'zod'
 
 import {createPress} from '@/actions/press'
 import {Button} from '@/components/ui/button'
-import {useServerAction} from '@/hooks/useServerAction'
+import {useServerAction} from '@/hooks/use-server-action'
 
 import {Input} from '../ui/input'
 

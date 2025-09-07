@@ -1,19 +1,19 @@
 import {
-  MapPinIcon,
-  PhoneIcon,
-  MailIcon,
-  UserIcon,
   ClockIcon,
+  LinkIcon,
+  MailIcon,
+  MapPinIcon,
   PaletteIcon,
+  PhoneIcon,
 } from 'lucide-react'
 import {getTranslations} from 'next-intl/server'
 
-import {getContactInfo} from '@/actions/contact'
-import {CallToAction} from '@/components/molecules/CallToAction'
+import {CallToAction} from '@/components/molecules/call-to-action'
 import {Badge} from '@/components/ui/badge'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Separator} from '@/components/ui/separator'
-import {prepareMetadata} from '@/utils/prepareMetadata'
+import {prepareMetadata} from '@/utils/prepare-metadata'
+import {getBektenContactInfo} from '@/utils/supabase/server'
 
 export async function generateMetadata(): Promise<
   ReturnType<typeof prepareMetadata>
@@ -29,9 +29,11 @@ export async function generateMetadata(): Promise<
 
 export default async function ContactPage() {
   const t = await getTranslations('contact')
-  const contactInfo = await getContactInfo()
 
-  if (!contactInfo) {
+  // Get Bekten's public contact information
+  const contactData = await getBektenContactInfo()
+
+  if (!contactData) {
     return (
       <div className="w-full pt-8">
         <div className="container space-y-6 text-center">
@@ -46,6 +48,18 @@ export default async function ContactPage() {
     )
   }
 
+  // Get social media links
+  const userSocials = contactData.socials || []
+
+  // Prepare contact info
+  const contactInfo = {
+    phone: contactData.phone || '',
+    email: 'bekten.usubaliev@gmail.com', // Public email
+    address: contactData.address || '',
+    working_hours: contactData.working_hours || '',
+    map_embed_url: contactData.map_embed_url || '',
+  }
+
   // Parse working hours JSON
   let workingHours: Record<string, string> = {
     'Monday - Friday': t('defaultWorkingHours.Monday - Friday'),
@@ -53,20 +67,12 @@ export default async function ContactPage() {
     Sunday: t('defaultWorkingHours.Sunday'),
   }
 
-  try {
-    if (contactInfo.working_hours) {
-      workingHours = JSON.parse(contactInfo.working_hours)
-    }
-  } catch (e) {
-    // Use default working hours if JSON parsing fails
+  if (contactInfo.working_hours) {
+    workingHours = JSON.parse(contactInfo.working_hours)
   }
 
   // Parse address lines
   const addressLines = contactInfo.address.split('\n')
-
-  // Extract Instagram username from URL
-  const instagramUsername =
-    contactInfo.instagram_url.split('/').pop() || 'bekten_usubaliev'
 
   return (
     <div className="container">
@@ -111,7 +117,7 @@ export default async function ContactPage() {
                     <h3 className="text-foreground mb-1 font-semibold">
                       {t('address')}
                     </h3>
-                    {addressLines.map((line, index) => (
+                    {addressLines.map((line: string, index: number) => (
                       <p key={index} className="text-muted-foreground">
                         {line}
                       </p>
@@ -160,27 +166,43 @@ export default async function ContactPage() {
                 </div>
               </div>
 
-              {/* Instagram */}
-              <div className="group from-muted/30 to-muted/20 hover:from-muted/40 hover:to-muted/30 rounded-xl bg-gradient-to-r p-4 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
-                    <UserIcon className="text-primary h-5 w-5" />
+              <Separator />
+
+              {/* Social Media Links - Dynamic */}
+              {userSocials.map((social: any) => {
+                const displayText = social.url.includes('http')
+                  ? social.url.replace(/^https?:\/\//, '').replace(/^www\./, '')
+                  : social.url
+
+                return (
+                  <div key={social.id}>
+                    <div className="group from-muted/30 to-muted/20 hover:from-muted/40 hover:to-muted/30 rounded-xl bg-gradient-to-r p-4 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                          <LinkIcon className="text-primary h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-foreground mb-1 font-semibold capitalize">
+                            {social.platform}
+                          </h3>
+                          <a
+                            href={
+                              social.url.startsWith('http')
+                                ? social.url
+                                : `https://${social.url}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            {displayText}
+                          </a>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-foreground mb-1 font-semibold">
-                      {t('instagram')}
-                    </h3>
-                    <a
-                      href={contactInfo.instagram_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      @{instagramUsername}
-                    </a>
-                  </div>
-                </div>
-              </div>
+                )
+              })}
 
               <Separator />
 

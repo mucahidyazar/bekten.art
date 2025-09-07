@@ -1,8 +1,8 @@
-import {UserIcon, MailIcon, EditIcon} from 'lucide-react'
+import {EditIcon, MailIcon, UserIcon} from 'lucide-react'
 
-import {ArtistHero} from '@/components/molecules/ArtistHero'
-import {RoleBadge} from '@/components/molecules/RoleBadge'
-import {SignOutButton} from '@/components/molecules/SignOutButton'
+import {ArtistHero} from '@/components/molecules/artist-hero'
+import {RoleBadge} from '@/components/molecules/role-badge'
+import {SignOutButton} from '@/components/molecules/sign-out-button'
 import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'

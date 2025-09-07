@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
   }
 
   console.log('Auth callback failed, redirecting to error page')
+
   // Return the user to an error page with instructions
   return NextResponse.redirect(`${origin}/auth/auth-code-error`)
 }

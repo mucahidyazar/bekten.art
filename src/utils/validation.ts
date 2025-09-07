@@ -1,32 +1,27 @@
-export function isValidImage(url: string) {
-  // URL'nin resim uzantısını kontrol eden regex pattern
-  const validImageUrlRegex = /\.(jpg|jpeg|png|gif|bmp)$/i;
-
-  // URL regex ile eşleşiyorsa true, aksi takdirde false döner
-  return validImageUrlRegex.test(url);
+/**
+ * Generates a temporary ID for new items
+ * @returns A temporary ID string
+ */
+export function generateTempId(): string {
+  return `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 }
 
-export function isValidImageUrl(url: string) {
-  // Öncelikle geçerli bir HTTP ya da HTTPS URL'si olup olmadığını kontrol eder
-  if (!isValidUrl(url)) {
-    return false;
-  }
-
-  // URL'nin resim uzantısını kontrol eden regex pattern
-  const validImageUrlRegex = /\.(jpg|jpeg|png|gif|bmp)$/i;
-
-  // URL regex ile eşleşiyorsa true, aksi takdirde false döner
-  return validImageUrlRegex.test(url);
+/**
+ * Checks if an ID is a temporary ID
+ * @param id - The ID to check
+ * @returns true if the ID is temporary, false otherwise
+ */
+export function isTempId(id: string): boolean {
+  return id.startsWith('temp-') || id.startsWith('fallback-')
 }
 
-export function isValidUrl(urlString: string) {
-  let url;
+/**
+ * Validates if a string is a valid UUID format
+ * @param id - The string to validate
+ * @returns true if the string is a valid UUID, false otherwise
+ */
+export function isValidUUID(id: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-  try {
-    url = new URL(urlString);
-  } catch {
-    return false;
-  }
-
-  return url.protocol === "http:" || url.protocol === "https:";
+  return uuidRegex.test(id)
 }

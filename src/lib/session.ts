@@ -14,11 +14,13 @@ export interface SessionData {
 
 export async function getSession(): Promise<IronSession<SessionData>> {
   const cookieStore = await cookies()
+
   return await getIronSession<SessionData>(cookieStore, sessionOptions)
 }
 
 export async function getSessionData(): Promise<SessionData> {
   const session = await getSession()
+
   return {
     userId: session.userId,
     email: session.email,

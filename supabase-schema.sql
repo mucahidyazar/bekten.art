@@ -85,6 +85,33 @@ CREATE TABLE IF NOT EXISTS public.feedbacks (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Section items table (for workshop, gallery, portfolio, etc.)
+CREATE TABLE IF NOT EXISTS public.section_items (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  section_type VARCHAR(50) NOT NULL CHECK (section_type IN ('workshop', 'gallery', 'portfolio', 'testimonials', 'services')),
+  url TEXT,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  "order" INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Section settings table (for section configurations)
+CREATE TABLE IF NOT EXISTS public.section_settings (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  section_type VARCHAR(50) NOT NULL UNIQUE CHECK (section_type IN ('workshop', 'gallery', 'portfolio', 'testimonials', 'services')),
+  section_title VARCHAR(255) NOT NULL,
+  section_description TEXT,
+  badge_text VARCHAR(100),
+  max_items INTEGER DEFAULT 6,
+  is_active BOOLEAN DEFAULT true,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON public.users(role);
@@ -98,6 +125,10 @@ CREATE INDEX IF NOT EXISTS idx_press_user_id ON public.press(user_id);
 CREATE INDEX IF NOT EXISTS idx_feedbacks_sender_id ON public.feedbacks(sender_id);
 CREATE INDEX IF NOT EXISTS idx_feedbacks_receiver_id ON public.feedbacks(receiver_id);
 CREATE INDEX IF NOT EXISTS idx_feedbacks_status ON public.feedbacks(status);
+CREATE INDEX IF NOT EXISTS idx_section_items_section_type ON public.section_items(section_type);
+CREATE INDEX IF NOT EXISTS idx_section_items_order ON public.section_items("order");
+CREATE INDEX IF NOT EXISTS idx_section_items_is_active ON public.section_items(is_active);
+CREATE INDEX IF NOT EXISTS idx_section_settings_section_type ON public.section_settings(section_type);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
@@ -107,6 +138,8 @@ ALTER TABLE public.artwork_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.news ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.press ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.feedbacks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.section_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.section_settings ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 
@@ -137,7 +170,7 @@ CREATE POLICY "Artists can manage own artworks" ON public.artworks
 CREATE POLICY "Admins can manage all artworks" ON public.artworks
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM public.users 
+      SELECT 1 FROM public.users
       WHERE id = auth.uid() AND role = 'ADMIN'
     )
   );
@@ -156,7 +189,7 @@ CREATE POLICY "Anyone can view news" ON public.news
 CREATE POLICY "Admins can manage news" ON public.news
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM public.users 
+      SELECT 1 FROM public.users
       WHERE id = auth.uid() AND role = 'ADMIN'
     )
   );
@@ -168,7 +201,7 @@ CREATE POLICY "Anyone can view press" ON public.press
 CREATE POLICY "Admins can manage press" ON public.press
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM public.users 
+      SELECT 1 FROM public.users
       WHERE id = auth.uid() AND role = 'ADMIN'
     )
   );
@@ -176,10 +209,10 @@ CREATE POLICY "Admins can manage press" ON public.press
 -- Feedback policies
 CREATE POLICY "Users can view feedbacks they sent or received" ON public.feedbacks
   FOR SELECT USING (
-    auth.uid() = sender_id OR 
+    auth.uid() = sender_id OR
     auth.uid() = receiver_id OR
     EXISTS (
-      SELECT 1 FROM public.users 
+      SELECT 1 FROM public.users
       WHERE id = auth.uid() AND role = 'ADMIN'
     )
   );
@@ -192,10 +225,34 @@ CREATE POLICY "Users can update feedbacks they received" ON public.feedbacks
 
 CREATE POLICY "Users can delete feedbacks they sent or received" ON public.feedbacks
   FOR DELETE USING (
-    auth.uid() = sender_id OR 
+    auth.uid() = sender_id OR
     auth.uid() = receiver_id OR
     EXISTS (
-      SELECT 1 FROM public.users 
+      SELECT 1 FROM public.users
+      WHERE id = auth.uid() AND role = 'ADMIN'
+    )
+  );
+
+-- Section items policies
+CREATE POLICY "Anyone can view section items" ON public.section_items
+  FOR SELECT USING (true);
+
+CREATE POLICY "Admins can manage section items" ON public.section_items
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.users
+      WHERE id = auth.uid() AND role = 'ADMIN'
+    )
+  );
+
+-- Section settings policies
+CREATE POLICY "Anyone can view section settings" ON public.section_settings
+  FOR SELECT USING (true);
+
+CREATE POLICY "Admins can manage section settings" ON public.section_settings
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.users
       WHERE id = auth.uid() AND role = 'ADMIN'
     )
   );
@@ -244,4 +301,12 @@ CREATE TRIGGER update_news_updated_at
 
 CREATE TRIGGER update_feedbacks_updated_at
   BEFORE UPDATE ON public.feedbacks
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_section_items_updated_at
+  BEFORE UPDATE ON public.section_items
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_section_settings_updated_at
+  BEFORE UPDATE ON public.section_settings
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();

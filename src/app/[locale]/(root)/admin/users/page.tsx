@@ -1,6 +1,6 @@
-import { Badge } from '@/components/ui/badge'
+import {Badge} from '@/components/ui/badge'
 
-import DataTable from '../components/DataTable'
+import DataTable from '../components/data-table'
 
 // Mock data for users
 const mockUsers = [

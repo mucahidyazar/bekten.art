@@ -3,9 +3,9 @@ import {useTranslations} from 'next-intl'
 
 import {ME, SocialLinks} from '@/constants'
 import {cn} from '@/utils'
-import {getSocialLink} from '@/utils/getSocialLink'
+import {getSocialLink} from '@/utils/get-social-link'
 
-import {AppTools} from './molecules/AppTools'
+import {AppTools} from './molecules/app-tools'
 import {Icons} from './ui/icons'
 
 type FooterProps = {
@@ -25,11 +25,12 @@ export function Footer({className}: FooterProps) {
       <div className="flex gap-4 py-2">
         {Object.entries(ME.social).map(([platform, id]) => {
           const IconComponent = (Icons as any)[platform]
+
           return (
             <a
               key={platform}
               href={getSocialLink(platform as SocialLinks, id)}
-              className="flex items-center gap-2 transition-all duration-300 ease-in-out hover:scale-125 hover:text-primary-900"
+              className="hover:text-primary-900 flex items-center gap-2 transition-all duration-300 ease-in-out hover:scale-125"
               target="_blank"
             >
               {IconComponent && <IconComponent className="w-4" />}
@@ -43,16 +44,16 @@ export function Footer({className}: FooterProps) {
           href="https://mucahid.dev"
           target="_blank"
           rel="noreferrer"
-          className="inline text-primary hover:text-primary/80 transition-colors duration-200 hover:underline"
+          className="text-primary hover:text-primary/80 inline transition-colors duration-200 hover:underline"
         >
           mucahid.dev
         </a>
       </p>
       <ul className="flex flex-wrap items-center gap-2 text-[10px]">
-        <li className="duration-150 hover:text-primary-500">
+        <li className="hover:text-primary-500 duration-150">
           <Link href="/privacy-policy">{t('legal.privacyPolicy')}</Link>
         </li>
-        <li className="duration-150 hover:text-primary-500">
+        <li className="hover:text-primary-500 duration-150">
           <Link href="/terms-of-service">{t('legal.termsOfService')}</Link>
         </li>
       </ul>

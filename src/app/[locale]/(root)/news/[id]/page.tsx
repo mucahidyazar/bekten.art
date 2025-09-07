@@ -1,10 +1,10 @@
 import {
-  CalendarIcon,
-  MapPinIcon,
-  ClockIcon,
   ArrowLeftIcon,
-  ShareIcon,
   BookmarkIcon,
+  CalendarIcon,
+  ClockIcon,
+  MapPinIcon,
+  ShareIcon,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -12,8 +12,8 @@ import {notFound} from 'next/navigation'
 import {unstable_ViewTransition as ViewTransition} from 'react'
 
 import {mockNewsData} from '@/mocks/news'
-import {formatDate} from '@/utils/formatDate'
-import {prepareMetadata} from '@/utils/prepareMetadata'
+import {formatDate} from '@/utils/format-date'
+import {prepareMetadata} from '@/utils/prepare-metadata'
 
 type PageProps = {
   params: Promise<{id: string}>
@@ -26,6 +26,7 @@ export async function generateMetadata({params}: PageProps) {
   if (!news) {
     const {getTranslations} = await import('next-intl/server')
     const t = await getTranslations('news')
+
     return prepareMetadata({
       title: t('newsNotFound'),
       description: t('newsNotFoundDescription'),

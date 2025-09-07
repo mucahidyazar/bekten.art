@@ -1,4 +1,5 @@
 'use client'
+
 import {zodResolver} from '@hookform/resolvers/zod'
 import {SendIcon} from 'lucide-react'
 import Image from 'next/image'
@@ -9,7 +10,7 @@ import {z} from 'zod'
 import {createFeedback} from '@/actions'
 import {Button} from '@/components/ui/button'
 import {Textarea} from '@/components/ui/textarea'
-import {useServerAction} from '@/hooks/useServerAction'
+import {useServerAction} from '@/hooks/use-server-action'
 
 type CreateFeedbackForm = {
   message: string
@@ -70,7 +71,7 @@ export default function CreateFeedback({
         <div className="flex-grow">
           <Textarea
             placeholder="Type your message here."
-            className="h-12 rounded-sm border-none bg-transparent p-0 outline-none focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0"
+            className="h-12 rounded-sm border-none bg-transparent p-0 outline-none focus-visible:shadow-none focus-visible:ring-0 focus-visible:outline-none"
             style={{boxShadow: 'none'}}
             rows={2}
             {...register('message', {required: true})}
@@ -83,7 +84,7 @@ export default function CreateFeedback({
         </div>
       </div>
       <Button
-        className="group absolute right-4 top-4 flex items-center gap-2 text-foreground"
+        className="group text-foreground absolute top-4 right-4 flex items-center gap-2"
         variant="link"
         size="sm"
         type="submit"
@@ -96,7 +97,7 @@ export default function CreateFeedback({
       {!senderId && (
         <Link
           href="/sign-in"
-          className="absolute inset-0 flex items-center justify-center rounded bg-gray-500 bg-opacity-80 text-sm hover:underline"
+          className="bg-opacity-80 absolute inset-0 flex items-center justify-center rounded bg-gray-500 text-sm hover:underline"
         >
           You must be logged in to send feedback.
         </Link>

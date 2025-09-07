@@ -33,6 +33,7 @@ export async function GET(_request: NextRequest) {
 
     if (error && error.code !== 'PGRST116') {
       console.error('Error loading contact info:', error)
+
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
@@ -48,6 +49,7 @@ export async function GET(_request: NextRequest) {
     })
   } catch (error) {
     console.error('Contact info API error:', error)
+
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
@@ -88,12 +90,14 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error saving contact info:', error)
+
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Contact info save API error:', error)
+
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

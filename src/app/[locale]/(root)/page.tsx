@@ -1,22 +1,31 @@
 import {
   ArrowRightIcon,
-  SparklesIcon,
-  PaletteIcon,
   HeartIcon,
+  PaletteIcon,
+  SparklesIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import {getTranslations} from 'next-intl/server'
 
-import {ArtworkCard} from '@/components/molecules/ArtworkCard'
-import {CallToAction} from '@/components/molecules/CallToAction'
-import {HeroVideo} from '@/components/molecules/HeroVideo'
-import {SectionHeader} from '@/components/molecules/SectionHeader'
-import {TestimonialsSection} from '@/components/molecules/TestimonialsSection'
-import {HomeSection} from '@/components/organisms/HomeSection'
-import {HomeSwiper} from '@/components/organisms/HomeSwiper'
+import {ArtworkCard} from '@/components/molecules/artwork-card'
+import {CallToAction} from '@/components/molecules/call-to-action'
+import {HeroVideo} from '@/components/molecules/hero-video'
+import {SectionHeader} from '@/components/molecules/section-header'
+import {TestimonialsSection} from '@/components/molecules/testimonials-section'
+import {HomeSection} from '@/components/organisms/home-section'
+import {ArtistSection} from '@/components/sections/artist-section'
+import {WorkshopSection} from '@/components/sections/workshop-section'
 import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
-import {prepareMetadata} from '@/utils/prepareMetadata'
+import {getSectionData} from '@/services'
+import {prepareMetadata} from '@/utils/prepare-metadata'
+
+import type {
+  ArtistDatabaseItem,
+  ArtistDatabaseSettings,
+  WorkshopDatabaseItem,
+  WorkshopDatabaseSettings,
+} from '@/types/database'
 
 export async function generateMetadata() {
   const t = await getTranslations('homepage')
@@ -27,38 +36,39 @@ export async function generateMetadata() {
   })
 }
 
-const workshopData = [
-  {
-    url: '/img/workshop/workshop-0.jpeg',
-    title: 'Broad Workshop View',
-    description:
-      "The heart of Bekten Usubaliev's artistic journey, this workshop is a place where creativity and imagination know no bounds. Various artworks, stretching from walls to the floor, reflect the breadth of his artistic vision.",
-  },
-  {
-    url: '/img/workshop/workshop-1.jpeg',
-    title: 'Portraits and Other Paintings',
-    description:
-      "Brought to life by Bekten's delicate brush strokes, these portraits dive deep into the depths of the human soul with their rich details. Each painting tells a different story to its viewers.",
-  },
-  {
-    url: '/img/workshop/workshop-2.jpeg',
-    title: 'Painting Shelves',
-    description:
-      "These shelves house Bekten's completed and ongoing projects. Each painting represents a different phase of the artist's journey.",
-  },
-  {
-    url: '/img/workshop/workshop-3.jpeg',
-    title: "Bekten's Uncle",
-    description:
-      'In the portrait of his uncle, Bekten plays both the artist and the observer. This self-portrait reflects his dedication and passion for art.',
-  },
-  {
-    url: '/img/workshop/workshop-4.jpeg',
-    title: 'Workshop Entrance',
-    description:
-      "Bekten's workshop is the space where he practices his art and imparts it to his students. The workshop stands as the heart of Bekten's artistic journey.",
-  },
-]
+// Workshop data is now fetched from Supabase service
+// const workshopData = [
+//   {
+//     url: '/img/workshop/workshop-0.jpeg',
+//     title: 'Broad Workshop View',
+//     description:
+//       "The heart of Bekten Usubaliev's artistic journey, this workshop is a place where creativity and imagination know no bounds. Various artworks, stretching from walls to the floor, reflect the breadth of his artistic vision.",
+//   },
+//   {
+//     url: '/img/workshop/workshop-1.jpeg',
+//     title: 'Portraits and Other Paintings',
+//     description:
+//       "Brought to life by Bekten's delicate brush strokes, these portraits dive deep into the depths of the human soul with their rich details. Each painting tells a different story to its viewers.",
+//   },
+//   {
+//     url: '/img/workshop/workshop-2.jpeg',
+//     title: 'Painting Shelves',
+//     description:
+//       "These shelves house Bekten's completed and ongoing projects. Each painting represents a different phase of the artist's journey.",
+//   },
+//   {
+//     url: '/img/workshop/workshop-3.jpeg',
+//     title: "Bekten's Uncle",
+//     description:
+//       'In the portrait of his uncle, Bekten plays both the artist and the observer. This self-portrait reflects his dedication and passion for art.',
+//   },
+//   {
+//     url: '/img/workshop/workshop-4.jpeg',
+//     title: 'Workshop Entrance',
+//     description:
+//       "Bekten's workshop is the space where he practices art and imparts it to his students. The workshop stands as the heart of Bekten's artistic journey.",
+//   },
+// ]
 
 const artworksData = [
   {
@@ -109,6 +119,16 @@ export default async function Home() {
   // TODO: Replace with Supabase query
   const onSaleArtworks: any[] = []
   const t = await getTranslations('homepage')
+
+  // Fetch data from Supabase using getSectionData
+  const workshopData = (await getSectionData('workshop')) as {
+    items: WorkshopDatabaseItem[]
+    settings: WorkshopDatabaseSettings | null
+  }
+  const artistData = (await getSectionData('artist')) as {
+    items: ArtistDatabaseItem[]
+    settings: ArtistDatabaseSettings | null
+  }
 
   return (
     <div id="home" className="w-full pt-8">
@@ -228,94 +248,14 @@ export default async function Home() {
       <CallToAction />
 
       {/* Workshop Showcase Section */}
-      <section className="py-20">
-        <div className="container lg:px-0">
-          <SectionHeader
-            badgeText={t('workshopBadge')}
-            badgeIcon="palette"
-            title={t('workshopTitle')}
-            description={t('workshopDescription')}
-          />
+      {workshopData.settings && workshopData.items.length > 0 && (
+        <WorkshopSection workshopData={workshopData} />
+      )}
 
-          <div className="bg-card/50 border-border/50 relative rounded-3xl border p-6 shadow-2xl backdrop-blur-sm">
-            <HomeSwiper data={workshopData} />
-          </div>
-        </div>
-      </section>
-
-      {/* About Artist Section with Stats */}
-      <section className="py-20">
-        <div className="container lg:px-0">
-          <SectionHeader
-            badgeText={t('artistBadge')}
-            badgeIcon="heart"
-            title={t('artistName')}
-            description={t('artistDescription')}
-            className="mb-16"
-          />
-
-          {/* Stats */}
-          <div className="mb-16 grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="bg-card/50 border-border/30 rounded-2xl border p-8 text-center backdrop-blur-sm transition-all duration-300 hover:shadow-lg">
-              <div className="text-primary mb-2 text-4xl font-bold lg:text-5xl">
-                50+
-              </div>
-              <div className="text-muted-foreground font-medium">
-                {t('stat1Title')}
-              </div>
-              <div className="text-muted-foreground/70 mt-2 text-sm">
-                {t('stat1Description')}
-              </div>
-            </div>
-            <div className="bg-card/50 border-border/30 rounded-2xl border p-8 text-center backdrop-blur-sm transition-all duration-300 hover:shadow-lg">
-              <div className="text-primary mb-2 text-4xl font-bold lg:text-5xl">
-                25+
-              </div>
-              <div className="text-muted-foreground font-medium">
-                {t('stat2Title')}
-              </div>
-              <div className="text-muted-foreground/70 mt-2 text-sm">
-                {t('stat2Description')}
-              </div>
-            </div>
-            <div className="bg-card/50 border-border/30 rounded-2xl border p-8 text-center backdrop-blur-sm transition-all duration-300 hover:shadow-lg">
-              <div className="text-primary mb-2 text-4xl font-bold lg:text-5xl">
-                100+
-              </div>
-              <div className="text-muted-foreground font-medium">
-                {t('stat3Title')}
-              </div>
-              <div className="text-muted-foreground/70 mt-2 text-sm">
-                {t('stat3Description')}
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/gallery">
-              <Button
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg transition-all duration-300 hover:shadow-xl"
-              >
-                <PaletteIcon className="mr-2 h-4 w-4" />
-                {t('statsButton1')}
-                <ArrowRightIcon className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/about">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-border/50 text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
-              >
-                <HeartIcon className="mr-2 h-4 w-4" />
-                {t('statsButton2')}
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Artist Section */}
+      {artistData.settings && artistData.items.length > 0 && (
+        <ArtistSection artistData={artistData} />
+      )}
 
       {/* Testimonials Section */}
       <TestimonialsSection />

@@ -4,7 +4,7 @@ import {useTranslations} from 'next-intl'
 
 import {cn} from '@/utils'
 
-import {NavbarItem} from './NavbarItem'
+import {NavbarItem} from './navbar-item'
 
 type NavbarProps = {
   className?: string
@@ -38,12 +38,14 @@ export function Navbar({className, user}: NavbarProps) {
       label: t('navigation.store'),
       path: '/store',
     },
-    ...(user?.profile?.role?.toLowerCase() === 'admin' ? [{label: 'Admin', path: '/admin'}] : []),
+    ...(user?.profile?.role?.toLowerCase() === 'admin'
+      ? [{label: 'Admin', path: '/admin'}]
+      : []),
   ]
 
   return (
     <nav className={cn('flex flex-col', className)}>
-      <ul className="flex justify-center gap-4 text-sm text-muted-foreground flex-wrap">
+      <ul className="text-muted-foreground flex flex-wrap justify-center gap-4 text-sm">
         {NAV_ITEMS.map(item => (
           <NavbarItem key={item.label} {...item} />
         ))}

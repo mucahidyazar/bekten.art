@@ -26,7 +26,7 @@ export default function AuthCodeErrorPage() {
             <AlertTriangle className="w-8 h-8 text-destructive" />
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <h1 className="text-xl font-semibold">Authentication Error</h1>
           <p className="text-muted-foreground">
@@ -43,15 +43,15 @@ export default function AuthCodeErrorPage() {
         </div>
 
         <div className="space-y-3">
-          <Button 
-            onClick={() => router.push('/sign-in')} 
+          <Button
+            onClick={() => router.push('/sign-in')}
             className="w-full"
           >
             Try Again
           </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => router.push('/')} 
+          <Button
+            variant="outline"
+            onClick={() => router.push('/')}
             className="w-full"
           >
             Go Home

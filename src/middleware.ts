@@ -37,7 +37,7 @@ export const config = {
      * - auth/callback (auth callback route)
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|auth/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|mov|avi|webm|ogg)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|auth/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|mov|avi|webm|ogg|webmanifest)$).*)',
   ],
 }
 
@@ -92,13 +92,16 @@ export async function middleware(request: NextRequest) {
   // Redirect unauthenticated users from protected routes
   if (isProtectedRoute && !user) {
     const redirectUrl = new URL('/sign-in', request.url)
+
     redirectUrl.searchParams.set('redirect', pathname)
+
     return NextResponse.redirect(redirectUrl)
   }
 
   // Redirect authenticated users away from auth routes
   if (isAuthRoute && user) {
     const redirectTo = url.searchParams.get('redirect') || '/'
+
     return NextResponse.redirect(new URL(redirectTo, request.url))
   }
 
@@ -116,6 +119,7 @@ export async function middleware(request: NextRequest) {
       }
     } catch (error) {
       console.error('Error checking admin status:', error)
+
       return NextResponse.redirect(new URL('/', request.url))
     }
   }

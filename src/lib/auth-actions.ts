@@ -7,6 +7,7 @@ import { createClient, requireAuth as requireAuthBase, requireAdmin as requireAd
 export async function requireAdmin() {
   try {
     const userProfile = await requireAdminBase()
+
     return userProfile
   } catch (error) {
     redirect('/')
@@ -16,6 +17,7 @@ export async function requireAdmin() {
 export async function requireAuth() {
   try {
     const user = await requireAuthBase()
+
     return user
   } catch (error) {
     redirect('/sign-in')
@@ -48,6 +50,7 @@ export async function signInWithGoogle() {
 
 export async function signOut() {
   const supabase = await createClient()
+
   await supabase.auth.signOut()
   redirect('/')
 }
