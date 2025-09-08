@@ -1,10 +1,13 @@
+import {Metadata} from 'next'
+
+import Link from 'next/link'
+
 import {
   ArrowRightIcon,
   HeartIcon,
   PaletteIcon,
   SparklesIcon,
 } from 'lucide-react'
-import Link from 'next/link'
 import {getTranslations} from 'next-intl/server'
 
 import {ArtworkCard} from '@/components/molecules/artwork-card'
@@ -27,7 +30,7 @@ import type {
   WorkshopDatabaseSettings,
 } from '@/types/database'
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('homepage')
 
   return await prepareMetadata({

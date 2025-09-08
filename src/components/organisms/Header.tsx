@@ -1,6 +1,7 @@
 import {Nanum_Brush_Script} from 'next/font/google'
 import Image from 'next/image'
 import Link from 'next/link'
+
 import {getTranslations} from 'next-intl/server'
 
 import {Navbar} from '@/components/navbar'

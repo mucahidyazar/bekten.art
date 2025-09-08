@@ -2,7 +2,7 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "explicit"
+    "source.organizeImports": "never"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[typescript]": {
@@ -26,9 +26,6 @@
     "typescript",
     "typescriptreact"
   ],
-  "typescript.preferences.organizeImportsCollation": "ordinal",
-  "typescript.preferences.organizeImportsIgnoreCase": "auto",
-  "typescript.preferences.organizeImportsNumericCollation": true,
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true

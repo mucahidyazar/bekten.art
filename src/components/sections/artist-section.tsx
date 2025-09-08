@@ -1,7 +1,8 @@
 'use client'
 
-import {ArrowRightIcon, Edit, HeartIcon, PaletteIcon, User} from 'lucide-react'
 import Link from 'next/link'
+
+import {ArrowRightIcon, Edit, HeartIcon, PaletteIcon, User} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 
 import {saveArtistDataAction} from '@/actions/artist'

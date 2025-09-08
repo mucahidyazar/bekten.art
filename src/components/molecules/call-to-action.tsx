@@ -1,7 +1,8 @@
 'use client'
 
-import {ArrowRightIcon, PaletteIcon, MailIcon, HeartIcon} from 'lucide-react'
 import Link from 'next/link'
+
+import {ArrowRightIcon, PaletteIcon, MailIcon, HeartIcon} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 
 import {Button} from '@/components/ui/button'

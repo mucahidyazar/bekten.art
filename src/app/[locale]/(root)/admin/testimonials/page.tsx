@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 import {
   PlusIcon,
   EditIcon,
@@ -12,7 +14,6 @@ import {
   UserIcon,
   MapPinIcon,
 } from 'lucide-react'
-import Image from 'next/image'
 import {useState} from 'react'
 
 import {Badge} from '@/components/ui/badge'

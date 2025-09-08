@@ -1,5 +1,9 @@
 'use client'
 
+import Image from 'next/image'
+import Link from 'next/link'
+import {usePathname} from 'next/navigation'
+
 import {
   LayoutDashboard,
   Users,
@@ -10,9 +14,6 @@ import {
   LogOut,
   MessageSquare,
 } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import {usePathname} from 'next/navigation'
 
 import {Button} from '@/components/ui/button'
 import {cn} from '@/utils/cn'

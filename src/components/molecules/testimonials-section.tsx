@@ -1,7 +1,8 @@
 'use client'
 
-import {ChevronLeftIcon, ChevronRightIcon, QuoteIcon} from 'lucide-react'
 import Image from 'next/image'
+
+import {ChevronLeftIcon, ChevronRightIcon, QuoteIcon} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useEffect, useState} from 'react'
 

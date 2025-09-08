@@ -1,6 +1,9 @@
-import {CalendarIcon, ClockIcon, MapPinIcon} from 'lucide-react'
+import {Metadata} from 'next'
+
 import Image from 'next/image'
 import Link from 'next/link'
+
+import {CalendarIcon, ClockIcon, MapPinIcon} from 'lucide-react'
 import {unstable_ViewTransition as ViewTransition} from 'react'
 
 import {NewsletterCTA} from '@/components/molecules/newsletter-cta'
@@ -11,7 +14,7 @@ import {prepareMetadata} from '@/utils/prepare-metadata'
 
 import {PressSection} from './components/press-section'
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const {getTranslations} = await import('next-intl/server')
   const t = await getTranslations('news')
 

@@ -1,6 +1,7 @@
 'use client'
 
 import {usePathname} from 'next/navigation'
+
 import {useEffect, useState} from 'react'
 
 import {createClient} from '@/utils/supabase/client'

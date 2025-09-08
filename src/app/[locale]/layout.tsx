@@ -1,7 +1,10 @@
 import './global.css'
 
+import {Metadata} from 'next'
+
 import {Lora} from 'next/font/google'
 import {notFound} from 'next/navigation'
+
 import {NextIntlClientProvider} from 'next-intl'
 import {ViewTransitions} from 'next-view-transitions'
 import {Suspense} from 'react'
@@ -21,7 +24,7 @@ import {getUser} from '@/utils/supabase/server'
 
 const lora = Lora({subsets: ['latin']})
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   return await prepareMetadata()
 }
 

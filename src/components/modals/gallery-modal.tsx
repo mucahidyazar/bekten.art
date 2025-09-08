@@ -1,7 +1,8 @@
 'use client'
 
-import {Check, Search, Upload} from 'lucide-react'
 import Image from 'next/image'
+
+import {Check, Search, Upload} from 'lucide-react'
 import {useEffect, useState} from 'react'
 
 import {Badge} from '@/components/ui/badge'

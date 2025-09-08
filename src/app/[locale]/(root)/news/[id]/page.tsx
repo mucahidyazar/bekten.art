@@ -1,3 +1,9 @@
+import {Metadata} from 'next'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import {notFound} from 'next/navigation'
+
 import {
   ArrowLeftIcon,
   BookmarkIcon,
@@ -6,9 +12,6 @@ import {
   MapPinIcon,
   ShareIcon,
 } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import {notFound} from 'next/navigation'
 import {unstable_ViewTransition as ViewTransition} from 'react'
 
 import {mockNewsData} from '@/mocks/news'
@@ -19,7 +22,7 @@ type PageProps = {
   params: Promise<{id: string}>
 }
 
-export async function generateMetadata({params}: PageProps) {
+export async function generateMetadata({params}: PageProps): Promise<Metadata> {
   const {id} = await params
   const news = mockNewsData.find(item => item.id === id)
 

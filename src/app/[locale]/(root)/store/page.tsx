@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 import {
   CheckCircleIcon,
   ClockIcon,
@@ -9,7 +11,6 @@ import {
   StarIcon,
   XCircleIcon,
 } from 'lucide-react'
-import Image from 'next/image'
 import {useTranslations} from 'next-intl'
 import {
   useMemo,

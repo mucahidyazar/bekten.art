@@ -1,7 +1,8 @@
 'use client'
 
-import {Pause, Play} from 'lucide-react'
 import Image from 'next/image'
+
+import {Pause, Play} from 'lucide-react'
 import {useEffect, useState} from 'react'
 
 import {useMusic} from '@/components/providers/music-provider'

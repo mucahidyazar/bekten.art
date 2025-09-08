@@ -1,9 +1,10 @@
 'use client'
 
-import {LaptopIcon, LogInIcon, MoonIcon, SunIcon, WavesIcon} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {usePathname, useRouter} from 'next/navigation'
+
+import {LaptopIcon, LogInIcon, MoonIcon, SunIcon, WavesIcon} from 'lucide-react'
 import {useLocale, useTranslations} from 'next-intl'
 import {useTheme} from 'next-themes'
 import {useEffect, useState, useTransition} from 'react'

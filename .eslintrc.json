@@ -28,9 +28,11 @@
           "type"
         ],
         "pathGroups": [
+          {"pattern": "next", "group": "external", "position": "before"},
+          {"pattern": "next/**", "group": "external", "position": "before"},
           {"pattern": "@**", "group": "external", "position": "after"}
         ],
-        "pathGroupsExcludedImportTypes": ["react"],
+        "pathGroupsExcludedImportTypes": ["react", "next"],
         "newlines-between": "always",
         "alphabetize": {"order": "asc", "caseInsensitive": true}
       }

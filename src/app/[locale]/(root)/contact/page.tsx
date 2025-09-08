@@ -1,3 +1,5 @@
+import {Metadata} from 'next'
+
 import {
   ClockIcon,
   LinkIcon,
@@ -15,9 +17,7 @@ import {Separator} from '@/components/ui/separator'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 import {getBektenContactInfo} from '@/utils/supabase/server'
 
-export async function generateMetadata(): Promise<
-  ReturnType<typeof prepareMetadata>
-> {
+export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('contact')
 
   return await prepareMetadata({

@@ -1,10 +1,13 @@
+import {Metadata} from 'next'
+
+import Image from 'next/image'
+
 import {
   AwardIcon,
   GraduationCapIcon,
   HeartIcon,
   PaletteIcon,
 } from 'lucide-react'
-import Image from 'next/image'
 import {useTranslations} from 'next-intl'
 
 import {ArtistHero} from '@/components/molecules/artist-hero'
@@ -12,7 +15,7 @@ import {CallToAction} from '@/components/molecules/call-to-action'
 import {SectionHeader} from '@/components/molecules/section-header'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const {getTranslations} = await import('next-intl/server')
   const t = await getTranslations('about')
 

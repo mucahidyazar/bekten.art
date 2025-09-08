@@ -1,6 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
+
 import { useEffect, useState } from 'react'
 
 export function ErrorDisplay() {

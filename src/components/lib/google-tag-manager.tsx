@@ -2,6 +2,7 @@
 
 import {usePathname, useSearchParams} from 'next/navigation'
 import Script from 'next/script'
+
 import {useEffect} from 'react'
 
 import {configs} from '@/configs'

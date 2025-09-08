@@ -1,7 +1,8 @@
 'use client'
 
-import {HeartIcon} from 'lucide-react'
 import Image from 'next/image'
+
+import {HeartIcon} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useState} from 'react'
 

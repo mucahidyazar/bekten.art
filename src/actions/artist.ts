@@ -1,6 +1,7 @@
 'use server'
 
 import {revalidatePath} from 'next/cache'
+
 import {z} from 'zod'
 
 import {artistItemSchema, artistSettingsSchema} from '@/schemas/artist'

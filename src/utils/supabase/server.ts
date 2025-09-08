@@ -1,5 +1,6 @@
-import {createServerClient} from '@supabase/ssr'
 import {cookies} from 'next/headers'
+
+import {createServerClient} from '@supabase/ssr'
 
 // Enhanced User type that includes Supabase Auth User + profile
 export type EnhancedUser = {

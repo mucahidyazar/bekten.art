@@ -1,8 +1,9 @@
 'use client'
 
+import Image from 'next/image'
+
 import {zodResolver} from '@hookform/resolvers/zod'
 import {ImageIcon, Loader2} from 'lucide-react'
-import Image from 'next/image'
 import {FieldValues, Path, useForm} from 'react-hook-form'
 import {z} from 'zod'
 

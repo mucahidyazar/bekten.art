@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 import {
   PaletteIcon,
   GraduationCapIcon,
@@ -8,7 +10,6 @@ import {
   ShieldCheckIcon,
   BadgeCheckIcon,
 } from 'lucide-react'
-import Image from 'next/image'
 import {useTranslations} from 'next-intl'
 
 import {Badge} from '@/components/ui/badge'

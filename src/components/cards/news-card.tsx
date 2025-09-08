@@ -1,8 +1,9 @@
 'use client'
 
-import {ClockIcon, HomeIcon, MapIcon} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+
+import {ClockIcon, HomeIcon, MapIcon} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 
 import {cn} from '@/utils'

@@ -1,7 +1,9 @@
+import {Metadata} from 'next'
+
 import {GalleryTemplate} from '@/components/templates/gallery-template'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const {getTranslations} = await import('next-intl/server')
   const t = await getTranslations('gallery')
 

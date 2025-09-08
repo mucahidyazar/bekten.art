@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -7,7 +9,6 @@ import {
   LayoutGridIcon,
   XIcon,
 } from 'lucide-react'
-import Image from 'next/image'
 import {useState} from 'react'
 
 import {ArtImage} from '@/components/molecules/art-image'
