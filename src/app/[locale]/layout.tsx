@@ -107,7 +107,7 @@ export default async function RootLayout({children, params}: LayoutProps) {
             <QueryProvider>
               <ThemeProvider
                 attribute="class"
-                defaultTheme="system"
+                defaultTheme="light"
                 enableSystem
                 themes={['light', 'dark', 'navy', 'system']}
               >
