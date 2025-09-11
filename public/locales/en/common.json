@@ -107,6 +107,9 @@
   "common": {
     "back": "Back",
     "cancel": "Cancel",
+    "title": "Title",
+    "description": "Description",
+    "name": "Name",
     "close": "Close",
     "confirm": "Confirm",
     "copy": "Copy",
@@ -349,12 +352,18 @@
     "metaTitle": "🎨 Latest Art News - Bekten Usubaliev's Exhibitions & Updates",
     "newsDescription": "Stay updated with Bekten's latest exhibitions, events, and artistic journey",
     "readMore": "Read More",
+    "readOriginal": "Read Original",
     "relatedNews": "Related News",
     "stayConnected": "Stay Connected",
 
     "allNewsEvents": "All News & Events",
     "backToNews": "Back to News",
     "newsNotFound": "News Not Found",
+    "editNewsSection": "Edit News Section",
+    "manageNewsDescription": "Manage your news articles and events",
+    "editNews": "Edit News",
+    "subtitle": "Subtitle",
+    "category": "Category",
 
     "newsNotFoundDescription": "The requested news article could not be found."
   },
@@ -427,6 +436,15 @@
     "reserved": "Reserved",
     "sold": "Sold",
     "unavailable": "Unavailable",
+    "original": "Original",
+    "reproduction": "Reproduction",
+    "storeManagement": "Store Management",
+    "storeBadge": "Store",
+    "artStore": "Art Store",
+    "mainImage": "Main Image",
+    "price": "Price",
+    "viewDetails": "View Details",
+    "category": "Category",
 
     "adjustFilters": "Try adjusting your filters or browse all categories.",
     "featuredFirst": "Featured First",
@@ -452,6 +470,9 @@
     "categoryCollector": "Collector",
     "categoryCritic": "Art Critic",
     "categoryPolitician": "Statesman",
+    "categoryJournalist": "Journalist",
+    "categoryCurator": "Curator",
+    "company": "Company",
     "manualControl": "Manual Control"
   }
 }

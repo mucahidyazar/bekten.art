@@ -10,13 +10,12 @@ import {
 } from 'lucide-react'
 import {getTranslations} from 'next-intl/server'
 
-import {ArtworkCard} from '@/components/molecules/artwork-card'
 import {CallToAction} from '@/components/molecules/call-to-action'
 import {HeroVideo} from '@/components/molecules/hero-video'
-import {SectionHeader} from '@/components/molecules/section-header'
 import {TestimonialsSection} from '@/components/molecules/testimonials-section'
-import {HomeSection} from '@/components/organisms/home-section'
 import {ArtistSection} from '@/components/sections/artist-section'
+import {HomeStoreSection} from '@/components/sections/home-store-section'
+import {MemoriesSection} from '@/components/sections/memories-section'
 import {WorkshopSection} from '@/components/sections/workshop-section'
 import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
@@ -26,6 +25,12 @@ import {prepareMetadata} from '@/utils/prepare-metadata'
 import type {
   ArtistDatabaseItem,
   ArtistDatabaseSettings,
+  MemoriesDatabaseItem,
+  MemoriesDatabaseSettings,
+  StoreDatabaseItem,
+  StoreDatabaseSettings,
+  TestimonialDatabaseItem,
+  TestimonialDatabaseSettings,
   WorkshopDatabaseItem,
   WorkshopDatabaseSettings,
 } from '@/types/database'
@@ -33,7 +38,7 @@ import type {
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('homepage')
 
-  return await prepareMetadata({
+  return prepareMetadata({
     title: t('metaTitle'),
     description: t('metaDescription'),
   })
@@ -73,54 +78,7 @@ export async function generateMetadata(): Promise<Metadata> {
 //   },
 // ]
 
-const artworksData = [
-  {
-    url: '/img/art/art-0.png',
-    title: 'Graceful Lady Portrait',
-    description:
-      "A captivating portrait capturing the essence of a lady's elegance and deep gaze. The detailed patterns and contrasting yellow dress exude a sense of grace and timelessness.",
-  },
-  {
-    url: '/img/art/art-1.png',
-    title: 'Dance of Unity',
-    description:
-      'A vibrant depiction of three figures in dance, symbolizing unity and joy. The use of geometrical patterns and bold colors brings this artwork to life, evoking a sense of movement and celebration.',
-  },
-  {
-    url: '/img/art/art-2.png',
-    title: 'Solitude with Nature',
-    description:
-      "A serene portrayal of a woman lost in her thoughts, with nature's abundance around her. The juxtaposition of the figure with flowers and fruits symbolizes harmony and contemplation.",
-  },
-  {
-    url: '/img/art/art-3.png',
-    title: 'Musician in Thought',
-    description:
-      'A deep portrayal of a musician immersed in his music, the artwork beautifully captures the emotion and passion of an artist for his craft. The splashes of colors in the background further accentuate the depth of his contemplation.',
-  },
-  {
-    url: '/img/art/art-4.png',
-    title: 'Elderly Gentleman Portrait',
-    description:
-      'A masterful portrait capturing the wisdom and dignity of an elderly gentleman. The subtle details, from the texture of the hat to the expression in his eyes, convey a lifetime of experiences and stories.',
-  },
-  {
-    url: '/img/art/art-5.png',
-    title: 'Lady of the Twilight',
-    description:
-      'An enchanting depiction of a solitary figure standing tall amidst geometric patterns. The use of contrasting colors and the silhouette of the lady create a mystic aura, symbolizing strength and grace.',
-  },
-  {
-    url: '/img/art/art-6.png',
-    title: 'Dancers in Harmony',
-    description:
-      'A dynamic portrayal of three dancers in synchrony, set against a backdrop of vibrant colors. The artwork exudes energy, movement, and the joy of unity in dance.',
-  },
-]
-
 export default async function Home() {
-  // TODO: Replace with Supabase query
-  const onSaleArtworks: any[] = []
   const t = await getTranslations('homepage')
 
   // Fetch data from Supabase using getSectionData
@@ -131,6 +89,18 @@ export default async function Home() {
   const artistData = (await getSectionData('artist')) as {
     items: ArtistDatabaseItem[]
     settings: ArtistDatabaseSettings | null
+  }
+  const testimonialData = (await getSectionData('testimonials')) as {
+    items: TestimonialDatabaseItem[]
+    settings: TestimonialDatabaseSettings | null
+  }
+  const memoriesData = (await getSectionData('memories')) as {
+    items: MemoriesDatabaseItem[]
+    settings: MemoriesDatabaseSettings | null
+  }
+  const storeData = (await getSectionData('store')) as {
+    items: StoreDatabaseItem[]
+    settings: StoreDatabaseSettings | null
   }
 
   return (
@@ -261,40 +231,18 @@ export default async function Home() {
       )}
 
       {/* Testimonials Section */}
-      <TestimonialsSection />
+      {testimonialData.settings && testimonialData.items.length > 0 && (
+        <TestimonialsSection testimonialData={testimonialData} />
+      )}
 
-      {/* Featured Artworks Section */}
-      <section className="py-20">
-        <div className="container lg:px-0">
-          <SectionHeader
-            badgeText={t('collectionBadge')}
-            badgeIcon="sparkles"
-            title={t('collectionTitle')}
-            description={t('collectionDescription')}
-          />
+      {/* Memories in Paint Section */}
+      {memoriesData.settings && memoriesData.items.length > 0 && (
+        <MemoriesSection memoriesData={memoriesData} />
+      )}
 
-          <HomeSection title="" data={artworksData} />
-        </div>
-      </section>
-
-      {/* On Sale Artworks - if any */}
-      {!!onSaleArtworks.length && (
-        <section className="py-20">
-          <div className="container lg:px-0">
-            <SectionHeader
-              badgeText={t('storeBadge')}
-              badgeIcon="sparkles"
-              title={t('storeTitle')}
-              description={t('storeDescription')}
-            />
-
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {onSaleArtworks.map(item => (
-                <ArtworkCard key={item.id} artwork={item} />
-              ))}
-            </div>
-          </div>
-        </section>
+      {/* Store Section - Featured Artworks */}
+      {storeData.settings && storeData.items.length > 0 && (
+        <HomeStoreSection storeData={storeData} />
       )}
     </div>
   )

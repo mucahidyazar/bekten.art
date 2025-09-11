@@ -61,39 +61,39 @@ export const mockPressData: PressItem[] = [
     category: 'news'
   },
   {
-    id: 'press-5',
-    title: 'Art Critic\'s Choice: Bekten Usubaliev\'s Masterful Color Palette',
-    subtitle: 'Technical Excellence Meets Emotional Expression',
-    description: 'Professional art critic analyzes the technical aspects of Bekten Usubaliev\'s work, focusing on his masterful use of color and composition.',
-    content: 'Usubaliev\'s command of color theory and composition creates a visual language that speaks directly to the viewer\'s emotions. His technical skill serves the higher purpose of emotional communication through art.',
-    image: '/img/posts/post-5.jpg',
-    date: '2023-12-15',
-    source: 'Professional Art Review',
-    url: 'https://example.com/press-5',
-    category: 'review'
+    id: 'press-6',
+    title: 'Cultural Heritage Meets Modern Expression in Usubaliev\'s Work',
+    subtitle: 'Bridging Tradition and Contemporary Art',
+    description: 'Analysis of how Bekten Usubaliev successfully integrates Kyrgyz cultural elements into contemporary artistic expression.',
+    content: 'Usubaliev\'s unique approach to blending traditional Kyrgyz motifs with modern artistic techniques creates a distinctive voice in contemporary Central Asian art.',
+    image: '/img/posts/post-6.jpg',
+    date: '2023-12-10',
+    source: 'Cultural Arts Quarterly',
+    url: 'https://example.com/press-6',
+    category: 'feature'
   },
   {
-    id: 'press-5',
-    title: 'Art Critic\'s Choice: Bekten Usubaliev\'s Masterful Color Palette',
-    subtitle: 'Technical Excellence Meets Emotional Expression',
-    description: 'Professional art critic analyzes the technical aspects of Bekten Usubaliev\'s work, focusing on his masterful use of color and composition.',
-    content: 'Usubaliev\'s command of color theory and composition creates a visual language that speaks directly to the viewer\'s emotions. His technical skill serves the higher purpose of emotional communication through art.',
-    image: '/img/posts/post-5.jpg',
-    date: '2023-12-15',
-    source: 'Professional Art Review',
-    url: 'https://example.com/press-5',
-    category: 'review'
+    id: 'press-7',
+    title: 'International Recognition for Kyrgyz Artist Bekten Usubaliev',
+    subtitle: 'Global Acclaim for Local Talent',
+    description: 'Coverage of international art community\'s growing recognition of Bekten Usubaliev\'s contributions to contemporary art.',
+    content: 'International art critics and collectors are taking notice of Usubaliev\'s distinctive style and profound emotional expression, marking him as an artist to watch.',
+    image: '/img/posts/post-7.jpg',
+    date: '2023-12-05',
+    source: 'International Art News',
+    url: 'https://example.com/press-7',
+    category: 'news'
   },
   {
-    id: 'press-5',
+    id: 'press-8',
     title: 'Art Critic\'s Choice: Bekten Usubaliev\'s Masterful Color Palette',
     subtitle: 'Technical Excellence Meets Emotional Expression',
     description: 'Professional art critic analyzes the technical aspects of Bekten Usubaliev\'s work, focusing on his masterful use of color and composition.',
     content: 'Usubaliev\'s command of color theory and composition creates a visual language that speaks directly to the viewer\'s emotions. His technical skill serves the higher purpose of emotional communication through art.',
-    image: '/img/posts/post-5.jpg',
-    date: '2023-12-15',
+    image: '/img/posts/post-8.jpg',
+    date: '2023-11-30',
     source: 'Professional Art Review',
-    url: 'https://example.com/press-5',
+    url: 'https://example.com/press-8',
     category: 'review'
   }
 ]

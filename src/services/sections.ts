@@ -12,6 +12,9 @@ export type SectionType =
   | 'portfolio'
   | 'testimonials'
   | 'services'
+  | 'memories'
+  | 'store'
+  | 'news'
 
 export async function getSectionData(sectionType: SectionType): Promise<{
   items: DatabaseSectionItem[]

@@ -1,28 +1,28 @@
-import { Metadata } from "next"
+import {Metadata} from 'next'
 
-import { headers } from "next/headers"
-
-import { ME } from "@/constants"
+import {ME} from '@/constants'
 
 type TPrepareMetadata = Metadata & {
   title?: string
   description?: string
   page?: string
 }
-export async function prepareMetadata(metadata: TPrepareMetadata = {}): Promise<Metadata> {
-  const headersList = await headers()
-  const host = headersList.get('host')
-  const protocal = process?.env.NODE_ENV === 'development' ? 'http' : 'https'
-  const domain = `${protocal}://${host}`
+export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
+  // Get domain from environment variables
+  const domain =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3000'
+      : 'https://bekten.art')
 
   const DEFAULT_TITLE = {
-    default: 'Bekten Usubaliev',
-    template: `%s - Painter | ${domain}`,
+    default: 'Bekten Usubaliev - Contemporary Oil Painter | Kyrgyz Artist',
+    template: `%s | Bekten Usubaliev - Contemporary Artist`,
   }
   const title = metadata.title || DEFAULT_TITLE
   const description = metadata.description || ME.descriptionFull
 
-  const { authors, openGraph, twitter, ...rest } = metadata
+  const {authors, openGraph, twitter, keywords, ...rest} = metadata
 
   const imagesUrl = new URL(`${domain}/api/og`)
 
@@ -37,16 +37,45 @@ export async function prepareMetadata(metadata: TPrepareMetadata = {}): Promise<
   }
   const images = imagesUrl.toString()
 
+  // SEO Keywords for art and painting
+  const defaultKeywords = [
+    'Bekten Usubaliev',
+    'contemporary artist',
+    'oil painting',
+    'Kyrgyz artist',
+    'portrait painter',
+    'art gallery',
+    'contemporary art',
+    'Bishkek artist',
+    'Central Asian art',
+    'modern painting',
+    'fine art',
+    'artist portfolio',
+    'painting workshop',
+    'art exhibition',
+    'cultural art',
+  ]
+
   const initialMetadata = {
     title,
     description,
-    authors: [{ name: 'Bekten Usubaliev', url: `${domain}` }],
+    keywords: keywords || defaultKeywords.join(', '),
+    authors: [{name: 'Bekten Usubaliev', url: `${domain}`}],
+    creator: 'Bekten Usubaliev',
+    publisher: 'Bekten Usubaliev',
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
     manifest: '/site.webmanifest',
     alternates: {
       canonical: '/',
       languages: {
         'en-US': '/en',
-        'tr-TR': '/tr'
+        'tr-TR': '/tr',
+        'ky-KG': '/kg',
+        'ru-RU': '/ru',
       },
     },
     metadataBase: new URL(`${domain}`),
@@ -55,30 +84,44 @@ export async function prepareMetadata(metadata: TPrepareMetadata = {}): Promise<
       description,
       type: 'website',
       locale: 'en_US',
-      images,
+      siteName: 'Bekten Usubaliev - Contemporary Artist',
+      images: [
+        {
+          url: images,
+          width: 1200,
+          height: 630,
+          alt: 'Bekten Usubaliev - Contemporary Oil Painter',
+        },
+      ],
     },
     twitter: {
       title,
       description,
-      card: 'summary',
-      site: `${domain}`,
-      creator: 'Bekten Usubaliev',
-      siteId: `${domain}`,
-      creatorId: 'bektenusubaliev',
-      images,
+      card: 'summary_large_image',
+      site: '@bektenusubaliev',
+      creator: '@bektenusubaliev',
+      images: [
+        {
+          url: images,
+          alt: 'Bekten Usubaliev - Contemporary Oil Painter',
+        },
+      ],
     },
     robots: {
       index: true,
       follow: true,
-      nocache: true,
       googleBot: {
         index: true,
         follow: true,
-        noimageindex: true,
         'max-video-preview': -1,
         'max-snippet': -1,
+        'max-image-preview': 'large' as const,
       },
     },
+    verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION,
+    },
+    category: 'Art & Culture',
   }
 
   return {

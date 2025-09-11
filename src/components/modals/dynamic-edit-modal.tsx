@@ -101,7 +101,7 @@ export function DynamicEditModal<
   const [inlineEditingIndex, setInlineEditingIndex] = useState<number>(-1)
   const [isLoading, setIsLoading] = useState(false)
   const [currentViewType, setCurrentViewType] = useState<'card' | 'table'>(
-    viewType,
+    viewConfig.card ? viewType : 'table',
   )
 
   // const _handleItemSubmit = async (data: Partial<TItem>) => {
@@ -348,190 +348,195 @@ export function DynamicEditModal<
     }
   }
 
-  const renderCardView = () => (
-    <div className="grid auto-rows-max grid-cols-1 gap-6 overflow-y-auto p-4 md:grid-cols-2 lg:grid-cols-3">
-      {items.map((item, index) => (
-        <Card
-          key={item.id || index}
-          className={`group border-border/20 from-card/80 to-card/40 hover:shadow-primary/10 relative w-full overflow-hidden rounded-2xl border bg-gradient-to-br shadow-lg backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 ${
-            inlineEditingIndex === index ? 'ring-primary/50 ring-2' : ''
-          }`}
-          style={{aspectRatio: viewConfig.card.aspectRatio || '160/240'}}
-        >
-          {/* Hover Actions */}
-          <div
-            className={`absolute top-2 right-2 z-10 flex gap-1 transition-all duration-300 ${
-              inlineEditingIndex === index
-                ? 'opacity-100'
-                : 'opacity-0 group-hover:opacity-100'
+  const renderCardView = () => {
+    if (!viewConfig.card) return null
+
+    const cardConfig = viewConfig.card
+
+    return (
+      <div className="grid auto-rows-max grid-cols-1 gap-6 overflow-y-auto p-4 md:grid-cols-2 lg:grid-cols-3">
+        {items.map((item, index) => (
+          <Card
+            key={item.id || index}
+            className={`group border-border/20 from-card/80 to-card/40 hover:shadow-primary/10 relative w-full overflow-hidden rounded-2xl border bg-gradient-to-br shadow-lg backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 ${
+              inlineEditingIndex === index ? 'ring-primary/50 ring-2' : ''
             }`}
+            style={{aspectRatio: cardConfig.aspectRatio || '160/240'}}
           >
-            {inlineEditingIndex === index ? (
-              <>
-                <div
-                  onClick={handleInlineCancel}
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-red-600/20"
-                >
-                  <X className="h-4 w-4 text-white/80" />
-                </div>
-                <div
-                  onClick={handleInlineSave}
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-green-600/20"
-                >
-                  <Check className="h-4 w-4 text-white/80" />
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex h-8 w-8 cursor-grab items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200 hover:cursor-grabbing hover:bg-white/10">
-                  <GripVertical className="h-4 w-4 text-white/80" />
-                </div>
-                <div
-                  onClick={() => handleInlineEdit(index)}
-                  className="hover:bg-primary/20 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-110"
-                >
-                  <Edit className="h-4 w-4 text-white/80" />
-                </div>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-red-600/20">
-                      <Trash2 className="h-4 w-4 text-white/80" />
-                    </div>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="border-destructive/20">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="text-destructive">
-                        Remove Item
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to remove "
-                        {item[viewConfig.card.titleField] || 'this item'}" from
-                        your collection? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="border-border/50">
-                        Keep it
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDeleteItem(index)}
-                        className="from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70 bg-gradient-to-r"
-                      >
-                        Remove
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </>
-            )}
-          </div>
+            {/* Hover Actions */}
+            <div
+              className={`absolute top-2 right-2 z-10 flex gap-1 transition-all duration-300 ${
+                inlineEditingIndex === index
+                  ? 'opacity-100'
+                  : 'opacity-0 group-hover:opacity-100'
+              }`}
+            >
+              {inlineEditingIndex === index ? (
+                <>
+                  <div
+                    onClick={handleInlineCancel}
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-red-600/20"
+                  >
+                    <X className="h-4 w-4 text-white/80" />
+                  </div>
+                  <div
+                    onClick={handleInlineSave}
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-green-600/20"
+                  >
+                    <Check className="h-4 w-4 text-white/80" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex h-8 w-8 cursor-grab items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200 hover:cursor-grabbing hover:bg-white/10">
+                    <GripVertical className="h-4 w-4 text-white/80" />
+                  </div>
+                  <div
+                    onClick={() => handleInlineEdit(index)}
+                    className="hover:bg-primary/20 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-110"
+                  >
+                    <Edit className="h-4 w-4 text-white/80" />
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-red-600/20">
+                        <Trash2 className="h-4 w-4 text-white/80" />
+                      </div>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="border-destructive/20">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-destructive">
+                          Remove Item
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to remove "
+                          {item[cardConfig.titleField] || 'this item'}" from
+                          your collection? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="border-border/50">
+                          Keep it
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteItem(index)}
+                          className="from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70 bg-gradient-to-r"
+                        >
+                          Remove
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
+              )}
+            </div>
 
-          <CardContent className="relative flex h-full flex-col p-0">
-            {inlineEditingIndex === index ? (
-              // Inline Edit Mode
-              <div className="flex h-full flex-col">
-                <div className="relative min-h-[272px] flex-grow overflow-hidden">
-                  {editingItem?.[viewConfig.card.imageField] ? (
-                    <Image
-                      src={editingItem[viewConfig.card.imageField] as string}
-                      alt="Preview"
-                      fill
-                      className="object-cover"
-                      onError={e => {
-                        const target = e.target as HTMLImageElement
+            <CardContent className="relative flex h-full flex-col p-0">
+              {inlineEditingIndex === index ? (
+                // Inline Edit Mode
+                <div className="flex h-full flex-col">
+                  <div className="relative min-h-[272px] flex-grow overflow-hidden">
+                    {editingItem?.[cardConfig.imageField] ? (
+                      <Image
+                        src={editingItem[cardConfig.imageField] as string}
+                        alt="Preview"
+                        fill
+                        className="object-cover"
+                        onError={e => {
+                          const target = e.target as HTMLImageElement
 
-                        target.style.display = 'none'
-                      }}
-                    />
-                  ) : (
-                    <div className="bg-muted/50 flex h-full w-full items-center justify-center">
-                      {viewConfig.card.placeholderIcon || (
-                        <ImageIcon className="text-muted-foreground/60 h-8 w-8" />
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="p-3">
-                  <Input
-                    value={
-                      getNestedValue(editingItem, viewConfig.card.titleField) ||
-                      ''
-                    }
-                    onChange={e =>
-                      handleFieldChange(
-                        viewConfig.card.titleField,
-                        e.target.value,
-                      )
-                    }
-                    placeholder="Title..."
-                    className="text-foreground/90 mb-1 h-[20px] border-none bg-transparent p-0 text-sm font-semibold shadow-none focus-visible:ring-0"
-                  />
-                  <Textarea
-                    value={
-                      getNestedValue(
-                        editingItem,
-                        viewConfig.card.descriptionField,
-                      ) || ''
-                    }
-                    onChange={e =>
-                      handleFieldChange(
-                        viewConfig.card.descriptionField,
-                        e.target.value,
-                      )
-                    }
-                    placeholder="Description..."
-                    className="text-muted-foreground/80 resize-none border-none bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
-                    rows={2}
-                  />
-                </div>
-              </div>
-            ) : (
-              // Normal View Mode
-              <>
-                <div className="relative min-h-[272px] flex-grow overflow-hidden">
-                  {getNestedValue(item, viewConfig.card.imageField) ? (
-                    <Image
-                      src={getNestedValue(item, viewConfig.card.imageField)}
-                      alt={getNestedValue(item, viewConfig.card.titleField)}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      onError={e => {
-                        const target = e.target as HTMLImageElement
-
-                        target.style.display = 'none'
-                      }}
-                    />
-                  ) : (
-                    <div className="bg-muted/50 flex h-full w-full items-center justify-center">
-                      {viewConfig.card.placeholderIcon || (
-                        <ImageIcon className="text-muted-foreground/60 h-8 w-8" />
-                      )}
-                    </div>
-                  )}
-                  {/* Decorative overlay */}
-                  <div className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-transform duration-500 group-hover:rotate-90">
-                    {viewConfig.card.placeholderIcon || (
-                      <ImageIcon className="h-4 w-4 text-white/80" />
+                          target.style.display = 'none'
+                        }}
+                      />
+                    ) : (
+                      <div className="bg-muted/50 flex h-full w-full items-center justify-center">
+                        {cardConfig.placeholderIcon || (
+                          <ImageIcon className="text-muted-foreground/60 h-8 w-8" />
+                        )}
+                      </div>
                     )}
                   </div>
+                  <div className="p-3">
+                    <Input
+                      value={
+                        getNestedValue(editingItem, cardConfig.titleField) || ''
+                      }
+                      onChange={e =>
+                        handleFieldChange(cardConfig.titleField, e.target.value)
+                      }
+                      placeholder="Title..."
+                      className="text-foreground/90 mb-1 h-[20px] border-none bg-transparent p-0 text-sm font-semibold shadow-none focus-visible:ring-0"
+                    />
+                    <Textarea
+                      value={
+                        getNestedValue(
+                          editingItem,
+                          cardConfig.descriptionField,
+                        ) || ''
+                      }
+                      onChange={e =>
+                        handleFieldChange(
+                          cardConfig.descriptionField,
+                          e.target.value,
+                        )
+                      }
+                      placeholder="Description..."
+                      className="text-muted-foreground/80 resize-none border-none bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
+                      rows={2}
+                    />
+                  </div>
                 </div>
-                <div className="p-3">
-                  <h4 className="text-foreground/90 group-hover:text-primary mb-1 line-clamp-2 text-sm font-semibold transition-colors duration-300">
-                    {getNestedValue(item, viewConfig.card.titleField) ||
-                      'Untitled'}
-                  </h4>
-                  <p className="text-muted-foreground/80 line-clamp-2 text-xs">
-                    {getNestedValue(item, viewConfig.card.descriptionField) ||
-                      'No description'}
-                  </p>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
+              ) : (
+                // Normal View Mode
+                <>
+                  <div className="relative min-h-[272px] flex-grow overflow-hidden">
+                    {getNestedValue(item, cardConfig.imageField) ? (
+                      <Image
+                        src={getNestedValue(item, cardConfig.imageField)}
+                        alt={
+                          getNestedValue(item, cardConfig.titleField) ||
+                          'Item image'
+                        }
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        onError={e => {
+                          const target = e.target as HTMLImageElement
+
+                          target.style.display = 'none'
+                        }}
+                      />
+                    ) : (
+                      <div className="bg-muted/50 flex h-full w-full items-center justify-center">
+                        {cardConfig.placeholderIcon || (
+                          <ImageIcon className="text-muted-foreground/60 h-8 w-8" />
+                        )}
+                      </div>
+                    )}
+                    {/* Decorative overlay */}
+                    <div className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 backdrop-blur-sm transition-transform duration-500 group-hover:rotate-90">
+                      {cardConfig.placeholderIcon || (
+                        <ImageIcon className="h-4 w-4 text-white/80" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <h4 className="text-foreground/90 group-hover:text-primary mb-1 line-clamp-2 text-sm font-semibold transition-colors duration-300">
+                      {getNestedValue(item, cardConfig.titleField) ||
+                        'Untitled'}
+                    </h4>
+                    <p className="text-muted-foreground/80 line-clamp-2 text-xs">
+                      {getNestedValue(item, cardConfig.descriptionField) ||
+                        'No description'}
+                    </p>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
 
   const renderTableView = () => (
     <div className="overflow-y-auto p-4">
@@ -574,7 +579,12 @@ export function DynamicEditModal<
                       ) : getNestedValue(item, column.field) ? (
                         <Image
                           src={getNestedValue(item, column.field)}
-                          alt={getNestedValue(item, viewConfig.card.titleField)}
+                          alt={
+                            getNestedValue(
+                              item,
+                              viewConfig.card?.titleField || 'data.name',
+                            ) || 'Item image'
+                          }
                           fill
                           className="object-cover"
                           onError={e => {
@@ -698,8 +708,9 @@ export function DynamicEditModal<
                             </AlertDialogTitle>
                             <AlertDialogDescription>
                               Are you sure you want to remove "
-                              {item[viewConfig.card.titleField] || 'this item'}"
-                              from your collection? This action cannot be
+                              {item[viewConfig.card?.titleField || 'id'] ||
+                                'this item'}
+                              " from your collection? This action cannot be
                               undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
@@ -793,35 +804,39 @@ export function DynamicEditModal<
           >
             <div className="flex items-center justify-between px-4">
               <div className="flex items-center gap-2">
-                {/* View Toggle Buttons */}
-                <div className="border-border/20 bg-muted/20 flex items-center rounded-lg border p-1">
-                  <Button
-                    variant={currentViewType === 'card' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setCurrentViewType('card')}
-                    className={`h-8 px-3 ${
-                      currentViewType === 'card'
-                        ? 'from-primary to-primary/80 bg-gradient-to-r text-white shadow-sm'
-                        : 'hover:bg-muted/50'
-                    }`}
-                  >
-                    <Grid3X3 className="mr-1.5 h-4 w-4" />
-                    <span className="text-xs font-medium">Cards</span>
-                  </Button>
-                  <Button
-                    variant={currentViewType === 'table' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setCurrentViewType('table')}
-                    className={`h-8 px-3 ${
-                      currentViewType === 'table'
-                        ? 'from-primary to-primary/80 bg-gradient-to-r text-white shadow-sm'
-                        : 'hover:bg-muted/50'
-                    }`}
-                  >
-                    <Table className="mr-1.5 h-4 w-4" />
-                    <span className="text-xs font-medium">Table</span>
-                  </Button>
-                </div>
+                {/* View Toggle Buttons - Only show if card config is available */}
+                {viewConfig.card && (
+                  <div className="border-border/20 bg-muted/20 flex items-center rounded-lg border p-1">
+                    <Button
+                      variant={currentViewType === 'card' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setCurrentViewType('card')}
+                      className={`h-8 px-3 ${
+                        currentViewType === 'card'
+                          ? 'from-primary to-primary/80 bg-gradient-to-r text-white shadow-sm'
+                          : 'hover:bg-muted/50'
+                      }`}
+                    >
+                      <Grid3X3 className="mr-1.5 h-4 w-4" />
+                      <span className="text-xs font-medium">Cards</span>
+                    </Button>
+                    <Button
+                      variant={
+                        currentViewType === 'table' ? 'default' : 'ghost'
+                      }
+                      size="sm"
+                      onClick={() => setCurrentViewType('table')}
+                      className={`h-8 px-3 ${
+                        currentViewType === 'table'
+                          ? 'from-primary to-primary/80 bg-gradient-to-r text-white shadow-sm'
+                          : 'hover:bg-muted/50'
+                      }`}
+                    >
+                      <Table className="mr-1.5 h-4 w-4" />
+                      <span className="text-xs font-medium">Table</span>
+                    </Button>
+                  </div>
+                )}
               </div>
               <Button
                 onClick={handleAddItem}
@@ -838,7 +853,9 @@ export function DynamicEditModal<
             </div>
 
             {/* Conditional View Rendering */}
-            {currentViewType === 'card' ? renderCardView() : renderTableView()}
+            {currentViewType === 'card' && viewConfig.card
+              ? renderCardView()
+              : renderTableView()}
 
             {items.length === 0 && (
               <Card className="border-border/20 from-muted/20 to-muted/5 border-2 border-dashed bg-gradient-to-br">
@@ -999,28 +1016,28 @@ export type DynamicSettings = {
 // Default settings fields that are common across all sections
 const defaultSettingsFields: SettingsFieldConfig[] = [
   {
-    name: 'sectionTitle',
+    name: 'section_title',
     label: 'Section Title',
     type: 'text',
     placeholder: 'Enter a compelling section title...',
     icon: <Settings className="h-3 w-3 text-white" />,
   },
   {
-    name: 'sectionDescription',
+    name: 'section_description',
     label: 'Section Description',
     type: 'textarea',
     placeholder: 'Describe your section and its unique features...',
     icon: <Edit className="h-3 w-3 text-white" />,
   },
   {
-    name: 'badgeText',
+    name: 'badge_text',
     label: 'Badge Text',
     type: 'text',
     placeholder: "Add a special badge (e.g., 'Featured', 'New Collection')",
     icon: <Zap className="h-3 w-3 text-white" />,
   },
   {
-    name: 'maxItems',
+    name: 'max_items',
     label: 'Maximum Items',
     type: 'number',
     placeholder: '6',
@@ -1047,7 +1064,7 @@ export type SettingsFieldConfig = {
 }
 
 export type ViewConfig = {
-  card: {
+  card?: {
     aspectRatio?: string
     imageField: string
     titleField: string

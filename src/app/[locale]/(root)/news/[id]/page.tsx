@@ -1,6 +1,5 @@
 import {Metadata} from 'next'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import {notFound} from 'next/navigation'
 
@@ -14,9 +13,14 @@ import {
 } from 'lucide-react'
 import {unstable_ViewTransition as ViewTransition} from 'react'
 
-import {mockNewsData} from '@/mocks/news'
+import {CallToAction} from '@/components/molecules/call-to-action'
+import {Badge} from '@/components/ui/badge'
+import {FallbackImage} from '@/components/ui/fallback-image'
+import {getSectionData} from '@/services'
 import {formatDate} from '@/utils/format-date'
 import {prepareMetadata} from '@/utils/prepare-metadata'
+
+import type {NewsDatabaseItem, NewsDatabaseSettings} from '@/types/database'
 
 type PageProps = {
   params: Promise<{id: string}>
@@ -24,7 +28,14 @@ type PageProps = {
 
 export async function generateMetadata({params}: PageProps): Promise<Metadata> {
   const {id} = await params
-  const news = mockNewsData.find(item => item.id === id)
+
+  // Fetch news data from database
+  const newsData = (await getSectionData('news')) as {
+    items: NewsDatabaseItem[]
+    settings: NewsDatabaseSettings | null
+  }
+
+  const news = newsData.items.find(item => item.id === id)
 
   if (!news) {
     const {getTranslations} = await import('next-intl/server')
@@ -37,28 +48,35 @@ export async function generateMetadata({params}: PageProps): Promise<Metadata> {
     })
   }
 
-  return await prepareMetadata({
-    title: `🎨 ${news.title} - Bekten Usubaliev`,
-    description: news.description,
+  return prepareMetadata({
+    title: `🎨 ${news.data.title} - Bekten Usubaliev`,
+    description: news.data.description,
     page: 'news detail',
   })
 }
 
 export default async function NewsDetailPage({params}: PageProps) {
   const {id} = await params
-  const news = mockNewsData.find(item => item.id === id)
   const {getTranslations} = await import('next-intl/server')
   const t = await getTranslations()
+
+  // Fetch news data from database
+  const newsData = (await getSectionData('news')) as {
+    items: NewsDatabaseItem[]
+    settings: NewsDatabaseSettings | null
+  }
+
+  const news = newsData.items.find(item => item.id === id)
 
   if (!news) {
     notFound()
   }
 
   // Get related news (exclude current)
-  const relatedNews = mockNewsData.filter(item => item.id !== id).slice(0, 3)
+  const relatedNews = newsData.items.filter(item => item.id !== id).slice(0, 3)
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
+    <div className="container pt-0!">
       {/* Back Navigation */}
       <ViewTransition>
         <Link
@@ -73,9 +91,10 @@ export default async function NewsDetailPage({params}: PageProps) {
       {/* Hero Image */}
       <div className="relative h-96 overflow-hidden rounded-2xl md:h-[500px]">
         <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-        <Image
-          src={news.image}
-          alt={news.title}
+        <FallbackImage
+          src={news.data.image}
+          fallbackSrc="/img/empty-event-image.png"
+          alt={news.data.title}
           fill
           className="object-cover"
           priority
@@ -94,12 +113,17 @@ export default async function NewsDetailPage({params}: PageProps) {
         {/* Title Overlay */}
         <div className="absolute right-0 bottom-0 left-0 z-20 p-8">
           <div className="space-y-3">
+            <div className="mb-3">
+              <Badge variant="secondary" className="capitalize">
+                {news.data.category}
+              </Badge>
+            </div>
             <h1 className="text-3xl leading-tight font-bold text-white md:text-4xl lg:text-5xl">
-              {news.title}
+              {news.data.title}
             </h1>
-            {news.subtitle && (
+            {news.data.subtitle && (
               <p className="text-primary-300 text-xl font-medium">
-                {news.subtitle}
+                {news.data.subtitle}
               </p>
             )}
           </div>
@@ -118,12 +142,12 @@ export default async function NewsDetailPage({params}: PageProps) {
                 {t('news.dateTime')}
               </p>
               <p className="text-foreground font-semibold">
-                {formatDate('MMMM DD, YYYY', news.date)}
+                {formatDate('MMMM DD, YYYY', new Date(news.data.date))}
               </p>
             </div>
           </div>
 
-          {news.location && (
+          {news.data.location && (
             <div className="flex items-center space-x-3">
               <div className="bg-primary/10 rounded-lg p-2">
                 <MapPinIcon className="text-primary h-5 w-5" />
@@ -132,7 +156,9 @@ export default async function NewsDetailPage({params}: PageProps) {
                 <p className="text-muted-foreground text-sm">
                   {t('news.location')}
                 </p>
-                <p className="text-foreground font-semibold">{news.location}</p>
+                <p className="text-foreground font-semibold">
+                  {news.data.location}
+                </p>
               </div>
             </div>
           )}
@@ -146,7 +172,10 @@ export default async function NewsDetailPage({params}: PageProps) {
                 {t('news.published')}
               </p>
               <p className="text-foreground font-semibold">
-                {formatDate('MMMM DD, YYYY', news.created_at)}
+                {formatDate(
+                  'MMMM DD, YYYY',
+                  new Date(news.created_at || news.data.date),
+                )}
               </p>
             </div>
           </div>
@@ -157,24 +186,24 @@ export default async function NewsDetailPage({params}: PageProps) {
       <div className="prose prose-lg max-w-none">
         <div className="bg-card border-ring/20 space-y-6 rounded-xl border p-8">
           <div className="text-foreground text-lg leading-relaxed">
-            {news.description}
+            {news.data.description}
           </div>
 
-          {news.address && (
+          {news.data.address && (
             <div className="border-primary bg-primary/5 rounded-r-lg border-l-4 py-4 pl-6">
               <h3 className="text-foreground mb-2 font-semibold">
                 {t('news.address')}
               </h3>
-              <p className="text-muted-foreground">{news.address}</p>
+              <p className="text-muted-foreground">{news.data.address}</p>
             </div>
           )}
 
-          {news.note && (
+          {news.data.note && (
             <div className="border-accent bg-accent/5 rounded-r-lg border-l-4 py-4 pl-6">
               <h3 className="text-foreground mb-2 font-semibold">
                 {t('news.importantNote')}
               </h3>
-              <p className="text-muted-foreground">{news.note}</p>
+              <p className="text-muted-foreground">{news.data.note}</p>
             </div>
           )}
 
@@ -204,9 +233,10 @@ export default async function NewsDetailPage({params}: PageProps) {
                   className="group bg-card border-ring/20 overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg"
                 >
                   <div className="relative h-32 overflow-hidden">
-                    <Image
-                      src={relatedItem.image}
-                      alt={relatedItem.title}
+                    <FallbackImage
+                      src={relatedItem.data.image}
+                      fallbackSrc="/img/empty-event-image.png"
+                      alt={relatedItem.data.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
@@ -214,10 +244,13 @@ export default async function NewsDetailPage({params}: PageProps) {
 
                   <div className="space-y-2 p-4">
                     <h3 className="text-foreground group-hover:text-primary line-clamp-2 font-semibold transition-colors">
-                      {relatedItem.title}
+                      {relatedItem.data.title}
                     </h3>
                     <p className="text-muted-foreground text-xs">
-                      {formatDate('MMMM DD, YYYY', relatedItem.date)}
+                      {formatDate(
+                        'MMMM DD, YYYY',
+                        new Date(relatedItem.data.date),
+                      )}
                     </p>
                   </div>
                 </Link>
@@ -227,33 +260,8 @@ export default async function NewsDetailPage({params}: PageProps) {
         </div>
       )}
 
-      {/* CTA */}
-      <div className="from-primary/5 rounded-2xl bg-gradient-to-br to-transparent p-8 text-center">
-        <div className="space-y-4">
-          <h3 className="text-foreground text-2xl font-bold">
-            {t('news.stayConnected')}
-          </h3>
-          <p className="text-muted-foreground">{t('news.followDescription')}</p>
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <ViewTransition>
-              <Link
-                href="/contact"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg py-3 font-medium transition-colors"
-              >
-                {t('about.getInTouch')}
-              </Link>
-            </ViewTransition>
-            <ViewTransition>
-              <Link
-                href="/gallery"
-                className="border-ring/30 text-foreground hover:bg-muted/30 rounded-lg border-2 py-3 font-medium transition-colors"
-              >
-                {t('about.viewGallery')}
-              </Link>
-            </ViewTransition>
-          </div>
-        </div>
-      </div>
+      {/* Call to Action */}
+      <CallToAction className="py-0" />
     </div>
   )
 }

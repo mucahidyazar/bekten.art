@@ -20,7 +20,7 @@ import {getBektenContactInfo} from '@/utils/supabase/server'
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('contact')
 
-  return await prepareMetadata({
+  return prepareMetadata({
     title: t('metaTitle'),
     description: t('metaDescription'),
     page: 'contact',
@@ -169,13 +169,17 @@ export default async function ContactPage() {
               <Separator />
 
               {/* Social Media Links - Dynamic */}
-              {userSocials.map((social: any) => {
+              {userSocials.map((social: any, index: number) => {
                 const displayText = social.url.includes('http')
                   ? social.url.replace(/^https?:\/\//, '').replace(/^www\./, '')
                   : social.url
 
                 return (
-                  <div key={social.id}>
+                  <div
+                    key={
+                      social.id || `${social.platform}-${index}-${social.url}`
+                    }
+                  >
                     <div className="group from-muted/30 to-muted/20 hover:from-muted/40 hover:to-muted/30 rounded-xl bg-gradient-to-r p-4 transition-colors">
                       <div className="flex items-center space-x-3">
                         <div className="bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">

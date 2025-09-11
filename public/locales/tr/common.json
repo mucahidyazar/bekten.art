@@ -107,6 +107,9 @@
   "common": {
     "back": "Geri",
     "cancel": "İptal",
+    "title": "Başlık",
+    "description": "Açıklama",
+    "name": "İsim",
     "close": "Kapat",
     "confirm": "Onayla",
     "copy": "Kopyala",
@@ -349,12 +352,18 @@
     "metaTitle": "🎨 Son Sanat Haberleri - Bekten Usubaliev'in Sergileri ve Güncellemeleri",
     "newsDescription": "Bekten'in son sergileri, etkinlikleri ve sanatsal yolculuğuyla güncel kalın",
     "readMore": "Devamını Oku",
+    "readOriginal": "Orijinalini Oku",
     "relatedNews": "İlgili Haberler",
     "stayConnected": "Bağlantıda Kalın",
 
     "allNewsEvents": "Tüm Haberler ve Etkinlikler",
     "backToNews": "Haberlere Dön",
     "newsNotFound": "Haber Bulunamadı",
+    "editNewsSection": "Haber Bölümünü Düzenle",
+    "manageNewsDescription": "Haber makalelerinizi ve etkinliklerinizi yönetin",
+    "editNews": "Haberleri Düzenle",
+    "subtitle": "Alt Başlık",
+    "category": "Kategori",
 
     "newsNotFoundDescription": "İstenen haber makalesi bulunamadı."
   },
@@ -427,6 +436,15 @@
     "reserved": "Rezerve",
     "sold": "Satıldı",
     "unavailable": "Mevcut Değil",
+    "original": "Orijinal",
+    "reproduction": "Reproduksiyon",
+    "storeManagement": "Mağaza Yönetimi",
+    "storeBadge": "Mağaza",
+    "artStore": "Sanat Mağazası",
+    "mainImage": "Ana Resim",
+    "price": "Fiyat",
+    "viewDetails": "Detayları Görüntüle",
+    "category": "Kategori",
 
     "adjustFilters": "Filtrelerinizi ayarlamayı deneyin veya tüm kategorilere göz atın.",
     "featuredFirst": "Önce Öne Çıkanlar",
@@ -452,6 +470,9 @@
     "categoryCollector": "Koleksiyoncu",
     "categoryCritic": "Sanat Eleştirmeni",
     "categoryPolitician": "Devlet Adamı",
+    "categoryJournalist": "Gazeteci",
+    "categoryCurator": "Küratör",
+    "company": "Şirket",
     "manualControl": "Manuel Kontrol"
   }
 }

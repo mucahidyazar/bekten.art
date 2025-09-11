@@ -4,35 +4,29 @@ import {revalidatePath} from 'next/cache'
 
 import {z} from 'zod'
 
-import {newsItemSchema, newsSettingsSchema} from '@/schemas/news'
+import {storeItemSchema, storeSettingsSchema} from '@/schemas/store'
 import {createServerAction} from '@/utils/create-server-action'
 import {createClient, getUser} from '@/utils/supabase/server'
+import {isValidUUID} from '@/utils/validation'
 
-// Helper function to validate UUID
-const isValidUUID = (id: string): boolean => {
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+// Schema for store data save
+const storeSaveSchema = z.object({
+  items: z.array(storeItemSchema),
+  settings: storeSettingsSchema,
+})
 
-  return uuidRegex.test(id)
-}
-
-// Schema for news item operations
-const newsItemOperationSchema = z.object({
+// Schema for store item operations
+const storeItemOperationSchema = z.object({
   id: z.string().min(1, 'Item ID is required'),
 })
 
-const newsItemUpdateSchema = newsItemSchema.extend({
+const storeItemUpdateSchema = storeItemSchema.extend({
   id: z.string().min(1, 'Item ID is required'),
 })
 
-const newsDataSaveSchema = z.object({
-  items: z.array(newsItemSchema),
-  settings: newsSettingsSchema,
-})
-
-// Create single news item
-export const createNewsItemAction = createServerAction(
-  newsItemSchema.omit({id: true}),
+// Create new store item
+export const createStoreItemAction = createServerAction(
+  storeItemSchema,
   async ({input}) => {
     const user = await getUser()
 
@@ -41,21 +35,36 @@ export const createNewsItemAction = createServerAction(
     }
     const supabase = await createClient()
 
+    // Get current max order
+    const {data: maxOrderData} = await supabase
+      .from('section_data')
+      .select('order')
+      .eq('section_type', 'store')
+      .order('order', {ascending: false})
+      .limit(1)
+      .single()
+
+    const nextOrder = (maxOrderData?.order || 0) + 1
+
+    // Insert new store item
     // Store all data in the data field
     const combinedData = {
       ...input.data,
     }
 
+    // Let database generate UUID automatically - don't include id field
+    const insertData = {
+      data: combinedData,
+      is_active: input.is_active,
+      section_type: 'store',
+      order: nextOrder,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+
     const {data, error} = await supabase
       .from('section_data')
-      .insert([
-        {
-          data: combinedData,
-          order: input.order || 0,
-          is_active: input.is_active,
-          section_type: 'news',
-        },
-      ])
+      .insert(insertData)
       .select()
       .single()
 
@@ -64,20 +73,20 @@ export const createNewsItemAction = createServerAction(
     }
 
     // Revalidate the page
-    revalidatePath('/news')
-    revalidatePath('/[locale]/news', 'page')
+    revalidatePath('/store')
+    revalidatePath('/[locale]/store', 'page')
 
     return {
       success: true,
-      message: 'News item created successfully',
       data,
+      message: 'Store item created successfully',
     }
   },
 )
 
-// Delete single news item
-export const deleteNewsItemAction = createServerAction(
-  newsItemOperationSchema,
+// Delete store item
+export const deleteStoreItemAction = createServerAction(
+  storeItemOperationSchema,
   async ({input}) => {
     const user = await getUser()
 
@@ -92,78 +101,115 @@ export const deleteNewsItemAction = createServerAction(
       throw new Error('Invalid ID format - must be a valid UUID')
     }
 
-    // Delete news item
+    // Delete store item
     const {error} = await supabase
       .from('section_data')
       .delete()
       .eq('id', id)
-      .eq('section_type', 'news')
+      .eq('section_type', 'store')
 
     if (error) {
       throw new Error(`Database error: ${error.message}`)
     }
 
     // Revalidate the page
-    revalidatePath('/news')
-    revalidatePath('/[locale]/news', 'page')
+    revalidatePath('/store')
+    revalidatePath('/[locale]/store', 'page')
 
     return {
       success: true,
-      message: 'News item deleted successfully',
+      message: 'Store item deleted successfully',
     }
   },
 )
 
-// Get news data
-export const getNewsDataAction = createServerAction(z.object({}), async () => {
-  const user = await getUser()
-
-  if (!user?.isAdmin) {
-    throw new Error('Admin access required')
-  }
+// Get store data
+export const getStoreDataAction = createServerAction(z.object({}), async () => {
   const supabase = await createClient()
 
-  // Get news data from database
-  const {data: newsData, error: newsError} = await supabase
+  // Get store data from database
+  const {data: storeData, error: storeError} = await supabase
     .from('section_data')
     .select('*')
-    .eq('section_type', 'news')
+    .eq('section_type', 'store')
+    .eq('is_active', true)
     .order('order', {ascending: true})
 
-  // Get news settings
+  // Get store settings
   const {data: settingsData, error: settingsError} = await supabase
     .from('sections')
     .select('*')
-    .eq('section_type', 'news')
+    .eq('section_type', 'store')
+    .eq('is_active', true)
     .single()
 
-  if (newsError && newsError.code !== 'PGRST116') {
-    console.error('News data error:', newsError)
+  if (storeError && storeError.code !== 'PGRST116') {
+    console.error('Store data error:', storeError)
 
     return {items: [], settings: null}
   }
 
   if (settingsError && settingsError.code !== 'PGRST116') {
-    console.error('News settings error:', settingsError)
+    console.error('Store settings error:', settingsError)
 
     return {
-      items: newsData || [],
+      items: storeData || [],
       settings: null,
     }
   }
 
   return {
-    items: newsData || [],
+    items: storeData || [],
     settings: settingsData || null,
   }
 })
 
-// Save news data (bulk update/create for items and settings)
-export const saveNewsDataAction = createServerAction(
-  newsDataSaveSchema,
+// Get store data for admin
+export const getStoreDataAdminAction = createServerAction(
+  z.object({}),
+  async () => {
+    const user = await getUser()
+
+    if (!user?.isAdmin) {
+      throw new Error('Admin access required')
+    }
+    const supabase = await createClient()
+
+    // Get store data from database
+    const {data: storeData, error: storeError} = await supabase
+      .from('section_data')
+      .select('*')
+      .eq('section_type', 'store')
+      .order('order', {ascending: true})
+
+    // Get store settings
+    const {data: settingsData, error: settingsError} = await supabase
+      .from('sections')
+      .select('*')
+      .eq('section_type', 'store')
+      .single()
+
+    if (storeError && storeError.code !== 'PGRST116') {
+      throw new Error(`Database error: ${storeError.message}`)
+    }
+
+    if (settingsError && settingsError.code !== 'PGRST116') {
+      throw new Error(`Settings error: ${settingsError.message}`)
+    }
+
+    return {
+      items: storeData || [],
+      settings: settingsData || null,
+    }
+  },
+)
+
+// Save store data (bulk update)
+export const saveStoreDataAction = createServerAction(
+  storeSaveSchema,
   async ({input}) => {
     try {
-      console.log('saveNewsDataAction called with input:', input)
+      console.log('saveStoreDataAction called with input:', input)
       console.log('Input items:', input.items)
       console.log('Input settings:', input.settings)
 
@@ -177,11 +223,11 @@ export const saveNewsDataAction = createServerAction(
 
       console.log('Admin access confirmed, proceeding with save...')
 
-      // Get existing news items
+      // Get existing store items
       const {data: existingItems, error: fetchError} = await supabase
         .from('section_data')
         .select('*')
-        .eq('section_type', 'news')
+        .eq('section_type', 'store')
 
       if (fetchError) {
         console.error('Fetch error:', fetchError)
@@ -207,7 +253,7 @@ export const saveNewsDataAction = createServerAction(
           data: combinedData,
           order: index,
           is_active: item.is_active,
-          section_type: 'news',
+          section_type: 'store',
           updated_at: new Date().toISOString(),
         }
 
@@ -223,20 +269,25 @@ export const saveNewsDataAction = createServerAction(
             .from('section_data')
             .update(itemData)
             .eq('id', item.id)
-            .eq('section_type', 'news')
+            .eq('section_type', 'store')
 
           if (updateError) {
-            console.error(`Update error for item ${item.id}:`, updateError)
+            console.error('Update error:', updateError)
             throw new Error(
               `Failed to update item ${item.id}: ${updateError.message}`,
             )
           }
         } else {
-          // Insert new item
-          console.log('Inserting new item:', item)
+          // Insert new item (let database generate UUID)
+          console.log('Inserting new item')
+          const insertData = {
+            ...itemData,
+            created_at: new Date().toISOString(),
+          }
+
           const {error: insertError} = await supabase
             .from('section_data')
-            .insert([itemData])
+            .insert(insertData)
 
           if (insertError) {
             console.error('Insert error:', insertError)
@@ -245,26 +296,33 @@ export const saveNewsDataAction = createServerAction(
         }
       }
 
-      // Delete items that are no longer in the new list
-      const idsToDelete = Array.from(existingIds).filter(id => !newIds.has(id))
+      // Delete items that are no longer in the list (only if we have valid IDs to compare)
+      if (newIds.size > 0) {
+        const idsToDelete = Array.from(existingIds).filter(
+          id => !newIds.has(id),
+        )
 
-      if (idsToDelete.length > 0) {
-        console.log('Deleting removed items:', idsToDelete)
-        const {error: deleteError} = await supabase
-          .from('section_data')
-          .delete()
-          .in('id', idsToDelete)
-          .eq('section_type', 'news')
+        if (idsToDelete.length > 0) {
+          console.log(`Deleting removed items: ${idsToDelete.join(', ')}`)
+          const {error: deleteError} = await supabase
+            .from('section_data')
+            .delete()
+            .eq('section_type', 'store')
+            .in('id', idsToDelete)
 
-        if (deleteError) {
-          console.error('Delete error:', deleteError)
-          throw new Error(`Failed to delete items: ${deleteError.message}`)
+          if (deleteError) {
+            console.error('Delete error:', deleteError)
+            throw new Error(
+              `Failed to delete removed items: ${deleteError.message}`,
+            )
+          }
         }
       }
 
-      // Update settings
+      // Upsert store settings
+      console.log('Upserting store settings...')
       const settingsToUpsert = {
-        section_type: settings.section_type,
+        section_type: 'store',
         section_title: settings.section_title,
         section_description: settings.section_description,
         badge_text: settings.badge_text,
@@ -290,25 +348,25 @@ export const saveNewsDataAction = createServerAction(
       console.log('All database operations completed successfully')
 
       // Revalidate the page to show updated data
-      revalidatePath('/news')
-      revalidatePath('/[locale]/news', 'page')
+      revalidatePath('/store')
+      revalidatePath('/[locale]/store', 'page')
 
       console.log('Revalidation completed')
 
       return {
         success: true,
-        message: 'News data updated successfully',
+        message: 'Store data updated successfully',
       }
     } catch (error) {
-      console.error('saveNewsDataAction error:', error)
+      console.error('saveStoreDataAction error:', error)
       throw error
     }
   },
 )
 
-// Update single news item
-export const updateNewsItemAction = createServerAction(
-  newsItemUpdateSchema,
+// Update single store item
+export const updateStoreItemAction = createServerAction(
+  storeItemUpdateSchema,
   async ({input}) => {
     const user = await getUser()
 
@@ -323,7 +381,7 @@ export const updateNewsItemAction = createServerAction(
       throw new Error('Invalid ID format - must be a valid UUID')
     }
 
-    // Update news item
+    // Update store item
     // Store all data in the data field
     const combinedData = {
       ...updateData.data,
@@ -334,11 +392,11 @@ export const updateNewsItemAction = createServerAction(
       .update({
         data: combinedData,
         is_active: updateData.is_active,
-        section_type: 'news',
+        section_type: 'store',
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .eq('section_type', 'news')
+      .eq('section_type', 'store')
       .select()
       .single()
 
@@ -347,13 +405,13 @@ export const updateNewsItemAction = createServerAction(
     }
 
     // Revalidate the page
-    revalidatePath('/news')
-    revalidatePath('/[locale]/news', 'page')
+    revalidatePath('/store')
+    revalidatePath('/[locale]/store', 'page')
 
     return {
       success: true,
-      message: 'News item updated successfully',
       data,
+      message: 'Store item updated successfully',
     }
   },
 )

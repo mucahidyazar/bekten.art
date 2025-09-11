@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const {getTranslations} = await import('next-intl/server')
   const t = await getTranslations('gallery')
 
-  return await prepareMetadata({
+  return prepareMetadata({
     title: t('metaTitle'),
     description: t('metaDescription'),
     page: 'gallery',

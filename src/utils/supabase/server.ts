@@ -105,6 +105,7 @@ export async function getBektenContactInfo() {
       working_hours,
       map_embed_url,
       socials (
+        id,
         platform,
         url
       )

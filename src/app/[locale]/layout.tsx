@@ -17,15 +17,23 @@ import {
 import {QueryProvider} from '@/components/providers/query-provider'
 import {ThemeProvider} from '@/components/providers/theme-provider'
 import {UserProvider} from '@/components/providers/user-provider'
+import {HrefLang} from '@/components/seo/hreflang'
+import {
+  OrganizationStructuredData,
+  PersonStructuredData,
+  WebsiteStructuredData,
+} from '@/components/seo/structured-data'
 import {MusicPlayer} from '@/components/ui/music-player'
 import {Toaster} from '@/components/ui/toaster'
+import {ME} from '@/constants'
+import {LOCALES} from '@/constants/locales'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 import {getUser} from '@/utils/supabase/server'
 
 const lora = Lora({subsets: ['latin']})
 
 export async function generateMetadata(): Promise<Metadata> {
-  return await prepareMetadata()
+  return prepareMetadata()
 }
 
 async function getMessages(locale: string) {
@@ -50,10 +58,20 @@ export default async function RootLayout({children, params}: LayoutProps) {
   // Get initial user data for UserProvider
   const user = await getUser()
 
+  // Determine domain for structured data
+  const domain =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3000'
+      : 'https://bekten.art')
+
   return (
     <ViewTransitions>
       <html lang={locale} suppressHydrationWarning>
         <head>
+          {/* Hreflang tags for multilingual SEO */}
+          <HrefLang locales={LOCALES} defaultLocale="en" />
+
           <script
             dangerouslySetInnerHTML={{
               __html: `
@@ -108,6 +126,38 @@ export default async function RootLayout({children, params}: LayoutProps) {
           <Suspense>
             <GoogleTagManager />
           </Suspense>
+
+          {/* Structured Data */}
+          <PersonStructuredData
+            name={ME.fullName}
+            alternateName="Bekten"
+            description={ME.description}
+            url={domain}
+            image={`${domain}/me.jpg`}
+            jobTitle={ME.job}
+            nationality="Kyrgyzstani"
+            birthPlace="Kyrgyzstan"
+            sameAs={[
+              `https://instagram.com/${ME.social.instagram}`,
+              `https://wa.me/${ME.social.whatsapp}`,
+            ]}
+          />
+          <OrganizationStructuredData
+            name={ME.company.name}
+            description="Contemporary art gallery and workshop by Bekten Usubaliev"
+            url={domain}
+            logo={`${domain}/logo.svg`}
+            sameAs={[`https://instagram.com/${ME.social.instagram}`]}
+            contactPoint={{
+              telephone: `+${ME.social.phone}`,
+              contactType: 'customer service',
+            }}
+          />
+          <WebsiteStructuredData
+            name={`${ME.fullName} - Artist Portfolio`}
+            description={ME.description}
+            url={domain}
+          />
         </body>
       </html>
     </ViewTransitions>

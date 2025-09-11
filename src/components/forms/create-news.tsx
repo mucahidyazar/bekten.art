@@ -6,7 +6,7 @@ import {CalendarIcon} from 'lucide-react'
 import {Controller, useForm} from 'react-hook-form'
 import {z} from 'zod'
 
-import {createNews} from '@/actions/news'
+import {createNewsItemAction} from '@/actions/news'
 import {Button} from '@/components/ui/button'
 import {useServerAction} from '@/hooks/use-server-action'
 import {cn} from '@/utils'
@@ -16,40 +16,33 @@ import {Input} from '../ui/input'
 import {Popover, PopoverContent, PopoverTrigger} from '../ui/popover'
 import {Textarea} from '../ui/textarea'
 
-type CreateNewsForm = {
-  title: string
-  subtitle: string
-  image: string
-  location: string
-  date?: Date | null | undefined
-  note: string
-  address: string
-  description: string
-}
+const validationSchema = z.object({
+  title: z.string().min(4).max(120),
+  subtitle: z.string().min(4).max(120),
+  image: z.string().min(4).max(120),
+  location: z.string().min(4).max(60),
+  date: z.date().nullable().optional(),
+  note: z.string().min(4).max(240),
+  address: z.string().min(4).max(240),
+  description: z.string().min(4).max(480),
+  source: z.string().optional(),
+  category: z
+    .enum(['news', 'feature', 'interview', 'exhibition', 'biography'])
+    .default('news'),
+})
 
 type CreateNewsProps = {
   onRequestClose: () => void
 }
 export default function CreateNews({onRequestClose}: CreateNewsProps) {
-  const [action, isPending] = useServerAction(createNews)
-
-  const validationSchema = z.object({
-    title: z.string().min(4).max(120),
-    subtitle: z.string().min(4).max(120),
-    image: z.string().min(4).max(120),
-    location: z.string().min(4).max(60),
-    date: z.date().nullable().optional(),
-    note: z.string().min(4).max(240),
-    address: z.string().min(4).max(240),
-    description: z.string().min(4).max(480),
-  })
+  const [action, isPending] = useServerAction(createNewsItemAction)
   const {
     formState: {errors},
     control,
     register,
     reset,
     handleSubmit,
-  } = useForm<CreateNewsForm>({
+  } = useForm({
     defaultValues: {
       title: '',
       subtitle: '',
@@ -59,6 +52,8 @@ export default function CreateNews({onRequestClose}: CreateNewsProps) {
       note: '',
       address: '',
       description: '',
+      source: '',
+      category: 'news',
     },
     resolver: zodResolver(validationSchema),
   })
@@ -67,12 +62,25 @@ export default function CreateNews({onRequestClose}: CreateNewsProps) {
     <form
       className="relative flex flex-col gap-2"
       onSubmit={handleSubmit(data => {
-        action(data, {
-          onSuccess: () => {
-            onRequestClose && onRequestClose()
-            reset()
+        action(
+          {
+            section_type: 'news',
+            is_active: true,
+            data: {
+              ...data,
+              date: data.date
+                ? data.date.toISOString()
+                : new Date().toISOString(),
+              source: data.source || '',
+            },
           },
-        })
+          {
+            onSuccess: () => {
+              onRequestClose && onRequestClose()
+              reset()
+            },
+          },
+        )
       })}
     >
       <Input

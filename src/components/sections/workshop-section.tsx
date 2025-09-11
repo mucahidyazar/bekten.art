@@ -13,7 +13,6 @@ import {
 import {GalleryModal} from '@/components/modals/gallery-modal'
 import {ArtImage} from '@/components/molecules/art-image'
 import {SectionHeader} from '@/components/molecules/section-header'
-import {useUser} from '@/components/providers/user-provider'
 import {Button} from '@/components/ui/button'
 
 import type {
@@ -30,7 +29,6 @@ type WorkshopSectionProps = {
 
 export function WorkshopSection({workshopData}: WorkshopSectionProps) {
   const t = useTranslations('homepage')
-  const {user} = useUser()
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [selectedImageUrl, setSelectedImageUrl] = useState('')
   const [imageUpdateCallback, setImageUpdateCallback] = useState<
@@ -184,53 +182,48 @@ export function WorkshopSection({workshopData}: WorkshopSectionProps) {
     return null
   }
 
+  // Create admin edit trigger
+  const adminEditTrigger = (
+    <DynamicEditModal
+      items={workshopData.items}
+      settings={workshopData.settings!}
+      title={workshopData.settings?.section_title || 'Workshop Studio'}
+      description={
+        workshopData.settings?.section_description ||
+        'Craft your creative space with intuitive drag & drop tools and modern design elements'
+      }
+      icon={<Sparkles className="h-6 w-6 text-white" />}
+      itemFields={itemFields}
+      viewConfig={viewConfig}
+      maxItems={workshopData.settings?.max_items || 6}
+      onSave={handleWorkshopSave}
+      onImageSelect={handleImageSelect}
+      onImageSelected={handleImageSelected}
+      viewType="table"
+      createNewItem={createNewItem}
+      trigger={
+        <Button variant="outline" size="sm" className="gap-2">
+          <Edit className="h-4 w-4" />
+          Edit Workshop
+        </Button>
+      }
+    />
+  )
+
   return (
     <section className="relative overflow-hidden py-32">
       <div className="relative z-10 container lg:px-0">
-        <div className="relative">
-          <SectionHeader
-            badgeText={workshopData.settings?.badge_text || t('workshopBadge')}
-            badgeIcon="palette"
-            title={workshopData.settings?.section_title || t('workshopTitle')}
-            description={
-              workshopData.settings?.section_description ||
-              t('workshopDescription')
-            }
-            className="mb-20"
-          />
-
-          {/* Admin Edit Button */}
-          {user?.isAdmin && (
-            <div className="absolute top-0 right-0">
-              <DynamicEditModal
-                items={workshopData.items}
-                settings={workshopData.settings!}
-                title={
-                  workshopData.settings?.section_title || 'Workshop Studio'
-                }
-                description={
-                  workshopData.settings?.section_description ||
-                  'Craft your creative space with intuitive drag & drop tools and modern design elements'
-                }
-                icon={<Sparkles className="h-6 w-6 text-white" />}
-                itemFields={itemFields}
-                viewConfig={viewConfig}
-                maxItems={workshopData.settings?.max_items || 6}
-                onSave={handleWorkshopSave}
-                onImageSelect={handleImageSelect}
-                onImageSelected={handleImageSelected}
-                viewType="table"
-                createNewItem={createNewItem}
-                trigger={
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Edit className="h-4 w-4" />
-                    Edit Workshop
-                  </Button>
-                }
-              />
-            </div>
-          )}
-        </div>
+        <SectionHeader
+          badgeText={workshopData.settings?.badge_text || t('workshopBadge')}
+          badgeIcon="palette"
+          title={workshopData.settings?.section_title || t('workshopTitle')}
+          description={
+            workshopData.settings?.section_description ||
+            t('workshopDescription')
+          }
+          adminEditTrigger={adminEditTrigger}
+          className="mb-20"
+        />
 
         {/* Interactive Workshop Grid */}
         <div className="grid min-h-[600px] grid-cols-1 gap-6 lg:grid-cols-12">

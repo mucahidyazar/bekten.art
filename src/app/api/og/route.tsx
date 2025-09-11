@@ -15,6 +15,44 @@ export async function GET(request: Request) {
   const protocal = configs.isDevelopment ? 'http' : 'https'
   const domain = `${protocal}://${host}`
 
+  // Get theme colors based on page
+  const getThemeColors = (page: string | null) => {
+    switch (page) {
+      case 'gallery':
+        return {
+          bg: 'linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%)',
+          accent: '#f4d03f',
+        }
+      case 'about':
+        return {
+          bg: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+          accent: '#e8daef',
+        }
+      case 'news':
+        return {
+          bg: 'linear-gradient(135deg, #0d1421 0%, #1e3a8a 100%)',
+          accent: '#aed6f1',
+        }
+      case 'contact':
+        return {
+          bg: 'linear-gradient(135deg, #1b4332 0%, #2d5016 100%)',
+          accent: '#95e5a6',
+        }
+      case 'store':
+        return {
+          bg: 'linear-gradient(135deg, #722f37 0%, #8b1538 100%)',
+          accent: '#f1948a',
+        }
+      default:
+        return {
+          bg: 'radial-gradient(circle, rgba(70, 71, 122, 1) 0%, rgba(11, 17, 32, 1) 100%)',
+          accent: '#ffa500',
+        }
+    }
+  }
+
+  const colors = getThemeColors(page)
+
   return new ImageResponse(
     (
       <div
@@ -24,81 +62,146 @@ export async function GET(request: Request) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '80px',
-          padding: '240px',
-          background:
-            'radial-gradient(circle, rgba(70, 71, 122, 1) 0%, rgba(11, 17, 32, 1) 100%)',
+          gap: '60px',
+          padding: '60px',
+          background: colors.bg,
+          position: 'relative',
         }}
       >
-        <img
-          src={`${domain}/me.jpg`}
-          alt="Picture of the author"
-          width={300}
-          height={300}
+        {/* Artistic Background Elements */}
+        <div
           style={{
-            border: '8px solid black',
+            position: 'absolute',
+            top: '30px',
+            left: '30px',
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            background: colors.accent,
+            opacity: 0.1,
           }}
         />
-        <p
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '40px',
+            right: '80px',
+            width: '100px',
+            height: '100px',
+            borderRadius: '50%',
+            background: colors.accent,
+            opacity: 0.15,
+          }}
+        />
+
+        {/* Profile Image */}
+        <div
           style={{
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'center',
           }}
         >
-          <p
+          <img
+            src={`${domain}/me.jpg`}
+            alt="Bekten Usubaliev - Contemporary Oil Painter"
+            width={280}
+            height={280}
+            style={{
+              border: `6px solid ${colors.accent}`,
+              borderRadius: '20px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+            }}
+          />
+        </div>
+
+        {/* Content */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            maxWidth: '600px',
+          }}
+        >
+          {/* Header with logo and page */}
+          <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
               gap: '20px',
-              height: '60px',
-              overflow: 'hidden',
+              marginBottom: '30px',
             }}
           >
             <img
               src={`${domain}/svg/full-logo.svg`}
-              alt="Picture of the author"
-              height={60}
+              alt="Bekten Art Logo"
+              height={50}
+              style={{filter: 'brightness(0) invert(1)'}}
             />
             {page && (
-              <p
+              <span
                 style={{
-                  color: 'white',
-                  fontSize: '60px',
+                  color: colors.accent,
+                  fontSize: '40px',
+                  fontWeight: 'bold',
                   textTransform: 'uppercase',
+                  letterSpacing: '2px',
                 }}
               >
                 / {page}
-              </p>
+              </span>
             )}
-          </p>
+          </div>
+
+          {/* Title */}
           {title && (
-            <p
+            <h1
               style={{
-                textAlign: 'center',
-                fontSize: 32,
-                margin: '20px auto 0',
-                color: 'orange',
+                fontSize: Math.min(
+                  42,
+                  Math.max(28, 500 / (title.length || 10)),
+                ),
+                fontWeight: 'bold',
+                margin: '0 0 20px 0',
+                color: colors.accent,
+                lineHeight: 1.2,
               }}
             >
               {title}
-            </p>
+            </h1>
           )}
+
+          {/* Description */}
           <p
             style={{
               color: 'white',
-              textAlign: 'center',
-              lineHeight: '24px',
+              fontSize: '22px',
+              lineHeight: '32px',
+              margin: 0,
+              opacity: 0.9,
             }}
           >
             {description}
           </p>
-        </p>
+
+          {/* Website URL */}
+          <div
+            style={{
+              marginTop: '30px',
+              color: colors.accent,
+              fontSize: '18px',
+              letterSpacing: '1px',
+              opacity: 0.8,
+            }}
+          >
+            bekten.art
+          </div>
+        </div>
       </div>
     ),
     {
       width: 1200,
-      height: 600,
+      height: 630,
     },
   )
 }

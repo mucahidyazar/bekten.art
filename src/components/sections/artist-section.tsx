@@ -12,7 +12,6 @@ import {
   type ViewConfig,
 } from '@/components/modals/dynamic-edit-modal'
 import {SectionHeader} from '@/components/molecules/section-header'
-import {useUser} from '@/components/providers/user-provider'
 import {Button} from '@/components/ui/button'
 
 import type {ArtistDatabaseItem, ArtistDatabaseSettings} from '@/types/database'
@@ -26,7 +25,6 @@ type ArtistSectionProps = {
 
 export function ArtistSection({artistData}: ArtistSectionProps) {
   const t = useTranslations('homepage')
-  const {user} = useUser()
 
   // Configuration for artist items (stats)
   const itemFields: FieldConfig[] = [
@@ -55,13 +53,6 @@ export function ArtistSection({artistData}: ArtistSectionProps) {
 
   // View configuration (using raw database fields)
   const viewConfig: ViewConfig = {
-    card: {
-      aspectRatio: '160/240',
-      imageField: 'data.number',
-      titleField: 'data.title',
-      descriptionField: 'data.description',
-      placeholderIcon: <User className="text-muted-foreground/60 h-8 w-8" />,
-    },
     table: {
       columns: [
         {
@@ -139,45 +130,42 @@ export function ArtistSection({artistData}: ArtistSectionProps) {
     return null
   }
 
+  // Create admin edit trigger
+  const adminEditTrigger = (
+    <DynamicEditModal
+      items={artistData.items}
+      settings={artistData.settings!}
+      title="Master Kyrgyz Artist"
+      description="Bekten Usubaliev - Unveiling the hidden emotions and dreams within the human spirit through masterful brushstrokes"
+      icon={<User className="h-6 w-6 text-white" />}
+      itemFields={itemFields}
+      viewConfig={viewConfig}
+      maxItems={artistData.settings?.max_items || 6}
+      onSave={handleArtistSave}
+      viewType="table"
+      createNewItem={createNewItem}
+      trigger={
+        <Button variant="outline" size="sm" className="gap-2">
+          <Edit className="h-4 w-4" />
+          Edit Artist Info
+        </Button>
+      }
+    />
+  )
+
   return (
     <section className="py-20">
       <div className="container lg:px-0">
-        <div className="relative">
-          <SectionHeader
-            badgeText={artistData.settings?.badge_text || t('artistBadge')}
-            badgeIcon="heart"
-            title={artistData.settings?.section_title || t('artistName')}
-            description={
-              artistData.settings?.section_description || t('artistDescription')
-            }
-            className="mb-16"
-          />
-
-          {/* Admin Edit Button */}
-          {user?.isAdmin && (
-            <div className="absolute top-0 right-0">
-              <DynamicEditModal
-                items={artistData.items}
-                settings={artistData.settings!}
-                title="Master Kyrgyz Artist"
-                description="Bekten Usubaliev - Unveiling the hidden emotions and dreams within the human spirit through masterful brushstrokes"
-                icon={<User className="h-6 w-6 text-white" />}
-                itemFields={itemFields}
-                viewConfig={viewConfig}
-                maxItems={artistData.settings?.max_items || 6}
-                onSave={handleArtistSave}
-                viewType="table"
-                createNewItem={createNewItem}
-                trigger={
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Edit className="h-4 w-4" />
-                    Edit Artist Info
-                  </Button>
-                }
-              />
-            </div>
-          )}
-        </div>
+        <SectionHeader
+          badgeText={artistData.settings?.badge_text || t('artistBadge')}
+          badgeIcon="heart"
+          title={artistData.settings?.section_title || t('artistName')}
+          description={
+            artistData.settings?.section_description || t('artistDescription')
+          }
+          adminEditTrigger={adminEditTrigger}
+          className="mb-16"
+        />
 
         {/* Stats */}
         <div className="mb-16 grid grid-cols-1 gap-8 md:grid-cols-3">
