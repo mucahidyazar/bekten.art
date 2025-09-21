@@ -2,7 +2,7 @@ import {MetadataRoute} from 'next'
 
 import {createClient} from '@/utils/supabase/server'
 
-const DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://bekten.art'
+const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art'
 const LOCALES = ['en', 'tr', 'kg', 'ru']
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

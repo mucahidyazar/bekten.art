@@ -1,8 +1,12 @@
 'use server'
 
-import { redirect } from 'next/navigation'
+import {redirect} from 'next/navigation'
 
-import { createClient, requireAuth as requireAuthBase, requireAdmin as requireAdminBase } from '@/utils/supabase/server'
+import {
+  createClient,
+  requireAuth as requireAuthBase,
+  requireAdmin as requireAdminBase,
+} from '@/utils/supabase/server'
 
 export async function requireAdmin() {
   try {
@@ -27,15 +31,15 @@ export async function requireAuth() {
 export async function signInWithGoogle() {
   const supabase = await createClient()
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  const {data, error} = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',
-      }
-    }
+      },
+    },
   })
 
   if (error) {

@@ -17,7 +17,7 @@ export function HrefLang({locales, defaultLocale = 'en'}: HrefLangProps) {
   const domain =
     typeof window !== 'undefined'
       ? window.location.origin
-      : process.env.NEXT_PUBLIC_SITE_URL || 'https://bekten.art'
+      : process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art'
 
   return (
     <>

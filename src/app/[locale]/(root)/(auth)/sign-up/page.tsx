@@ -11,11 +11,9 @@ export default async function SignUpPage() {
       {/* Header */}
       <div className="space-y-2 text-center">
         <h1 className="text-foreground text-2xl font-bold tracking-tight">
-          {t('auth.signUp.title')}
+          {t('title')}
         </h1>
-        <p className="text-muted-foreground text-sm">
-          {t('auth.signUp.subtitle')}
-        </p>
+        <p className="text-muted-foreground text-sm">{t('subtitle')}</p>
       </div>
 
       {/* Google Sign Up */}
@@ -28,7 +26,7 @@ export default async function SignUpPage() {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-card text-muted-foreground px-3 py-1 font-medium">
-            {t('auth.signUp.orContinue')}
+            {t('orContinue')}
           </span>
         </div>
       </div>
@@ -39,12 +37,12 @@ export default async function SignUpPage() {
       {/* Footer */}
       <div className="text-muted-foreground text-center text-sm">
         <p>
-          {t('auth.signUp.hasAccount')}{' '}
+          {t('hasAccount')}{' '}
           <a
             href="/sign-in"
             className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
-            {t('auth.signUp.signIn')}
+            {t('signIn')}
           </a>
         </p>
       </div>

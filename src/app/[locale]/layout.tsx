@@ -60,7 +60,7 @@ export default async function RootLayout({children, params}: LayoutProps) {
 
   // Determine domain for structured data
   const domain =
-    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
     (process.env.NODE_ENV === 'development'
       ? 'http://localhost:3000'
       : 'https://bekten.art')

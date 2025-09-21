@@ -1,6 +1,6 @@
 import {MetadataRoute} from 'next'
 
-const DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://bekten.art'
+const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art'
 
 export default function robots(): MetadataRoute.Robots {
   return {

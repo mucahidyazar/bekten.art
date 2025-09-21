@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import {Input} from '@/components/ui/input'
+import {useToast} from '@/components/ui/use-toast'
 import {createClient} from '@/utils/supabase/client'
 
 type FormValues = {
@@ -28,6 +29,7 @@ export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const t = useTranslations('forms')
+  const {toast} = useToast()
 
   const validationSchema = z.object({
     email: z.string().email(t('validation.emailInvalid')),
@@ -47,20 +49,48 @@ export function SignInForm() {
     const supabase = createClient()
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const {error} = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) {
         console.error('Error signing in:', error.message)
-        // TODO: Show error toast
+
+        // Show user-friendly error messages
+        let errorMessage = 'An error occurred during sign in'
+
+        if (error.message.includes('Email not confirmed')) {
+          errorMessage =
+            'Please check your email and confirm your account before signing in'
+        } else if (error.message.includes('Invalid login credentials')) {
+          errorMessage =
+            'Invalid email or password. Please check your credentials and try again'
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage =
+            'Too many sign in attempts. Please wait a moment and try again'
+        }
+
+        toast({
+          title: 'Sign In Failed',
+          description: errorMessage,
+          variant: 'destructive',
+        })
       } else {
+        toast({
+          title: t('messages.signInSuccess'),
+          description: 'You have been successfully signed in',
+        })
         // Redirect or refresh will be handled by auth state change
         window.location.href = '/'
       }
     } catch (error) {
       console.error('Sign in error:', error)
+      toast({
+        title: 'Sign In Failed',
+        description: 'An unexpected error occurred. Please try again',
+        variant: 'destructive',
+      })
     } finally {
       setIsLoading(false)
     }
@@ -68,24 +98,21 @@ export function SignInForm() {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(submitHandler)}
-        className="space-y-4"
-      >
+      <form onSubmit={form.handleSubmit(submitHandler)} className="space-y-4">
         <FormField
           name="email"
           control={form.control}
           render={({field}) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-foreground">
+              <FormLabel className="text-foreground text-sm font-medium">
                 {t('labels.email')}
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <MailIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <MailIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                   <Input
                     placeholder={t('placeholders.enterEmail')}
-                    className="pl-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
+                    className="bg-background border-ring/30 focus:border-primary h-10 pl-10 transition-colors"
                     {...field}
                   />
                 </div>
@@ -100,7 +127,7 @@ export function SignInForm() {
           control={form.control}
           render={({field}) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-foreground">
+              <FormLabel className="text-foreground text-sm font-medium">
                 {t('labels.password')}
               </FormLabel>
               <FormControl>
@@ -108,13 +135,13 @@ export function SignInForm() {
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     placeholder={t('placeholders.enterPassword')}
-                    className="pr-10 h-10 bg-background  border-ring/30 focus:border-primary transition-colors"
+                    className="bg-background border-ring/30 focus:border-primary h-10 pr-10 transition-colors"
                     {...field}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
                   >
                     {showPassword ? (
                       <EyeOffIcon className="h-4 w-4" />
@@ -130,16 +157,18 @@ export function SignInForm() {
         />
 
         <div className="flex items-center justify-between text-sm">
-          <label className="flex items-center space-x-2 cursor-pointer">
+          <label className="flex cursor-pointer items-center space-x-2">
             <input
               type="checkbox"
-              className="rounded border-muted text-primary focus:ring-primary"
+              className="border-muted text-primary focus:ring-primary rounded"
             />
-            <span className="text-muted-foreground">{t('messages.rememberMe')}</span>
+            <span className="text-muted-foreground">
+              {t('messages.rememberMe')}
+            </span>
           </label>
           <a
             href="#"
-            className="text-primary hover:text-primary/80 transition-colors font-medium"
+            className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
             {t('messages.forgotPassword')}
           </a>
@@ -147,12 +176,12 @@ export function SignInForm() {
 
         <Button
           type="submit"
-          className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground h-10 w-full font-medium transition-colors"
           disabled={isLoading}
         >
           {isLoading ? (
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4  border-white/20 border-t-white rounded-full animate-spin" />
+              <div className="h-4 w-4 animate-spin rounded-full border-white/20 border-t-white" />
               <span>{t('buttons.signingIn')}</span>
             </div>
           ) : (

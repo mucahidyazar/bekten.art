@@ -18,11 +18,9 @@ export default async function SignInPage() {
       {/* Header */}
       <div className="space-y-2 text-center">
         <h1 className="text-foreground text-2xl font-bold tracking-tight">
-          {t('auth.signIn.title')}
+          {t('title')}
         </h1>
-        <p className="text-muted-foreground text-sm">
-          {t('auth.signIn.subtitle')}
-        </p>
+        <p className="text-muted-foreground text-sm">{t('subtitle')}</p>
       </div>
 
       {/* Google Sign In */}
@@ -35,7 +33,7 @@ export default async function SignInPage() {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-card text-muted-foreground px-3 py-1 font-medium">
-            {t('auth.signIn.orContinue')}
+            {t('orContinue')}
           </span>
         </div>
       </div>
@@ -46,12 +44,12 @@ export default async function SignInPage() {
       {/* Footer */}
       <div className="text-muted-foreground text-center text-sm">
         <p>
-          {t('auth.signIn.noAccount')}{' '}
+          {t('noAccount')}{' '}
           <a
             href="/sign-up"
             className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
-            {t('auth.signIn.signUp')}
+            {t('signUp')}
           </a>
         </p>
       </div>
