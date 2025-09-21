@@ -1,12 +1,15 @@
+'use client'
+
 import {Nanum_Brush_Script} from 'next/font/google'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import {getTranslations} from 'next-intl/server'
+import {useTranslations} from 'next-intl'
+import {useEffect, useState} from 'react'
 
 import {Navbar} from '@/components/navbar'
 import {cn} from '@/utils'
-import {getUser} from '@/utils/supabase/server'
+import {EnhancedUser} from '@/utils/supabase/server'
 
 import {AppTools} from '../molecules/app-tools'
 
@@ -15,16 +18,60 @@ const nanum = Nanum_Brush_Script({
   weight: ['400'],
 })
 
-export async function Header() {
-  const userProfile = await getUser()
-  const user = userProfile
-  const t = await getTranslations()
+interface HeaderProps {
+  user: EnhancedUser | null
+}
+
+function HeaderClient({user}: HeaderProps) {
+  const [isScrolled, setIsScrolled] = useState(false)
+  const t = useTranslations()
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Layout içindeki scroll container'ı bul
+      const scrollContainer = document.querySelector('#layout-wrapper')
+
+      if (scrollContainer) {
+        const scrollY = scrollContainer.scrollTop
+
+        setIsScrolled(scrollY > 64)
+      }
+    }
+
+    // Layout içindeki scroll container'ı bul ve event listener ekle
+    const scrollContainer = document.querySelector('#layout-wrapper')
+
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll)
+
+      return () => scrollContainer.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
 
   return (
-    <header className="border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 w-full border-b backdrop-blur">
-      <div className="relative container flex w-full flex-col">
-        <AppTools user={user} />
-        <aside className="mb-4 flex flex-col items-center">
+    <header
+      className={cn(
+        'border-border/40 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 w-full border-b backdrop-blur transition-colors duration-300',
+      )}
+    >
+      <div
+        className={cn(
+          'relative container flex w-full flex-col',
+          isScrolled
+            ? 'md:flex-row md:items-center md:justify-between md:py-4!'
+            : '',
+        )}
+      >
+        <AppTools
+          user={user}
+          className={cn(isScrolled ? 'md:static md:order-3' : '')}
+        />
+        <aside
+          className={cn(
+            'mb-4 flex flex-col items-center',
+            isScrolled ? 'md:mb-0' : '',
+          )}
+        >
           <Link href="/">
             <Image
               src="/svg/full-logo.svg"
@@ -38,14 +85,23 @@ export async function Header() {
           <p
             className={cn(
               nanum.className,
-              'text-muted-foreground mb-4 text-center text-xs uppercase',
+              'text-muted-foreground text-center text-xs uppercase',
             )}
           >
             {t('branding.slogan')}
           </p>
         </aside>
-        <Navbar user={userProfile} />
+        <Navbar
+          user={user}
+          className={cn(
+            isScrolled
+              ? 'md:absolute md:top-1/2 md:right-0 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2'
+              : '',
+          )}
+        />
       </div>
     </header>
   )
 }
+
+export {HeaderClient as Header}

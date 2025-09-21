@@ -12,6 +12,7 @@ import {Header} from '@/components/organisms/header'
 import {Breadcrumb} from '@/components/seo/breadcrumb'
 import ProgressBar from '@/components/ui/progress-bar'
 import {prepareMetadata} from '@/utils/prepare-metadata'
+import {getUser} from '@/utils/supabase/server'
 
 import LayoutWrapper from './admin/components/layout-wrapper'
 
@@ -23,10 +24,15 @@ type LayoutProps = {
   children: React.ReactNode
 }
 export default async function RootLayout({children}: LayoutProps) {
+  const user = await getUser()
+
   return (
     <LayoutWrapper>
-      <div className="flex max-h-screen min-h-screen w-full flex-col overflow-y-auto">
-        <Header />
+      <div
+        className="flex max-h-screen min-h-screen w-full flex-col overflow-y-auto"
+        id="layout-wrapper"
+      >
+        <Header user={user} />
         <ProgressBar />
         <main className="flex-1">
           <Breadcrumb />

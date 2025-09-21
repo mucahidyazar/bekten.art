@@ -82,7 +82,7 @@ export function AppTools({className, user}: AppToolsProps) {
       <section
         id="app-tools"
         className={cn(
-          'bg-background/80 fixed top-2 right-2 z-[60] flex gap-1 rounded backdrop-blur-sm lg:right-4',
+          'fixed top-2 right-2 z-[60] flex gap-1 rounded backdrop-blur-sm lg:right-4',
           className,
         )}
       >
@@ -97,7 +97,7 @@ export function AppTools({className, user}: AppToolsProps) {
     <section
       id="app-tools"
       className={cn(
-        'bg-background/80 fixed top-2 right-2 z-[60] mb-0 flex gap-1 rounded backdrop-blur-sm lg:right-4',
+        'fixed top-2 right-2 z-[60] mb-0 flex gap-1 rounded backdrop-blur-sm lg:right-4',
         className,
       )}
     >
@@ -124,10 +124,10 @@ export function AppTools({className, user}: AppToolsProps) {
           <Button
             variant="outline"
             size="sm"
-            className="flex items-center space-x-2"
+            className="border-border bg-card text-foreground hover:bg-muted relative z-50 h-9 w-9 justify-center gap-2 rounded border text-xs uppercase transition-colors sm:w-fit"
           >
             <LogInIcon className="h-4 w-4" />
-            <span>Sign In</span>
+            <span className="hidden md:block">Sign In</span>
           </Button>
         </Link>
       )}

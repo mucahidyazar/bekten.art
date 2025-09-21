@@ -44,8 +44,10 @@ export function Navbar({className, user}: NavbarProps) {
   ]
 
   return (
-    <nav className={cn('flex flex-col', className)}>
-      <ul className="text-muted-foreground flex flex-wrap justify-center gap-4 text-sm">
+    <nav
+      className={cn('scrollbar-hide flex flex-col overflow-scroll', className)}
+    >
+      <ul className="text-muted-foreground flex justify-center gap-4 text-sm">
         {NAV_ITEMS.map(item => (
           <NavbarItem key={item.label} {...item} />
         ))}
