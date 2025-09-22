@@ -13,7 +13,7 @@ const defaultStoreItem: Partial<StoreItem> = {
     currency: 'USD',
     imageUrl: '',
     images: [],
-    category: 'painting',
+    category: 'painting' as const,
     medium: '',
     dimensions: {
       width: 0,
@@ -54,10 +54,11 @@ const storeItemSchema = z.object({
         .max(100, 'Title must be less than 100 characters'),
       description: z
         .string()
-        .min(1, 'Description is required')
-        .max(1000, 'Description must be less than 1000 characters'),
-      price: z.number().min(0, 'Price must be positive'),
-      originalPrice: z
+        .max(1000, 'Description must be less than 1000 characters')
+        .optional()
+        .default(''),
+      price: z.coerce.number().min(0, 'Price must be positive'),
+      originalPrice: z.coerce
         .number()
         .min(0, 'Original price must be positive')
         .optional(),
@@ -87,31 +88,40 @@ const storeItemSchema = z.object({
         )
         .default([]),
       category: z
-        .enum(['painting', 'digital', 'print', 'sculpture'])
+        .enum([
+          'painting',
+          'digital',
+          'print',
+          'sculpture',
+          'portrait',
+          'landscape',
+          'mixed-media',
+        ])
         .default('painting'),
       medium: z
         .string()
-        .min(1, 'Medium is required')
-        .max(100, 'Medium must be less than 100 characters'),
+        .max(100, 'Medium must be less than 100 characters')
+        .optional()
+        .default(''),
       dimensions: z.object({
-        width: z.number().min(0, 'Width must be positive'),
-        height: z.number().min(0, 'Height must be positive'),
-        depth: z.number().min(0, 'Depth must be positive').optional(),
+        width: z.coerce.number().min(0, 'Width must be positive'),
+        height: z.coerce.number().min(0, 'Height must be positive'),
+        depth: z.coerce.number().min(0, 'Depth must be positive').optional(),
         unit: z.enum(['cm', 'in']).default('cm'),
       }),
-      year: z
+      year: z.coerce
         .number()
         .int()
         .min(1900, 'Year must be at least 1900')
         .max(new Date().getFullYear() + 1, 'Year cannot be in the future'),
       isOriginal: z.boolean().default(true),
       isLimitedEdition: z.boolean().default(false),
-      editionSize: z
+      editionSize: z.coerce
         .number()
         .int()
         .min(1, 'Edition size must be at least 1')
         .optional(),
-      editionNumber: z
+      editionNumber: z.coerce
         .number()
         .int()
         .min(1, 'Edition number must be at least 1')
@@ -131,7 +141,7 @@ const storeItemSchema = z.object({
       currency: 'USD',
       imageUrl: '',
       images: [],
-      category: 'painting',
+      category: 'painting' as const,
       medium: '',
       dimensions: {
         width: 0,
@@ -145,7 +155,7 @@ const storeItemSchema = z.object({
       tags: [],
       featured: false,
     }),
-  order: z.number().int().min(0).optional(),
+  order: z.coerce.number().int().min(0).optional(),
   is_active: z.boolean().default(true),
 })
 

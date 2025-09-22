@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import {usePathname, useRouter} from 'next/navigation'
 
@@ -15,6 +14,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {FallbackImage} from '@/components/ui/fallback-image'
 import {LOCALE, LOCALES} from '@/constants'
 import {cn} from '@/utils'
 
@@ -97,7 +97,7 @@ export function AppTools({className, user}: AppToolsProps) {
     <section
       id="app-tools"
       className={cn(
-        'fixed top-2 right-2 z-[60] mb-0 flex gap-1 rounded backdrop-blur-sm lg:right-4',
+        'fixed top-2 right-2 z-[60] mb-0 flex gap-1 rounded lg:right-4',
         className,
       )}
     >
@@ -111,11 +111,16 @@ export function AppTools({className, user}: AppToolsProps) {
               user.user_metadata?.name ||
               'Profile'}
           </span>
-          <Image
-            src={user?.user_metadata?.avatar_url || '/img/cinema.png'}
-            width={24}
-            height={24}
-            alt="user avatar"
+          <FallbackImage
+            src={user?.user_metadata?.avatar_url}
+            fallbackSrc="/img/empty-event-image.png"
+            width={36}
+            height={36}
+            alt={
+              user?.user_metadata?.full_name ||
+              user?.user_metadata?.name ||
+              'User avatar'
+            }
             className="border-border h-9 w-9 rounded border object-cover"
           />
         </Link>

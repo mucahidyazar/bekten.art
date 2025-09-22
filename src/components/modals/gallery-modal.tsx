@@ -2,9 +2,10 @@
 
 import Image from 'next/image'
 
-import {Check, Search, Upload} from 'lucide-react'
-import {useEffect, useState} from 'react'
+import {Check, Search, Upload, X, Trash2, Loader2} from 'lucide-react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 
+import {Alert, AlertDescription} from '@/components/ui/alert'
 import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
 import {
@@ -15,7 +16,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {Input} from '@/components/ui/input'
+import {Progress} from '@/components/ui/progress'
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs'
+import {
+  uploadFile,
+  getUploadedFiles,
+  deleteFile,
+  type UploadedFile,
+} from '@/utils/supabase/storage'
 
 type GalleryImage = {
   id: string
@@ -88,6 +96,14 @@ export function GalleryModal({
   >('all')
   const [customUrl, setCustomUrl] = useState('')
 
+  // Upload states
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isDragOver, setIsDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   // Filter images based on search and category
   const filteredImages = mockGalleryImages.filter(image => {
     const matchesSearch =
@@ -112,13 +128,132 @@ export function GalleryModal({
     }
   }
 
-  // Reset search when modal closes
+  // Load uploaded files when upload tab is opened
+  const loadUploadedFiles = useCallback(async () => {
+    try {
+      const files = await getUploadedFiles('images', 'gallery')
+
+      setUploadedFiles(files)
+    } catch (error) {
+      console.error('Failed to load uploaded files:', error)
+      setUploadError('Failed to load uploaded files')
+    }
+  }, [])
+
+  // Handle file upload
+  const handleFileUpload = async (files: File[]) => {
+    if (files.length === 0) return
+
+    setIsUploading(true)
+    setUploadError(null)
+    setUploadProgress(0)
+
+    try {
+      // Upload files one by one to show progress
+      const uploadedFiles: UploadedFile[] = []
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+
+        setUploadProgress(((i + 1) / files.length) * 100)
+
+        const uploadedFile = await uploadFile(file, {
+          bucket: 'images',
+          folder: 'gallery',
+          maxSizeInMB: 10,
+          allowedTypes: [
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+          ],
+        })
+
+        uploadedFiles.push(uploadedFile)
+      }
+
+      // Refresh uploaded files list
+      await loadUploadedFiles()
+      setUploadProgress(100)
+
+      // Auto-select first uploaded file if only one file uploaded
+      if (uploadedFiles.length === 1) {
+        handleImageSelect(uploadedFiles[0].url)
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      setUploadError(error instanceof Error ? error.message : 'Upload failed')
+    } finally {
+      setIsUploading(false)
+      setTimeout(() => setUploadProgress(0), 1000)
+    }
+  }
+
+  // Handle file input change
+  const handleFileInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = Array.from(event.target.files || [])
+
+    handleFileUpload(files)
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  // Handle drag and drop
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+
+    const files = Array.from(e.dataTransfer.files).filter(file =>
+      file.type.startsWith('image/'),
+    )
+
+    if (files.length > 0) {
+      handleFileUpload(files)
+    }
+  }
+
+  // Handle file deletion
+  const handleFileDelete = async (fileId: string) => {
+    try {
+      await deleteFile(fileId)
+      await loadUploadedFiles() // Refresh list
+    } catch (error) {
+      console.error('Delete error:', error)
+      setUploadError(error instanceof Error ? error.message : 'Delete failed')
+    }
+  }
+
+  // Reset search when modal closes and load files when opened
   useEffect(() => {
     if (!open) {
       setSearchTerm('')
       setCustomUrl('')
+      setUploadError(null)
+      setUploadProgress(0)
     }
   }, [open])
+
+  // Load uploaded files when component mounts
+  useEffect(() => {
+    if (open) {
+      loadUploadedFiles()
+    }
+  }, [open, loadUploadedFiles])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,8 +266,9 @@ export function GalleryModal({
         </DialogHeader>
 
         <Tabs defaultValue="gallery" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="gallery">Gallery</TabsTrigger>
+            <TabsTrigger value="upload">Upload</TabsTrigger>
             <TabsTrigger value="custom">Custom URL</TabsTrigger>
           </TabsList>
 
@@ -228,6 +364,147 @@ export function GalleryModal({
             </div>
           </TabsContent>
 
+          <TabsContent value="upload" className="space-y-4">
+            {/* File Upload Area */}
+            <div
+              className={`rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
+                isDragOver
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-primary/50'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <div className="space-y-4">
+                <div className="bg-primary/10 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
+                  <Upload className="text-primary h-8 w-8" />
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">Upload Images</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Drag and drop images here, or click to select files
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    Supports JPEG, PNG, WebP, GIF up to 10MB each
+                  </p>
+                </div>
+
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="mx-auto"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Select Files
+                    </>
+                  )}
+                </Button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileInputChange}
+                />
+              </div>
+            </div>
+
+            {/* Upload Progress */}
+            {isUploading && uploadProgress > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Uploading...</span>
+                  <span>{Math.round(uploadProgress)}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
+            )}
+
+            {/* Upload Error */}
+            {uploadError && (
+              <Alert variant="destructive">
+                <X className="h-4 w-4" />
+                <AlertDescription>{uploadError}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Uploaded Files Grid */}
+            {uploadedFiles.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="font-medium">Your Uploaded Images</h4>
+                <div className="h-[300px] w-full overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-4 p-1 md:grid-cols-3 lg:grid-cols-4">
+                    {uploadedFiles.map(file => (
+                      <div
+                        key={file.id}
+                        className={`group relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all hover:shadow-lg ${
+                          selectedUrl === file.url
+                            ? 'border-primary shadow-md'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                        onClick={() => handleImageSelect(file.url)}
+                      >
+                        <div className="relative aspect-square">
+                          <Image
+                            src={file.url}
+                            alt={file.name}
+                            fill
+                            className="object-cover transition-transform group-hover:scale-105"
+                            loading="lazy"
+                          />
+
+                          {/* Overlay */}
+                          <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
+
+                          {/* Selected indicator */}
+                          {selectedUrl === file.url && (
+                            <div className="bg-primary text-primary-foreground absolute top-2 right-2 rounded-full p-1">
+                              <Check className="h-3 w-3" />
+                            </div>
+                          )}
+
+                          {/* Delete button */}
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            className="absolute top-2 left-2 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
+                            onClick={e => {
+                              e.stopPropagation()
+                              handleFileDelete(file.id)
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+
+                          {/* File info */}
+                          <div className="absolute right-0 bottom-0 left-0 bg-black/50 p-2 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            <p className="truncate text-xs font-medium">
+                              {file.name}
+                            </p>
+                            <p className="text-xs opacity-75">
+                              {(file.size / 1024 / 1024).toFixed(1)} MB
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="custom" className="space-y-4">
             <div className="space-y-4">
               <div>
@@ -248,6 +525,7 @@ export function GalleryModal({
                   <Button
                     onClick={handleCustomUrlSubmit}
                     disabled={!customUrl.trim()}
+                    className="min-w-fit"
                   >
                     <Upload className="mr-2 h-4 w-4" />
                     Use URL

@@ -66,7 +66,7 @@ export function MusicPlayer({className = ''}: MusicPlayerProps) {
             {/* Record Image */}
             <div className="absolute inset-3 overflow-hidden rounded-full">
               <Image
-                src="/img/vinly-record.png"
+                src="/img/vinyl-record.png"
                 alt="Music"
                 fill
                 sizes="(max-width: 768px) 32px, 48px"

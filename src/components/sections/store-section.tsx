@@ -431,7 +431,7 @@ export function StoreSection({storeData}: StoreSectionProps) {
       />
 
       {/* Filters and Sort */}
-      <div className="bg-card/50 border-border/50 mb-8 flex flex-col gap-4 rounded-xl border p-6 backdrop-blur-sm sm:flex-row sm:justify-between">
+      <div className="bg-card/50 border-border/50 mb-8 flex flex-col gap-4 rounded-xl border p-6 backdrop-blur-sm sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <FilterIcon className="text-muted-foreground h-4 w-4" />
@@ -461,7 +461,7 @@ export function StoreSection({storeData}: StoreSectionProps) {
 
         <div className="flex items-center gap-2">
           <SortAscIcon className="text-muted-foreground h-4 w-4" />
-          <span className="text-muted-foreground text-sm font-medium">
+          <span className="text-muted-foreground min-w-fit text-sm font-medium">
             Sort by:
           </span>
           <Select
