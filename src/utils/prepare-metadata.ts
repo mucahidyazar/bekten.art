@@ -35,7 +35,10 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
   if (metadata.page) {
     imagesUrl.searchParams.set('page', metadata.page)
   }
-  const images = imagesUrl.toString()
+  const dynamicImage = imagesUrl.toString()
+
+  // Static fallback image for WhatsApp and other platforms that don't support dynamic OG images
+  const staticImage = `${domain}/link-preview.jpg`
 
   // SEO Keywords for art and painting
   const defaultKeywords = [
@@ -87,7 +90,13 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
       siteName: 'Bekten Usubaliev - Contemporary Artist',
       images: [
         {
-          url: images,
+          url: dynamicImage,
+          width: 1200,
+          height: 630,
+          alt: 'Bekten Usubaliev - Contemporary Oil Painter',
+        },
+        {
+          url: staticImage,
           width: 1200,
           height: 630,
           alt: 'Bekten Usubaliev - Contemporary Oil Painter',
@@ -102,7 +111,11 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
       creator: '@bektenusubaliev',
       images: [
         {
-          url: images,
+          url: dynamicImage,
+          alt: 'Bekten Usubaliev - Contemporary Oil Painter',
+        },
+        {
+          url: staticImage,
           alt: 'Bekten Usubaliev - Contemporary Oil Painter',
         },
       ],
@@ -122,6 +135,18 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
       google: process.env.GOOGLE_SITE_VERIFICATION,
     },
     category: 'Art & Culture',
+    // Additional meta tags for better social media support
+    other: {
+      // WhatsApp specific meta tags
+      'og:image:secure_url': staticImage,
+      'og:image:type': 'image/jpeg',
+      'og:image:width': '1200',
+      'og:image:height': '630',
+      // Additional fallback for various platforms
+      'twitter:image:src': staticImage,
+      // Telegram specific
+      'tg:image': staticImage,
+    },
   }
 
   return {

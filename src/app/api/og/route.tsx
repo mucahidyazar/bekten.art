@@ -53,7 +53,7 @@ export async function GET(request: Request) {
 
   const colors = getThemeColors(page)
 
-  return new ImageResponse(
+  const response = new ImageResponse(
     (
       <div
         style={{
@@ -202,8 +202,23 @@ export async function GET(request: Request) {
     {
       width: 1200,
       height: 630,
+      headers: {
+        'Cache-Control':
+          'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+        'Content-Type': 'image/png',
+      },
     },
   )
+
+  // Add additional headers for better caching and social media support
+  response.headers.set(
+    'Cache-Control',
+    'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+  )
+  response.headers.set('CDN-Cache-Control', 'public, max-age=86400')
+  response.headers.set('Vercel-CDN-Cache-Control', 'public, max-age=86400')
+
+  return response
 }
 
 export const runtime = 'edge'

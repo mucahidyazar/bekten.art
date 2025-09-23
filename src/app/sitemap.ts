@@ -107,6 +107,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   })
 
+  // Add API routes that should be indexed
+  sitemapEntries.push({
+    url: `${DOMAIN}/api/og`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.3,
+  })
+
   // Add dynamic pages (already include locale)
   dynamicPages.forEach(page => {
     sitemapEntries.push({
