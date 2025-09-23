@@ -1,44 +1,36 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import {NextResponse, type NextRequest} from 'next/server'
 
-import { createServerClient } from '@supabase/ssr'
+import {createServerClient} from '@supabase/ssr'
 import createMiddleware from 'next-intl/middleware'
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware({
   locales: ['en', 'tr', 'ru', 'kg'],
   defaultLocale: 'en',
-  localePrefix: 'never' // This will keep URLs without locale prefix
+  localePrefix: 'never', // This will keep URLs without locale prefix
 })
 
 // Protected routes that require authentication
-const protectedRoutes = [
-  '/admin',
-  '/profile',
-  '/store/create'
-]
+const protectedRoutes = ['/admin', '/profile', '/store/create']
 
 // Admin only routes
-const adminRoutes = [
-  '/admin'
-]
+const adminRoutes = ['/admin']
 
 // Public routes that authenticated users should be redirected from
-const authRoutes = [
-  '/sign-in',
-  '/sign-up'
-]
+const authRoutes = ['/sign-in', '/sign-up']
 
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
+     * - api/ (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - auth/callback (auth callback route)
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|auth/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|mov|avi|webm|ogg|webmanifest)$).*)',
+    '/((?!api/|_next/static|_next/image|favicon.ico|auth/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|mov|avi|webm|ogg|webmanifest)$).*)',
   ],
 }
 
@@ -52,9 +44,11 @@ export async function middleware(request: NextRequest) {
   }
 
   // Then handle Supabase auth
-  let supabaseResponse = intlResponse || NextResponse.next({
-    request,
-  })
+  let supabaseResponse =
+    intlResponse ||
+    NextResponse.next({
+      request,
+    })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -65,28 +59,32 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({name, value}) =>
+            request.cookies.set(name, value),
+          )
           supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+          cookiesToSet.forEach(({name, value, options}) =>
+            supabaseResponse.cookies.set(name, value, options),
           )
         },
       },
-    }
+    },
   )
 
   // Get user and refresh session
   const {
-    data: { user },
+    data: {user},
   } = await supabase.auth.getUser()
 
   const url = request.nextUrl
   const pathname = url.pathname
 
   // Check if route requires authentication
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+  const isProtectedRoute = protectedRoutes.some(route =>
+    pathname.startsWith(route),
+  )
   const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
 
@@ -109,7 +107,7 @@ export async function middleware(request: NextRequest) {
   // Check admin access for admin routes
   if (isAdminRoute && user) {
     try {
-      const { data: profile } = await supabase
+      const {data: profile} = await supabase
         .from('users')
         .select('role')
         .eq('id', user.id)

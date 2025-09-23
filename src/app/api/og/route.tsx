@@ -12,8 +12,8 @@ export async function GET(request: Request) {
   const description = searchParams.get('description') || ME.descriptionFull
   const headersList = await headers()
   const host = headersList.get('host')
-  const protocal = configs.isDevelopment ? 'http' : 'https'
-  const domain = `${protocal}://${host}`
+  const protocol = configs.isDevelopment ? 'http' : 'https'
+  const domain = `${protocol}://${host}`
 
   // Get theme colors based on page
   const getThemeColors = (page: string | null) => {
@@ -111,6 +111,7 @@ export async function GET(request: Request) {
               border: `6px solid ${colors.accent}`,
               borderRadius: '20px',
               boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+              objectFit: 'cover',
             }}
           />
         </div>
@@ -202,11 +203,6 @@ export async function GET(request: Request) {
     {
       width: 1200,
       height: 630,
-      headers: {
-        'Cache-Control':
-          'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
-        'Content-Type': 'image/png',
-      },
     },
   )
 
