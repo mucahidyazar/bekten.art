@@ -1,42 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server'
+import {NextResponse} from 'next/server'
 
-import { createClient } from '@/utils/supabase/server'
+import {getUser} from '@/utils/supabase/server'
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
-    const supabase = await createClient()
+    const user = await getUser()
 
-    // Get user from Supabase (using cookies from middleware)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ isAdmin: false, error: 'No user found' }, { status: 401 })
+    if (!user) {
+      return NextResponse.json(
+        {error: 'No user found', isAdmin: false},
+        {status: 401},
+      )
     }
-
-    // Check user role in database
-    const { data: userData, error: profileError } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (profileError && profileError.code !== 'PGRST116') {
-      console.error('Profile check error:', profileError)
-
-      return NextResponse.json({ isAdmin: false, error: 'Database error' }, { status: 500 })
-    }
-
-    const isAdmin = userData?.role?.toLowerCase() === 'admin'
 
     return NextResponse.json({
-      isAdmin,
       error: null,
+      isAdmin: user.isAdmin,
       userId: user.id,
-      userRole: userData?.role || null
+      userRole: user.profile.role || null,
     })
   } catch (error) {
     console.error('Admin check API error:', error)
 
-    return NextResponse.json({ isAdmin: false, error: 'Server error' }, { status: 500 })
+    return NextResponse.json(
+      {error: 'Server error', isAdmin: false},
+      {status: 500},
+    )
   }
 }
+
+export const dynamic = 'force-dynamic'

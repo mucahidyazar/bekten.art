@@ -1,8 +1,7 @@
 'use client'
 
-import {createContext, ReactNode, useContext, useEffect, useState} from 'react'
+import {createContext, ReactNode, useContext} from 'react'
 
-import {createClient} from '@/utils/supabase/client'
 import {EnhancedUser} from '@/utils/supabase/server'
 
 interface UserContextType {
@@ -20,27 +19,11 @@ export function UserProvider({
   children,
   initialUser = null,
 }: UserProviderProps) {
-  const [user, setUser] = useState<EnhancedUser | null>(initialUser)
-
-  useEffect(() => {
-    const supabase = createClient()
-
-    // Auth state değişikliklerini dinle - sadece sign out için
-    const {
-      data: {subscription},
-    } = supabase.auth.onAuthStateChange(event => {
-      if (event === 'SIGNED_OUT') {
-        setUser(null)
-      }
-      // Sign in durumunda sayfa yenilenir zaten, server-side getUser çalışır
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
-
-  return <UserContext.Provider value={{user}}>{children}</UserContext.Provider>
+  return (
+    <UserContext.Provider value={{user: initialUser}}>
+      {children}
+    </UserContext.Provider>
+  )
 }
 
 export function useUser() {

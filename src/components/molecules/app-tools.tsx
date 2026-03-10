@@ -6,7 +6,7 @@ import {usePathname, useRouter} from 'next/navigation'
 import {LaptopIcon, LogInIcon, MoonIcon, SunIcon, WavesIcon} from 'lucide-react'
 import {useLocale, useTranslations} from 'next-intl'
 import {useTheme} from 'next-themes'
-import {useEffect, useState, useTransition} from 'react'
+import {useTransition} from 'react'
 
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {FallbackImage} from '@/components/ui/fallback-image'
 import {LOCALE, LOCALES} from '@/constants'
+import {useHydrated} from '@/hooks/use-hydrated'
 import {cn} from '@/utils'
 
 import {Button} from '../ui/button'
@@ -26,17 +27,12 @@ type AppToolsProps = {
 }
 export function AppTools({className, user}: AppToolsProps) {
   const [isPending, startTransition] = useTransition()
-  const [mounted, setMounted] = useState(false)
+  const mounted = useHydrated()
   const t = useTranslations()
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
   const {setTheme, theme} = useTheme()
-
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const handleThemeChange = (newTheme: string) => {
     try {
@@ -76,7 +72,6 @@ export function AppTools({className, user}: AppToolsProps) {
     system: <LaptopIcon className="w-3" />,
   } as {[key: string]: React.ReactNode}
 
-  // Don't render until mounted to prevent hydration mismatch
   if (!mounted) {
     return (
       <section

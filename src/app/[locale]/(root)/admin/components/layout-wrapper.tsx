@@ -2,9 +2,9 @@
 
 import {usePathname} from 'next/navigation'
 
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 
-import {createClient} from '@/utils/supabase/client'
+import {useUser} from '@/components/providers/user-provider'
 
 import AdminSidebar from './admin-sidebar'
 
@@ -14,39 +14,14 @@ interface LayoutWrapperProps {
 
 export default function LayoutWrapper({children}: LayoutWrapperProps) {
   const pathname = usePathname()
-  const [user, setUser] = useState<any>(null)
+  const {user} = useUser()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
 
   // Check if current page is admin page
   const isAdminPage = pathname.startsWith('/admin')
 
-  useEffect(() => {
-    async function fetchUser() {
-      if (isAdminPage) {
-        try {
-          const supabase = createClient()
-          const {
-            data: {user},
-          } = await supabase.auth.getUser()
-
-          setUser(user)
-        } catch (error) {
-          console.error('Error fetching user:', error)
-        }
-      }
-      setLoading(false)
-    }
-
-    fetchUser()
-  }, [isAdminPage])
-
   if (!isAdminPage) {
-    return <>{children}</>
-  }
-
-  if (loading) {
     return <>{children}</>
   }
 

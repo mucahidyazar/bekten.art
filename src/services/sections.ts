@@ -1,3 +1,5 @@
+import {unstable_noStore as noStore} from 'next/cache'
+
 import {createClient} from '@/utils/supabase/server'
 
 import type {
@@ -20,6 +22,8 @@ export async function getSectionData(sectionType: SectionType): Promise<{
   items: DatabaseSectionItem[]
   settings: DatabaseSectionSettings | null
 }> {
+  noStore()
+
   const supabase = await createClient()
 
   try {

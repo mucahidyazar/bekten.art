@@ -1,13 +1,13 @@
 import {MetadataRoute} from 'next'
 
-import {createClient} from '@/utils/supabase/server'
+import {prisma} from '@/lib/db'
+
+export const dynamic = 'force-dynamic'
 
 const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art'
 const LOCALES = ['en', 'tr', 'kg', 'ru']
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createClient()
-
   // Static pages
   const staticPages = [
     {
@@ -61,12 +61,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }> = []
 
   try {
-    const {data: newsData} = await supabase
-      .from('news')
-      .select('id, updated_at')
-      .eq('published', true)
+    const newsData = await prisma.sectionData.findMany({
+      orderBy: {updated_at: 'desc'},
+      select: {
+        id: true,
+        updated_at: true,
+      },
+      where: {
+        is_active: true,
+        section_type: 'news',
+      },
+    })
 
-    if (newsData) {
+    if (newsData.length > 0) {
       const newsPagesForLocales = newsData.flatMap((item: any) =>
         LOCALES.map(locale => ({
           url: `/${locale}/news/${item.id}`,

@@ -1,0 +1,35 @@
+{
+  "exportedAt": "2026-03-10T21:12:28.965Z",
+  "exportDir": "/Users/mucahidyazar/Code/supabase-export-vbxzmrlrwdxbmlcbitrq",
+  "identitiesByUser": {
+    "01c01968-96c5-44d2-a888-9621647d7a56": 1,
+    "5bedf29b-70de-4919-8668-0d398ffda137": 1,
+    "dffffc82-671d-4eed-9e81-1dc2ed68a520": 1,
+    "5b3f041a-d151-4b9c-8d06-b54ad9a9f174": 1,
+    "56e94df8-5cb6-4576-b8cc-7c71dee90117": 1,
+    "e9dcf523-ec70-489d-bcb6-67eb19e28b6b": 1,
+    "9b2b2eee-2885-459d-9dbe-25eff973ffbe": 1,
+    "296f6f99-c0ab-45bd-8678-94d3d61c5ef8": 1
+  },
+  "report": {
+    "accounts": 4,
+    "files": 1,
+    "sections": 6,
+    "sectionData": 30,
+    "skippedFiles": 0,
+    "socials": 3,
+    "users": 8
+  },
+  "resetCandidates": [
+    {
+      "email": "mucahidyazar00001@gmail.com",
+      "id": "dffffc82-671d-4eed-9e81-1dc2ed68a520",
+      "note": "Email exists with password hash but is not confirmed in source auth export."
+    },
+    {
+      "email": "mucahidyazar00002@gmail.com",
+      "id": "5bedf29b-70de-4919-8668-0d398ffda137",
+      "note": "Email exists with password hash but is not confirmed in source auth export."
+    }
+  ]
+}

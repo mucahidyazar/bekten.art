@@ -70,6 +70,45 @@ function getRoleInfo(role: 'USER' | 'ARTIST' | 'ADMIN') {
   }
 }
 
+const DEFAULT_INTERESTS = [
+  'Contemporary Art',
+  'Digital Art',
+  'Paintings',
+  'Sculptures',
+  'Photography',
+]
+
+function createRecentActivities(baseDate: string) {
+  const offsetIso = (days: number) => {
+    const date = new Date(baseDate)
+
+    date.setUTCDate(date.getUTCDate() - days)
+
+    return date.toISOString()
+  }
+
+  return [
+    {
+      id: '1',
+      type: 'like',
+      description: 'Liked "Mountain Spirits" artwork',
+      created_at: offsetIso(2),
+    },
+    {
+      id: '2',
+      type: 'collection',
+      description: 'Added to "Favorites" collection',
+      created_at: offsetIso(7),
+    },
+    {
+      id: '3',
+      type: 'subscribe',
+      description: 'Subscribed to newsletter',
+      created_at: offsetIso(14),
+    },
+  ]
+}
+
 export default async function ProfilePage({params}: PageProps) {
   // Require authentication
   const currentUser = await requireAuth()
@@ -90,6 +129,12 @@ export default async function ProfilePage({params}: PageProps) {
     console.error('Error fetching profile:', error)
   }
 
+  const activityBaseDate =
+    profileData?.updated_at ||
+    profileData?.created_at ||
+    currentUser.last_sign_in_at ||
+    currentUser.created_at
+
   // If profile exists in Supabase, use it; otherwise create default profile
   const profile: UserProfile = profileData
     ? {
@@ -103,39 +148,8 @@ export default async function ProfilePage({params}: PageProps) {
         collections: 5,
         following: 3,
         followers: 8,
-        interests: [
-          'Contemporary Art',
-          'Digital Art',
-          'Paintings',
-          'Sculptures',
-          'Photography',
-        ],
-        recent_activities: [
-          {
-            id: '1',
-            type: 'like',
-            description: 'Liked "Mountain Spirits" artwork',
-            created_at: new Date(
-              Date.now() - 2 * 24 * 60 * 60 * 1000,
-            ).toISOString(),
-          },
-          {
-            id: '2',
-            type: 'collection',
-            description: 'Added to "Favorites" collection',
-            created_at: new Date(
-              Date.now() - 7 * 24 * 60 * 60 * 1000,
-            ).toISOString(),
-          },
-          {
-            id: '3',
-            type: 'subscribe',
-            description: 'Subscribed to newsletter',
-            created_at: new Date(
-              Date.now() - 14 * 24 * 60 * 60 * 1000,
-            ).toISOString(),
-          },
-        ],
+        interests: DEFAULT_INTERESTS,
+        recent_activities: createRecentActivities(activityBaseDate),
       }
     : {
         id: currentUser.id,
@@ -157,39 +171,8 @@ export default async function ProfilePage({params}: PageProps) {
         collections: 5,
         following: 3,
         followers: 8,
-        interests: [
-          'Contemporary Art',
-          'Digital Art',
-          'Paintings',
-          'Sculptures',
-          'Photography',
-        ],
-        recent_activities: [
-          {
-            id: '1',
-            type: 'like',
-            description: 'Liked "Mountain Spirits" artwork',
-            created_at: new Date(
-              Date.now() - 2 * 24 * 60 * 60 * 1000,
-            ).toISOString(),
-          },
-          {
-            id: '2',
-            type: 'collection',
-            description: 'Added to "Favorites" collection',
-            created_at: new Date(
-              Date.now() - 7 * 24 * 60 * 60 * 1000,
-            ).toISOString(),
-          },
-          {
-            id: '3',
-            type: 'subscribe',
-            description: 'Subscribed to newsletter',
-            created_at: new Date(
-              Date.now() - 14 * 24 * 60 * 60 * 1000,
-            ).toISOString(),
-          },
-        ],
+        interests: DEFAULT_INTERESTS,
+        recent_activities: createRecentActivities(activityBaseDate),
       }
 
   const isOwnProfile = currentUser.id === profile.id

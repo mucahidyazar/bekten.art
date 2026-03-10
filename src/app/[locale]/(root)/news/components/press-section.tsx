@@ -3,10 +3,12 @@
 import Link from 'next/link'
 
 import {ExternalLinkIcon, NewspaperIcon} from 'lucide-react'
-import {unstable_ViewTransition as ViewTransition} from 'react'
+import {Fragment} from 'react'
 
 import {mockPressData} from '@/mocks/press'
 import {formatDate} from '@/utils/format-date'
+
+const ViewTransition = Fragment
 
 export function PressSection() {
   return (

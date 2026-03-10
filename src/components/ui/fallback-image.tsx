@@ -2,7 +2,7 @@
 
 import Image, {ImageProps} from 'next/image'
 
-import {useState, useEffect} from 'react'
+import {useState} from 'react'
 
 interface FallbackImageProps extends Omit<ImageProps, 'src' | 'onError'> {
   src: string | undefined
@@ -26,24 +26,13 @@ export function FallbackImage({
   quality = 85,
   ...props
 }: FallbackImageProps) {
-  const [imageError, setImageError] = useState(false)
-  const [currentSrc, setCurrentSrc] = useState(src || fallbackSrc)
-
-  // Reset when src prop changes
-  useEffect(() => {
-    if (src && src !== currentSrc && !imageError) {
-      setCurrentSrc(src)
-      setImageError(false)
-    } else if (!src) {
-      setCurrentSrc(fallbackSrc)
-      setImageError(false)
-    }
-  }, [src, fallbackSrc, currentSrc, imageError])
+  const [failedSrc, setFailedSrc] = useState<string | null>(null)
+  const currentSrc = src && failedSrc !== src ? src : fallbackSrc
+  const imageError = !src || failedSrc === src
 
   const handleError = () => {
-    if (!imageError && currentSrc !== fallbackSrc) {
-      setImageError(true)
-      setCurrentSrc(fallbackSrc)
+    if (src && failedSrc !== src) {
+      setFailedSrc(src)
     }
   }
 

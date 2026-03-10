@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button'
-import { signOut } from '@/lib/auth-actions'
+import { signOutUser } from '@/lib/auth-actions'
 
 export function SignOutButton() {
   return (
-    <form action={signOut}>
+    <form action={signOutUser}>
       <Button
         type="submit"
         variant="outline"

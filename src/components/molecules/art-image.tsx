@@ -1,5 +1,6 @@
 import Image from 'next/image'
 
+import {shouldBypassImageOptimization} from '@/lib/image-optimization'
 import {cn} from '@/utils'
 
 type ArtImageProps = {
@@ -16,6 +17,8 @@ export function ArtImage({
   src,
   onClick,
 }: ArtImageProps) {
+  const unoptimized = shouldBypassImageOptimization(src)
+
   return (
     <div
       className={cn('group relative w-full overflow-hidden', className)}
@@ -23,17 +26,18 @@ export function ArtImage({
     >
       <Image
         src={src}
-        alt="'TRAVELLING'  Canvas, oil, 70x85 cm, 2001"
+        alt={description || 'Artwork'}
         width={400}
         height={400}
         className={cn('w-full object-cover', imageClassName)}
+        unoptimized={unoptimized}
       />
       {description && (
         <>
-          <p className="wrap absolute bottom-0 left-0 z-20 max-w-full break-words m-3 text-xs text-white line-clamp-3 overflow-hidden">
+          <p className="wrap absolute bottom-0 left-0 z-20 m-3 line-clamp-3 max-w-full overflow-hidden text-xs break-words text-white">
             {description}
           </p>
-          <div className="absolute bottom-0 left-0 right-0 z-10 h-16 bg-gradient-to-t from-black to-transparent" />
+          <div className="absolute right-0 bottom-0 left-0 z-10 h-16 bg-gradient-to-t from-black to-transparent" />
         </>
       )}
     </div>

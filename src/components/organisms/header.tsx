@@ -1,6 +1,5 @@
 'use client'
 
-import {Nanum_Brush_Script} from 'next/font/google'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -12,11 +11,6 @@ import {cn} from '@/utils'
 import {EnhancedUser} from '@/utils/supabase/server'
 
 import {AppTools} from '../molecules/app-tools'
-
-const nanum = Nanum_Brush_Script({
-  subsets: ['latin'],
-  weight: ['400'],
-})
 
 interface HeaderProps {
   user: EnhancedUser | null
@@ -84,8 +78,7 @@ function HeaderClient({user}: HeaderProps) {
           </Link>
           <p
             className={cn(
-              nanum.className,
-              'text-muted-foreground text-center text-xs uppercase',
+              'font-signature text-muted-foreground text-center text-xs uppercase',
             )}
           >
             {t('branding.slogan')}

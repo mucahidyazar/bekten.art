@@ -4,14 +4,31 @@ const withNextIntl = require('next-intl/plugin')(
   './i18n.ts',
 )
 
+const pocketBaseUrl = process.env.POCKETBASE_URL
+const pocketBasePattern = (() => {
+  if (!pocketBaseUrl) {
+    return null
+  }
+
+  try {
+    const parsed = new URL(pocketBaseUrl)
+
+    return {
+      protocol: parsed.protocol.replace(':', ''),
+      hostname: parsed.hostname,
+      port: parsed.port || undefined,
+    }
+  } catch {
+    return null
+  }
+})()
+
 const nextConfig = {
   ...withNextIntl(),
   env: {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID:
       process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
   images: {
     remotePatterns: [
@@ -19,6 +36,7 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**',
       },
+      ...(pocketBasePattern ? [pocketBasePattern] : []),
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -37,9 +55,7 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
-  // Enable static exports for better SEO
   trailingSlash: false,
-  // Security headers
   async headers() {
     return [
       {

@@ -2,6 +2,7 @@
 
 import {zodResolver} from '@hookform/resolvers/zod'
 import {EyeIcon, EyeOffIcon, MailIcon} from 'lucide-react'
+import {signIn} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import {useState} from 'react'
 import {useForm} from 'react-hook-form'
@@ -18,7 +19,6 @@ import {
 } from '@/components/ui/form'
 import {Input} from '@/components/ui/input'
 import {useToast} from '@/components/ui/use-toast'
-import {createClient} from '@/utils/supabase/client'
 
 type FormValues = {
   email: string
@@ -46,44 +46,30 @@ export function SignInForm() {
 
   const submitHandler = async ({email, password}: FormValues) => {
     setIsLoading(true)
-    const supabase = createClient()
 
     try {
-      const {error} = await supabase.auth.signInWithPassword({
+      const result = await signIn('credentials', {
         email,
         password,
+        redirect: false,
       })
 
-      if (error) {
-        console.error('Error signing in:', error.message)
-
-        // Show user-friendly error messages
-        let errorMessage = 'An error occurred during sign in'
-
-        if (error.message.includes('Email not confirmed')) {
-          errorMessage =
-            'Please check your email and confirm your account before signing in'
-        } else if (error.message.includes('Invalid login credentials')) {
-          errorMessage =
-            'Invalid email or password. Please check your credentials and try again'
-        } else if (error.message.includes('Too many requests')) {
-          errorMessage =
-            'Too many sign in attempts. Please wait a moment and try again'
-        }
-
+      if (result?.error) {
         toast({
           title: 'Sign In Failed',
-          description: errorMessage,
+          description: 'Invalid email or password. Please try again.',
           variant: 'destructive',
         })
-      } else {
-        toast({
-          title: t('messages.signInSuccess'),
-          description: 'You have been successfully signed in',
-        })
-        // Redirect or refresh will be handled by auth state change
-        window.location.href = '/'
+
+        return
       }
+
+      toast({
+        title: t('messages.signInSuccess'),
+        description: 'You have been successfully signed in',
+      })
+
+      window.location.href = result?.url || '/'
     } catch (error) {
       console.error('Sign in error:', error)
       toast({
@@ -155,24 +141,6 @@ export function SignInForm() {
             </FormItem>
           )}
         />
-
-        <div className="flex items-center justify-between text-sm">
-          <label className="flex cursor-pointer items-center space-x-2">
-            <input
-              type="checkbox"
-              className="border-muted text-primary focus:ring-primary rounded"
-            />
-            <span className="text-muted-foreground">
-              {t('messages.rememberMe')}
-            </span>
-          </label>
-          <a
-            href="#"
-            className="text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            {t('messages.forgotPassword')}
-          </a>
-        </div>
 
         <Button
           type="submit"

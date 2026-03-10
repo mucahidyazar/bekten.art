@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import {getTranslations} from 'next-intl/server'
 import {Suspense} from 'react'
 
@@ -45,12 +47,12 @@ export default async function SignInPage() {
       <div className="text-muted-foreground text-center text-sm">
         <p>
           {t('noAccount')}{' '}
-          <a
+          <Link
             href="/sign-up"
             className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
             {t('signUp')}
-          </a>
+          </Link>
         </p>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import {getTranslations} from 'next-intl/server'
 
 import {SignUpForm} from '@/components/forms/sign-up-form'
@@ -38,12 +40,12 @@ export default async function SignUpPage() {
       <div className="text-muted-foreground text-center text-sm">
         <p>
           {t('hasAccount')}{' '}
-          <a
+          <Link
             href="/sign-in"
             className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
             {t('signIn')}
-          </a>
+          </Link>
         </p>
       </div>
     </div>

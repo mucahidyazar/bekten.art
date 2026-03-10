@@ -1,18 +1,13 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import {useSearchParams} from 'next/navigation'
 
-import { useEffect, useState } from 'react'
+import {useHydrated} from '@/hooks/use-hydrated'
 
 export function ErrorDisplay() {
+  const mounted = useHydrated()
   const searchParams = useSearchParams()
-  const [error, setError] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    setError(searchParams.get('error'))
-  }, [searchParams])
+  const error = searchParams.get('error')
 
   if (!mounted || !error) {
     return null

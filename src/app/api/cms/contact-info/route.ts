@@ -1,103 +1,112 @@
-import { NextRequest, NextResponse } from 'next/server'
+import {NextResponse} from 'next/server'
 
-import { createClient } from '@/utils/supabase/server'
+import {prisma} from '@/lib/db'
+import {requireAdmin} from '@/utils/supabase/server'
 
-// GET - Load contact info
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
-    const supabase = await createClient()
+    await requireAdmin()
 
-    // Check if user is admin
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check admin role
-    const { data: userData, error: roleError } = await supabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (roleError || userData?.role?.toLowerCase() !== 'admin') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-    }
-
-    // Get contact info
-    const { data: contactInfo, error } = await supabase
-      .from('cms_contact_info')
-      .select('*')
-      .single()
-
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error loading contact info:', error)
-
-      return NextResponse.json({ error: 'Database error' }, { status: 500 })
-    }
+    const contactUser = await getPrimaryContactUser()
 
     return NextResponse.json({
-      contactInfo: contactInfo || {
-        phone: '',
-        email: '',
-        address: '',
-        instagram_url: '',
-        working_hours: '',
-        map_embed_url: '',
-      }
+      contactInfo: {
+        address: contactUser?.address || '',
+        email: contactUser?.email || '',
+        instagram_url:
+          contactUser?.socials.find(social => social.platform === 'instagram')
+            ?.url || '',
+        map_embed_url: contactUser?.map_embed_url || '',
+        phone: contactUser?.phone || '',
+        working_hours: contactUser?.working_hours || '',
+      },
     })
   } catch (error) {
     console.error('Contact info API error:', error)
 
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    return NextResponse.json({error: 'Server error'}, {status: 500})
   }
 }
 
-// POST - Save contact info
-export async function POST(request: NextRequest) {
+async function getPrimaryContactUser() {
+  return prisma.user.findFirst({
+    include: {
+      socials: {
+        orderBy: {platform: 'asc'},
+      },
+    },
+    orderBy: [{email: 'asc'}],
+    where: {
+      OR: [
+        {email: 'bekten.usubaliev@gmail.com'},
+        {role: 'ADMIN'},
+      ],
+    },
+  })
+}
+
+export async function POST(request: Request) {
   try {
-    const supabase = await createClient()
+    await requireAdmin()
 
-    // Check if user is admin
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const contactInfo = (await request.json()) as {
+      address?: string
+      email?: string
+      instagram_url?: string
+      map_embed_url?: string
+      phone?: string
+      working_hours?: string
     }
 
-    // Check admin role
-    const { data: userData, error: roleError } = await supabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    const contactUser = await getPrimaryContactUser()
 
-    if (roleError || userData?.role?.toLowerCase() !== 'admin') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    if (!contactUser) {
+      return NextResponse.json({error: 'Admin user not found'}, {status: 404})
     }
 
-    // Get request body
-    const contactInfo = await request.json()
-
-    // Save contact info
-    const { error } = await supabase
-      .from('cms_contact_info')
-      .upsert({
-        ...contactInfo,
-        updated_at: new Date().toISOString(),
+    await prisma.$transaction(async tx => {
+      await tx.user.update({
+        where: {id: contactUser.id},
+        data: {
+          address: contactInfo.address || '',
+          email: contactInfo.email || contactUser.email,
+          map_embed_url: contactInfo.map_embed_url || '',
+          phone: contactInfo.phone || '',
+          working_hours: contactInfo.working_hours || '',
+        },
       })
 
-    if (error) {
-      console.error('Error saving contact info:', error)
+      const existingInstagram = await tx.social.findFirst({
+        where: {
+          platform: 'instagram',
+          user_id: contactUser.id,
+        },
+      })
 
-      return NextResponse.json({ error: 'Database error' }, { status: 500 })
-    }
+      if (contactInfo.instagram_url) {
+        if (existingInstagram) {
+          await tx.social.update({
+            where: {id: existingInstagram.id},
+            data: {url: contactInfo.instagram_url},
+          })
+        } else {
+          await tx.social.create({
+            data: {
+              platform: 'instagram',
+              url: contactInfo.instagram_url,
+              user_id: contactUser.id,
+            },
+          })
+        }
+      }
+    })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({success: true})
   } catch (error) {
     console.error('Contact info save API error:', error)
 
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    return NextResponse.json({error: 'Server error'}, {status: 500})
   }
 }
+
+export const dynamic = 'force-dynamic'

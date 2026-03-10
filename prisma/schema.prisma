@@ -1,0 +1,212 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ARTIST
+  ADMIN
+}
+
+enum SectionType {
+  workshop
+  gallery
+  portfolio
+  testimonials
+  services
+  artist
+  memories
+  store
+  news
+}
+
+model User {
+  id                    String               @id @default(uuid()) @db.Uuid
+  name                  String?
+  email                 String?              @unique
+  emailVerified         DateTime?            @map("email_verified")
+  image                 String?
+  role                  UserRole             @default(USER)
+  passwordHash          String?              @map("password_hash")
+  passwordResetRequired Boolean              @default(false) @map("password_reset_required")
+  phone                 String?
+  address               String?
+  bio                   String?
+  website               String?
+  twitter               String?
+  instagram             String?
+  linkedin              String?
+  github                String?
+  working_hours         String?
+  map_embed_url         String?
+  years_experience      Int                  @default(0)
+  artworks_count        Int                  @default(0)
+  exhibitions_count     Int                  @default(0)
+  last_sign_in_at       DateTime?
+  created_at            DateTime             @default(now())
+  updated_at            DateTime             @updatedAt
+  accounts              Account[]
+  password_reset_tokens PasswordResetToken[]
+  sessions              Session[]
+  socials               Social[]
+
+  @@map("users")
+}
+
+model Social {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  platform   String
+  url        String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("socials")
+}
+
+model Section {
+  id                  String      @id @default(uuid()) @db.Uuid
+  section_type        SectionType @unique
+  section_title       String
+  section_description String
+  badge_text          String
+  max_items           Int         @default(6)
+  is_active           Boolean     @default(true)
+  display_order       Int         @default(0)
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
+
+  @@index([display_order])
+  @@map("sections")
+}
+
+model SectionData {
+  id           String      @id @default(uuid()) @db.Uuid
+  section_type SectionType
+  order        Int         @default(0)
+  is_active    Boolean     @default(true)
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
+  data         Json
+
+  @@index([section_type, order])
+  @@index([section_type, is_active])
+  @@map("section_data")
+}
+
+model UploadedFile {
+  id                 String         @id @default(uuid()) @db.Uuid
+  app_key            String         @default("bekten-art")
+  name               String
+  original_name      String
+  file_path          String         @unique
+  folder             String?
+  file_size          Int
+  file_type          String
+  bucket_name        String
+  public_url         String
+  source_url         String?
+  storage_provider   String         @default("pocketbase")
+  storage_collection String?
+  storage_record_id  String?
+  uploaded_at        DateTime       @default(now())
+  created_at         DateTime       @default(now())
+  updated_at         DateTime       @updatedAt
+  instagram_post     InstagramPost?
+
+  @@index([app_key, bucket_name])
+  @@index([bucket_name, uploaded_at])
+  @@map("uploaded_files")
+}
+
+model InstagramPost {
+  id                 String        @id @default(uuid()) @db.Uuid
+  instagram_media_id String        @unique
+  shortcode          String        @unique
+  username           String
+  owner_username     String?
+  caption            String?
+  media_type         String
+  source_permalink   String
+  source_display_url String
+  thumbnail_url      String?
+  alt_text           String?
+  posted_at          DateTime?
+  display_order      Int           @default(0)
+  is_active          Boolean       @default(true)
+  is_pinned          Boolean       @default(false)
+  raw_payload        Json
+  synced_at          DateTime      @default(now())
+  uploaded_file_id   String?       @unique @db.Uuid
+  created_at         DateTime      @default(now())
+  updated_at         DateTime      @updatedAt
+  uploaded_file      UploadedFile? @relation(fields: [uploaded_file_id], references: [id], onDelete: SetNull)
+
+  @@index([is_active, display_order])
+  @@index([username, is_active, posted_at])
+  @@map("instagram_posts")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String   @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model PasswordResetToken {
+  id         String    @id @default(cuid())
+  userId     String    @db.Uuid
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  created_at DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
+}

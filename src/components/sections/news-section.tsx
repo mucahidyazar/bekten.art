@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 import {CalendarIcon, Edit, MapPinIcon} from 'lucide-react'
 import {useTranslations} from 'next-intl'
-import {unstable_ViewTransition as ViewTransition} from 'react'
+import {Fragment} from 'react'
 
 import {saveNewsDataAction} from '@/actions/news'
 import {DynamicEditModal} from '@/components/modals/dynamic-edit-modal'
@@ -27,6 +27,8 @@ interface NewsSectionProps {
     settings: NewsDatabaseSettings | null
   }
 }
+
+const ViewTransition = Fragment
 
 export function NewsSection({newsData}: NewsSectionProps) {
   const t = useTranslations()

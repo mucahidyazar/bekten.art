@@ -2,7 +2,6 @@ import './global.css'
 
 import {Metadata} from 'next'
 
-import {Lora} from 'next/font/google'
 import {notFound} from 'next/navigation'
 
 import {NextIntlClientProvider} from 'next-intl'
@@ -29,8 +28,6 @@ import {ME} from '@/constants'
 import {LOCALES} from '@/constants/locales'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 import {getUser} from '@/utils/supabase/server'
-
-const lora = Lora({subsets: ['latin']})
 
 export async function generateMetadata(): Promise<Metadata> {
   return prepareMetadata()
@@ -100,7 +97,7 @@ export default async function RootLayout({children, params}: LayoutProps) {
           />
         </head>
         <body
-          className={`${lora.className} bg-background flex flex-col overflow-x-hidden`}
+          className="font-editorial bg-background flex flex-col overflow-x-hidden"
           suppressHydrationWarning
         >
           <NextIntlClientProvider locale={locale} messages={messages}>

@@ -8,6 +8,7 @@ const path = require('path')
 function countWords(str) {
   // Handle camelCase by splitting on uppercase letters
   const words = str.split(/(?=[A-Z])/).filter(word => word.length > 0)
+
   return words.length
 }
 
@@ -132,6 +133,7 @@ function formatJsonWithBlankLines(obj, depth = 0) {
   const keyIndent = '  '.repeat(depth + 1)
 
   const entries = Object.entries(obj)
+
   entries.sort(customSort)
   const groups = groupEntries(entries)
 
@@ -154,6 +156,7 @@ function formatJsonWithBlankLines(obj, depth = 0) {
       ) {
         // Recursive formatting for nested objects
         const formattedValue = formatJsonWithBlankLines(value, depth + 1)
+
         result += `${keyIndent}"${key}": ${formattedValue}`
       } else {
         // Simple value formatting
@@ -175,6 +178,7 @@ function formatJsonWithBlankLines(obj, depth = 0) {
   }
 
   result += indent + '}'
+
   return result
 }
 
@@ -198,6 +202,7 @@ function sortJsonFile(inputPath, outputPath) {
 
     // Write sorted JSON to output file with pretty formatting and blank lines between groups
     const formattedJson = formatJsonWithBlankLines(sortedData)
+
     fs.writeFileSync(outputPath, formattedJson, 'utf8')
 
     console.log('✅ JSON sorting completed successfully!')

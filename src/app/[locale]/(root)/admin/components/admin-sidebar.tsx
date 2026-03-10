@@ -14,6 +14,8 @@ import {
   LogOut,
   MessageSquare,
 } from 'lucide-react'
+import {signOut} from 'next-auth/react'
+import {useTransition} from 'react'
 
 import {Button} from '@/components/ui/button'
 import {cn} from '@/utils/cn'
@@ -77,6 +79,7 @@ export default function AdminSidebar({
   onCollapsedChange,
 }: AdminSidebarProps) {
   const pathname = usePathname()
+  const [isPending, startTransition] = useTransition()
 
   return (
     <div
@@ -219,9 +222,11 @@ export default function AdminSidebar({
           <Button
             variant="ghost"
             className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive h-9 w-full justify-center rounded-lg px-3 pr-8 transition-colors"
+            disabled={isPending}
             onClick={() => {
-              // TODO: Implement logout functionality
-              console.log('Logout clicked')
+              startTransition(async () => {
+                await signOut({callbackUrl: '/'})
+              })
             }}
           >
             <LogOut className="mr-3 h-4 w-4" />

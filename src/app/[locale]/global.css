@@ -173,6 +173,14 @@
   .shadow-soft-lg {
     box-shadow: 0px 0px 20px 0px rgba(176, 48, 11, 0.4);
   }
+
+  .font-editorial {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+
+  .font-signature {
+    font-family: 'Brush Script MT', 'Segoe Script', 'Snell Roundhand', cursive;
+  }
 }
 
 @layer base {

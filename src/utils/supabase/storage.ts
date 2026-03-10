@@ -1,7 +1,5 @@
 'use client'
 
-import {createClient} from '@/utils/supabase/client'
-
 export type FileUploadOptions = {
   bucket?: string
   folder?: string
@@ -10,7 +8,6 @@ export type FileUploadOptions = {
   overwrite?: boolean
 }
 
-// File upload types
 export type UploadedFile = {
   id: string
   name: string
@@ -36,183 +33,105 @@ const DEFAULT_OPTIONS: Required<FileUploadOptions> = {
   overwrite: false,
 }
 
-// Delete file
 export const deleteFile = async (fileId: string): Promise<void> => {
-  const supabase = createClient()
+  const response = await fetch(`/api/uploads?id=${fileId}`, {
+    method: 'DELETE',
+  })
 
-  // Get file info first
-  const {data: fileInfo, error: fetchError} = await supabase
-    .from('uploaded_files')
-    .select('file_path, bucket_name')
-    .eq('id', fileId)
-    .single()
+  if (!response.ok) {
+    const payload = (await response.json()) as {error?: string}
 
-  if (fetchError) {
-    throw new Error(`File not found: ${fetchError.message}`)
-  }
-
-  // Delete from storage
-  const {error: storageError} = await supabase.storage
-    .from(fileInfo.bucket_name)
-    .remove([fileInfo.file_path])
-
-  if (storageError) {
-    throw new Error(`Storage deletion failed: ${storageError.message}`)
-  }
-
-  // Delete from database
-  const {error: dbError} = await supabase
-    .from('uploaded_files')
-    .delete()
-    .eq('id', fileId)
-
-  if (dbError) {
-    throw new Error(`Database deletion failed: ${dbError.message}`)
+    throw new Error(payload.error || 'Delete failed')
   }
 }
 
-// Generate thumbnail URL (if using Supabase image transformations)
 export const getThumbnailUrl = (
   originalUrl: string,
   width: number = 300,
   height: number = 300,
 ): string => {
-  if (originalUrl.includes('supabase')) {
-    return `${originalUrl}?width=${width}&height=${height}&resize=cover&quality=80`
+  if (originalUrl.includes('/api/files/')) {
+    return `${originalUrl}?thumb=${width}x${height}`
   }
 
   return originalUrl
 }
 
-// Get uploaded files from database
 export const getUploadedFiles = async (
   bucket: string = 'images',
   folder?: string,
 ): Promise<UploadedFile[]> => {
-  const supabase = createClient()
-
-  let query = supabase
-    .from('uploaded_files')
-    .select('*')
-    .eq('bucket_name', bucket)
-    .order('uploaded_at', {ascending: false})
+  const params = new URLSearchParams({bucket})
 
   if (folder) {
-    query = query.like('file_path', `${folder}%`)
+    params.set('folder', folder)
   }
 
-  const {data, error} = await query
+  const response = await fetch(`/api/uploads?${params.toString()}`)
 
-  if (error) {
-    throw new Error(`Failed to fetch files: ${error.message}`)
+  if (!response.ok) {
+    const payload = (await response.json()) as {error?: string}
+
+    throw new Error(payload.error || 'Failed to fetch files')
   }
 
-  return data.map(file => ({
-    id: file.id,
-    name: file.name,
-    url: file.public_url,
-    size: file.file_size,
-    type: file.file_type,
-    uploaded_at: file.uploaded_at,
-    bucket: file.bucket_name,
-    path: file.file_path,
-  }))
+  const payload = (await response.json()) as {files: UploadedFile[]}
+
+  return payload.files
 }
 
-// Upload single file
 export const uploadFile = async (
   file: File,
   options: FileUploadOptions = {},
 ): Promise<UploadedFile> => {
-  const supabase = createClient()
   const opts = {...DEFAULT_OPTIONS, ...options}
 
-  // Validate file size
   if (file.size > opts.maxSizeInMB * 1024 * 1024) {
     throw new Error(`File size must be less than ${opts.maxSizeInMB}MB`)
   }
 
-  // Validate file type
   if (!opts.allowedTypes.includes(file.type)) {
     throw new Error(
       `File type ${file.type} is not allowed. Allowed types: ${opts.allowedTypes.join(', ')}`,
     )
   }
 
-  // Generate unique filename
-  const fileExt = file.name.split('.').pop()
-  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-  const filePath = `${opts.folder}/${fileName}`
+  const formData = new FormData()
 
-  try {
-    // Upload to Supabase Storage
-    const {error} = await supabase.storage
-      .from(opts.bucket)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: opts.overwrite,
-      })
+  formData.set('bucket', opts.bucket)
+  formData.set('folder', opts.folder)
+  formData.set('file', file)
 
-    if (error) {
-      throw new Error(`Upload failed: ${error.message}`)
-    }
+  const response = await fetch('/api/uploads', {
+    body: formData,
+    method: 'POST',
+  })
 
-    // Get public URL
-    const {
-      data: {publicUrl},
-    } = supabase.storage.from(opts.bucket).getPublicUrl(filePath)
-
-    // Save file metadata to database
-    const fileMetadata = {
-      name: file.name,
-      original_name: file.name,
-      file_path: filePath,
-      file_size: file.size,
-      file_type: file.type,
-      bucket_name: opts.bucket,
-      public_url: publicUrl,
-      uploaded_at: new Date().toISOString(),
-    }
-
-    const {data: savedFile, error: dbError} = await supabase
-      .from('uploaded_files')
-      .insert(fileMetadata)
-      .select()
-      .single()
-
-    if (dbError) {
-      // If DB save fails, try to delete the uploaded file
-      await supabase.storage.from(opts.bucket).remove([filePath])
-      throw new Error(`Database save failed: ${dbError.message}`)
-    }
-
-    return {
-      id: savedFile.id,
-      name: savedFile.name,
-      url: publicUrl,
-      size: file.size,
-      type: file.type,
-      uploaded_at: savedFile.uploaded_at,
-      bucket: opts.bucket,
-      path: filePath,
-    }
-  } catch (error) {
-    console.error('Upload error:', error)
-    throw error
+  const payload = (await response.json()) as {
+    error?: string
+    file?: UploadedFile
   }
+
+  if (!response.ok || !payload.file) {
+    throw new Error(payload.error || 'Upload failed')
+  }
+
+  return payload.file
 }
 
-// Upload multiple files
 export const uploadFiles = async (
   files: File[],
   options: FileUploadOptions = {},
 ): Promise<UploadedFile[]> => {
-  const uploadPromises = files.map(file => uploadFile(file, options))
+  const uploadedFiles = []
 
-  return Promise.all(uploadPromises)
+  for (const file of files) {
+    uploadedFiles.push(await uploadFile(file, options))
+  }
+
+  return uploadedFiles
 }
 
-// Validate image URL
 export const validateImageUrl = async (url: string): Promise<boolean> => {
   try {
     const response = await fetch(url, {method: 'HEAD'})

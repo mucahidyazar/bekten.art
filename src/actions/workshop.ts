@@ -194,11 +194,18 @@ export const saveWorkshopDataAction = createServerAction(
       }
 
       // Process items safely - update existing, insert new, delete removed
-      const existingIds = new Set(existingItems?.map(item => item.id) || [])
-      const newIds = new Set(
+      const existingIds = new Set<string>(
+        existingItems?.map((item: {id: string}) => item.id) || [],
+      )
+      const newIds = new Set<string>(
         items
           .map(item => item.id)
-          .filter(id => id && isValidUUID(id) && !id.startsWith('temp-')),
+          .filter(
+            (id): id is string =>
+              typeof id === 'string' &&
+              isValidUUID(id) &&
+              !id.startsWith('temp-'),
+          ),
       )
 
       // Update or insert items
@@ -257,9 +264,7 @@ export const saveWorkshopDataAction = createServerAction(
 
       // Delete items that are no longer in the list (only if we have valid IDs to compare)
       if (newIds.size > 0) {
-        const idsToDelete = Array.from(existingIds).filter(
-          id => !newIds.has(id),
-        )
+        const idsToDelete = Array.from(existingIds).filter(id => !newIds.has(id))
 
         if (idsToDelete.length > 0) {
           console.log(`Deleting removed items: ${idsToDelete.join(', ')}`)

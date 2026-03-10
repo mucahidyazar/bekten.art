@@ -2,6 +2,7 @@
 
 import {zodResolver} from '@hookform/resolvers/zod'
 import {EyeIcon, EyeOffIcon, MailIcon, UserIcon} from 'lucide-react'
+import {signIn} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import {useState} from 'react'
 import {useForm} from 'react-hook-form'
@@ -18,9 +19,8 @@ import {
 } from '@/components/ui/form'
 import {Input} from '@/components/ui/input'
 import {useToast} from '@/components/ui/use-toast'
-import {createClient} from '@/utils/supabase/client'
 
-const createValidationSchema = (t: any) =>
+const createValidationSchema = (t: (key: string) => string) =>
   z
     .object({
       name: z.string().min(2, t('validation.nameRequired')),
@@ -56,55 +56,56 @@ export function SignUpForm() {
 
   const submitHandler = async ({name, email, password}: FormValues) => {
     setIsLoading(true)
-    const supabase = createClient()
 
     try {
-      const {error} = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name,
-          },
+      const response = await fetch('/api/auth/register', {
+        body: JSON.stringify({email, name, password}),
+        headers: {
+          'Content-Type': 'application/json',
         },
+        method: 'POST',
       })
 
-      if (error) {
-        console.error('Error signing up:', error.message)
+      const payload = (await response.json()) as {
+        error?: string
+        success?: boolean
+      }
 
-        // Show user-friendly error messages
-        let errorMessage = 'An error occurred during sign up'
-
-        if (error.message.includes('User already registered')) {
-          errorMessage =
-            'An account with this email already exists. Please sign in instead'
-        } else if (error.message.includes('Password should be at least')) {
-          errorMessage = 'Password should be at least 6 characters long'
-        } else if (error.message.includes('Invalid email')) {
-          errorMessage = 'Please enter a valid email address'
-        }
-
+      if (!response.ok || !payload.success) {
         toast({
           title: 'Sign Up Failed',
-          description: errorMessage,
+          description:
+            payload.error ||
+            'An account with this email already exists or the request is invalid.',
           variant: 'destructive',
         })
-      } else {
-        // Show success message
-        toast({
-          title: 'Account Created Successfully!',
-          description:
-            'Please check your email and click the verification link to activate your account',
-        })
 
-        // Clear the form
-        form.reset()
-
-        // Redirect to sign in page after a short delay
-        setTimeout(() => {
-          window.location.href = '/sign-in'
-        }, 2000)
+        return
       }
+
+      const loginResult = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (loginResult?.error) {
+        toast({
+          title: 'Account Created',
+          description: 'Your account was created. Please sign in.',
+        })
+        window.location.href = '/sign-in'
+
+        return
+      }
+
+      toast({
+        title: 'Account Created Successfully!',
+        description: 'You are now signed in.',
+      })
+
+      form.reset()
+      window.location.href = loginResult?.url || '/'
     } catch (error) {
       console.error('Sign up error:', error)
       toast({
@@ -218,7 +219,9 @@ export function SignUpForm() {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    onClick={() =>
+                      setShowConfirmPassword(!showConfirmPassword)
+                    }
                     className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
                   >
                     {showConfirmPassword ? (

@@ -13,6 +13,7 @@ import {useState} from 'react'
 
 import {ArtImage} from '@/components/molecules/art-image'
 import {useEventListener} from '@/hooks/use-event-listener'
+import {shouldBypassImageOptimization} from '@/lib/image-optimization'
 
 import {Dialog, DialogContent, DialogTitle, DialogTrigger} from '../ui/dialog'
 
@@ -191,6 +192,7 @@ export function GalleryTemplate({imageArrays = []}: GalleryTemplateProps) {
                         width={800}
                         height={600}
                         className="h-auto max-h-[56vh] w-full rounded-lg object-contain"
+                        unoptimized={shouldBypassImageOptimization(image.url)}
                       />
                     </div>
                   </div>
@@ -294,6 +296,7 @@ export function GalleryTemplate({imageArrays = []}: GalleryTemplateProps) {
                           fill
                           sizes="48px"
                           className="object-cover"
+                          unoptimized={shouldBypassImageOptimization(img.url)}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                         <div className="absolute right-0 bottom-0 left-0 text-center">
@@ -327,6 +330,7 @@ export function GalleryTemplate({imageArrays = []}: GalleryTemplateProps) {
                         fill
                         sizes="48px"
                         className="object-cover"
+                        unoptimized={shouldBypassImageOptimization(img.url)}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                       <div className="absolute right-0 bottom-0 left-0 text-center">
@@ -384,6 +388,7 @@ export function GalleryTemplate({imageArrays = []}: GalleryTemplateProps) {
                         width={1200}
                         height={800}
                         className="h-auto max-h-[70vh] max-w-full min-w-96 rounded-lg object-contain"
+                        unoptimized={shouldBypassImageOptimization(image.url)}
                       />
 
                       {/* Image Reflection */}

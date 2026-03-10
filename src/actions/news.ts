@@ -189,11 +189,18 @@ export const saveNewsDataAction = createServerAction(
       }
 
       // Process items safely - update existing, insert new, delete removed
-      const existingIds = new Set(existingItems?.map(item => item.id) || [])
-      const newIds = new Set(
+      const existingIds = new Set<string>(
+        existingItems?.map((item: {id: string}) => item.id) || [],
+      )
+      const newIds = new Set<string>(
         items
           .map(item => item.id)
-          .filter(id => id && isValidUUID(id) && !id.startsWith('temp-')),
+          .filter(
+            (id): id is string =>
+              typeof id === 'string' &&
+              isValidUUID(id) &&
+              !id.startsWith('temp-'),
+          ),
       )
 
       // Update or insert items

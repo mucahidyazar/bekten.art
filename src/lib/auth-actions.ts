@@ -2,61 +2,36 @@
 
 import {redirect} from 'next/navigation'
 
+import {signIn, signOut} from '@/auth'
 import {
-  createClient,
-  requireAuth as requireAuthBase,
   requireAdmin as requireAdminBase,
+  requireAuth as requireAuthBase,
 } from '@/utils/supabase/server'
 
 export async function requireAdmin() {
   try {
-    const userProfile = await requireAdminBase()
-
-    return userProfile
-  } catch (error) {
+    return await requireAdminBase()
+  } catch {
     redirect('/')
   }
 }
 
 export async function requireAuth() {
   try {
-    const user = await requireAuthBase()
-
-    return user
-  } catch (error) {
+    return await requireAuthBase()
+  } catch {
     redirect('/sign-in')
   }
 }
 
 export async function signInWithGoogle() {
-  const supabase = await createClient()
-
-  const {data, error} = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-      },
-    },
+  await signIn('google', {
+    redirectTo: '/',
   })
-
-  if (error) {
-    console.error('Google sign in error:', error)
-    throw new Error('Authentication failed')
-  }
-
-  if (data.url) {
-    redirect(data.url)
-  }
 }
 
-export async function signOut() {
-  const supabase = await createClient()
-
-  await supabase.auth.signOut()
-  redirect('/')
+export async function signOutUser() {
+  await signOut({
+    redirectTo: '/',
+  })
 }
-
-//

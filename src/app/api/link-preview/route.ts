@@ -1,23 +1,5 @@
 import { CheerioAPI, load } from 'cheerio'
 
-function metaTagContent(doc: CheerioAPI, type: string, attr: string) {
-  return doc(`meta[${attr}='${type}']`).attr(`content`);
-}
-
-function getTitle(doc: CheerioAPI) {
-  let title =
-    metaTagContent(doc, `og:title`, `property`) ||
-    metaTagContent(doc, `og:title`, `name`);
-
-  if (!title) {
-    title = doc(`title`).text();
-  }
-
-  return title;
-}
-
-const HTTP_TIMEOUT = 3000;
-
 export async function POST(request: Request) {
 
   const controller = new AbortController();
@@ -52,3 +34,23 @@ export async function POST(request: Request) {
     clearTimeout(timeoutId);
   }
 }
+
+function metaTagContent(doc: CheerioAPI, type: string, attr: string) {
+  return doc(`meta[${attr}='${type}']`).attr(`content`);
+}
+
+function getTitle(doc: CheerioAPI) {
+  let title =
+    metaTagContent(doc, `og:title`, `property`) ||
+    metaTagContent(doc, `og:title`, `name`);
+
+  if (!title) {
+    title = doc(`title`).text();
+  }
+
+  return title;
+}
+
+const HTTP_TIMEOUT = 3000;
+
+export const dynamic = 'force-dynamic'

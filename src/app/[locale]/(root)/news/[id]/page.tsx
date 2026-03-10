@@ -11,7 +11,7 @@ import {
   MapPinIcon,
   ShareIcon,
 } from 'lucide-react'
-import {unstable_ViewTransition as ViewTransition} from 'react'
+import {Fragment} from 'react'
 
 import {CallToAction} from '@/components/molecules/call-to-action'
 import {Badge} from '@/components/ui/badge'
@@ -25,6 +25,8 @@ import type {NewsDatabaseItem, NewsDatabaseSettings} from '@/types/database'
 type PageProps = {
   params: Promise<{id: string}>
 }
+
+const ViewTransition = Fragment
 
 export async function generateMetadata({params}: PageProps): Promise<Metadata> {
   const {id} = await params
