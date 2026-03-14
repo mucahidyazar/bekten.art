@@ -3,7 +3,7 @@
 import Image from 'next/image'
 
 import {Pause, Play} from 'lucide-react'
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 
 import {useMusic} from '@/components/providers/music-provider'
 
@@ -14,27 +14,12 @@ interface MusicPlayerProps {
 export function MusicPlayer({className = ''}: MusicPlayerProps) {
   const {
     isPlaying,
-    currentTrack,
-    tracks,
     isLoading,
     error,
     toggleMusic,
-    playTrack,
   } = useMusic()
 
   const [isExpanded, setIsExpanded] = useState(false)
-
-  // Auto-play first track when component mounts
-  useEffect(() => {
-    if (tracks.length > 0 && !currentTrack) {
-      // Auto-play after a short delay to ensure user interaction
-      const timer = setTimeout(() => {
-        playTrack(tracks[0])
-      }, 1000)
-
-      return () => clearTimeout(timer)
-    }
-  }, [tracks, currentTrack, playTrack])
 
   if (error) {
     return null // Hide player on error
