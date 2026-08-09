@@ -206,7 +206,8 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
   - [x] Production startup'ta migration/backfill/media cutover sırasını ve
         graceful signal forwarding'i uygula
   - [x] Retention cleanup endpoint/job'unu bounded ve idempotent olarak ekle
-  - [ ] Retention cleanup production cron'unu yapılandır
+  - [x] Retention cleanup production cron'unu yapılandır ve manuel ilk çalışmayı
+        `Last run: success` ile doğrula
 
 - [x] Kod kalitesi ve mimari borçları kapat
   - [x] Büyük dosyaları parçala
@@ -240,8 +241,8 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
   - [x] Garage üzerinde Bekten'e özel bucket ve erişim anahtarı oluştur
   - [x] Coolify içinde gerekli environment/deploy ayarlarını güncelle
   - [x] Resend domain ve sender ayarlarını tamamla
-  - [ ] Resend webhook ve outbox/retention cron ayarlarını Coolify üzerinde
-        tamamla
+  - [x] Resend webhook ve outbox/retention cron ayarlarını Coolify üzerinde
+        tamamla; outbox ve retention görevlerini `Last run: success` ile doğrula
   - [ ] Gerekirse Google servis ayarlarını doğrula
   - [ ] Coolify migration/startup/healthcheck/deploy ayarlarını doğrula
   - [ ] Bekten production deploy sonrası health/readiness ve kritik smoke

@@ -58,14 +58,14 @@ authorization or processing failure.
 - Every minute (`* * * * *`), dispatch a bounded mail batch:
 
   ```sh
-  node -e "fetch('http://127.0.0.1:3000/api/email/outbox',{method:'POST',headers:{authorization:'Bearer '+process.env.OUTBOX_DISPATCH_SECRET}}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status)})"
+  node -e "const port=process.env.PORT||'3000';fetch('http://127.0.0.1:'+port+'/api/email/outbox',{method:'POST',headers:{authorization:'Bearer '+process.env.OUTBOX_DISPATCH_SECRET}}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status)})"
   ```
 
 - Daily at 03:15 UTC (`15 3 * * *`), purge expired feedback, rate-limit buckets,
   completed outbox jobs, webhook receipts and auth tokens:
 
   ```sh
-  node -e "fetch('http://127.0.0.1:3000/api/operations/retention',{method:'POST',headers:{authorization:'Bearer '+process.env.OUTBOX_DISPATCH_SECRET}}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status)})"
+  node -e "const port=process.env.PORT||'3000';fetch('http://127.0.0.1:'+port+'/api/operations/retention',{method:'POST',headers:{authorization:'Bearer '+process.env.OUTBOX_DISPATCH_SECRET}}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status)})"
   ```
 
 The retention endpoint deletes at most 500 records per category per run, so a
