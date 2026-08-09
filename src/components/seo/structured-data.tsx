@@ -1,4 +1,16 @@
-import Script from 'next/script'
+function serializeStructuredData(value: unknown) {
+  return JSON.stringify(value).replace(/</g, '\\u003c')
+}
+
+function StructuredDataScript({id, data}: {id: string; data: unknown}) {
+  return (
+    <script
+      id={id}
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{__html: serializeStructuredData(data)}}
+    />
+  )
+}
 
 interface PersonSchemaProps {
   name: string
@@ -67,15 +79,7 @@ export function ArtworkStructuredData({
     genre: 'Contemporary Art',
   }
 
-  return (
-    <Script
-      id="artwork-structured-data"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema),
-      }}
-    />
-  )
+  return <StructuredDataScript id="artwork-structured-data" data={schema} />
 }
 
 export function BreadcrumbStructuredData({
@@ -94,15 +98,7 @@ export function BreadcrumbStructuredData({
     })),
   }
 
-  return (
-    <Script
-      id="breadcrumb-structured-data"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema),
-      }}
-    />
-  )
+  return <StructuredDataScript id="breadcrumb-structured-data" data={schema} />
 }
 
 export function OrganizationStructuredData({
@@ -135,13 +131,7 @@ export function OrganizationStructuredData({
   }
 
   return (
-    <Script
-      id="organization-structured-data"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema),
-      }}
-    />
+    <StructuredDataScript id="organization-structured-data" data={schema} />
   )
 }
 
@@ -185,15 +175,7 @@ export function PersonStructuredData({
     },
   }
 
-  return (
-    <Script
-      id="person-structured-data"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema),
-      }}
-    />
-  )
+  return <StructuredDataScript id="person-structured-data" data={schema} />
 }
 
 export function WebsiteStructuredData({
@@ -212,14 +194,6 @@ export function WebsiteStructuredData({
     name,
     description,
     url,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${url}/search?q={search_term_string}`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
     publisher: {
       '@type': 'Person',
       name: 'Bekten Usubaliev',
@@ -227,13 +201,7 @@ export function WebsiteStructuredData({
     },
   }
 
-  return (
-    <Script
-      id="website-structured-data"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema),
-      }}
-    />
-  )
+  return <StructuredDataScript id="website-structured-data" data={schema} />
 }
+
+export {serializeStructuredData}

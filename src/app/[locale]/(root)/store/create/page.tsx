@@ -1,9 +1,31 @@
-export default function CreatePage() {
-  return (
-    <div className="mx-auto flex h-40 w-full items-center justify-center rounded bg-gray-100 dark:bg-slate-950">
-      <p className="text-sm text-gray-500">
-        Artwork creation page will be implemented with Supabase
-      </p>
-    </div>
-  )
+import {notFound, redirect} from 'next/navigation'
+
+import {
+  AdminAccessRequiredError,
+  AuthenticationRequiredError,
+  requireAdminUser,
+} from '@/server/auth/access'
+
+type PageProps = Readonly<{
+  params: Promise<{locale: string}>
+}>
+
+export default async function CreateStorePage({params}: PageProps) {
+  const {locale} = await params
+
+  try {
+    await requireAdminUser()
+  } catch (error) {
+    if (error instanceof AuthenticationRequiredError) {
+      redirect(`/${locale}/sign-in`)
+    }
+
+    if (error instanceof AdminAccessRequiredError) {
+      notFound()
+    }
+
+    throw error
+  }
+
+  redirect(`/${locale}/admin/content`)
 }

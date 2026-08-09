@@ -6,7 +6,6 @@ import {Check, Search, Upload, X, Trash2, Loader2} from 'lucide-react'
 import {useCallback, useEffect, useRef, useState} from 'react'
 
 import {Alert, AlertDescription} from '@/components/ui/alert'
-import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
 import {
   Dialog,
@@ -19,11 +18,11 @@ import {Input} from '@/components/ui/input'
 import {Progress} from '@/components/ui/progress'
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs'
 import {
-  uploadFile,
-  getUploadedFiles,
-  deleteFile,
-  type UploadedFile,
-} from '@/utils/supabase/storage'
+  deleteMedia,
+  listMedia,
+  uploadMedia,
+  type UploadedMedia,
+} from '@/lib/media-library'
 
 type GalleryImage = {
   id: string
@@ -40,8 +39,8 @@ type GalleryModalProps = {
   selectedUrl?: string
 }
 
-// Mock gallery data - in real app, this would come from API
-const mockGalleryImages: GalleryImage[] = [
+// Curated local artwork available even when the media library is empty.
+const curatedGalleryImages: GalleryImage[] = [
   // Art images
   {id: '1', url: '/img/art/art-0.png', title: 'Artwork 1', category: 'art'},
   {id: '2', url: '/img/art/art-1.png', title: 'Artwork 2', category: 'art'},
@@ -97,7 +96,7 @@ export function GalleryModal({
   const [customUrl, setCustomUrl] = useState('')
 
   // Upload states
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+  const [uploadedFiles, setUploadedFiles] = useState<readonly UploadedMedia[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -105,7 +104,7 @@ export function GalleryModal({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Filter images based on search and category
-  const filteredImages = mockGalleryImages.filter(image => {
+  const filteredImages = curatedGalleryImages.filter(image => {
     const matchesSearch =
       image.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       image.url.toLowerCase().includes(searchTerm.toLowerCase())
@@ -131,7 +130,7 @@ export function GalleryModal({
   // Load uploaded files when upload tab is opened
   const loadUploadedFiles = useCallback(async () => {
     try {
-      const files = await getUploadedFiles('images', 'gallery')
+      const files = await listMedia('images', 'gallery')
 
       setUploadedFiles(files)
     } catch (error) {
@@ -150,23 +149,22 @@ export function GalleryModal({
 
     try {
       // Upload files one by one to show progress
-      const uploadedFiles: UploadedFile[] = []
+      const uploadedFiles: UploadedMedia[] = []
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
 
         setUploadProgress(((i + 1) / files.length) * 100)
 
-        const uploadedFile = await uploadFile(file, {
+        const uploadedFile = await uploadMedia(file, {
           bucket: 'images',
           folder: 'gallery',
-          maxSizeInMB: 10,
+          maxSizeInMB: 12,
           allowedTypes: [
             'image/jpeg',
-            'image/jpg',
             'image/png',
             'image/webp',
-            'image/gif',
+            'image/avif',
           ],
         })
 
@@ -230,7 +228,7 @@ export function GalleryModal({
   // Handle file deletion
   const handleFileDelete = async (fileId: string) => {
     try {
-      await deleteFile(fileId)
+      await deleteMedia(fileId)
       await loadUploadedFiles() // Refresh list
     } catch (error) {
       console.error('Delete error:', error)
@@ -238,25 +236,39 @@ export function GalleryModal({
     }
   }
 
-  // Reset search when modal closes and load files when opened
-  useEffect(() => {
-    if (!open) {
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
       setSearchTerm('')
       setCustomUrl('')
       setUploadError(null)
       setUploadProgress(0)
     }
-  }, [open])
+
+    onOpenChange(nextOpen)
+  }
 
   // Load uploaded files when component mounts
   useEffect(() => {
-    if (open) {
-      loadUploadedFiles()
+    if (!open) return
+
+    let active = true
+
+    void listMedia('images', 'gallery')
+      .then(files => {
+        if (active) setUploadedFiles(files)
+      })
+      .catch(error => {
+        console.error('Failed to load uploaded files:', error)
+        if (active) setUploadError('Failed to load uploaded files')
+      })
+
+    return () => {
+      active = false
     }
-  }, [open, loadUploadedFiles])
+  }, [open])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="border-border/20 max-h-[80vh] max-w-4xl">
         <DialogHeader>
           <DialogTitle>Select Image</DialogTitle>
@@ -276,8 +288,16 @@ export function GalleryModal({
             {/* Search and Filter */}
             <div className="flex gap-4">
               <div className="relative flex-1">
-                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
+                <label htmlFor="gallery-search" className="sr-only">
+                  Search images
+                </label>
+                <Search
+                  aria-hidden="true"
+                  className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform"
+                />
                 <Input
+                  id="gallery-search"
+                  type="search"
                   placeholder="Search images..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
@@ -294,6 +314,8 @@ export function GalleryModal({
                         selectedCategory === category ? 'default' : 'outline'
                       }
                       size="sm"
+                      type="button"
+                      aria-pressed={selectedCategory === category}
                       onClick={() => setSelectedCategory(category)}
                       className="capitalize"
                     >
@@ -308,16 +330,19 @@ export function GalleryModal({
             <div className="h-[400px] w-full overflow-y-auto">
               <div className="grid grid-cols-2 gap-4 p-1 md:grid-cols-3 lg:grid-cols-4">
                 {filteredImages.map(image => (
-                  <div
+                  <button
+                    type="button"
                     key={image.id}
-                    className={`group relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all hover:shadow-lg ${
+                    aria-label={`Select ${image.title}`}
+                    aria-pressed={selectedUrl === image.url}
+                    className={`group focus-visible:ring-ring relative overflow-hidden rounded-lg border-2 text-left transition-all hover:shadow-lg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
                       selectedUrl === image.url
                         ? 'border-primary shadow-md'
                         : 'border-border hover:border-primary/50'
                     }`}
                     onClick={() => handleImageSelect(image.url)}
                   >
-                    <div className="relative aspect-square">
+                    <span className="relative block aspect-square">
                       <Image
                         src={image.url}
                         alt={image.title}
@@ -327,37 +352,34 @@ export function GalleryModal({
                       />
 
                       {/* Overlay */}
-                      <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
+                      <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
 
                       {/* Selected indicator */}
                       {selectedUrl === image.url && (
-                        <div className="bg-primary text-primary-foreground absolute top-2 right-2 rounded-full p-1">
-                          <Check className="h-3 w-3" />
-                        </div>
+                        <span className="bg-primary text-primary-foreground absolute top-2 right-2 rounded-full p-1">
+                          <Check aria-hidden="true" className="h-3 w-3" />
+                        </span>
                       )}
 
                       {/* Category badge */}
-                      <Badge
-                        variant="secondary"
-                        className="absolute top-2 left-2 text-xs opacity-0 transition-opacity group-hover:opacity-100"
-                      >
+                      <span className="bg-secondary text-secondary-foreground absolute top-2 left-2 rounded-full px-2.5 py-0.5 text-xs font-semibold opacity-0 transition-opacity group-hover:opacity-100">
                         {image.category}
-                      </Badge>
-                    </div>
+                      </span>
+                    </span>
 
                     {/* Title */}
-                    <div className="p-2">
-                      <p className="truncate text-sm font-medium">
+                    <span className="block p-2">
+                      <span className="block truncate text-sm font-medium">
                         {image.title}
-                      </p>
-                    </div>
-                  </div>
+                      </span>
+                    </span>
+                  </button>
                 ))}
               </div>
 
               {filteredImages.length === 0 && (
                 <div className="text-muted-foreground flex h-32 flex-col items-center justify-center">
-                  <Search className="mb-2 h-8 w-8" />
+                  <Search aria-hidden="true" className="mb-2 h-8 w-8" />
                   <p>No images found</p>
                 </div>
               )}
@@ -378,7 +400,7 @@ export function GalleryModal({
             >
               <div className="space-y-4">
                 <div className="bg-primary/10 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
-                  <Upload className="text-primary h-8 w-8" />
+                  <Upload aria-hidden="true" className="text-primary h-8 w-8" />
                 </div>
 
                 <div className="space-y-2">
@@ -387,29 +409,35 @@ export function GalleryModal({
                     Drag and drop images here, or click to select files
                   </p>
                   <p className="text-muted-foreground text-xs">
-                    Supports JPEG, PNG, WebP, GIF up to 10MB each
+                    Supports JPEG, PNG, WebP and AVIF up to 12MB each
                   </p>
                 </div>
 
                 <Button
+                  type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
                   className="mx-auto"
                 >
                   {isUploading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2
+                        aria-hidden="true"
+                        className="mr-2 h-4 w-4 animate-spin"
+                      />
                       Uploading...
                     </>
                   ) : (
                     <>
-                      <Upload className="mr-2 h-4 w-4" />
+                      <Upload aria-hidden="true" className="mr-2 h-4 w-4" />
                       Select Files
                     </>
                   )}
                 </Button>
 
                 <input
+                  id="gallery-file-input"
+                  aria-label="Choose images to upload"
                   ref={fileInputRef}
                   type="file"
                   multiple
@@ -422,7 +450,7 @@ export function GalleryModal({
 
             {/* Upload Progress */}
             {isUploading && uploadProgress > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-2" role="status" aria-live="polite">
                 <div className="flex items-center justify-between text-sm">
                   <span>Uploading...</span>
                   <span>{Math.round(uploadProgress)}%</span>
@@ -434,7 +462,7 @@ export function GalleryModal({
             {/* Upload Error */}
             {uploadError && (
               <Alert variant="destructive">
-                <X className="h-4 w-4" />
+                <X aria-hidden="true" className="h-4 w-4" />
                 <AlertDescription>{uploadError}</AlertDescription>
               </Alert>
             )}
@@ -448,55 +476,59 @@ export function GalleryModal({
                     {uploadedFiles.map(file => (
                       <div
                         key={file.id}
-                        className={`group relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all hover:shadow-lg ${
+                        className={`group relative overflow-hidden rounded-lg border-2 transition-all hover:shadow-lg ${
                           selectedUrl === file.url
                             ? 'border-primary shadow-md'
                             : 'border-border hover:border-primary/50'
                         }`}
-                        onClick={() => handleImageSelect(file.url)}
                       >
-                        <div className="relative aspect-square">
-                          <Image
-                            src={file.url}
-                            alt={file.name}
-                            fill
-                            className="object-cover transition-transform group-hover:scale-105"
-                            loading="lazy"
-                          />
+                        <button
+                          type="button"
+                          aria-label={`Select ${file.name}`}
+                          aria-pressed={selectedUrl === file.url}
+                          className="focus-visible:ring-ring block w-full text-left focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+                          onClick={() => handleImageSelect(file.url)}
+                        >
+                          <span className="relative block aspect-square">
+                            <Image
+                              src={file.url}
+                              alt={file.name}
+                              fill
+                              className="object-cover transition-transform group-hover:scale-105"
+                              loading="lazy"
+                            />
 
-                          {/* Overlay */}
-                          <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
+                            {/* Overlay */}
+                            <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
 
-                          {/* Selected indicator */}
-                          {selectedUrl === file.url && (
-                            <div className="bg-primary text-primary-foreground absolute top-2 right-2 rounded-full p-1">
-                              <Check className="h-3 w-3" />
-                            </div>
-                          )}
+                            {/* Selected indicator */}
+                            {selectedUrl === file.url && (
+                              <span className="bg-primary text-primary-foreground absolute top-2 right-2 rounded-full p-1">
+                                <Check aria-hidden="true" className="h-3 w-3" />
+                              </span>
+                            )}
 
-                          {/* Delete button */}
-                          <Button
-                            size="icon"
-                            variant="destructive"
-                            className="absolute top-2 left-2 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
-                            onClick={e => {
-                              e.stopPropagation()
-                              handleFileDelete(file.id)
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-
-                          {/* File info */}
-                          <div className="absolute right-0 bottom-0 left-0 bg-black/50 p-2 text-white opacity-0 transition-opacity group-hover:opacity-100">
-                            <p className="truncate text-xs font-medium">
-                              {file.name}
-                            </p>
-                            <p className="text-xs opacity-75">
-                              {(file.size / 1024 / 1024).toFixed(1)} MB
-                            </p>
-                          </div>
-                        </div>
+                            {/* File info */}
+                            <span className="absolute right-0 bottom-0 left-0 block bg-black/50 p-2 text-white opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+                              <span className="block truncate text-xs font-medium">
+                                {file.name}
+                              </span>
+                              <span className="block text-xs opacity-75">
+                                {(file.size / 1024 / 1024).toFixed(1)} MB
+                              </span>
+                            </span>
+                          </span>
+                        </button>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="destructive"
+                          aria-label={`Delete ${file.name}`}
+                          className="absolute top-2 left-2 z-10 h-6 w-6 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+                          onClick={() => handleFileDelete(file.id)}
+                        >
+                          <Trash2 aria-hidden="true" className="h-3 w-3" />
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -508,11 +540,16 @@ export function GalleryModal({
           <TabsContent value="custom" className="space-y-4">
             <div className="space-y-4">
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label
+                  htmlFor="custom-image-url"
+                  className="mb-2 block text-sm font-medium"
+                >
                   Image URL
                 </label>
                 <div className="flex gap-2">
                   <Input
+                    id="custom-image-url"
+                    type="url"
                     placeholder="https://example.com/image.jpg"
                     value={customUrl}
                     onChange={e => setCustomUrl(e.target.value)}
@@ -523,11 +560,12 @@ export function GalleryModal({
                     }}
                   />
                   <Button
+                    type="button"
                     onClick={handleCustomUrlSubmit}
                     disabled={!customUrl.trim()}
                     className="min-w-fit"
                   >
-                    <Upload className="mr-2 h-4 w-4" />
+                    <Upload aria-hidden="true" className="mr-2 h-4 w-4" />
                     Use URL
                   </Button>
                 </div>
@@ -536,7 +574,7 @@ export function GalleryModal({
               {/* URL Preview */}
               {customUrl && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Preview:</label>
+                  <p className="text-sm font-medium">Preview:</p>
                   <div className="bg-muted relative h-48 w-full overflow-hidden rounded-lg border">
                     <Image
                       src={customUrl}

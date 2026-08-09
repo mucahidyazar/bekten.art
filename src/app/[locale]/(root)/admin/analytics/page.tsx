@@ -1,18 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {redirect} from 'next/navigation'
 
-export default function AdminAnalyticsPage() {
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Analytics Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Analytics dashboard coming soon...
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  )
+import {safeAdminLocale} from '../_lib/admin-data'
+
+export default async function LegacyAdminAnalyticsPage({
+  params,
+}: Readonly<{params: Promise<{locale: string}>}>) {
+  const {locale} = await params
+
+  redirect(`/${safeAdminLocale(locale)}/admin/overview`)
 }

@@ -4,14 +4,13 @@ const withNextIntl = require('next-intl/plugin')(
   './i18n.ts',
 )
 
-const pocketBaseUrl = process.env.POCKETBASE_URL
-const pocketBasePattern = (() => {
-  if (!pocketBaseUrl) {
+function toRemotePattern(rawUrl) {
+  if (!rawUrl) {
     return null
   }
 
   try {
-    const parsed = new URL(pocketBaseUrl)
+    const parsed = new URL(rawUrl)
 
     return {
       protocol: parsed.protocol.replace(':', ''),
@@ -21,12 +20,17 @@ const pocketBasePattern = (() => {
   } catch {
     return null
   }
-})()
+}
+
+const mediaEndpointPattern = toRemotePattern(process.env.MEDIA_S3_ENDPOINT)
 
 const nextConfig = {
   ...withNextIntl(),
+  output: 'standalone',
   env: {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_GOOGLE_ANALYTICS_ID:
+      process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID,
     NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID:
       process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID,
   },
@@ -34,24 +38,23 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: '**.fbcdn.net',
       },
-      ...(pocketBasePattern ? [pocketBasePattern] : []),
+      {
+        protocol: 'https',
+        hostname: 'scontent.cdninstagram.com',
+      },
+      ...(mediaEndpointPattern ? [mediaEndpointPattern] : []),
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    dangerouslyAllowSVG: false,
   },
   experimental: {
     webpackBuildWorker: true,
-    viewTransition: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-  },
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    optimizePackageImports: ['lucide-react'],
   },
   poweredByHeader: false,
   compress: true,
@@ -71,11 +74,19 @@ const nextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'strict-origin-when-cross-origin',
           },
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
           },
         ],
       },

@@ -1,65 +1,104 @@
-import {NextResponse, type NextRequest} from 'next/server'
+import {NextRequest, NextResponse} from 'next/server'
 
 import createMiddleware from 'next-intl/middleware'
 
-import {auth} from '@/auth'
+import {APP_LOCALES} from '@/lib/localized-path'
+import {buildContentSecurityPolicy} from '@/server/security/content-security-policy'
 
-const intlMiddleware = createMiddleware({
+const routingConfig = {
   defaultLocale: 'en',
-  localePrefix: 'never',
-  locales: ['en', 'tr', 'ru', 'kg'],
-})
+  localePrefix: 'always',
+  locales: [...APP_LOCALES],
+} as const
 
-const protectedRoutes = ['/admin', '/profile', '/store/create']
-const adminRoutes = ['/admin']
-const authRoutes = ['/sign-in', '/sign-up']
+const intlMiddleware = createMiddleware(routingConfig)
+const PUBLIC_FILE_PATTERN = /\/[^/]+\.[^/]+$/
 
 export const config = {
   matcher: [
-    '/((?!api/|_next/static|_next/image|favicon.ico|auth/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|mov|avi|webm|ogg|webmanifest)$).*)',
+    '/((?!api(?:/|$)|_next(?:/|$)|robots\\.txt$|sitemap\\.xml$|favicon\\.ico$|.*\\.[^/]+$).*)',
   ],
 }
 
-export default auth(request => {
-  const authRequest = request as NextRequest & {
-    auth?: {
-      user?: {
-        role?: string | null
-      }
-    }
-  }
-  const intlResponse = intlMiddleware(authRequest)
-
-  if (intlResponse && intlResponse.status !== 200) {
-    return intlResponse
+export function normalizeLegacyLocalePathname(pathname: string) {
+  if (pathname === '/kg') {
+    return '/ky'
   }
 
-  const pathname = authRequest.nextUrl.pathname
-  const isAuthenticated = Boolean(authRequest.auth?.user)
-  const role = authRequest.auth?.user?.role?.toLowerCase()
-  const isProtectedRoute = protectedRoutes.some(route =>
-    pathname.startsWith(route),
+  if (pathname.startsWith('/kg/')) {
+    return `/ky${pathname.slice(3)}`
+  }
+
+  return null
+}
+
+export const routing = routingConfig
+
+function createSecurityContext(request: NextRequest) {
+  const nonce = crypto.randomUUID().replaceAll('-', '')
+  const policy = buildContentSecurityPolicy({
+    nonce,
+    production: process.env.NODE_ENV === 'production',
+  })
+  const headers = new Headers(request.headers)
+
+  headers.set('Content-Security-Policy', policy)
+  headers.set('x-nonce', nonce)
+  headers.set('x-pathname', request.nextUrl.pathname)
+
+  return {
+    policy,
+    request: new NextRequest(request, {headers}),
+  }
+}
+
+function withContentSecurityPolicy<T extends NextResponse>(
+  response: T,
+  policy: string,
+) {
+  response.headers.set('Content-Security-Policy', policy)
+
+  return response
+}
+
+export function shouldBypassInternationalization(pathname: string) {
+  return (
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/favicon.ico' ||
+    pathname.startsWith('/api/') ||
+    pathname === '/api' ||
+    pathname.startsWith('/_next/') ||
+    pathname === '/_next' ||
+    PUBLIC_FILE_PATTERN.test(pathname)
   )
-  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+}
 
-  if (isProtectedRoute && !isAuthenticated) {
-    const redirectUrl = new URL('/sign-in', authRequest.url)
+export default function proxy(request: NextRequest) {
+  const security = createSecurityContext(request)
 
-    redirectUrl.searchParams.set('redirect', pathname)
-
-    return NextResponse.redirect(redirectUrl)
+  if (shouldBypassInternationalization(request.nextUrl.pathname)) {
+    return withContentSecurityPolicy(
+      NextResponse.next({request: {headers: security.request.headers}}),
+      security.policy,
+    )
   }
 
-  if (isAuthRoute && isAuthenticated) {
-    const redirectTo = authRequest.nextUrl.searchParams.get('redirect') || '/'
+  const legacyPathname = normalizeLegacyLocalePathname(request.nextUrl.pathname)
 
-    return NextResponse.redirect(new URL(redirectTo, authRequest.url))
+  if (legacyPathname) {
+    const redirectUrl = request.nextUrl.clone()
+
+    redirectUrl.pathname = legacyPathname
+
+    return withContentSecurityPolicy(
+      NextResponse.redirect(redirectUrl, 308),
+      security.policy,
+    )
   }
 
-  if (isAdminRoute && role !== 'admin') {
-    return NextResponse.redirect(new URL('/', authRequest.url))
-  }
-
-  return intlResponse || NextResponse.next()
-})
+  return withContentSecurityPolicy(
+    intlMiddleware(security.request),
+    security.policy,
+  )
+}

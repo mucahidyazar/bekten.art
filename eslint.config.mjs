@@ -63,6 +63,17 @@ const config = [
       ],
     },
   },
+  {
+    files: [
+      'src/server/admin/admin-repository.ts',
+      'src/server/content/domain/**/*.ts',
+    ],
+    rules: {
+      // Runtime schemas and their inferred types are intentionally kept beside
+      // their dependencies; alphabetic reordering would create temporal cycles.
+      'sort-exports/sort-exports': 'off',
+    },
+  },
 ]
 
 export default config

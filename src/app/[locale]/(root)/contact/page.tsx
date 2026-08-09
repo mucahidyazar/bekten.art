@@ -8,14 +8,16 @@ import {
   PaletteIcon,
   PhoneIcon,
 } from 'lucide-react'
-import {getTranslations} from 'next-intl/server'
+import {getLocale, getTranslations} from 'next-intl/server'
 
+import {ConsentGoogleMap} from '@/components/consent/google-map'
+import {FeedbackForm} from '@/components/forms/feedback-form'
 import {CallToAction} from '@/components/molecules/call-to-action'
 import {Badge} from '@/components/ui/badge'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Separator} from '@/components/ui/separator'
+import {getPublicContactInfo} from '@/server/contact/public-contact'
 import {prepareMetadata} from '@/utils/prepare-metadata'
-import {getBektenContactInfo} from '@/utils/supabase/server'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('contact')
@@ -28,15 +30,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactPage() {
-  const t = await getTranslations('contact')
+  const [t, locale] = await Promise.all([
+    getTranslations('contact'),
+    getLocale(),
+  ])
 
-  // Get Bekten's public contact information
-  const contactData = await getBektenContactInfo()
+  const contactData = await getPublicContactInfo(
+    locale as 'en' | 'tr' | 'ru' | 'ky',
+  )
 
   if (!contactData) {
     return (
-      <div className="w-full pt-8">
-        <div className="container space-y-6 text-center">
+      <div className="app-container w-full space-y-10 pt-8">
+        <div className="app-container space-y-6 text-center">
           <h1 className="text-4xl font-bold lg:text-6xl">
             {t('contactUnavailable')}
           </h1>
@@ -44,20 +50,21 @@ export default async function ContactPage() {
             {t('contactUnavailableDescription')}
           </p>
         </div>
+        <FeedbackForm locale={locale as 'en' | 'tr' | 'ru' | 'ky'} />
       </div>
     )
   }
 
   // Get social media links
-  const userSocials = contactData.socials || []
+  const userSocials = contactData.socials
 
   // Prepare contact info
   const contactInfo = {
-    phone: contactData.phone || '',
-    email: 'bekten.usubaliev@gmail.com', // Public email
-    address: contactData.address || '',
-    working_hours: contactData.working_hours || '',
-    map_embed_url: contactData.map_embed_url || '',
+    address: contactData.address,
+    email: contactData.email,
+    mapEmbedUrl: contactData.mapEmbedUrl || '',
+    phone: contactData.phone,
+    workingHours: contactData.workingHours || '',
   }
 
   // Parse working hours JSON
@@ -67,15 +74,29 @@ export default async function ContactPage() {
     Sunday: t('defaultWorkingHours.Sunday'),
   }
 
-  if (contactInfo.working_hours) {
-    workingHours = JSON.parse(contactInfo.working_hours)
+  if (contactInfo.workingHours) {
+    try {
+      const parsedWorkingHours: unknown = JSON.parse(contactInfo.workingHours)
+
+      if (
+        parsedWorkingHours &&
+        typeof parsedWorkingHours === 'object' &&
+        Object.values(parsedWorkingHours).every(
+          value => typeof value === 'string',
+        )
+      ) {
+        workingHours = parsedWorkingHours as Record<string, string>
+      }
+    } catch {
+      // Keep the localized defaults when stored contact data is malformed.
+    }
   }
 
   // Parse address lines
   const addressLines = contactInfo.address.split('\n')
 
   return (
-    <div className="container">
+    <div className="app-container">
       {/* Hero Section */}
       <div className="space-y-6 text-center">
         <div className="space-y-4">
@@ -169,7 +190,7 @@ export default async function ContactPage() {
               <Separator />
 
               {/* Social Media Links - Dynamic */}
-              {userSocials.map((social: any, index: number) => {
+              {userSocials.map((social, index) => {
                 const displayText = social.url.includes('http')
                   ? social.url.replace(/^https?:\/\//, '').replace(/^www\./, '')
                   : social.url
@@ -247,30 +268,16 @@ export default async function ContactPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="relative">
-                <iframe
-                  src={contactInfo.map_embed_url}
-                  width="100%"
-                  height="400"
-                  style={{border: 0}}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="rounded-b-2xl"
-                />
-                <div className="border-border/50 absolute top-10 left-2 rounded-sm border bg-white px-4 py-1 backdrop-blur-sm">
-                  <p className="text-xs font-medium text-blue-700">
-                    {t('studioName')}
-                  </p>
-                  <p className="text-[0.6rem] text-blue-700">
-                    {t('studioLocation')}
-                  </p>
-                </div>
-              </div>
+              <ConsentGoogleMap
+                src={contactInfo.mapEmbedUrl}
+                title={`${t('studioName')} – ${t('studioLocation')} studio map`}
+              />
             </CardContent>
           </Card>
         </div>
       </div>
+
+      <FeedbackForm locale={locale as 'en' | 'tr' | 'ru' | 'ky'} />
 
       <CallToAction
         title={t('readyToTalk')}

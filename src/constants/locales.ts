@@ -1,8 +1,10 @@
+import {APP_LOCALES} from '@/lib/localized-path'
+
 export const LOCALE = {
-  tr: 'tr',
   en: 'en',
-  kg: 'kg',
-  ru: 'ru'
+  tr: 'tr',
+  ru: 'ru',
+  ky: 'ky',
 } as const
 
-export const LOCALES = Object.values(LOCALE) as (keyof typeof LOCALE)[]
+export const LOCALES = [...APP_LOCALES]

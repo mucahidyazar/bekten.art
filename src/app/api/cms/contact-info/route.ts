@@ -1,111 +1,138 @@
 import {NextResponse} from 'next/server'
 
+import {ZodError} from 'zod'
+
 import {prisma} from '@/lib/db'
-import {requireAdmin} from '@/utils/supabase/server'
+import {
+  AdminAccessRequiredError,
+  AuthenticationRequiredError,
+  RecentAuthenticationRequiredError,
+  requireAdminUser,
+  requireRecentAdminUser,
+} from '@/server/auth/access'
+import {isSameOriginMutation} from '@/server/auth/mutation-origin'
+import {contactInfoCreateSchema, contentLocaleSchema} from '@/server/content/domain'
+import {
+  InvalidRequestBodyError,
+  readBoundedText,
+  RequestBodyTooLargeError,
+} from '@/server/http/bounded-body'
 
-export async function GET() {
-  try {
-    await requireAdmin()
-
-    const contactUser = await getPrimaryContactUser()
-
-    return NextResponse.json({
-      contactInfo: {
-        address: contactUser?.address || '',
-        email: contactUser?.email || '',
-        instagram_url:
-          contactUser?.socials.find(social => social.platform === 'instagram')
-            ?.url || '',
-        map_embed_url: contactUser?.map_embed_url || '',
-        phone: contactUser?.phone || '',
-        working_hours: contactUser?.working_hours || '',
-      },
-    })
-  } catch (error) {
-    console.error('Contact info API error:', error)
-
-    return NextResponse.json({error: 'Server error'}, {status: 500})
+function responseError(error: unknown) {
+  if (error instanceof AuthenticationRequiredError) {
+    return NextResponse.json({error: 'Authentication required'}, {status: 401})
   }
+
+  if (error instanceof AdminAccessRequiredError) {
+    return NextResponse.json({error: 'Admin access required'}, {status: 403})
+  }
+
+  if (error instanceof RecentAuthenticationRequiredError) {
+    return NextResponse.json({error: 'Recent authentication required'}, {status: 403})
+  }
+
+  if (error instanceof ZodError) {
+    return NextResponse.json({error: 'Invalid contact information'}, {status: 400})
+  }
+
+  if (error instanceof RequestBodyTooLargeError) {
+    return NextResponse.json({error: 'Request body is too large'}, {status: 413})
+  }
+
+  if (error instanceof InvalidRequestBodyError || error instanceof SyntaxError) {
+    return NextResponse.json({error: 'Invalid contact information'}, {status: 400})
+  }
+
+  console.error('Contact information request failed')
+
+  return NextResponse.json({error: 'Unable to process contact information'}, {status: 500})
 }
 
-async function getPrimaryContactUser() {
-  return prisma.user.findFirst({
-    include: {
-      socials: {
-        orderBy: {platform: 'asc'},
-      },
-    },
-    orderBy: [{email: 'asc'}],
-    where: {
-      OR: [
-        {email: 'bekten.usubaliev@gmail.com'},
-        {role: 'ADMIN'},
-      ],
-    },
+function serializedContact(contact: {
+  address: string
+  email: string
+  instagramUrl: string | null
+  isPrimary: boolean
+  locale: string
+  mapEmbedUrl: string | null
+  phone: string
+  updatedAt: Date
+  workingHours: string | null
+}) {
+  return Object.freeze({
+    address: contact.address,
+    email: contact.email,
+    instagramUrl: contact.instagramUrl,
+    isPrimary: contact.isPrimary,
+    locale: contact.locale,
+    mapEmbedUrl: contact.mapEmbedUrl,
+    phone: contact.phone,
+    updatedAt: contact.updatedAt.toISOString(),
+    workingHours: contact.workingHours,
   })
+}
+
+export async function GET(request: Request) {
+  try {
+    await requireAdminUser()
+
+    const locale = contentLocaleSchema.parse(
+      new URL(request.url).searchParams.get('locale') || 'en',
+    )
+    const contact = await prisma.contactInfo.findUnique({where: {locale}})
+
+    return NextResponse.json({
+      contactInfo: contact ? serializedContact(contact) : null,
+    })
+  } catch (error) {
+    return responseError(error)
+  }
 }
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin()
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.NEXTAUTH_URL?.trim()
 
-    const contactInfo = (await request.json()) as {
-      address?: string
-      email?: string
-      instagram_url?: string
-      map_embed_url?: string
-      phone?: string
-      working_hours?: string
+    if (!appUrl || !isSameOriginMutation(request, appUrl)) {
+      return NextResponse.json({error: 'Request origin is not allowed'}, {status: 403})
     }
 
-    const contactUser = await getPrimaryContactUser()
+    const admin = await requireRecentAdminUser()
+    const input = contactInfoCreateSchema.parse(
+      JSON.parse(await readBoundedText(request, 24 * 1_024)),
+    )
+    const contact = await prisma.$transaction(async transaction => {
+      const saved = await transaction.contactInfo.upsert({
+        create: input,
+        update: {
+          address: input.address,
+          email: input.email,
+          instagramUrl: input.instagramUrl ?? null,
+          isPrimary: input.isPrimary,
+          mapEmbedUrl: input.mapEmbedUrl ?? null,
+          phone: input.phone,
+          workingHours: input.workingHours ?? null,
+        },
+        where: {locale: input.locale},
+      })
 
-    if (!contactUser) {
-      return NextResponse.json({error: 'Admin user not found'}, {status: 404})
-    }
-
-    await prisma.$transaction(async tx => {
-      await tx.user.update({
-        where: {id: contactUser.id},
+      await transaction.auditEvent.create({
         data: {
-          address: contactInfo.address || '',
-          email: contactInfo.email || contactUser.email,
-          map_embed_url: contactInfo.map_embed_url || '',
-          phone: contactInfo.phone || '',
-          working_hours: contactInfo.working_hours || '',
+          action: 'contact.updated',
+          actorUserId: admin.id,
+          entityId: saved.id,
+          entityType: 'ContactInfo',
+          metadata: {locale: saved.locale},
         },
       })
 
-      const existingInstagram = await tx.social.findFirst({
-        where: {
-          platform: 'instagram',
-          user_id: contactUser.id,
-        },
-      })
-
-      if (contactInfo.instagram_url) {
-        if (existingInstagram) {
-          await tx.social.update({
-            where: {id: existingInstagram.id},
-            data: {url: contactInfo.instagram_url},
-          })
-        } else {
-          await tx.social.create({
-            data: {
-              platform: 'instagram',
-              url: contactInfo.instagram_url,
-              user_id: contactUser.id,
-            },
-          })
-        }
-      }
+      return saved
     })
 
-    return NextResponse.json({success: true})
+    return NextResponse.json({contactInfo: serializedContact(contact), success: true})
   } catch (error) {
-    console.error('Contact info save API error:', error)
-
-    return NextResponse.json({error: 'Server error'}, {status: 500})
+    return responseError(error)
   }
 }
 

@@ -1,9 +1,10 @@
 'use client'
 
+import {useRouter} from 'next/navigation'
+
 import {zodResolver} from '@hookform/resolvers/zod'
 import {EyeIcon, EyeOffIcon, MailIcon, UserIcon} from 'lucide-react'
-import {signIn} from 'next-auth/react'
-import {useTranslations} from 'next-intl'
+import {useLocale, useTranslations} from 'next-intl'
 import {useState} from 'react'
 import {useForm} from 'react-hook-form'
 import {z} from 'zod'
@@ -37,6 +38,8 @@ export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const locale = useLocale()
+  const router = useRouter()
   const t = useTranslations('forms')
   const {toast} = useToast()
 
@@ -83,29 +86,13 @@ export function SignUpForm() {
         return
       }
 
-      const loginResult = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      })
-
-      if (loginResult?.error) {
-        toast({
-          title: 'Account Created',
-          description: 'Your account was created. Please sign in.',
-        })
-        window.location.href = '/sign-in'
-
-        return
-      }
-
       toast({
-        title: 'Account Created Successfully!',
-        description: 'You are now signed in.',
+        title: t('messages.verificationSentTitle'),
+        description: t('messages.verificationSentDescription'),
       })
 
       form.reset()
-      window.location.href = loginResult?.url || '/'
+      router.push(`/${locale}/sign-in?verification=pending`)
     } catch (error) {
       console.error('Sign up error:', error)
       toast({
@@ -129,16 +116,19 @@ export function SignUpForm() {
               <FormLabel className="text-foreground text-sm font-medium">
                 {t('labels.fullName')}
               </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <UserIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <div className="relative">
+                <UserIcon
+                  aria-hidden="true"
+                  className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                />
+                <FormControl>
                   <Input
                     placeholder={t('placeholders.enterName')}
                     className="bg-background border-ring/30 focus:border-primary h-10 pl-10 transition-colors"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage className="text-xs" />
             </FormItem>
           )}
@@ -152,16 +142,19 @@ export function SignUpForm() {
               <FormLabel className="text-foreground text-sm font-medium">
                 {t('labels.email')}
               </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <MailIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <div className="relative">
+                <MailIcon
+                  aria-hidden="true"
+                  className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                />
+                <FormControl>
                   <Input
                     placeholder={t('placeholders.enterEmail')}
                     className="bg-background border-ring/30 focus:border-primary h-10 pl-10 transition-colors"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage className="text-xs" />
             </FormItem>
           )}
@@ -175,27 +168,32 @@ export function SignUpForm() {
               <FormLabel className="text-foreground text-sm font-medium">
                 {t('labels.password')}
               </FormLabel>
-              <FormControl>
-                <div className="relative">
+              <div className="relative">
+                <FormControl>
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     placeholder={t('placeholders.createPassword')}
                     className="bg-background border-ring/30 focus:border-primary h-10 pr-10 transition-colors"
                     {...field}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeOffIcon className="h-4 w-4" />
-                    ) : (
-                      <EyeIcon className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </FormControl>
+                </FormControl>
+                <button
+                  type="button"
+                  aria-label={
+                    showPassword
+                      ? t('buttons.hidePassword')
+                      : t('buttons.showPassword')
+                  }
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOffIcon aria-hidden="true" className="h-4 w-4" />
+                  ) : (
+                    <EyeIcon aria-hidden="true" className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               <FormMessage className="text-xs" />
             </FormItem>
           )}
@@ -209,36 +207,39 @@ export function SignUpForm() {
               <FormLabel className="text-foreground text-sm font-medium">
                 {t('labels.confirmPassword')}
               </FormLabel>
-              <FormControl>
-                <div className="relative">
+              <div className="relative">
+                <FormControl>
                   <Input
                     type={showConfirmPassword ? 'text' : 'password'}
                     placeholder={t('placeholders.confirmPassword')}
                     className="bg-background border-ring/30 focus:border-primary h-10 pr-10 transition-colors"
                     {...field}
                   />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
-                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOffIcon className="h-4 w-4" />
-                    ) : (
-                      <EyeIcon className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </FormControl>
+                </FormControl>
+                <button
+                  type="button"
+                  aria-label={
+                    showConfirmPassword
+                      ? t('buttons.hidePassword')
+                      : t('buttons.showPassword')
+                  }
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOffIcon aria-hidden="true" className="h-4 w-4" />
+                  ) : (
+                    <EyeIcon aria-hidden="true" className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               <FormMessage className="text-xs" />
             </FormItem>
           )}
         />
 
         <div className="text-muted-foreground text-xs">
-          <p dangerouslySetInnerHTML={{__html: t('messages.termsAgreement')}} />
+          <p>{t('messages.termsAgreement')}</p>
         </div>
 
         <Button

@@ -1,269 +1,227 @@
-import {Metadata} from 'next'
+import type {Metadata} from 'next'
 
 import Link from 'next/link'
 import {notFound} from 'next/navigation'
 
-import {
-  ArrowLeftIcon,
-  BookmarkIcon,
-  CalendarIcon,
-  ClockIcon,
-  MapPinIcon,
-  ShareIcon,
-} from 'lucide-react'
-import {Fragment} from 'react'
+import {ArrowLeftIcon, CalendarIcon, ExternalLinkIcon, MapPinIcon} from 'lucide-react'
+import {getTranslations} from 'next-intl/server'
 
 import {CallToAction} from '@/components/molecules/call-to-action'
 import {Badge} from '@/components/ui/badge'
 import {FallbackImage} from '@/components/ui/fallback-image'
-import {getSectionData} from '@/services'
-import {formatDate} from '@/utils/format-date'
+import {localizedPath} from '@/lib/localized-path'
+import {
+  getPublishedNewsArticle,
+  getPublishedNewsArticles,
+} from '@/services'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
-import type {NewsDatabaseItem, NewsDatabaseSettings} from '@/types/database'
+import type {AppLocale} from '@/lib/localized-path'
+import type {NewsArticle} from '@/server/content/domain'
 
-type PageProps = {
-  params: Promise<{id: string}>
+type PageProps = Readonly<{
+  params: Promise<{id: string; locale: AppLocale}>
+}>
+
+function formatDate(date: Date, locale: AppLocale) {
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: 'long',
+    timeZone: 'UTC',
+  }).format(date)
 }
 
-const ViewTransition = Fragment
+function articleDate(article: NewsArticle) {
+  return article.eventAt ?? article.publishedAt ?? article.createdAt
+}
 
 export async function generateMetadata({params}: PageProps): Promise<Metadata> {
-  const {id} = await params
-
-  // Fetch news data from database
-  const newsData = (await getSectionData('news')) as {
-    items: NewsDatabaseItem[]
-    settings: NewsDatabaseSettings | null
-  }
-
-  const news = newsData.items.find(item => item.id === id)
+  const {id, locale} = await params
+  const [news, t] = await Promise.all([
+    getPublishedNewsArticle(locale, id),
+    getTranslations({locale, namespace: 'news'}),
+  ])
 
   if (!news) {
-    const {getTranslations} = await import('next-intl/server')
-    const t = await getTranslations('news')
-
     return prepareMetadata({
-      title: t('newsNotFound'),
       description: t('newsNotFoundDescription'),
-      page: 'news detail',
+      robots: {follow: false, index: false},
+      title: t('newsNotFound'),
     })
   }
 
   return prepareMetadata({
-    title: `🎨 ${news.data.title} - Bekten Usubaliev`,
-    description: news.data.description,
-    page: 'news detail',
+    description: news.excerpt,
+    openGraph: {
+      images: news.imageUrl
+        ? [{alt: news.imageAlt ?? news.title, url: news.imageUrl}]
+        : undefined,
+      publishedTime: news.publishedAt?.toISOString(),
+      title: news.title,
+      type: 'article',
+    },
+    page: `news/${news.slug}`,
+    title: news.title,
   })
 }
 
 export default async function NewsDetailPage({params}: PageProps) {
-  const {id} = await params
-  const {getTranslations} = await import('next-intl/server')
-  const t = await getTranslations()
+  const {id, locale} = await params
+  const [news, allNews, t] = await Promise.all([
+    getPublishedNewsArticle(locale, id),
+    getPublishedNewsArticles(locale, 4),
+    getTranslations({locale}),
+  ])
 
-  // Fetch news data from database
-  const newsData = (await getSectionData('news')) as {
-    items: NewsDatabaseItem[]
-    settings: NewsDatabaseSettings | null
-  }
+  if (!news) notFound()
 
-  const news = newsData.items.find(item => item.id === id)
-
-  if (!news) {
-    notFound()
-  }
-
-  // Get related news (exclude current)
-  const relatedNews = newsData.items.filter(item => item.id !== id).slice(0, 3)
+  const relatedNews = allNews.filter(item => item.id !== news.id).slice(0, 3)
+  const publishedDate = news.publishedAt ?? news.createdAt
 
   return (
-    <div className="container pt-0!">
-      {/* Back Navigation */}
-      <ViewTransition>
-        <Link
-          href="/news"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center space-x-2 transition-colors"
-        >
-          <ArrowLeftIcon className="h-4 w-4" />
-          <span>{t('news.backToNews')}</span>
-        </Link>
-      </ViewTransition>
+    <article className="app-container space-y-8 pt-0!">
+      <Link
+        href={localizedPath(locale, '/news')}
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2 transition-colors"
+      >
+        <ArrowLeftIcon aria-hidden="true" className="h-4 w-4" />
+        <span>{t('news.backToNews')}</span>
+      </Link>
 
-      {/* Hero Image */}
-      <div className="relative h-96 overflow-hidden rounded-2xl md:h-[500px]">
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-        <FallbackImage
-          src={news.data.image}
-          fallbackSrc="/img/empty-event-image.png"
-          alt={news.data.title}
-          fill
-          className="object-cover"
-          priority
-        />
-
-        {/* Floating Actions */}
-        <div className="absolute top-6 right-6 z-20 flex space-x-2">
-          <button className="bg-background/80 text-foreground hover:bg-background rounded-full p-2 backdrop-blur-sm transition-colors">
-            <ShareIcon className="h-4 w-4" />
-          </button>
-          <button className="bg-background/80 text-foreground hover:bg-background rounded-full p-2 backdrop-blur-sm transition-colors">
-            <BookmarkIcon className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* Title Overlay */}
-        <div className="absolute right-0 bottom-0 left-0 z-20 p-8">
-          <div className="space-y-3">
-            <div className="mb-3">
-              <Badge variant="secondary" className="capitalize">
-                {news.data.category}
-              </Badge>
-            </div>
+      {news.imageUrl ? (
+        <div className="relative h-96 overflow-hidden rounded-2xl md:h-[500px]">
+          <div aria-hidden="true" className="absolute inset-0 z-10 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <FallbackImage
+            alt={news.imageAlt ?? news.title}
+            className="object-cover"
+            fill
+            priority
+            src={news.imageUrl}
+          />
+          <div className="absolute right-0 bottom-0 left-0 z-20 space-y-3 p-8">
+            <Badge className="capitalize" variant="secondary">
+              {news.category.toLocaleLowerCase(locale)}
+            </Badge>
             <h1 className="text-3xl leading-tight font-bold text-white md:text-4xl lg:text-5xl">
-              {news.data.title}
+              {news.title}
             </h1>
-            {news.data.subtitle && (
-              <p className="text-primary-300 text-xl font-medium">
-                {news.data.subtitle}
-              </p>
-            )}
+            {news.subtitle ? (
+              <p className="text-xl font-medium text-white/90">{news.subtitle}</p>
+            ) : null}
           </div>
         </div>
-      </div>
-
-      {/* Event Details Bar */}
-      <div className="bg-card border-ring/20 rounded-xl border p-6">
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="flex items-center space-x-3">
-            <div className="bg-primary/10 rounded-lg p-2">
-              <CalendarIcon className="text-primary h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-muted-foreground text-sm">
-                {t('news.dateTime')}
-              </p>
-              <p className="text-foreground font-semibold">
-                {formatDate('MMMM DD, YYYY', new Date(news.data.date))}
-              </p>
-            </div>
-          </div>
-
-          {news.data.location && (
-            <div className="flex items-center space-x-3">
-              <div className="bg-primary/10 rounded-lg p-2">
-                <MapPinIcon className="text-primary h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-sm">
-                  {t('news.location')}
-                </p>
-                <p className="text-foreground font-semibold">
-                  {news.data.location}
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center space-x-3">
-            <div className="bg-primary/10 rounded-lg p-2">
-              <ClockIcon className="text-primary h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-muted-foreground text-sm">
-                {t('news.published')}
-              </p>
-              <p className="text-foreground font-semibold">
-                {formatDate(
-                  'MMMM DD, YYYY',
-                  new Date(news.created_at || news.data.date),
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="prose prose-lg max-w-none">
-        <div className="bg-card border-ring/20 space-y-6 rounded-xl border p-8">
-          <div className="text-foreground text-lg leading-relaxed">
-            {news.data.description}
-          </div>
-
-          {news.data.address && (
-            <div className="border-primary bg-primary/5 rounded-r-lg border-l-4 py-4 pl-6">
-              <h3 className="text-foreground mb-2 font-semibold">
-                {t('news.address')}
-              </h3>
-              <p className="text-muted-foreground">{news.data.address}</p>
-            </div>
-          )}
-
-          {news.data.note && (
-            <div className="border-accent bg-accent/5 rounded-r-lg border-l-4 py-4 pl-6">
-              <h3 className="text-foreground mb-2 font-semibold">
-                {t('news.importantNote')}
-              </h3>
-              <p className="text-muted-foreground">{news.data.note}</p>
-            </div>
-          )}
-
-          {/* Extended Content */}
-          <div className="text-foreground space-y-4 leading-relaxed">
-            <p>{t('news.extendedContent1')}</p>
-
-            <p>{t('news.extendedContent2')}</p>
-
-            <p>{t('news.extendedContent3')}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Related News */}
-      {relatedNews.length > 0 && (
-        <div className="space-y-6">
-          <h2 className="text-foreground text-2xl font-bold">
-            {t('news.relatedNews')}
-          </h2>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            {relatedNews.map(relatedItem => (
-              <ViewTransition key={relatedItem.id}>
-                <Link
-                  href={`/news/${relatedItem.id}`}
-                  className="group bg-card border-ring/20 overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg"
-                >
-                  <div className="relative h-32 overflow-hidden">
-                    <FallbackImage
-                      src={relatedItem.data.image}
-                      fallbackSrc="/img/empty-event-image.png"
-                      alt={relatedItem.data.title}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-
-                  <div className="space-y-2 p-4">
-                    <h3 className="text-foreground group-hover:text-primary line-clamp-2 font-semibold transition-colors">
-                      {relatedItem.data.title}
-                    </h3>
-                    <p className="text-muted-foreground text-xs">
-                      {formatDate(
-                        'MMMM DD, YYYY',
-                        new Date(relatedItem.data.date),
-                      )}
-                    </p>
-                  </div>
-                </Link>
-              </ViewTransition>
-            ))}
-          </div>
-        </div>
+      ) : (
+        <header className="space-y-4">
+          <Badge className="capitalize" variant="secondary">
+            {news.category.toLocaleLowerCase(locale)}
+          </Badge>
+          <h1 className="text-4xl font-bold lg:text-5xl">{news.title}</h1>
+          {news.subtitle ? (
+            <p className="text-muted-foreground text-xl">{news.subtitle}</p>
+          ) : null}
+        </header>
       )}
 
-      {/* Call to Action */}
+      <div className="bg-card border-ring/20 grid gap-6 rounded-xl border p-6 md:grid-cols-3">
+        <div className="flex items-center gap-3">
+          <CalendarIcon aria-hidden="true" className="text-primary h-5 w-5" />
+          <div>
+            <p className="text-muted-foreground text-sm">{t('news.published')}</p>
+            <time className="font-semibold" dateTime={publishedDate.toISOString()}>
+              {formatDate(publishedDate, locale)}
+            </time>
+          </div>
+        </div>
+
+        {news.eventAt ? (
+          <div className="flex items-center gap-3">
+            <CalendarIcon aria-hidden="true" className="text-primary h-5 w-5" />
+            <div>
+              <p className="text-muted-foreground text-sm">{t('news.dateTime')}</p>
+              <time className="font-semibold" dateTime={news.eventAt.toISOString()}>
+                {formatDate(news.eventAt, locale)}
+              </time>
+            </div>
+          </div>
+        ) : null}
+
+        {news.location ? (
+          <div className="flex items-center gap-3">
+            <MapPinIcon aria-hidden="true" className="text-primary h-5 w-5" />
+            <div>
+              <p className="text-muted-foreground text-sm">{t('news.location')}</p>
+              <p className="font-semibold">{news.location}</p>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="bg-card border-ring/20 space-y-6 rounded-xl border p-8">
+        <p className="text-lg leading-8 whitespace-pre-line">{news.body}</p>
+
+        {news.address ? (
+          <section className="border-primary bg-primary/5 rounded-r-lg border-l-4 py-4 pl-6">
+            <h2 className="mb-2 font-semibold">{t('news.address')}</h2>
+            <p className="text-muted-foreground">{news.address}</p>
+          </section>
+        ) : null}
+
+        {news.note ? (
+          <section className="border-accent bg-accent/5 rounded-r-lg border-l-4 py-4 pl-6">
+            <h2 className="mb-2 font-semibold">{t('news.importantNote')}</h2>
+            <p className="text-muted-foreground">{news.note}</p>
+          </section>
+        ) : null}
+
+        {news.sourceUrl ? (
+          <a
+            className="text-primary inline-flex items-center gap-2 font-medium underline-offset-4 hover:underline"
+            href={news.sourceUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <ExternalLinkIcon aria-hidden="true" className="h-4 w-4" />
+            {t('common.view')}
+          </a>
+        ) : null}
+      </div>
+
+      {relatedNews.length > 0 ? (
+        <section aria-labelledby="related-news-heading" className="space-y-6">
+          <h2 id="related-news-heading" className="text-2xl font-bold">
+            {t('news.relatedNews')}
+          </h2>
+          <div className="grid gap-6 md:grid-cols-3">
+            {relatedNews.map(item => (
+              <Link
+                className="group bg-card border-ring/20 overflow-hidden rounded-xl border transition-shadow hover:shadow-lg"
+                href={localizedPath(locale, `/news/${item.slug}`)}
+                key={item.id}
+              >
+                {item.imageUrl ? (
+                  <div className="relative h-32 overflow-hidden">
+                    <FallbackImage
+                      alt={item.imageAlt ?? item.title}
+                      className="object-cover transition-transform group-hover:scale-105"
+                      fill
+                      src={item.imageUrl}
+                    />
+                  </div>
+                ) : null}
+                <div className="space-y-2 p-4">
+                  <h3 className="group-hover:text-primary line-clamp-2 font-semibold transition-colors">
+                    {item.title}
+                  </h3>
+                  <time className="text-muted-foreground text-xs" dateTime={articleDate(item).toISOString()}>
+                    {formatDate(articleDate(item), locale)}
+                  </time>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <CallToAction className="py-0" />
-    </div>
+    </article>
   )
 }

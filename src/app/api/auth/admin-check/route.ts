@@ -1,29 +1,43 @@
 import {NextResponse} from 'next/server'
 
-import {getUser} from '@/utils/supabase/server'
+import {
+  AdminAccessRequiredError,
+  AuthenticationRequiredError,
+  requireAdminUser,
+} from '@/server/auth/access'
 
 export async function GET() {
   try {
-    const user = await getUser()
+    const user = await requireAdminUser()
 
-    if (!user) {
+    return NextResponse.json(
+      {
+        error: null,
+        isAdmin: true,
+        userId: user.id,
+        userRole: user.role,
+      },
+      {headers: {'Cache-Control': 'private, no-store'}},
+    )
+  } catch (error) {
+    if (error instanceof AuthenticationRequiredError) {
       return NextResponse.json(
-        {error: 'No user found', isAdmin: false},
+        {error: 'Authentication required', isAdmin: false},
         {status: 401},
       )
     }
 
-    return NextResponse.json({
-      error: null,
-      isAdmin: user.isAdmin,
-      userId: user.id,
-      userRole: user.profile.role || null,
-    })
-  } catch (error) {
-    console.error('Admin check API error:', error)
+    if (error instanceof AdminAccessRequiredError) {
+      return NextResponse.json(
+        {error: 'Access denied', isAdmin: false},
+        {status: 403},
+      )
+    }
+
+    console.error('Admin authorization check failed')
 
     return NextResponse.json(
-      {error: 'Server error', isAdmin: false},
+      {error: 'Unable to verify access', isAdmin: false},
       {status: 500},
     )
   }

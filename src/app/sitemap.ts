@@ -1,136 +1,72 @@
 import {MetadataRoute} from 'next'
 
 import {prisma} from '@/lib/db'
+import {
+  APP_LOCALES,
+  localizedAlternates,
+  localizedPath,
+} from '@/lib/localized-path'
+
+import type {AppLocale} from '@/lib/localized-path'
 
 export const dynamic = 'force-dynamic'
 
-const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art'
-const LOCALES = ['en', 'tr', 'kg', 'ru']
+const DOMAIN = new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art')
+  .origin
+
+const STATIC_PAGES = [
+  {path: '/', changeFrequency: 'monthly', priority: 1},
+  {path: '/about', changeFrequency: 'monthly', priority: 0.8},
+  {path: '/gallery', changeFrequency: 'weekly', priority: 0.9},
+  {path: '/news', changeFrequency: 'weekly', priority: 0.7},
+  {path: '/contact', changeFrequency: 'monthly', priority: 0.6},
+  {path: '/store', changeFrequency: 'weekly', priority: 0.8},
+] as const
+
+function isAppLocale(locale: string): locale is AppLocale {
+  return APP_LOCALES.some(candidate => candidate === locale)
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Static pages
-  const staticPages = [
-    {
-      url: '',
-      changeFrequency: 'monthly' as const,
-      priority: 1,
-    },
-    {
-      url: '/about',
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: '/gallery',
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: '/news',
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    },
-    {
-      url: '/contact',
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: '/store',
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    {
-      url: '/sign-in',
-      changeFrequency: 'yearly' as const,
-      priority: 0.1,
-    },
-    {
-      url: '/sign-up',
-      changeFrequency: 'yearly' as const,
-      priority: 0.1,
-    },
-  ]
+  const entries: MetadataRoute.Sitemap = STATIC_PAGES.flatMap(page => {
+    const languages = localizedAlternates(DOMAIN, page.path)
 
-  // Fetch dynamic news pages
-  let dynamicPages: Array<{
-    url: string
-    lastModified: Date
-    changeFrequency: 'daily' | 'weekly' | 'monthly' | 'yearly'
-    priority: number
-  }> = []
+    return APP_LOCALES.map(locale => ({
+      url: `${DOMAIN}${localizedPath(locale, page.path)}`,
+      changeFrequency: page.changeFrequency,
+      priority: page.priority,
+      alternates: {languages},
+    }))
+  })
 
   try {
-    const newsData = await prisma.sectionData.findMany({
-      orderBy: {updated_at: 'desc'},
+    const newsData = await prisma.newsArticle.findMany({
+      orderBy: {updatedAt: 'desc'},
       select: {
-        id: true,
-        updated_at: true,
+        locale: true,
+        slug: true,
+        updatedAt: true,
       },
-      where: {
-        is_active: true,
-        section_type: 'news',
-      },
+      where: {status: 'PUBLISHED'},
     })
 
-    if (newsData.length > 0) {
-      const newsPagesForLocales = newsData.flatMap((item: any) =>
-        LOCALES.map(locale => ({
-          url: `/${locale}/news/${item.id}`,
-          lastModified: new Date(item.updated_at),
-          changeFrequency: 'monthly' as const,
-          priority: 0.6,
-        })),
-      )
+    newsData.forEach(item => {
+      if (!isAppLocale(item.locale)) {
+        return
+      }
 
-      dynamicPages = [...dynamicPages, ...newsPagesForLocales]
-    }
+      const publicPath = `/news/${encodeURIComponent(item.slug)}`
+
+      entries.push({
+        url: `${DOMAIN}${localizedPath(item.locale, publicPath)}`,
+        lastModified: item.updatedAt,
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      })
+    })
   } catch (error) {
     console.error('Error fetching news data for sitemap:', error)
   }
 
-  // Generate sitemap entries for all locales
-  const sitemapEntries: MetadataRoute.Sitemap = []
-
-  // Add static pages for all locales
-  staticPages.forEach(page => {
-    LOCALES.forEach(locale => {
-      sitemapEntries.push({
-        url: `${DOMAIN}/${locale}${page.url}`,
-        lastModified: new Date(),
-        changeFrequency: page.changeFrequency,
-        priority: page.priority,
-        alternates: {
-          languages: LOCALES.reduce(
-            (acc, lang) => {
-              acc[lang] = `${DOMAIN}/${lang}${page.url}`
-
-              return acc
-            },
-            {} as Record<string, string>,
-          ),
-        },
-      })
-    })
-  })
-
-  // Add API routes that should be indexed
-  sitemapEntries.push({
-    url: `${DOMAIN}/api/og`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.3,
-  })
-
-  // Add dynamic pages (already include locale)
-  dynamicPages.forEach(page => {
-    sitemapEntries.push({
-      url: `${DOMAIN}${page.url}`,
-      lastModified: page.lastModified,
-      changeFrequency: page.changeFrequency,
-      priority: page.priority,
-    })
-  })
-
-  return sitemapEntries
+  return entries
 }

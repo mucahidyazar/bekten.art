@@ -1,0 +1,109 @@
+name: Quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bekten
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d bekten"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/bekten
+      NEXT_PUBLIC_APP_URL: https://bekten.art
+      NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: G-TEST0000
+      NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID: GTM-TEST0000
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate:deploy
+      - run: pnpm lint
+      - run: pnpm type-check
+      - run: pnpm test:coverage
+      - run: pnpm build
+      - run: pnpm audit --prod --audit-level=high
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run critical browser flows
+        env:
+          PLAYWRIGHT_WEB_SERVER_COMMAND: pnpm start --hostname 127.0.0.1
+        run: pnpm e2e
+
+      - name: Build production image
+        run: >-
+          docker build
+          --build-arg NEXT_PUBLIC_APP_URL=https://bekten.art
+          --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-TEST0000
+          --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-TEST0000
+          -f Dockerfile.prod
+          -t bekten-art:ci .
+
+      - name: Smoke production container
+        run: |
+          docker run --detach --name bekten-art-smoke --network host \
+            --env AUTH_GOOGLE_ID="123456789-test.apps.googleusercontent.com" \
+            --env AUTH_GOOGLE_SECRET="google-smoke-secret" \
+            --env AUTH_TRUST_PROXY="true" \
+            --env DATABASE_URL="$DATABASE_URL" \
+            --env MEDIA_S3_ACCESS_KEY_ID="smoke-access" \
+            --env MEDIA_S3_BUCKET="bekten-art-smoke" \
+            --env MEDIA_S3_ENDPOINT="https://s3.invalid" \
+            --env MEDIA_S3_FORCE_PATH_STYLE="true" \
+            --env MEDIA_S3_REGION="garage" \
+            --env MEDIA_S3_SECRET_ACCESS_KEY="smoke-secret" \
+            --env NEXT_PUBLIC_APP_URL="https://bekten.art" \
+            --env NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-TEST0000" \
+            --env NEXTAUTH_SECRET="000000000000000000000000000000000000000000000000" \
+            --env NEXTAUTH_URL="https://bekten.art" \
+            --env OUTBOX_DISPATCH_SECRET="111111111111111111111111111111111111111111111111" \
+            --env RESEND_API_KEY="re_smoke_test" \
+            --env RESEND_FROM_EMAIL="noreply@example.com" \
+            --env RESEND_REPLY_TO="support@example.com" \
+            --env RESEND_WEBHOOK_SECRET="whsec_smoke_test" \
+            bekten-art:ci
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs bekten-art-smoke
+          exit 1
+
+      - name: Clean smoke container
+        if: always()
+        run: docker rm --force bekten-art-smoke 2>/dev/null || true

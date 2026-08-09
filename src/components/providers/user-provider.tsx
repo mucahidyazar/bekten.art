@@ -2,17 +2,17 @@
 
 import {createContext, ReactNode, useContext} from 'react'
 
-import {EnhancedUser} from '@/utils/supabase/server'
+import type {UiUser} from '@/types/ui-user'
 
 interface UserContextType {
-  user: EnhancedUser | null
+  user: UiUser | null
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 interface UserProviderProps {
   children: ReactNode
-  initialUser?: EnhancedUser | null
+  initialUser?: UiUser | null
 }
 
 export function UserProvider({

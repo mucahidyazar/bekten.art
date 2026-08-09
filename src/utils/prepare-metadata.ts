@@ -1,6 +1,6 @@
-import {Metadata} from 'next'
+import type {Metadata} from 'next'
 
-import {ME} from '@/constants'
+import {ME} from '../constants/me'
 
 type TPrepareMetadata = Metadata & {
   title?: string
@@ -9,11 +9,12 @@ type TPrepareMetadata = Metadata & {
 }
 export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
   // Get domain from environment variables
-  const domain =
+  const domain = new URL(
     process.env.NEXT_PUBLIC_APP_URL ||
-    (process.env.NODE_ENV === 'development'
-      ? 'http://localhost:3000'
-      : 'https://bekten.art')
+      (process.env.NODE_ENV === 'development'
+        ? 'http://localhost:3000'
+        : 'https://bekten.art'),
+  ).origin
 
   const DEFAULT_TITLE = {
     default: 'Bekten Usubaliev - Contemporary Oil Painter | Kyrgyz Artist',
@@ -22,7 +23,7 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
   const title = metadata.title || DEFAULT_TITLE
   const description = metadata.description || ME.descriptionFull
 
-  const {authors, openGraph, twitter, keywords, ...rest} = metadata
+  const {authors, openGraph, page, twitter, keywords, ...rest} = metadata
 
   const imagesUrl = new URL(`${domain}/api/og`)
 
@@ -32,8 +33,8 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
   if (metadata.description) {
     imagesUrl.searchParams.set('description', metadata.description)
   }
-  if (metadata.page) {
-    imagesUrl.searchParams.set('page', metadata.page)
+  if (page) {
+    imagesUrl.searchParams.set('page', page)
   }
   const dynamicImage = imagesUrl.toString()
 
@@ -62,7 +63,7 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
   const initialMetadata = {
     title,
     description,
-    keywords: keywords || defaultKeywords.join(', '),
+    keywords: keywords || defaultKeywords,
     authors: [{name: 'Bekten Usubaliev', url: `${domain}`}],
     creator: 'Bekten Usubaliev',
     publisher: 'Bekten Usubaliev',
@@ -72,16 +73,10 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
       telephone: false,
     },
     manifest: '/site.webmanifest',
-    alternates: {
-      canonical: '/',
-      languages: {
-        'en-US': '/en',
-        'tr-TR': '/tr',
-        'ky-KG': '/kg',
-        'ru-RU': '/ru',
-      },
-    },
-    metadataBase: new URL(`${domain}`),
+    // Canonical and hreflang tags are route-aware and emitted once by the
+    // localized root layout. A global `/` canonical would conflict on every
+    // localized child page.
+    metadataBase: new URL(domain),
     openGraph: {
       title,
       description,

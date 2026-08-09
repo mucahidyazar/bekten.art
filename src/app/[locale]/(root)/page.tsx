@@ -18,25 +18,19 @@ import {HomeStoreSection} from '@/components/sections/home-store-section'
 import {MemoriesSection} from '@/components/sections/memories-section'
 import {WorkshopSection} from '@/components/sections/workshop-section'
 import {Badge} from '@/components/ui/badge'
-import {Button} from '@/components/ui/button'
-import {getSectionData} from '@/services'
+import {buttonVariants} from '@/components/ui/button'
+import {localizedPath} from '@/lib/localized-path'
+import {getHomepageContent} from '@/services'
+import {cn} from '@/utils'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
-import type {
-  ArtistDatabaseItem,
-  ArtistDatabaseSettings,
-  MemoriesDatabaseItem,
-  MemoriesDatabaseSettings,
-  StoreDatabaseItem,
-  StoreDatabaseSettings,
-  TestimonialDatabaseItem,
-  TestimonialDatabaseSettings,
-  WorkshopDatabaseItem,
-  WorkshopDatabaseSettings,
-} from '@/types/database'
+import type {AppLocale} from '@/lib/localized-path'
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('homepage')
+type PageProps = Readonly<{params: Promise<{locale: AppLocale}>}>
+
+export async function generateMetadata({params}: PageProps): Promise<Metadata> {
+  const {locale} = await params
+  const t = await getTranslations({locale, namespace: 'homepage'})
 
   return prepareMetadata({
     title: t('metaTitle'),
@@ -44,71 +38,22 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-// Workshop data is now fetched from Supabase service
-// const workshopData = [
-//   {
-//     url: '/img/workshop/workshop-0.jpeg',
-//     title: 'Broad Workshop View',
-//     description:
-//       "The heart of Bekten Usubaliev's artistic journey, this workshop is a place where creativity and imagination know no bounds. Various artworks, stretching from walls to the floor, reflect the breadth of his artistic vision.",
-//   },
-//   {
-//     url: '/img/workshop/workshop-1.jpeg',
-//     title: 'Portraits and Other Paintings',
-//     description:
-//       "Brought to life by Bekten's delicate brush strokes, these portraits dive deep into the depths of the human soul with their rich details. Each painting tells a different story to its viewers.",
-//   },
-//   {
-//     url: '/img/workshop/workshop-2.jpeg',
-//     title: 'Painting Shelves',
-//     description:
-//       "These shelves house Bekten's completed and ongoing projects. Each painting represents a different phase of the artist's journey.",
-//   },
-//   {
-//     url: '/img/workshop/workshop-3.jpeg',
-//     title: "Bekten's Uncle",
-//     description:
-//       'In the portrait of his uncle, Bekten plays both the artist and the observer. This self-portrait reflects his dedication and passion for art.',
-//   },
-//   {
-//     url: '/img/workshop/workshop-4.jpeg',
-//     title: 'Workshop Entrance',
-//     description:
-//       "Bekten's workshop is the space where he practices art and imparts it to his students. The workshop stands as the heart of Bekten's artistic journey.",
-//   },
-// ]
-
-export default async function Home() {
-  const t = await getTranslations('homepage')
-
-  // Fetch data from Supabase using getSectionData
-  const workshopData = (await getSectionData('workshop')) as {
-    items: WorkshopDatabaseItem[]
-    settings: WorkshopDatabaseSettings | null
-  }
-  const artistData = (await getSectionData('artist')) as {
-    items: ArtistDatabaseItem[]
-    settings: ArtistDatabaseSettings | null
-  }
-  const testimonialData = (await getSectionData('testimonials')) as {
-    items: TestimonialDatabaseItem[]
-    settings: TestimonialDatabaseSettings | null
-  }
-  const memoriesData = (await getSectionData('memories')) as {
-    items: MemoriesDatabaseItem[]
-    settings: MemoriesDatabaseSettings | null
-  }
-  const storeData = (await getSectionData('store')) as {
-    items: StoreDatabaseItem[]
-    settings: StoreDatabaseSettings | null
-  }
+export default async function Home({params}: PageProps) {
+  const {locale} = await params
+  const [t, content] = await Promise.all([
+    getTranslations({locale, namespace: 'homepage'}),
+    getHomepageContent(locale),
+  ])
 
   return (
     <div id="home" className="w-full pt-8">
       {/* Creative Artist Hero Section */}
-      <section className="relative overflow-hidden pt-10 pb-40">
+      <section
+        aria-labelledby="home-hero-heading"
+        className="relative overflow-hidden pt-10 pb-40"
+      >
         {/* Artistic Background Elements */}
-        <div className="absolute inset-0">
+        <div aria-hidden="true" className="absolute inset-0">
           {/* Paint Splashes */}
           <div className="bg-primary/20 animate-float absolute top-20 left-20 h-4 w-4 rounded-full blur-sm" />
           <div className="bg-primary/15 animate-float-delayed absolute top-40 right-32 h-6 w-6 rounded-full blur-md" />
@@ -125,7 +70,10 @@ export default async function Home() {
         </div>
 
         {/* Floating Art Elements */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+        >
           {/* Palette */}
           <div className="animate-float-palette absolute top-1/4 left-16 h-8 w-8">
             <PaletteIcon className="text-primary/20 h-full w-full" />
@@ -142,7 +90,7 @@ export default async function Home() {
           <div className="animate-color-drop animation-delay-1200 absolute bottom-1/4 left-1/2 h-2 w-2 rounded-full bg-yellow-400/30" />
         </div>
 
-        <div className="relative container py-20">
+        <div className="app-container relative py-20">
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
             {/* Artist Introduction */}
             <div className="animate-fade-in-up space-y-8">
@@ -152,13 +100,16 @@ export default async function Home() {
                     variant="secondary"
                     className="bg-primary/10 text-primary border-primary/20 animate-pulse-gentle w-fit"
                   >
-                    <SparklesIcon className="mr-2 h-3 w-3" />
+                    <SparklesIcon aria-hidden="true" className="mr-2 h-3 w-3" />
                     {t('heroTitle')}
                   </Badge>
                 </div>
 
                 <div className="animate-fade-in-up animation-delay-400">
-                  <h1 className="text-6xl leading-none font-bold lg:text-8xl">
+                  <h1
+                    id="home-hero-heading"
+                    className="text-6xl leading-none font-bold lg:text-8xl"
+                  >
                     <span className="from-foreground via-primary to-foreground/70 animate-gradient-slow block bg-gradient-to-r bg-clip-text text-transparent">
                       Bekten
                     </span>
@@ -179,25 +130,35 @@ export default async function Home() {
               </div>
 
               <div className="animate-fade-in-up animation-delay-1000 flex flex-wrap gap-4">
-                <Link href="/gallery">
-                  <Button
-                    size="lg"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-primary/25 group shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-xl"
-                  >
-                    <PaletteIcon className="mr-2 h-4 w-4 transition-transform group-hover:rotate-12" />
-                    {t('heroButton1')}
-                    <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Button>
+                <Link
+                  href={localizedPath(locale, '/gallery')}
+                  className={cn(
+                    buttonVariants({size: 'lg'}),
+                    'bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-primary/25 group shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-xl',
+                  )}
+                >
+                  <PaletteIcon
+                    aria-hidden="true"
+                    className="mr-2 h-4 w-4 transition-transform group-hover:rotate-12"
+                  />
+                  {t('heroButton1')}
+                  <ArrowRightIcon
+                    aria-hidden="true"
+                    className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
+                  />
                 </Link>
-                <Link href="/about">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="border-primary/30 text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground group transition-all duration-500 hover:scale-105"
-                  >
-                    <HeartIcon className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-                    {t('heroButton2')}
-                  </Button>
+                <Link
+                  href={localizedPath(locale, '/about')}
+                  className={cn(
+                    buttonVariants({variant: 'outline', size: 'lg'}),
+                    'border-primary/30 text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground group transition-all duration-500 hover:scale-105',
+                  )}
+                >
+                  <HeartIcon
+                    aria-hidden="true"
+                    className="mr-2 h-4 w-4 transition-transform group-hover:scale-110"
+                  />
+                  {t('heroButton2')}
                 </Link>
               </div>
             </div>
@@ -210,7 +171,10 @@ export default async function Home() {
         </div>
 
         {/* Artistic Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 transform animate-bounce">
+        <div
+          aria-hidden="true"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 transform animate-bounce"
+        >
           <div className="border-primary/40 relative flex h-12 w-8 justify-center rounded-full border-2">
             <div className="from-primary/60 to-primary/20 mt-2 h-4 w-1.5 animate-pulse rounded-full bg-gradient-to-b" />
             <PaletteIcon className="text-primary/30 animate-spin-slow absolute -top-1 -right-1 h-3 w-3" />
@@ -221,29 +185,19 @@ export default async function Home() {
       <CallToAction />
 
       {/* Workshop Showcase Section */}
-      {workshopData.settings && workshopData.items.length > 0 && (
-        <WorkshopSection workshopData={workshopData} />
-      )}
+      <WorkshopSection items={content.workshopItems} locale={locale} />
 
       {/* Artist Section */}
-      {artistData.settings && artistData.items.length > 0 && (
-        <ArtistSection artistData={artistData} />
-      )}
+      <ArtistSection items={content.artistStats} locale={locale} />
 
       {/* Testimonials Section */}
-      {testimonialData.settings && testimonialData.items.length > 0 && (
-        <TestimonialsSection testimonialData={testimonialData} />
-      )}
+      <TestimonialsSection items={content.testimonials} />
 
       {/* Memories in Paint Section */}
-      {memoriesData.settings && memoriesData.items.length > 0 && (
-        <MemoriesSection memoriesData={memoriesData} />
-      )}
+      <MemoriesSection items={content.memories} locale={locale} />
 
       {/* Store Section - Featured Artworks */}
-      {storeData.settings && storeData.items.length > 0 && (
-        <HomeStoreSection storeData={storeData} />
-      )}
+      <HomeStoreSection items={content.artworks} locale={locale} />
     </div>
   )
 }

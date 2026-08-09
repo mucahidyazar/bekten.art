@@ -1,70 +1,91 @@
 import {unstable_noStore as noStore} from 'next/cache'
 
-import {createClient} from '@/utils/supabase/server'
+import {contentRepository} from '@/server/database/content'
 
+import type {AppLocale} from '@/lib/localized-path'
 import type {
-  DatabaseSectionItem,
-  DatabaseSectionSettings,
-} from '@/types/database'
+  ArtistStat,
+  Artwork,
+  Memory,
+  NewsArticle,
+  Testimonial,
+  WorkshopItem,
+} from '@/server/content/domain'
 
-export type SectionType =
-  | 'workshop'
-  | 'artist'
-  | 'gallery'
-  | 'portfolio'
-  | 'testimonials'
-  | 'services'
-  | 'memories'
-  | 'store'
-  | 'news'
+const HOMEPAGE_LIMITS = Object.freeze({
+  artistStats: 10,
+  artworks: 6,
+  memories: 6,
+  testimonials: 10,
+  workshopItems: 6,
+})
 
-export async function getSectionData(sectionType: SectionType): Promise<{
-  items: DatabaseSectionItem[]
-  settings: DatabaseSectionSettings | null
-}> {
+export type HomepageContent = Readonly<{
+  artistStats: ArtistStat[]
+  artworks: Artwork[]
+  memories: Memory[]
+  testimonials: Testimonial[]
+  workshopItems: WorkshopItem[]
+}>
+
+export async function getHomepageContent(
+  locale: AppLocale,
+): Promise<HomepageContent> {
   noStore()
 
-  const supabase = await createClient()
+  const [workshopItems, artistStats, testimonials, memories, artworks] =
+    await Promise.all([
+      contentRepository.workshopItems.listPublished({
+        locale,
+        limit: HOMEPAGE_LIMITS.workshopItems,
+      }),
+      contentRepository.artistStats.listPublished({
+        locale,
+        limit: HOMEPAGE_LIMITS.artistStats,
+      }),
+      contentRepository.testimonials.listPublished({
+        locale,
+        limit: HOMEPAGE_LIMITS.testimonials,
+      }),
+      contentRepository.memories.listPublished({
+        locale,
+        limit: HOMEPAGE_LIMITS.memories,
+      }),
+      contentRepository.artworks.listPublished({
+        locale,
+        limit: HOMEPAGE_LIMITS.artworks,
+      }),
+    ])
 
-  try {
-    // Get section data from database
-    const {data: sectionData, error: dataError} = await supabase
-      .from('section_data')
-      .select('*')
-      .eq('section_type', sectionType)
-      .eq('is_active', true)
-      .order('order', {ascending: true})
+  return {artistStats, artworks, memories, testimonials, workshopItems}
+}
 
-    // Get section settings
-    const {data: sectionSettings, error: settingsError} = await supabase
-      .from('sections')
-      .select('*')
-      .eq('section_type', sectionType)
-      .eq('is_active', true)
-      .single()
+export async function getPublishedNewsArticle(
+  locale: AppLocale,
+  identifier: string,
+): Promise<NewsArticle | null> {
+  noStore()
 
-    if (dataError && dataError.code !== 'PGRST116') {
-      console.error(`Error fetching ${sectionType} data:`, dataError)
+  return contentRepository.newsArticles.findPublishedByIdentifier({
+    identifier,
+    locale,
+  })
+}
 
-      return {items: [], settings: null}
-    }
+export async function getPublishedNewsArticles(
+  locale: AppLocale,
+  limit = 50,
+): Promise<NewsArticle[]> {
+  noStore()
 
-    if (settingsError && settingsError.code !== 'PGRST116') {
-      console.error(`Error fetching ${sectionType} settings:`, settingsError)
+  return contentRepository.newsArticles.listPublished({locale, limit})
+}
 
-      return {
-        items: (sectionData || []) as DatabaseSectionItem[],
-        settings: null,
-      }
-    }
+export async function getPublishedStoreArtworks(
+  locale: AppLocale,
+  limit = 50,
+): Promise<Artwork[]> {
+  noStore()
 
-    return {
-      items: (sectionData || []) as DatabaseSectionItem[],
-      settings: sectionSettings as DatabaseSectionSettings | null,
-    }
-  } catch (error) {
-    console.error(`Error in getSectionData for ${sectionType}:`, error)
-
-    return {items: [], settings: null}
-  }
+  return contentRepository.artworks.listPublished({locale, limit})
 }

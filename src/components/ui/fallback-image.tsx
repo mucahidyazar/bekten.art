@@ -5,8 +5,7 @@ import Image, {ImageProps} from 'next/image'
 import {useState} from 'react'
 
 interface FallbackImageProps extends Omit<ImageProps, 'src' | 'onError'> {
-  src: string | undefined
-  fallbackSrc: string
+  src: string
   alt: string
   title?: string
   loading?: 'lazy' | 'eager'
@@ -17,7 +16,6 @@ interface FallbackImageProps extends Omit<ImageProps, 'src' | 'onError'> {
 
 export function FallbackImage({
   src,
-  fallbackSrc,
   alt,
   title,
   loading = 'lazy',
@@ -27,26 +25,23 @@ export function FallbackImage({
   ...props
 }: FallbackImageProps) {
   const [failedSrc, setFailedSrc] = useState<string | null>(null)
-  const currentSrc = src && failedSrc !== src ? src : fallbackSrc
-  const imageError = !src || failedSrc === src
+
+  if (failedSrc === src) return null
 
   const handleError = () => {
-    if (src && failedSrc !== src) {
+    if (failedSrc !== src) {
       setFailedSrc(src)
     }
   }
 
-  // SEO optimized alt text - fallback için uyarı eklenir
-  const optimizedAlt = imageError ? `${alt} (fallback image)` : alt
-
   return (
     <Image
       {...props}
-      src={currentSrc}
-      alt={optimizedAlt}
+      src={src}
+      alt={alt}
       title={title || alt}
       loading={priority ? undefined : loading}
-      priority={priority}
+      priority={priority || undefined}
       sizes={sizes}
       quality={quality}
       onError={handleError}

@@ -30,7 +30,7 @@ export default function AboutPage() {
   const t = useTranslations()
 
   return (
-    <div id="about" className="container">
+    <div id="about" className="app-container">
       {/* Hero Section */}
       <ArtistHero />
 

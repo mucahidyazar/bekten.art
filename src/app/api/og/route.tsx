@@ -1,19 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
-import {headers} from 'next/headers'
 import {ImageResponse} from 'next/og'
 
-import {configs} from '@/configs'
 import {ME} from '@/constants'
+import {getOgAssetOrigin} from '@/server/seo/og-origin'
 
 export async function GET(request: Request) {
   const {searchParams} = new URL(request.url)
   const page = searchParams.get('page')
   const title = searchParams.get('title')
   const description = searchParams.get('description') || ME.descriptionFull
-  const headersList = await headers()
-  const host = headersList.get('host')
-  const protocol = configs.isDevelopment ? 'http' : 'https'
-  const domain = `${protocol}://${host}`
+  const domain = getOgAssetOrigin()
 
   // Get theme colors based on page
   const getThemeColors = (page: string | null) => {
@@ -54,152 +50,147 @@ export async function GET(request: Request) {
   const colors = getThemeColors(page)
 
   const response = new ImageResponse(
-    (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '60px',
+        padding: '60px',
+        background: colors.bg,
+        position: 'relative',
+      }}
+    >
+      {/* Artistic Background Elements */}
       <div
         style={{
-          width: '100%',
-          height: '100%',
+          position: 'absolute',
+          top: '30px',
+          left: '30px',
+          width: '80px',
+          height: '80px',
+          borderRadius: '50%',
+          background: colors.accent,
+          opacity: 0.1,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '40px',
+          right: '80px',
+          width: '100px',
+          height: '100px',
+          borderRadius: '50%',
+          background: colors.accent,
+          opacity: 0.15,
+        }}
+      />
+
+      {/* Profile Image */}
+      <div
+        style={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '60px',
-          padding: '60px',
-          background: colors.bg,
-          position: 'relative',
         }}
       >
-        {/* Artistic Background Elements */}
-        <div
+        <img
+          src={`${domain}/me.jpg`}
+          alt="Bekten Usubaliev - Contemporary Oil Painter"
+          width={280}
+          height={280}
           style={{
-            position: 'absolute',
-            top: '30px',
-            left: '30px',
-            width: '80px',
-            height: '80px',
-            borderRadius: '50%',
-            background: colors.accent,
-            opacity: 0.1,
+            border: `6px solid ${colors.accent}`,
+            borderRadius: '20px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+            objectFit: 'cover',
           }}
         />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '40px',
-            right: '80px',
-            width: '100px',
-            height: '100px',
-            borderRadius: '50%',
-            background: colors.accent,
-            opacity: 0.15,
-          }}
-        />
+      </div>
 
-        {/* Profile Image */}
+      {/* Content */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          maxWidth: '600px',
+        }}
+      >
+        {/* Header with logo and page */}
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
+            gap: '20px',
+            marginBottom: '30px',
           }}
         >
           <img
-            src={`${domain}/me.jpg`}
-            alt="Bekten Usubaliev - Contemporary Oil Painter"
-            width={280}
-            height={280}
-            style={{
-              border: `6px solid ${colors.accent}`,
-              borderRadius: '20px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-              objectFit: 'cover',
-            }}
+            src={`${domain}/svg/full-logo.svg`}
+            alt="Bekten Art Logo"
+            height={50}
+            style={{filter: 'brightness(0) invert(1)'}}
           />
-        </div>
-
-        {/* Content */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            maxWidth: '600px',
-          }}
-        >
-          {/* Header with logo and page */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '20px',
-              marginBottom: '30px',
-            }}
-          >
-            <img
-              src={`${domain}/svg/full-logo.svg`}
-              alt="Bekten Art Logo"
-              height={50}
-              style={{filter: 'brightness(0) invert(1)'}}
-            />
-            {page && (
-              <span
-                style={{
-                  color: colors.accent,
-                  fontSize: '40px',
-                  fontWeight: 'bold',
-                  textTransform: 'uppercase',
-                  letterSpacing: '2px',
-                }}
-              >
-                / {page}
-              </span>
-            )}
-          </div>
-
-          {/* Title */}
-          {title && (
-            <h1
+          {page && (
+            <span
               style={{
-                fontSize: Math.min(
-                  42,
-                  Math.max(28, 500 / (title.length || 10)),
-                ),
-                fontWeight: 'bold',
-                margin: '0 0 20px 0',
                 color: colors.accent,
-                lineHeight: 1.2,
+                fontSize: '40px',
+                fontWeight: 'bold',
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
               }}
             >
-              {title}
-            </h1>
+              / {page}
+            </span>
           )}
+        </div>
 
-          {/* Description */}
-          <p
+        {/* Title */}
+        {title && (
+          <h1
             style={{
-              color: 'white',
-              fontSize: '22px',
-              lineHeight: '32px',
-              margin: 0,
-              opacity: 0.9,
-            }}
-          >
-            {description}
-          </p>
-
-          {/* Website URL */}
-          <div
-            style={{
-              marginTop: '30px',
+              fontSize: Math.min(42, Math.max(28, 500 / (title.length || 10))),
+              fontWeight: 'bold',
+              margin: '0 0 20px 0',
               color: colors.accent,
-              fontSize: '18px',
-              letterSpacing: '1px',
-              opacity: 0.8,
+              lineHeight: 1.2,
             }}
           >
-            bekten.art
-          </div>
+            {title}
+          </h1>
+        )}
+
+        {/* Description */}
+        <p
+          style={{
+            color: 'white',
+            fontSize: '22px',
+            lineHeight: '32px',
+            margin: 0,
+            opacity: 0.9,
+          }}
+        >
+          {description}
+        </p>
+
+        {/* Website URL */}
+        <div
+          style={{
+            marginTop: '30px',
+            color: colors.accent,
+            fontSize: '18px',
+            letterSpacing: '1px',
+            opacity: 0.8,
+          }}
+        >
+          bekten.art
         </div>
       </div>
-    ),
+    </div>,
     {
       width: 1200,
       height: 630,
@@ -217,4 +208,4 @@ export async function GET(request: Request) {
   return response
 }
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'

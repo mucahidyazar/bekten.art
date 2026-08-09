@@ -19,9 +19,11 @@ function splitIntoColumns(images: GalleryImage[], columnCount = 3) {
 export async function getGalleryImageArrays() {
   const posts = await prisma.instagramPost.findMany({
     include: {
-      uploaded_file: {
+      media_object: {
         select: {
-          public_url: true,
+          id: true,
+          status: true,
+          visibility: true,
         },
       },
     },
@@ -39,7 +41,11 @@ export async function getGalleryImageArrays() {
     .map(post => ({
       description: post.caption || '',
       title: post.shortcode,
-      url: post.uploaded_file?.public_url || post.source_display_url,
+      url:
+        post.media_object?.status === 'READY' &&
+        post.media_object.visibility === 'PUBLIC'
+          ? `/api/media/${post.media_object.id}`
+          : post.source_display_url,
     }))
     .filter(image => image.url)
 

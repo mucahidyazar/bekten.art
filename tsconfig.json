@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2022",
     "lib": [
       "dom",
       "dom.iterable",
@@ -13,7 +13,7 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
@@ -44,9 +44,6 @@
       ],
       "@/hooks": [
         "./src/hooks/index.ts"
-      ],
-      "@/mocks": [
-        "./src/mocks/index.ts"
       ],
       "@/server/*": [
         "./src/server/*"

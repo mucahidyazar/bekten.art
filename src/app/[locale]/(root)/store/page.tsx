@@ -1,20 +1,18 @@
 import {NewsletterCTA} from '@/components/molecules/newsletter-cta'
 import {StoreSection} from '@/components/sections/store-section'
-import {getSectionData} from '@/services'
+import {getPublishedStoreArtworks} from '@/services'
 
-import type {StoreDatabaseItem, StoreDatabaseSettings} from '@/types/database'
+import type {AppLocale} from '@/lib/localized-path'
 
-export default async function StorePage() {
-  // Fetch store data from database
-  const storeData = (await getSectionData('store')) as {
-    items: StoreDatabaseItem[]
-    settings: StoreDatabaseSettings | null
-  }
+type PageProps = Readonly<{params: Promise<{locale: AppLocale}>}>
+
+export default async function StorePage({params}: PageProps) {
+  const {locale} = await params
+  const artworks = await getPublishedStoreArtworks(locale)
 
   return (
-    <div className="container">
-      {/* Store Content - Section Component */}
-      <StoreSection storeData={storeData} />
+    <div className="app-container">
+      <StoreSection items={artworks} locale={locale} />
 
       {/* Newsletter CTA */}
       <NewsletterCTA />

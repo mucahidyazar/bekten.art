@@ -1,0 +1,395 @@
+import {z} from 'zod'
+
+import {outboxJobRowSchema, uuidSchema} from '@/server/content/domain'
+
+const feedbackPayloadSchema = z
+  .object({feedbackId: uuidSchema})
+  .strict()
+const newsletterConfirmationPayloadSchema = z
+  .object({
+    confirmationTokenEncrypted: z.string().min(20).max(2_048),
+    subscriberId: uuidSchema,
+  })
+  .strict()
+const newsletterWelcomePayloadSchema = z
+  .object({
+    subscriberId: uuidSchema,
+    unsubscribeTokenEncrypted: z.string().min(20).max(2_048),
+  })
+  .strict()
+const authEmailVerificationPayloadSchema = z
+  .object({
+    locale: z.literal('en'),
+    name: z.string().max(100).nullable(),
+    to: z.string().email().max(320),
+    verificationUrlEncrypted: z.string().min(20).max(4_096),
+  })
+  .strict()
+const authPasswordResetPayloadSchema = z
+  .object({
+    locale: z.enum(['en', 'tr', 'ru', 'ky']),
+    name: z.string().max(100).nullable(),
+    resetUrlEncrypted: z.string().min(20).max(4_096),
+    to: z.string().email().max(320),
+  })
+  .strict()
+
+type ClaimedJob = z.infer<typeof outboxJobRowSchema>
+
+type FeedbackMessage = Readonly<{
+  email: string
+  message: string
+  name: string
+  subject: string
+}>
+
+type Subscriber = Readonly<{
+  email: string
+  locale: 'en' | 'tr' | 'ru' | 'ky'
+}>
+
+export type OutboxMailer = Readonly<{
+  sendEmailVerification: (input: Readonly<{
+    idempotencyKey: string
+    locale: Subscriber['locale']
+    name: string | null
+    to: string
+    verificationUrl: string
+  }>) => Promise<unknown>
+  sendPasswordReset: (input: Readonly<{
+    idempotencyKey: string
+    locale: Subscriber['locale']
+    name: string | null
+    resetUrl: string
+    to: string
+  }>) => Promise<unknown>
+  sendFeedbackAcknowledgement: (input: Readonly<{
+    idempotencyKey: string
+    name: string
+    to: string
+  }>) => Promise<unknown>
+  sendFeedbackNotification: (input: Readonly<{
+    idempotencyKey: string
+    message: string
+    name: string
+    replyTo: string
+    subject: string
+  }>) => Promise<unknown>
+  sendNewsletterConfirmation: (input: Readonly<{
+    confirmationUrl: string
+    idempotencyKey: string
+    locale: Subscriber['locale']
+    to: string
+  }>) => Promise<unknown>
+  sendNewsletterWelcome: (input: Readonly<{
+    idempotencyKey: string
+    locale: Subscriber['locale']
+    to: string
+    unsubscribeUrl: string
+  }>) => Promise<unknown>
+}>
+
+export type OutboxStore = Readonly<{
+  claim: (input: Readonly<{
+    lockExpiredBefore: Date
+    now: Date
+    workerId: string
+  }>) => Promise<unknown | null>
+  complete: (id: string, workerId: string, completedAt: Date) => Promise<boolean>
+  findFeedback: (id: string) => Promise<FeedbackMessage | null>
+  findSubscriber: (id: string) => Promise<Subscriber | null>
+  retry: (
+    id: string,
+    workerId: string,
+    input: Readonly<{
+      availableAt: Date
+      error: string
+      terminal: boolean
+    }>,
+  ) => Promise<boolean>
+}>
+
+type EngagementTokenReader = Readonly<{
+  decrypt: (encrypted: string) => string
+}>
+
+const transientError = 'EMAIL_DELIVERY_FAILED'
+const permanentError = 'OUTBOX_PAYLOAD_INVALID'
+const claimedJobIdentitySchema = z.object({id: uuidSchema}).passthrough()
+
+function addMilliseconds(value: Date, milliseconds: number) {
+  return new Date(value.getTime() + milliseconds)
+}
+
+function retryDelay(attempts: number) {
+  const exponent = Math.max(0, Math.min(10, attempts - 1))
+
+  return Math.min(15 * 60_000, 30_000 * 2 ** exponent)
+}
+
+function tokenUrl(appUrl: string, path: string, token: string, locale?: Subscriber['locale']) {
+  const target = new URL(path, new URL(appUrl).origin)
+
+  target.searchParams.set('token', token)
+
+  if (locale) target.searchParams.set('locale', locale)
+
+  return target.toString()
+}
+
+function requireSameOriginActionUrl(
+  appUrl: string,
+  encryptedUrl: string,
+  tokens: EngagementTokenReader,
+  allowedPath: RegExp,
+) {
+  const target = new URL(tokens.decrypt(encryptedUrl))
+  const origin = new URL(appUrl).origin
+
+  if (
+    target.origin !== origin ||
+    target.username ||
+    target.password ||
+    !allowedPath.test(target.pathname) ||
+    !target.searchParams.get('token')
+  ) {
+    throw new Error(permanentError)
+  }
+
+  return target.toString()
+}
+
+export function createOutboxDispatcher(
+  store: OutboxStore,
+  mailer: OutboxMailer,
+  tokens: EngagementTokenReader,
+  dependencies: Readonly<{
+    appUrl: string
+    lockTimeoutMs?: number
+    now?: () => Date
+    workerId: string
+  }>,
+) {
+  const now = dependencies.now ?? (() => new Date())
+  const lockTimeoutMs = dependencies.lockTimeoutMs ?? 5 * 60_000
+
+  async function requireFeedback(id: string) {
+    const feedback = await store.findFeedback(id)
+
+    if (!feedback) {
+      throw new Error(permanentError)
+    }
+
+    return feedback
+  }
+
+  async function requireSubscriber(id: string) {
+    const subscriber = await store.findSubscriber(id)
+
+    if (!subscriber) {
+      throw new Error(permanentError)
+    }
+
+    return subscriber
+  }
+
+  async function deliver(job: ClaimedJob) {
+    if (job.type === 'auth.email_verification') {
+      const parsed = authEmailVerificationPayloadSchema.safeParse(job.payload)
+
+      if (!parsed.success) throw new Error(permanentError)
+
+      await mailer.sendEmailVerification({
+        idempotencyKey: job.idempotencyKey,
+        locale: parsed.data.locale,
+        name: parsed.data.name,
+        to: parsed.data.to,
+        verificationUrl: requireSameOriginActionUrl(
+          dependencies.appUrl,
+          parsed.data.verificationUrlEncrypted,
+          tokens,
+          /^\/api\/auth\/verify-email$/u,
+        ),
+      })
+
+      return
+    }
+
+    if (job.type === 'auth.password_reset') {
+      const parsed = authPasswordResetPayloadSchema.safeParse(job.payload)
+
+      if (!parsed.success) throw new Error(permanentError)
+
+      await mailer.sendPasswordReset({
+        idempotencyKey: job.idempotencyKey,
+        locale: parsed.data.locale,
+        name: parsed.data.name,
+        resetUrl: requireSameOriginActionUrl(
+          dependencies.appUrl,
+          parsed.data.resetUrlEncrypted,
+          tokens,
+          /^\/(?:en|tr|ru|ky)\/reset-password$/u,
+        ),
+        to: parsed.data.to,
+      })
+
+      return
+    }
+
+    if (job.type === 'feedback.created') {
+      const parsed = feedbackPayloadSchema.safeParse(job.payload)
+
+      if (!parsed.success) {
+        throw new Error(permanentError)
+      }
+
+      const feedback = await requireFeedback(parsed.data.feedbackId)
+
+      await mailer.sendFeedbackNotification({
+        idempotencyKey: `${job.idempotencyKey}:support`,
+        message: feedback.message,
+        name: feedback.name,
+        replyTo: feedback.email,
+        subject: feedback.subject,
+      })
+      await mailer.sendFeedbackAcknowledgement({
+        idempotencyKey: `${job.idempotencyKey}:acknowledgement`,
+        name: feedback.name,
+        to: feedback.email,
+      })
+
+      return
+    }
+
+    if (job.type === 'newsletter.confirmation_requested') {
+      const parsed = newsletterConfirmationPayloadSchema.safeParse(job.payload)
+
+      if (!parsed.success) {
+        throw new Error(permanentError)
+      }
+
+      const subscriber = await requireSubscriber(parsed.data.subscriberId)
+      const token = tokens.decrypt(parsed.data.confirmationTokenEncrypted)
+
+      await mailer.sendNewsletterConfirmation({
+        confirmationUrl: tokenUrl(
+          dependencies.appUrl,
+          '/api/newsletter/confirm',
+          token,
+          subscriber.locale,
+        ),
+        idempotencyKey: job.idempotencyKey,
+        locale: subscriber.locale,
+        to: subscriber.email,
+      })
+
+      return
+    }
+
+    if (job.type === 'newsletter.welcome') {
+      const parsed = newsletterWelcomePayloadSchema.safeParse(job.payload)
+
+      if (!parsed.success) {
+        throw new Error(permanentError)
+      }
+
+      const subscriber = await requireSubscriber(parsed.data.subscriberId)
+      const token = tokens.decrypt(parsed.data.unsubscribeTokenEncrypted)
+
+      await mailer.sendNewsletterWelcome({
+        idempotencyKey: job.idempotencyKey,
+        locale: subscriber.locale,
+        to: subscriber.email,
+        unsubscribeUrl: tokenUrl(
+          dependencies.appUrl,
+          '/api/newsletter/unsubscribe',
+          token,
+          subscriber.locale,
+        ),
+      })
+
+      return
+    }
+
+    throw new Error(permanentError)
+  }
+
+  async function dispatchOne() {
+    const claimedAt = now()
+    const rawJob = await store.claim({
+      lockExpiredBefore: addMilliseconds(claimedAt, -lockTimeoutMs),
+      now: claimedAt,
+      workerId: dependencies.workerId,
+    })
+
+    if (!rawJob) {
+      return {status: 'idle'} as const
+    }
+
+    const parsedJob = outboxJobRowSchema.safeParse(rawJob)
+
+    if (!parsedJob.success) {
+      const identity = claimedJobIdentitySchema.safeParse(rawJob)
+
+      if (identity.success) {
+        await store.retry(identity.data.id, dependencies.workerId, {
+          availableAt: claimedAt,
+          error: permanentError,
+          terminal: true,
+        })
+      }
+
+      return {status: 'failed'} as const
+    }
+
+    const job = parsedJob.data
+
+    try {
+      await deliver(job)
+      await store.complete(job.id, dependencies.workerId, claimedAt)
+
+      return {status: 'completed'} as const
+    } catch (error) {
+      const terminal =
+        (error instanceof Error && error.message === permanentError) ||
+        job.attempts >= job.maxAttempts
+      const safeError = terminal ? permanentError : transientError
+
+      await store.retry(job.id, dependencies.workerId, {
+        availableAt: addMilliseconds(claimedAt, retryDelay(job.attempts)),
+        error: safeError,
+        terminal,
+      })
+
+      return {status: terminal ? ('failed' as const) : ('retrying' as const)}
+    }
+  }
+
+  async function dispatchBatch(limitInput = 10) {
+    const limit = z.number().int().min(1).max(50).parse(limitInput)
+
+    async function next(
+      remaining: number,
+      summary: Readonly<{completed: number; failed: number; retrying: number}>,
+    ): Promise<Readonly<{completed: number; failed: number; retrying: number}>> {
+      if (remaining === 0) {
+        return summary
+      }
+
+      const result = await dispatchOne()
+
+      if (result.status === 'idle') {
+        return summary
+      }
+
+      return next(remaining - 1, {
+        ...summary,
+        [result.status]: summary[result.status] + 1,
+      })
+    }
+
+    return next(limit, {completed: 0, failed: 0, retrying: 0})
+  }
+
+  return Object.freeze({dispatchBatch, dispatchOne})
+}

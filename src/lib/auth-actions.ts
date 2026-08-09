@@ -2,36 +2,33 @@
 
 import {redirect} from 'next/navigation'
 
-import {signIn, signOut} from '@/auth'
 import {
-  requireAdmin as requireAdminBase,
-  requireAuth as requireAuthBase,
-} from '@/utils/supabase/server'
+  requireAdminUser,
+  requireAuthenticatedUser,
+} from '@/server/auth/access'
 
 export async function requireAdmin() {
   try {
-    return await requireAdminBase()
+    return await requireAdminUser()
   } catch {
-    redirect('/')
+    redirect('/en')
   }
 }
 
 export async function requireAuth() {
   try {
-    return await requireAuthBase()
+    return await requireAuthenticatedUser()
   } catch {
-    redirect('/sign-in')
+    redirect('/en/sign-in')
   }
 }
 
+// NextAuth v4 intentionally exposes OAuth initiation through its HTTP flow.
+// Client components should prefer next-auth/react's signIn for a one-click UI.
 export async function signInWithGoogle() {
-  await signIn('google', {
-    redirectTo: '/',
-  })
+  redirect('/api/auth/signin/google?callbackUrl=%2Fen')
 }
 
 export async function signOutUser() {
-  await signOut({
-    redirectTo: '/',
-  })
+  redirect('/api/auth/signout?callbackUrl=%2Fen')
 }

@@ -9,34 +9,41 @@ import {useTheme} from 'next-themes'
 import {useTransition} from 'react'
 
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/avatar'
+import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuLabel,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {FallbackImage} from '@/components/ui/fallback-image'
 import {LOCALE, LOCALES} from '@/constants'
 import {useHydrated} from '@/hooks/use-hydrated'
+import {localizedPath} from '@/lib/localized-path'
 import {cn} from '@/utils'
 
-import {Button} from '../ui/button'
+import {buttonVariants} from '../ui/button'
+
+import type {AppLocale} from '@/lib/localized-path'
+import type {UiUser} from '@/types/ui-user'
 
 type AppToolsProps = {
   className?: string
-  user?: any
+  user?: UiUser | null
 }
 export function AppTools({className, user}: AppToolsProps) {
   const [isPending, startTransition] = useTransition()
   const mounted = useHydrated()
   const t = useTranslations()
-  const locale = useLocale()
+  const locale = useLocale() as AppLocale
   const router = useRouter()
   const pathname = usePathname()
   const {setTheme, theme} = useTheme()
 
   const handleThemeChange = (newTheme: string) => {
     try {
-      console.log('Changing theme from', theme, 'to', newTheme)
       setTheme(newTheme)
 
       // Force update document class for immediate visual feedback
@@ -66,16 +73,17 @@ export function AppTools({className, user}: AppToolsProps) {
   }
 
   const themeIconMap = {
-    light: <SunIcon className="w-3" />,
-    dark: <MoonIcon className="w-3" />,
-    navy: <WavesIcon className="w-3" />,
-    system: <LaptopIcon className="w-3" />,
+    light: <SunIcon aria-hidden="true" className="w-3" />,
+    dark: <MoonIcon aria-hidden="true" className="w-3" />,
+    navy: <WavesIcon aria-hidden="true" className="w-3" />,
+    system: <LaptopIcon aria-hidden="true" className="w-3" />,
   } as {[key: string]: React.ReactNode}
 
   if (!mounted) {
     return (
       <section
         id="app-tools"
+        aria-hidden="true"
         className={cn(
           'fixed top-2 right-2 z-[60] flex gap-1 rounded backdrop-blur-sm lg:right-4',
           className,
@@ -91,6 +99,7 @@ export function AppTools({className, user}: AppToolsProps) {
   return (
     <section
       id="app-tools"
+      aria-label="Display and account tools"
       className={cn(
         'fixed top-2 right-2 z-[60] mb-0 flex gap-1 rounded lg:right-4',
         className,
@@ -98,42 +107,38 @@ export function AppTools({className, user}: AppToolsProps) {
     >
       {user ? (
         <Link
-          href={`/profile/${user.id}`}
+          href={localizedPath(locale, `/profile/${user.id}`)}
           className="flex items-center space-x-2 transition-opacity hover:opacity-80"
         >
           <span className="text-muted-foreground hidden text-sm md:block">
-            {user.user_metadata?.full_name ||
-              user.user_metadata?.name ||
-              'Profile'}
+            {user.name || 'Profile'}
           </span>
-          <FallbackImage
-            src={user?.user_metadata?.avatar_url}
-            fallbackSrc="/img/empty-event-image.png"
-            width={36}
-            height={36}
-            alt={
-              user?.user_metadata?.full_name ||
-              user?.user_metadata?.name ||
-              'User avatar'
-            }
-            className="border-border h-9 w-9 rounded border object-cover"
-          />
+          <Avatar className="border-border h-9 w-9 border">
+            {user.image ? (
+              <AvatarImage alt={user.name || 'User avatar'} src={user.image} />
+            ) : null}
+            <AvatarFallback aria-hidden="true">
+              {(user.name || user.email || 'P').trim().charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
         </Link>
       ) : (
-        <Link href="/sign-in">
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-border bg-card text-foreground hover:bg-muted relative z-50 h-9 w-9 justify-center gap-2 rounded border text-xs uppercase transition-colors sm:w-fit"
-          >
-            <LogInIcon className="h-4 w-4" />
-            <span className="hidden md:block">Sign In</span>
-          </Button>
+        <Link
+          href={localizedPath(locale, '/sign-in')}
+          aria-label={t('auth.signIn.signIn')}
+          className={cn(
+            buttonVariants({variant: 'outline', size: 'sm'}),
+            'border-border bg-card text-foreground hover:bg-muted relative z-50 h-9 w-9 justify-center gap-2 rounded border text-xs uppercase transition-colors sm:w-fit',
+          )}
+        >
+          <LogInIcon aria-hidden="true" className="h-4 w-4" />
+          <span className="hidden md:block">{t('auth.signIn.signIn')}</span>
         </Link>
       )}
 
       <DropdownMenu>
         <DropdownMenuTrigger
+          aria-label={`Change language. Current language: ${t('branding.locale', {locale})}`}
           className={cn(
             'border-border bg-card text-foreground hover:bg-muted relative z-50 flex h-9 w-9 items-center justify-center rounded border text-xs uppercase transition-colors',
           )}
@@ -145,73 +150,80 @@ export function AppTools({className, user}: AppToolsProps) {
           align="end"
         >
           {LOCALES.map(cur => (
-            <DropdownMenuLabel
+            <DropdownMenuItem
               key={cur}
-              onClick={() => onSelectChange(cur)}
+              aria-current={locale === cur ? 'true' : undefined}
+              onSelect={() => onSelectChange(cur)}
               className={cn(
                 'text-popover-foreground hover:bg-muted/80 focus:bg-muted/80 cursor-pointer rounded-sm px-2 py-1.5 text-center text-xs font-thin uppercase transition-colors',
                 locale === cur && 'bg-muted/60 font-semibold',
               )}
             >
               {t('branding.locale', {locale: cur})}
-            </DropdownMenuLabel>
+            </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
 
       <DropdownMenu>
         <DropdownMenuTrigger
+          aria-label={`Change color theme. Current theme: ${theme || 'system'}`}
           className={cn(
             'border-border bg-card text-foreground hover:bg-muted relative z-50 flex h-9 w-9 items-center justify-center rounded border transition-colors',
           )}
-          title={`Current theme: ${theme || 'system'} - Click to change`}
         >
-          {themeIconMap[theme || 'system'] || <LaptopIcon className="w-3" />}
+          {themeIconMap[theme || 'system'] || (
+            <LaptopIcon aria-hidden="true" className="w-3" />
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
           className="bg-background! border-border! text-popover-foreground flex flex-col gap-1 rounded-sm shadow-lg"
           align="end"
         >
-          <DropdownMenuLabel
-            onClick={() => handleThemeChange('light')}
+          <DropdownMenuItem
+            aria-current={theme === 'light' ? 'true' : undefined}
+            onSelect={() => handleThemeChange('light')}
             className={cn(
               'text-popover-foreground hover:bg-muted/80 focus:bg-muted/80 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-center text-xs font-thin uppercase transition-colors',
               theme === 'light' && 'bg-muted/60 font-semibold',
             )}
           >
-            <SunIcon className="h-4 w-4" />
+            <SunIcon aria-hidden="true" className="h-4 w-4" />
             <span>Light</span>
-          </DropdownMenuLabel>
-          <DropdownMenuLabel
-            onClick={() => handleThemeChange('dark')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            aria-current={theme === 'dark' ? 'true' : undefined}
+            onSelect={() => handleThemeChange('dark')}
             className={cn(
               'text-popover-foreground hover:bg-muted/80 focus:bg-muted/80 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-center text-xs font-thin uppercase transition-colors',
               theme === 'dark' && 'bg-muted/60 font-semibold',
             )}
           >
-            <MoonIcon className="h-4 w-4" />
+            <MoonIcon aria-hidden="true" className="h-4 w-4" />
             <span>Dark</span>
-          </DropdownMenuLabel>
-          <DropdownMenuLabel
-            onClick={() => handleThemeChange('navy')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            aria-current={theme === 'navy' ? 'true' : undefined}
+            onSelect={() => handleThemeChange('navy')}
             className={cn(
               'text-popover-foreground hover:bg-muted/80 focus:bg-muted/80 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-center text-xs font-thin uppercase transition-colors',
               theme === 'navy' && 'bg-muted/60 font-semibold',
             )}
           >
-            <WavesIcon className="h-4 w-4" />
+            <WavesIcon aria-hidden="true" className="h-4 w-4" />
             <span>Navy</span>
-          </DropdownMenuLabel>
-          <DropdownMenuLabel
-            onClick={() => handleThemeChange('system')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            aria-current={theme === 'system' ? 'true' : undefined}
+            onSelect={() => handleThemeChange('system')}
             className={cn(
               'text-popover-foreground hover:bg-muted/80 focus:bg-muted/80 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-center text-xs font-thin uppercase transition-colors',
               theme === 'system' && 'bg-muted/60 font-semibold',
             )}
           >
-            <LaptopIcon className="h-4 w-4" />
+            <LaptopIcon aria-hidden="true" className="h-4 w-4" />
             <span>System</span>
-          </DropdownMenuLabel>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </section>

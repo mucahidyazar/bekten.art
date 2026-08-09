@@ -1,221 +1,167 @@
-// Combined types for artist
-export interface ArtistDatabaseData extends DatabaseSectionData {
-  section_type: 'artist'
-  data: ArtistItemData
-}
+export type ArtistDatabaseData = DatabaseSectionData<ArtistItemData, 'artist'>
 
-export interface ArtistDatabaseItem extends ArtistDatabaseData {}
+export type ArtistDatabaseItem = ArtistDatabaseData
 
-export interface ArtistDatabaseSection extends DatabaseSection {
-  section_type: 'artist'
-}
+export type ArtistDatabaseSection = DatabaseSection<'artist'>
 
-export interface ArtistDatabaseSettings extends ArtistDatabaseSection {}
-
-// Artist specific data structure (what goes in the data JSONB field)
+export type ArtistDatabaseSettings = ArtistDatabaseSection
 export interface ArtistItemData {
+  description: string
   number: string
   title: string
-  description: string
-  [key: string]: any // Allow additional fields
 }
 
-// sections table
-export interface DatabaseSection {
-  id: string
-  section_type:
-    | 'workshop'
-    | 'gallery'
-    | 'portfolio'
-    | 'testimonials'
-    | 'services'
-    | 'artist'
-    | 'memories'
-    | 'store'
-    | 'news'
-  section_title: string
-  section_description: string
+export interface DatabaseSection<
+  TSection extends LegacySectionType = LegacySectionType,
+> {
   badge_text: string
-  max_items: number
-  is_active: boolean
+  created_at: string
   display_order: number
-  created_at: string
-  updated_at: string
-}
-
-// Raw database types - matches Supabase schema exactly
-// section_data table
-export interface DatabaseSectionData {
   id: string
-  section_type:
-    | 'workshop'
-    | 'gallery'
-    | 'portfolio'
-    | 'testimonials'
-    | 'services'
-    | 'artist'
-    | 'memories'
-    | 'store'
-    | 'news'
-  data: Record<string, any> // JSONB field
-  order: number
   is_active: boolean
-  created_at: string
+  max_items: number
+  section_description: string
+  section_title: string
+  section_type: TSection
   updated_at: string
 }
-
-// Backward compatibility aliases
-export interface DatabaseSectionItem extends DatabaseSectionData {}
-
-export interface DatabaseSectionSettings extends DatabaseSection {}
-
-// Combined types for memories
-export interface MemoriesDatabaseData extends DatabaseSectionData {
-  section_type: 'memories'
-  data: MemoriesItemData
+export interface DatabaseSectionData<
+  TData = unknown,
+  TSection extends LegacySectionType = LegacySectionType,
+> {
+  created_at: string
+  data: TData
+  id: string
+  is_active: boolean
+  order: number
+  section_type: TSection
+  updated_at: string
 }
+export type DatabaseSectionItem = DatabaseSectionData
+export type DatabaseSectionSettings = DatabaseSection
+export type LegacySectionType =
+  | 'workshop'
+  | 'gallery'
+  | 'portfolio'
+  | 'testimonials'
+  | 'services'
+  | 'artist'
+  | 'memories'
+  | 'store'
+  | 'news'
 
-export interface MemoriesDatabaseItem extends MemoriesDatabaseData {}
-
-export interface MemoriesDatabaseSection extends DatabaseSection {
-  section_type: 'memories'
-}
-
-export interface MemoriesDatabaseSettings extends MemoriesDatabaseSection {}
-
-// Memories specific data structure (what goes in the data JSONB field)
+export type MemoriesDatabaseData = DatabaseSectionData<
+  MemoriesItemData,
+  'memories'
+>
+export type MemoriesDatabaseItem = MemoriesDatabaseData
+export type MemoriesDatabaseSection = DatabaseSection<'memories'>
+export type MemoriesDatabaseSettings = MemoriesDatabaseSection
 export interface MemoriesItemData {
-  url: string
-  title: string
   description: string
-  [key: string]: any // Allow additional fields
-}
-
-// Combined types for news
-export interface NewsDatabaseData extends DatabaseSectionData {
-  section_type: 'news'
-  data: NewsItemData
-}
-
-export interface NewsDatabaseItem extends NewsDatabaseData {}
-
-export interface NewsDatabaseSection extends DatabaseSection {
-  section_type: 'news'
-}
-
-export interface NewsDatabaseSettings extends NewsDatabaseSection {}
-
-// News specific data structure (what goes in the data JSONB field)
-export interface NewsItemData {
   title: string
-  subtitle?: string
+  url: string
+}
+
+export type NewsCategory =
+  | 'news'
+  | 'feature'
+  | 'interview'
+  | 'exhibition'
+  | 'biography'
+
+export type NewsDatabaseData = DatabaseSectionData<NewsItemData, 'news'>
+export type NewsDatabaseItem = NewsDatabaseData
+export type NewsDatabaseSection = DatabaseSection<'news'>
+export type NewsDatabaseSettings = NewsDatabaseSection
+export interface NewsItemData {
+  address?: string
+  category: NewsCategory
+  date: string
   description: string
   image?: string
-  date: string
   location?: string
-  address?: string
   note?: string
   source?: string
-  category: 'news' | 'feature' | 'interview' | 'exhibition' | 'biography'
-  [key: string]: any // Allow additional fields
-}
-
-// Combined types for store
-export interface StoreDatabaseData extends DatabaseSectionData {
-  section_type: 'store'
-  data: StoreItemData
-}
-
-export interface StoreDatabaseItem extends StoreDatabaseData {}
-
-export interface StoreDatabaseSection extends DatabaseSection {
-  section_type: 'store'
-}
-
-export interface StoreDatabaseSettings extends StoreDatabaseSection {}
-
-// Store specific data structure (what goes in the data JSONB field)
-export interface StoreItemData {
+  subtitle?: string
   title: string
-  description: string
-  price: number
-  originalPrice?: number
+}
+
+export type StoreCategory =
+  | 'painting'
+  | 'digital'
+  | 'print'
+  | 'sculpture'
+  | 'portrait'
+  | 'landscape'
+  | 'mixed-media'
+
+export type StoreDatabaseData = DatabaseSectionData<StoreItemData, 'store'>
+export type StoreDatabaseItem = StoreDatabaseData
+export type StoreDatabaseSection = DatabaseSection<'store'>
+export type StoreDatabaseSettings = StoreDatabaseSection
+export interface StoreItemData {
+  availability: 'available' | 'sold' | 'reserved'
+  category: StoreCategory
   currency: string
+  description: string
+  dimensions: {
+    depth?: number
+    height: number
+    unit: 'cm' | 'in'
+    width: number
+  }
+  editionNumber?: number
+  editionSize?: number
+  featured: boolean
   imageUrl: string
   images: string[]
-  category: 'painting' | 'digital' | 'print' | 'sculpture'
-  medium: string
-  dimensions: {
-    width: number
-    height: number
-    depth?: number
-    unit: 'cm' | 'in'
-  }
-  year: number
-  isOriginal: boolean
   isLimitedEdition: boolean
-  editionSize?: number
-  editionNumber?: number
-  availability: 'available' | 'sold' | 'reserved'
+  isOriginal: boolean
+  medium: string
+  originalPrice?: number
+  price: number
   tags: string[]
-  featured: boolean
-  [key: string]: any // Allow additional fields
-}
-
-// Combined types for testimonials
-export interface TestimonialDatabaseData extends DatabaseSectionData {
-  section_type: 'testimonials'
-  data: TestimonialItemData
-}
-
-export interface TestimonialDatabaseItem extends TestimonialDatabaseData {}
-
-export interface TestimonialDatabaseSection extends DatabaseSection {
-  section_type: 'testimonials'
-}
-
-export interface TestimonialDatabaseSettings
-  extends TestimonialDatabaseSection {}
-
-// Testimonial specific data structure (what goes in the data JSONB field)
-export interface TestimonialItemData {
-  name: string
   title: string
+  year: number
+}
+
+export type TestimonialCategory =
+  | 'artist'
+  | 'businessman'
+  | 'politician'
+  | 'collector'
+  | 'critic'
+  | 'journalist'
+  | 'curator'
+
+export type TestimonialDatabaseData = DatabaseSectionData<
+  TestimonialItemData,
+  'testimonials'
+>
+export type TestimonialDatabaseItem = TestimonialDatabaseData
+export type TestimonialDatabaseSection = DatabaseSection<'testimonials'>
+export type TestimonialDatabaseSettings = TestimonialDatabaseSection
+export interface TestimonialItemData {
+  avatar: string
+  category: TestimonialCategory
   company: string
   location: string
+  name: string
   quote: string
-  avatar: string
-  category:
-    | 'artist'
-    | 'businessman'
-    | 'politician'
-    | 'collector'
-    | 'critic'
-    | 'journalist'
-    | 'curator'
   source: string
-  [key: string]: any // Allow additional fields
-}
-
-// Combined types for workshop
-export interface WorkshopDatabaseData extends DatabaseSectionData {
-  section_type: 'workshop'
-  data: WorkshopItemData
-}
-
-// Backward compatibility aliases
-export interface WorkshopDatabaseItem extends WorkshopDatabaseData {}
-
-export interface WorkshopDatabaseSection extends DatabaseSection {
-  section_type: 'workshop'
-}
-
-export interface WorkshopDatabaseSettings extends WorkshopDatabaseSection {}
-
-// Workshop specific data structure (what goes in the data JSONB field)
-export interface WorkshopItemData {
-  url: string
   title: string
+}
+
+export type WorkshopDatabaseData = DatabaseSectionData<
+  WorkshopItemData,
+  'workshop'
+>
+export type WorkshopDatabaseItem = WorkshopDatabaseData
+export type WorkshopDatabaseSection = DatabaseSection<'workshop'>
+export type WorkshopDatabaseSettings = WorkshopDatabaseSection
+export interface WorkshopItemData {
   description: string
-  [key: string]: any // Allow additional fields
+  title: string
+  url: string
 }

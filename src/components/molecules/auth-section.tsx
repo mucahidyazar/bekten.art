@@ -1,11 +1,14 @@
-import {getTranslations} from 'next-intl/server'
+'use client'
 
-import {signInWithGoogle} from '@/lib/auth-actions'
-import {getUser} from '@/utils/supabase/server'
+import {signIn} from 'next-auth/react'
+import {useLocale, useTranslations} from 'next-intl'
 
-export async function AuthSection() {
-  const user = await getUser()
-  const t = await getTranslations('auth.signIn')
+import {useUser} from '@/components/providers/user-provider'
+
+export function AuthSection() {
+  const {user} = useUser()
+  const locale = useLocale()
+  const t = useTranslations('auth.signIn')
 
   if (user) {
     return (
@@ -25,9 +28,10 @@ export async function AuthSection() {
 
   return (
     <div className="space-y-4">
-      <form action={signInWithGoogle}>
+      <div>
         <button
-          type="submit"
+          type="button"
+          onClick={() => signIn('google', {callbackUrl: `/${locale}`})}
           className="border-ring/30 hover:border-primary bg-background hover:bg-muted/30 group flex h-10 w-full items-center justify-center space-x-3 rounded-md border-2 px-4 transition-all duration-200"
         >
           <div className="h-5 w-5 flex-shrink-0 rounded-full bg-gradient-to-r from-blue-500 via-green-500 to-yellow-500" />
@@ -35,7 +39,7 @@ export async function AuthSection() {
             {t('googleButton')}
           </span>
         </button>
-      </form>
+      </div>
     </div>
   )
 }

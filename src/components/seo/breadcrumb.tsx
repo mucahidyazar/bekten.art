@@ -1,10 +1,10 @@
-'use client'
-
+import {headers} from 'next/headers'
 import Link from 'next/link'
-import {usePathname} from 'next/navigation'
 
 import {ChevronRightIcon, HomeIcon} from 'lucide-react'
-import {useTranslations} from 'next-intl'
+import {getTranslations} from 'next-intl/server'
+
+import {APP_LOCALES, type AppLocale, localizedPath} from '@/lib/localized-path'
 
 import {BreadcrumbStructuredData} from './structured-data'
 
@@ -18,35 +18,99 @@ interface BreadcrumbProps {
   className?: string
 }
 
-export function Breadcrumb({items, className = ''}: BreadcrumbProps) {
-  const pathname = usePathname()
-  const t = useTranslations('navigation')
+type BreadcrumbTranslator = (key: string) => string
 
-  // Extract locale from pathname
-  const segments = pathname.split('/').filter(Boolean)
-  const locale = segments[0] || 'en'
-  const pathSegments = segments.slice(1) // Remove locale from segments
-
-  // Generate breadcrumb items if not provided
-  const breadcrumbItems: BreadcrumbItem[] =
-    items || generateBreadcrumbItems(pathSegments, locale, t)
-
-  if (breadcrumbItems.length <= 1) {
-    return null // Don't show breadcrumb for home page only
+function getBreadcrumbName(
+  segment: string,
+  parentSegment: string | undefined,
+  translate: BreadcrumbTranslator,
+) {
+  const translationKeys: Record<string, string> = {
+    about: 'about',
+    gallery: 'gallery',
+    news: 'news',
+    contact: 'contact',
+    store: 'store',
+    'sign-in': 'signIn',
+    'sign-up': 'signUp',
+    'forgot-password': 'forgotPassword',
+    'reset-password': 'resetPassword',
+    profile: 'profile',
   }
 
-  const domain =
-    typeof window !== 'undefined'
-      ? window.location.origin
-      : process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art'
+  if (translationKeys[segment]) {
+    return translate(translationKeys[segment])
+  }
 
+  if (parentSegment === 'news') {
+    return translate('newsDetail')
+  }
+
+  if (parentSegment === 'profile') {
+    return translate('userProfile')
+  }
+
+  return segment
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
+function buildBreadcrumbItems(
+  pathname: string,
+  translate: BreadcrumbTranslator,
+): BreadcrumbItem[] {
+  const segments = pathname.split('/').filter(Boolean)
+  const routeLocale = segments[0]
+  const isSupportedLocale = APP_LOCALES.includes(routeLocale as AppLocale)
+  const isLegacyKyrgyzLocale = routeLocale === 'kg'
+  const locale = isSupportedLocale
+    ? (routeLocale as AppLocale)
+    : isLegacyKyrgyzLocale
+      ? 'ky'
+      : 'en'
+  const pathSegments =
+    isSupportedLocale || isLegacyKyrgyzLocale ? segments.slice(1) : segments
+  const items: BreadcrumbItem[] = [
+    {name: translate('home'), url: localizedPath(locale, '/')},
+  ]
+
+  pathSegments.forEach((segment, index) => {
+    const publicPath = `/${pathSegments.slice(0, index + 1).join('/')}`
+
+    items.push({
+      name: getBreadcrumbName(segment, pathSegments[index - 1], translate),
+      url: localizedPath(locale, publicPath),
+    })
+  })
+
+  return items
+}
+
+export async function Breadcrumb({items, className = ''}: BreadcrumbProps) {
+  const pathname = (await headers()).get('x-pathname') ?? '/'
+  const routeLocale = pathname.split('/').filter(Boolean)[0]
+  const locale = APP_LOCALES.includes(routeLocale as AppLocale)
+    ? (routeLocale as AppLocale)
+    : 'en'
+  const t = await getTranslations({locale, namespace: 'navigation'})
+  const breadcrumbItems =
+    items || buildBreadcrumbItems(pathname, key => t(key as never))
+
+  if (breadcrumbItems.length <= 1) {
+    return null
+  }
+
+  const domain = new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art',
+  ).origin
   const structuredDataItems = breadcrumbItems.map(item => ({
     name: item.name,
     url: `${domain}${item.url}`,
   }))
 
   return (
-    <div className="container">
+    <div className="app-container">
       <BreadcrumbStructuredData items={structuredDataItems} />
       <nav aria-label="Breadcrumb" className={`mb-8 ${className}`}>
         <ol className="text-muted-foreground flex items-center space-x-2 text-sm">
@@ -60,7 +124,9 @@ export function Breadcrumb({items, className = ''}: BreadcrumbProps) {
                   className="text-foreground flex items-center font-medium"
                   aria-current="page"
                 >
-                  {index === 0 && <HomeIcon className="mr-1 h-4 w-4" />}
+                  {index === 0 && (
+                    <HomeIcon className="mr-1 h-4 w-4" aria-hidden="true" />
+                  )}
                   {item.name}
                 </span>
               ) : (
@@ -68,7 +134,9 @@ export function Breadcrumb({items, className = ''}: BreadcrumbProps) {
                   href={item.url}
                   className="hover:text-foreground flex items-center transition-colors"
                 >
-                  {index === 0 && <HomeIcon className="mr-1 h-4 w-4" />}
+                  {index === 0 && (
+                    <HomeIcon className="mr-1 h-4 w-4" aria-hidden="true" />
+                  )}
                   {item.name}
                 </Link>
               )}
@@ -80,77 +148,4 @@ export function Breadcrumb({items, className = ''}: BreadcrumbProps) {
   )
 }
 
-function generateBreadcrumbItems(
-  pathSegments: string[],
-  locale: string,
-  t: any,
-): BreadcrumbItem[] {
-  const items: BreadcrumbItem[] = [
-    {
-      name: t('home'),
-      url: `/${locale}`,
-    },
-  ]
-
-  let currentPath = `/${locale}`
-
-  pathSegments.forEach((segment, index) => {
-    currentPath += `/${segment}`
-
-    // Generate human-readable names for segments
-    let name = segment
-
-    // Handle known routes
-    switch (segment) {
-      case 'about':
-        name = t('about')
-        break
-      case 'gallery':
-        name = t('gallery')
-        break
-      case 'news':
-        name = t('news')
-        break
-      case 'contact':
-        name = t('contact')
-        break
-      case 'store':
-        name = t('store')
-        break
-      case 'sign-in':
-        name = t('signIn')
-        break
-      case 'sign-up':
-        name = t('signUp')
-        break
-      case 'profile':
-        name = t('profile')
-        break
-      default:
-        // For dynamic segments (like IDs), try to make them more readable
-        if (/^\d+$/.test(segment)) {
-          // If it's a number, it's likely an ID - use the parent context
-          if (pathSegments[index - 1] === 'news') {
-            name = t('newsDetail')
-          } else if (pathSegments[index - 1] === 'profile') {
-            name = t('userProfile')
-          } else {
-            name = `#${segment}`
-          }
-        } else {
-          // Capitalize and replace hyphens with spaces
-          name = segment
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ')
-        }
-    }
-
-    items.push({
-      name,
-      url: currentPath,
-    })
-  })
-
-  return items
-}
+export {buildBreadcrumbItems}

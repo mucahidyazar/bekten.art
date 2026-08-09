@@ -6,9 +6,11 @@ import {cn} from '@/utils'
 
 import {NavbarItem} from './navbar-item'
 
+import type {UiUser} from '@/types/ui-user'
+
 type NavbarProps = {
   className?: string
-  user?: any
+  user?: UiUser | null
 }
 export function Navbar({className, user}: NavbarProps) {
   const t = useTranslations()
@@ -38,7 +40,7 @@ export function Navbar({className, user}: NavbarProps) {
       label: t('navigation.store'),
       path: '/store',
     },
-    ...(user?.profile?.role?.toLowerCase() === 'admin'
+    ...(user?.role === 'ADMIN'
       ? [{label: 'Admin', path: '/admin'}]
       : []),
   ]

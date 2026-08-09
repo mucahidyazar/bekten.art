@@ -1,68 +1,165 @@
 import {NextResponse} from 'next/server'
 
-import {hash} from 'bcryptjs'
+import {getConfiguredEmailVerificationService} from '@/server/auth/configured-email-verification'
+import {consumeConfiguredRateLimit} from '@/server/auth/configured-rate-limit'
+import {isSameOriginMutation} from '@/server/auth/mutation-origin'
+import {
+  getClientAddress,
+  shouldTrustProxy,
+} from '@/server/auth/request-context'
+import {
+  InvalidRequestBodyError,
+  readBoundedText,
+  RequestBodyTooLargeError,
+} from '@/server/http/bounded-body'
 
-import {prisma} from '@/lib/db'
+const REGISTER_POLICY = Object.freeze({
+  limit: 5,
+  windowMs: 60 * 60 * 1_000,
+})
+const MAX_REQUEST_BYTES = 16 * 1_024
+const acceptedPayload = Object.freeze({
+  message:
+    'If the address can be registered, a verification email has been sent.',
+  success: true,
+})
+
+function getAppUrl() {
+  const configured =
+    process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.NEXTAUTH_URL?.trim()
+
+  if (!configured) {
+    throw new Error('Application URL is not configured')
+  }
+
+  return new URL(configured).origin
+}
+
+function json(payload: unknown, status: number, headers?: HeadersInit) {
+  return NextResponse.json(payload, {
+    headers: {
+      'Cache-Control': 'private, no-store',
+      ...headers,
+    },
+    status,
+  })
+}
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as {
-      email?: string
-      name?: string
-      password?: string
+    const appUrl = getAppUrl()
+
+    if (!isSameOriginMutation(request, appUrl)) {
+      return json({error: 'Request origin is not allowed', success: false}, 403)
     }
 
-    const email = String(body.email ?? '').trim().toLowerCase()
-    const name = String(body.name ?? '').trim()
-    const password = String(body.password ?? '')
+    const contentType = request.headers.get('content-type') ?? ''
+    const contentLength = Number(request.headers.get('content-length') ?? '0')
 
-    if (!email || !password || password.length < 8 || name.length < 2) {
-      return NextResponse.json(
-        {
-          error: 'Name, email, and an 8+ character password are required.',
-          success: false,
-        },
-        {status: 400},
+    if (
+      !contentType.toLowerCase().startsWith('application/json') ||
+      !Number.isFinite(contentLength) ||
+      contentLength > MAX_REQUEST_BYTES
+    ) {
+      return json({error: 'Invalid registration request', success: false}, 400)
+    }
+
+    let rawBody: string
+
+    try {
+      rawBody = await readBoundedText(request, MAX_REQUEST_BYTES)
+    } catch (error) {
+      if (
+        error instanceof InvalidRequestBodyError ||
+        error instanceof RequestBodyTooLargeError
+      ) {
+        return json(
+          {error: 'Invalid registration request', success: false},
+          400,
+        )
+      }
+
+      throw error
+    }
+
+    if (!rawBody) {
+      return json({error: 'Invalid registration request', success: false}, 400)
+    }
+
+    let parsedBody: unknown
+
+    try {
+      parsedBody = JSON.parse(rawBody)
+    } catch {
+      return json({error: 'Invalid registration request', success: false}, 400)
+    }
+
+    if (
+      !parsedBody ||
+      typeof parsedBody !== 'object' ||
+      Array.isArray(parsedBody)
+    ) {
+      return json({error: 'Invalid registration request', success: false}, 400)
+    }
+
+    const body = parsedBody as Record<string, unknown>
+
+    const normalizedEmail = String(body.email ?? '')
+      .trim()
+      .toLowerCase()
+      .slice(0, 320)
+    const address = getClientAddress(request, shouldTrustProxy())
+    const networkLimit = await consumeConfiguredRateLimit({
+      action: 'register_ip',
+      identifier: address,
+      policy: REGISTER_POLICY,
+    })
+
+    if (!networkLimit.allowed) {
+      return json(
+        {error: 'Too many requests. Please try again later.', success: false},
+        429,
+        {'Retry-After': String(networkLimit.retryAfterSeconds)},
       )
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: {email},
+    const identityLimit = await consumeConfiguredRateLimit({
+      action: 'register_identity',
+      identifier: normalizedEmail || 'invalid',
+      policy: REGISTER_POLICY,
     })
 
-    if (existingUser) {
-      return NextResponse.json(
-        {
-          error: 'An account with this email already exists.',
-          success: false,
-        },
-        {status: 409},
+    if (!identityLimit.allowed) {
+      return json(
+        {error: 'Too many requests. Please try again later.', success: false},
+        429,
+        {'Retry-After': String(identityLimit.retryAfterSeconds)},
       )
     }
 
-    const passwordHash = await hash(password, 12)
+    try {
+      await getConfiguredEmailVerificationService().register(body, appUrl)
+    } catch (error) {
+      if (error instanceof Error && error.message === 'REGISTRATION_INPUT_INVALID') {
+        return json({error: 'Invalid registration request', success: false}, 400)
+      }
 
-    await prisma.user.create({
-      data: {
-        email,
-        emailVerified: new Date(),
-        name,
-        passwordHash,
-        role: 'USER',
-      },
-    })
+      if (error instanceof Error && error.message === 'EMAIL_DELIVERY_FAILED') {
+        // The account remains unverified and the hashed token remains valid, so
+        // the same generic response prevents account-enumeration side channels.
+        console.error('Email verification delivery is temporarily unavailable')
 
-    return NextResponse.json({success: true})
-  } catch (error) {
-    console.error('Register API error:', error)
+        return json(acceptedPayload, 202)
+      }
 
-    return NextResponse.json(
-      {
-        error: 'Failed to create account.',
-        success: false,
-      },
-      {status: 500},
-    )
+      throw error
+    }
+
+    return json(acceptedPayload, 202)
+  } catch {
+    console.error('Registration request failed')
+
+    return json({error: 'Unable to process registration', success: false}, 500)
   }
 }
 

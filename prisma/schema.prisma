@@ -25,6 +25,70 @@ enum SectionType {
   news
 }
 
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum NewsCategory {
+  NEWS
+  FEATURE
+  INTERVIEW
+  EXHIBITION
+  BIOGRAPHY
+}
+
+enum PressCategory {
+  INTERVIEW
+  REVIEW
+  FEATURE
+  NEWS
+}
+
+enum TestimonialCategory {
+  ARTIST
+  BUSINESSPERSON
+  POLITICIAN
+  COLLECTOR
+  CRITIC
+  JOURNALIST
+  CURATOR
+}
+
+enum FeedbackStatus {
+  NEW
+  IN_REVIEW
+  RESOLVED
+  SPAM
+}
+
+enum NewsletterStatus {
+  PENDING
+  ACTIVE
+  UNSUBSCRIBED
+  BOUNCED
+}
+
+enum MediaVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum MediaStatus {
+  UPLOADING
+  READY
+  FAILED
+  QUARANTINED
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 model User {
   id                    String               @id @default(uuid()) @db.Uuid
   name                  String?
@@ -34,6 +98,7 @@ model User {
   role                  UserRole             @default(USER)
   passwordHash          String?              @map("password_hash")
   passwordResetRequired Boolean              @default(false) @map("password_reset_required")
+  sessionVersion        Int                  @default(0) @map("session_version")
   phone                 String?
   address               String?
   bio                   String?
@@ -51,6 +116,9 @@ model User {
   created_at            DateTime             @default(now())
   updated_at            DateTime             @updatedAt
   accounts              Account[]
+  audit_events          AuditEvent[]         @relation("AuditEventActor")
+  feedback_resolutions  Feedback[]           @relation("FeedbackResolver")
+  media_objects         MediaObject[]        @relation("MediaObjectUploader")
   password_reset_tokens PasswordResetToken[]
   sessions              Session[]
   socials               Social[]
@@ -101,29 +169,327 @@ model SectionData {
   @@map("section_data")
 }
 
-model UploadedFile {
-  id                 String         @id @default(uuid()) @db.Uuid
-  app_key            String         @default("bekten-art")
-  name               String
-  original_name      String
-  file_path          String         @unique
-  folder             String?
-  file_size          Int
-  file_type          String
-  bucket_name        String
-  public_url         String
-  source_url         String?
-  storage_provider   String         @default("pocketbase")
-  storage_collection String?
-  storage_record_id  String?
-  uploaded_at        DateTime       @default(now())
-  created_at         DateTime       @default(now())
-  updated_at         DateTime       @updatedAt
-  instagram_post     InstagramPost?
+model Artwork {
+  id           String        @id @default(uuid()) @db.Uuid
+  locale       String        @db.VarChar(5)
+  slug         String        @db.VarChar(160)
+  title        String        @db.VarChar(200)
+  description  String        @db.Text
+  imageUrl     String        @map("image_url") @db.Text
+  imageAlt     String        @map("image_alt") @db.VarChar(300)
+  objectKey    String?       @map("object_key") @db.VarChar(1024)
+  medium       String?       @db.VarChar(160)
+  dimensions   String?       @db.VarChar(120)
+  year         Int?
+  priceMinor   Int?          @map("price_minor")
+  currency     String?       @db.Char(3)
+  isAvailable  Boolean       @default(true) @map("is_available")
+  displayOrder Int           @default(0) @map("display_order")
+  status       ContentStatus @default(DRAFT)
+  publishedAt  DateTime?     @map("published_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
 
-  @@index([app_key, bucket_name])
-  @@index([bucket_name, uploaded_at])
-  @@map("uploaded_files")
+  @@unique([locale, slug])
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@map("artworks")
+}
+
+model NewsArticle {
+  id           String        @id @default(uuid()) @db.Uuid
+  locale       String        @db.VarChar(5)
+  slug         String        @db.VarChar(160)
+  title        String        @db.VarChar(200)
+  subtitle     String?       @db.VarChar(300)
+  excerpt      String        @db.Text
+  body         String        @db.Text
+  imageUrl     String?       @map("image_url") @db.Text
+  imageAlt     String?       @map("image_alt") @db.VarChar(300)
+  objectKey    String?       @map("object_key") @db.VarChar(1024)
+  eventAt      DateTime?     @map("event_at")
+  location     String?       @db.VarChar(200)
+  address      String?       @db.VarChar(300)
+  note         String?       @db.VarChar(500)
+  sourceUrl    String?       @map("source_url") @db.Text
+  category     NewsCategory  @default(NEWS)
+  displayOrder Int           @default(0) @map("display_order")
+  status       ContentStatus @default(DRAFT)
+  publishedAt  DateTime?     @map("published_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@unique([locale, slug])
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@index([eventAt])
+  @@map("news_articles")
+}
+
+model PressItem {
+  id           String        @id @default(uuid()) @db.Uuid
+  locale       String        @db.VarChar(5)
+  title        String        @db.VarChar(200)
+  subtitle     String?       @db.VarChar(300)
+  description  String        @db.Text
+  content      String?       @db.Text
+  imageUrl     String?       @map("image_url") @db.Text
+  imageAlt     String?       @map("image_alt") @db.VarChar(300)
+  objectKey    String?       @map("object_key") @db.VarChar(1024)
+  outlet       String        @db.VarChar(200)
+  sourceUrl    String        @map("source_url") @db.Text
+  publishedOn  DateTime?     @map("published_on") @db.Date
+  category     PressCategory
+  displayOrder Int           @default(0) @map("display_order")
+  status       ContentStatus @default(DRAFT)
+  publishedAt  DateTime?     @map("published_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@map("press_items")
+}
+
+model Testimonial {
+  id           String              @id @default(uuid()) @db.Uuid
+  locale       String              @db.VarChar(5)
+  name         String              @db.VarChar(120)
+  title        String              @db.VarChar(180)
+  company      String?             @db.VarChar(150)
+  location     String?             @db.VarChar(150)
+  quote        String              @db.Text
+  avatarUrl    String?             @map("avatar_url") @db.Text
+  avatarAlt    String?             @map("avatar_alt") @db.VarChar(300)
+  objectKey    String?             @map("object_key") @db.VarChar(1024)
+  category     TestimonialCategory
+  sourceUrl    String?             @map("source_url") @db.Text
+  displayOrder Int                 @default(0) @map("display_order")
+  status       ContentStatus       @default(DRAFT)
+  publishedAt  DateTime?           @map("published_at")
+  createdAt    DateTime            @default(now()) @map("created_at")
+  updatedAt    DateTime            @updatedAt @map("updated_at")
+
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@map("testimonials")
+}
+
+model WorkshopItem {
+  id              String        @id @default(uuid()) @db.Uuid
+  locale          String        @db.VarChar(5)
+  slug            String        @db.VarChar(160)
+  title           String        @db.VarChar(200)
+  description     String        @db.Text
+  imageUrl        String?       @map("image_url") @db.Text
+  imageAlt        String?       @map("image_alt") @db.VarChar(300)
+  objectKey       String?       @map("object_key") @db.VarChar(1024)
+  startsAt        DateTime?     @map("starts_at")
+  endsAt          DateTime?     @map("ends_at")
+  location        String?       @db.VarChar(200)
+  registrationUrl String?       @map("registration_url") @db.Text
+  displayOrder    Int           @default(0) @map("display_order")
+  status          ContentStatus @default(DRAFT)
+  publishedAt     DateTime?     @map("published_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  @@unique([locale, slug])
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@map("workshop_items")
+}
+
+model Memory {
+  id           String        @id @default(uuid()) @db.Uuid
+  locale       String        @db.VarChar(5)
+  slug         String        @db.VarChar(160)
+  title        String        @db.VarChar(160)
+  description  String        @db.Text
+  imageUrl     String        @map("image_url") @db.Text
+  imageAlt     String        @map("image_alt") @db.VarChar(300)
+  objectKey    String?       @map("object_key") @db.VarChar(1024)
+  capturedAt   DateTime?     @map("captured_at") @db.Date
+  displayOrder Int           @default(0) @map("display_order")
+  status       ContentStatus @default(DRAFT)
+  publishedAt  DateTime?     @map("published_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@unique([locale, slug])
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@map("memories")
+}
+
+model ArtistStat {
+  id           String        @id @default(uuid()) @db.Uuid
+  locale       String        @db.VarChar(5)
+  value        String        @db.VarChar(40)
+  label        String        @db.VarChar(100)
+  description  String        @db.VarChar(500)
+  displayOrder Int           @default(0) @map("display_order")
+  status       ContentStatus @default(DRAFT)
+  publishedAt  DateTime?     @map("published_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@map("artist_stats")
+}
+
+model ContactInfo {
+  id           String   @id @default(uuid()) @db.Uuid
+  locale       String   @unique @db.VarChar(5)
+  email        String   @db.VarChar(320)
+  phone        String   @db.VarChar(40)
+  address      String   @db.VarChar(500)
+  workingHours String?  @map("working_hours") @db.VarChar(300)
+  mapEmbedUrl  String?  @map("map_embed_url") @db.Text
+  instagramUrl String?  @map("instagram_url") @db.Text
+  isPrimary    Boolean  @default(false) @map("is_primary")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([isPrimary])
+  @@map("contact_info")
+}
+
+model Feedback {
+  id                String         @id @default(uuid()) @db.Uuid
+  name              String         @db.VarChar(120)
+  email             String         @db.VarChar(320)
+  subject           String         @db.VarChar(200)
+  message           String         @db.Text
+  locale            String         @db.VarChar(5)
+  rating            Int?
+  source            String         @default("contact-form") @db.VarChar(80)
+  status            FeedbackStatus @default(NEW)
+  privacyAcceptedAt DateTime       @map("privacy_accepted_at")
+  purgeAfter        DateTime?      @map("purge_after")
+  resolvedAt        DateTime?      @map("resolved_at")
+  resolvedByUserId  String?        @map("resolved_by_user_id") @db.Uuid
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+  resolvedByUser    User?          @relation("FeedbackResolver", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([email, createdAt])
+  @@index([purgeAfter])
+  @@map("feedback")
+}
+
+model NewsletterSubscriber {
+  id                    String           @id @default(uuid()) @db.Uuid
+  email                 String           @unique @db.VarChar(320)
+  locale                String           @db.VarChar(5)
+  source                String           @db.VarChar(80)
+  status                NewsletterStatus @default(PENDING)
+  consentedAt           DateTime         @map("consented_at")
+  confirmedAt           DateTime?        @map("confirmed_at")
+  unsubscribedAt        DateTime?        @map("unsubscribed_at")
+  confirmationTokenHash String?          @unique @map("confirmation_token_hash") @db.VarChar(128)
+  unsubscribeTokenHash  String?          @unique @map("unsubscribe_token_hash") @db.VarChar(128)
+  createdAt             DateTime         @default(now()) @map("created_at")
+  updatedAt             DateTime         @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@map("newsletter_subscribers")
+}
+
+model MediaObject {
+  id               String          @id @default(uuid()) @db.Uuid
+  provider         String          @default("garage") @db.VarChar(32)
+  objectKey        String          @unique @map("object_key") @db.VarChar(1024)
+  filename         String          @db.VarChar(255)
+  originalFilename String          @map("original_filename") @db.VarChar(255)
+  mimeType         String          @map("mime_type") @db.VarChar(127)
+  sizeBytes        Int             @map("size_bytes")
+  checksumSha256   String          @map("checksum_sha256") @db.Char(64)
+  width            Int?
+  height           Int?
+  visibility       MediaVisibility @default(PRIVATE)
+  status           MediaStatus     @default(UPLOADING)
+  uploadedByUserId String?         @map("uploaded_by_user_id") @db.Uuid
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+  uploadedByUser   User?           @relation("MediaObjectUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  instagramPosts   InstagramPost[]
+
+  @@index([status, createdAt])
+  @@index([visibility, status])
+  @@index([checksumSha256])
+  @@map("media_objects")
+}
+
+model AuditEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  action      String   @db.VarChar(120)
+  entityType  String   @map("entity_type") @db.VarChar(120)
+  entityId    String?  @map("entity_id") @db.VarChar(160)
+  requestId   String?  @map("request_id") @db.VarChar(160)
+  ipHash      String?  @map("ip_hash") @db.VarChar(128)
+  userAgent   String?  @map("user_agent") @db.VarChar(1000)
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  actorUser   User?    @relation("AuditEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_events")
+}
+
+model OutboxJob {
+  id             String       @id @default(uuid()) @db.Uuid
+  type           String       @db.VarChar(120)
+  payload        Json
+  idempotencyKey String       @unique @map("idempotency_key") @db.VarChar(200)
+  status         OutboxStatus @default(PENDING)
+  attempts       Int          @default(0)
+  maxAttempts    Int          @default(10) @map("max_attempts")
+  availableAt    DateTime     @default(now()) @map("available_at")
+  lockedAt       DateTime?    @map("locked_at")
+  lockedBy       String?      @map("locked_by") @db.VarChar(160)
+  lastError      String?      @map("last_error") @db.Text
+  completedAt    DateTime?    @map("completed_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  @@index([status, availableAt])
+  @@index([lockedAt])
+  @@map("outbox_jobs")
+}
+
+model EmailWebhookEvent {
+  id                String   @id @default(uuid()) @db.Uuid
+  provider          String   @db.VarChar(40)
+  externalId        String   @map("external_id") @db.VarChar(200)
+  eventType         String   @map("event_type") @db.VarChar(120)
+  providerMessageId String   @map("provider_message_id") @db.VarChar(160)
+  occurredAt        DateTime @map("occurred_at")
+  processedAt       DateTime @map("processed_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@unique([provider, externalId])
+  @@index([eventType, occurredAt])
+  @@index([providerMessageId])
+  @@map("email_webhook_events")
+}
+
+model RateLimitBucket {
+  action      String   @db.VarChar(120)
+  key         String   @db.Char(64)
+  attempts    Int      @default(0)
+  windowStart DateTime @map("window_start")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@id([action, key])
+  @@index([windowStart])
+  @@map("auth_rate_limits")
 }
 
 model InstagramPost {
@@ -144,10 +510,10 @@ model InstagramPost {
   is_pinned          Boolean       @default(false)
   raw_payload        Json
   synced_at          DateTime      @default(now())
-  uploaded_file_id   String?       @unique @db.Uuid
+  media_object_id    String?       @unique @db.Uuid
   created_at         DateTime      @default(now())
   updated_at         DateTime      @updatedAt
-  uploaded_file      UploadedFile? @relation(fields: [uploaded_file_id], references: [id], onDelete: SetNull)
+  media_object       MediaObject?  @relation(fields: [media_object_id], references: [id], onDelete: SetNull)
 
   @@index([is_active, display_order])
   @@index([username, is_active, posted_at])

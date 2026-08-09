@@ -1,6 +1,7 @@
 'use client'
 
-import {usePathname, useRouter} from 'next/navigation'
+import Link from 'next/link'
+import {usePathname} from 'next/navigation'
 
 import {cn} from '@/utils'
 
@@ -14,29 +15,29 @@ type TabsProps = {
 }
 
 export function Tabs({tabs}: TabsProps) {
-  const router = useRouter()
   const pathname = usePathname()
 
   return (
-    <div className="grid grid-cols-2 gap-1">
+    <nav aria-label="Authentication" className="grid grid-cols-2 gap-1">
       {tabs.map(tab => {
-        const isActive = pathname.includes(tab.value)
+        const isActive = pathname === tab.value
 
         return (
-          <button
+          <Link
             key={tab.value}
-            onClick={() => router.push(tab.value)}
+            href={tab.value}
+            aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'px-4 py-2 text-sm font-medium rounded-md transition-colors border',
+              'rounded-md border px-4 py-2 text-center text-sm font-medium transition-colors',
               isActive
-                ? 'bg-background text-foreground shadow-sm border-ring/40'
-                : 'text-muted-foreground hover:text-foreground hover:bg-background/60 border-transparent hover:border-ring/20'
+                ? 'border-ring/40 bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-background/60 hover:border-ring/20 border-transparent',
             )}
           >
             {tab.label}
-          </button>
+          </Link>
         )
       })}
-    </div>
+    </nav>
   )
 }

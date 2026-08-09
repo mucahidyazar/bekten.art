@@ -1,9 +1,11 @@
 'use client'
 
+import {useRouter} from 'next/navigation'
+
 import {zodResolver} from '@hookform/resolvers/zod'
 import {EyeIcon, EyeOffIcon, MailIcon} from 'lucide-react'
 import {signIn} from 'next-auth/react'
-import {useTranslations} from 'next-intl'
+import {useLocale, useTranslations} from 'next-intl'
 import {useState} from 'react'
 import {useForm} from 'react-hook-form'
 import {z} from 'zod'
@@ -28,6 +30,8 @@ type FormValues = {
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const locale = useLocale()
+  const router = useRouter()
   const t = useTranslations('forms')
   const {toast} = useToast()
 
@@ -51,6 +55,7 @@ export function SignInForm() {
       const result = await signIn('credentials', {
         email,
         password,
+        callbackUrl: `/${locale}`,
         redirect: false,
       })
 
@@ -69,7 +74,8 @@ export function SignInForm() {
         description: 'You have been successfully signed in',
       })
 
-      window.location.href = result?.url || '/'
+      router.push(`/${locale}`)
+      router.refresh()
     } catch (error) {
       console.error('Sign in error:', error)
       toast({
@@ -93,16 +99,19 @@ export function SignInForm() {
               <FormLabel className="text-foreground text-sm font-medium">
                 {t('labels.email')}
               </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <MailIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <div className="relative">
+                <MailIcon
+                  aria-hidden="true"
+                  className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                />
+                <FormControl>
                   <Input
                     placeholder={t('placeholders.enterEmail')}
                     className="bg-background border-ring/30 focus:border-primary h-10 pl-10 transition-colors"
                     {...field}
                   />
-                </div>
-              </FormControl>
+                </FormControl>
+              </div>
               <FormMessage className="text-xs" />
             </FormItem>
           )}
@@ -116,27 +125,32 @@ export function SignInForm() {
               <FormLabel className="text-foreground text-sm font-medium">
                 {t('labels.password')}
               </FormLabel>
-              <FormControl>
-                <div className="relative">
+              <div className="relative">
+                <FormControl>
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     placeholder={t('placeholders.enterPassword')}
                     className="bg-background border-ring/30 focus:border-primary h-10 pr-10 transition-colors"
                     {...field}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeOffIcon className="h-4 w-4" />
-                    ) : (
-                      <EyeIcon className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </FormControl>
+                </FormControl>
+                <button
+                  type="button"
+                  aria-label={
+                    showPassword
+                      ? t('buttons.hidePassword')
+                      : t('buttons.showPassword')
+                  }
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOffIcon aria-hidden="true" className="h-4 w-4" />
+                  ) : (
+                    <EyeIcon aria-hidden="true" className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               <FormMessage className="text-xs" />
             </FormItem>
           )}

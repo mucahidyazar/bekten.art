@@ -1,48 +1,46 @@
 'use client'
 
-import {usePathname, useSearchParams} from 'next/navigation'
+import {usePathname} from 'next/navigation'
 import Script from 'next/script'
 
-import {useEffect} from 'react'
+import {useEffect, useRef} from 'react'
 
+import {useConsent} from '@/components/consent/consent-provider'
 import {configs} from '@/configs'
-import {GTM_ID, pageview} from '@/lib/gtag'
+import {GTM_ID, virtualPageview} from '@/lib/gtag'
 
-export function GoogleTagManager() {
+type GoogleTagManagerProps = {
+  nonce?: string
+}
+
+export function GoogleTagManager({nonce}: GoogleTagManagerProps) {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const {decision, hydrated} = useConsent()
+  const currentPath = pathname
+  const previousPath = useRef(currentPath)
 
   useEffect(() => {
-    if (pathname) {
-      pageview(pathname)
-    }
-  }, [pathname, searchParams])
+    if (previousPath.current === currentPath) return
 
-  if (!configs.isProduction || !GTM_ID) return null
+    previousPath.current = currentPath
+
+    if (configs.isProduction && GTM_ID && decision?.analytics) {
+      virtualPageview(currentPath)
+    }
+  }, [currentPath, decision?.analytics])
+
+  const consentAllowsGoogleTags = Boolean(
+    hydrated && (decision?.analytics || decision?.marketing),
+  )
+
+  if (!configs.isProduction || !GTM_ID || !consentAllowsGoogleTags) return null
 
   return (
-    <>
-      <noscript>
-        <iframe
-          src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-          height="0"
-          width="0"
-          style={{display: 'none', visibility: 'hidden'}}
-        />
-      </noscript>
-      <Script
-        id="gtm-script"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer', '${GTM_ID}');
-  `,
-        }}
-      />
-    </>
+    <Script
+      id="google-tag-manager"
+      nonce={nonce}
+      src={`https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(GTM_ID)}`}
+      strategy="afterInteractive"
+    />
   )
 }

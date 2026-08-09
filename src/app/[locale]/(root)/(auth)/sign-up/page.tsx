@@ -4,9 +4,15 @@ import {getTranslations} from 'next-intl/server'
 
 import {SignUpForm} from '@/components/forms/sign-up-form'
 import {AuthSection} from '@/components/molecules/auth-section'
+import {localizedPath} from '@/lib/localized-path'
 
-export default async function SignUpPage() {
-  const t = await getTranslations('auth.signUp')
+import type {AppLocale} from '@/lib/localized-path'
+
+export default async function SignUpPage({
+  params,
+}: Readonly<{params: Promise<{locale: AppLocale}>}>) {
+  const {locale} = await params
+  const t = await getTranslations({locale, namespace: 'auth.signUp'})
 
   return (
     <div className="w-full space-y-4">
@@ -41,7 +47,7 @@ export default async function SignUpPage() {
         <p>
           {t('hasAccount')}{' '}
           <Link
-            href="/sign-in"
+            href={localizedPath(locale, '/sign-in')}
             className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
             {t('signIn')}

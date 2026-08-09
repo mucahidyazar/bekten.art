@@ -2,17 +2,20 @@ import './global.css'
 
 import {Metadata} from 'next'
 
+import {headers} from 'next/headers'
 import {notFound} from 'next/navigation'
 
 import {NextIntlClientProvider} from 'next-intl'
 import {ViewTransitions} from 'next-view-transitions'
 import {Suspense} from 'react'
 
-import {GoogleTagManager} from '@/components/lib/google-tag-manager'
+import {ConsentBootstrap} from '@/components/consent/consent-bootstrap'
 import {
-  MusicProvider,
-  defaultTracks,
-} from '@/components/providers/music-provider'
+  ConsentManager,
+  ConsentProvider,
+} from '@/components/consent/consent-provider'
+import {GoogleTagManager} from '@/components/lib/google-tag-manager'
+import {MusicProvider} from '@/components/providers/music-provider'
 import {QueryProvider} from '@/components/providers/query-provider'
 import {ThemeProvider} from '@/components/providers/theme-provider'
 import {UserProvider} from '@/components/providers/user-provider'
@@ -26,8 +29,10 @@ import {MusicPlayer} from '@/components/ui/music-player'
 import {Toaster} from '@/components/ui/toaster'
 import {ME} from '@/constants'
 import {LOCALES} from '@/constants/locales'
+import {getUiUser} from '@/server/auth/ui-user'
 import {prepareMetadata} from '@/utils/prepare-metadata'
-import {getUser} from '@/utils/supabase/server'
+
+import {resolveMessagesLocale} from '../../../i18n'
 
 export async function generateMetadata(): Promise<Metadata> {
   return prepareMetadata()
@@ -35,8 +40,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getMessages(locale: string) {
   try {
-    return (await import(`../../../public/locales/${locale}/common.json`))
-      .default
+    const messagesLocale = resolveMessagesLocale(locale)
+
+    return (
+      await import(`../../../public/locales/${messagesLocale}/common.json`)
+    ).default
   } catch {
     notFound()
   }
@@ -49,11 +57,12 @@ type LayoutProps = {
   }>
 }
 export default async function RootLayout({children, params}: LayoutProps) {
-  const {locale} = await params
+  const [{locale}, requestHeaders] = await Promise.all([params, headers()])
   const messages = await getMessages(locale)
+  const nonce = requestHeaders.get('x-nonce') ?? undefined
 
   // Get initial user data for UserProvider
-  const user = await getUser()
+  const user = await getUiUser()
 
   // Determine domain for structured data
   const domain =
@@ -66,63 +75,41 @@ export default async function RootLayout({children, params}: LayoutProps) {
     <ViewTransitions>
       <html lang={locale} suppressHydrationWarning>
         <head>
+          <ConsentBootstrap nonce={nonce} />
+
           {/* Hreflang tags for multilingual SEO */}
           <HrefLang locales={LOCALES} defaultLocale="en" />
-
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                // Prevent hydration mismatch from browser extensions
-                if (typeof window !== 'undefined') {
-                  const observer = new MutationObserver((mutations) => {
-                    mutations.forEach((mutation) => {
-                      if (mutation.type === 'attributes') {
-                        const target = mutation.target;
-                        if (target && target.hasAttribute && target.hasAttribute('bis_skin_checked')) {
-                          target.removeAttribute('bis_skin_checked');
-                        }
-                      }
-                    });
-                  });
-                  document.addEventListener('DOMContentLoaded', () => {
-                    observer.observe(document.body, {
-                      attributes: true,
-                      subtree: true,
-                      attributeFilter: ['bis_skin_checked']
-                    });
-                  });
-                }
-              `,
-            }}
-          />
         </head>
         <body
           className="font-editorial bg-background flex flex-col overflow-x-hidden"
           suppressHydrationWarning
         >
           <NextIntlClientProvider locale={locale} messages={messages}>
-            <QueryProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="light"
-                enableSystem
-                themes={['light', 'dark', 'navy', 'system']}
-              >
-                <UserProvider initialUser={user}>
-                  <MusicProvider defaultTracks={defaultTracks}>
-                    {children}
-                    <MusicPlayer />
-                  </MusicProvider>
-                </UserProvider>
-              </ThemeProvider>
-            </QueryProvider>
+            <ConsentProvider>
+              <QueryProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="light"
+                  enableSystem
+                  themes={['light', 'dark', 'navy', 'system']}
+                >
+                  <UserProvider initialUser={user}>
+                    <MusicProvider>
+                      {children}
+                      <MusicPlayer />
+                      <ConsentManager />
+                    </MusicProvider>
+                  </UserProvider>
+                </ThemeProvider>
+              </QueryProvider>
+
+              <Suspense>
+                <GoogleTagManager nonce={nonce} />
+              </Suspense>
+            </ConsentProvider>
           </NextIntlClientProvider>
 
           <Toaster />
-
-          <Suspense>
-            <GoogleTagManager />
-          </Suspense>
 
           {/* Structured Data */}
           <PersonStructuredData

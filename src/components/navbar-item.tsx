@@ -3,7 +3,12 @@
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 
+import {useLocale} from 'next-intl'
+
+import {localizedPath} from '@/lib/localized-path'
 import {cn} from '@/utils/cn'
+
+import type {AppLocale} from '@/lib/localized-path'
 
 interface INavbarItemProps {
   label: string
@@ -11,6 +16,7 @@ interface INavbarItemProps {
 }
 export function NavbarItem(item: INavbarItemProps) {
   const pathname = usePathname()
+  const locale = useLocale() as AppLocale
 
   const isActive = () => {
     // Remove locale prefix from pathname for comparison (e.g., /tr/about -> /about)
@@ -42,7 +48,7 @@ export function NavbarItem(item: INavbarItemProps) {
         isActive() && 'text-primary font-medium',
       )}
     >
-      <Link href={item.path}>{item.label}</Link>
+      <Link href={localizedPath(locale, item.path)}>{item.label}</Link>
       <div
         className={cn(
           'bg-primary h-[2px] w-0 transition-all duration-300 ease-in-out group-hover:w-full',

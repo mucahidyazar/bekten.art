@@ -12,18 +12,11 @@ interface MusicPlayerProps {
 }
 
 export function MusicPlayer({className = ''}: MusicPlayerProps) {
-  const {
-    isPlaying,
-    isLoading,
-    error,
-    toggleMusic,
-  } = useMusic()
+  const {isPlaying, isLoading, error, tracks, toggleMusic} = useMusic()
 
   const [isExpanded, setIsExpanded] = useState(false)
 
-  if (error) {
-    return null // Hide player on error
-  }
+  if (error || tracks.length === 0) return null
 
   return (
     <div
@@ -37,7 +30,7 @@ export function MusicPlayer({className = ''}: MusicPlayerProps) {
         {/* Vinyl Record */}
         <div
           className={`relative z-20 h-16 w-16 transition-transform duration-300 ${
-            isPlaying ? 'animate-spin' : ''
+            isPlaying ? 'animate-spin motion-reduce:animate-none' : ''
           } ${isExpanded ? 'scale-110' : 'scale-100'}`}
           style={{animationDuration: '3s'}}
         >
@@ -80,6 +73,7 @@ export function MusicPlayer({className = ''}: MusicPlayerProps) {
 
         {/* Play/Pause Overlay */}
         <button
+          aria-label={isPlaying ? 'Pause music' : 'Play music'}
           onClick={toggleMusic}
           disabled={isLoading}
           className="absolute inset-0 z-30 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-black/10"

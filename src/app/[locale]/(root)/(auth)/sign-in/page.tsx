@@ -6,9 +6,15 @@ import {Suspense} from 'react'
 import {SignInForm} from '@/components/forms/sign-in-form'
 import {AuthSection} from '@/components/molecules/auth-section'
 import {ErrorDisplay} from '@/components/molecules/error-display'
+import {localizedPath} from '@/lib/localized-path'
 
-export default async function SignInPage() {
-  const t = await getTranslations('auth.signIn')
+import type {AppLocale} from '@/lib/localized-path'
+
+export default async function SignInPage({
+  params,
+}: Readonly<{params: Promise<{locale: AppLocale}>}>) {
+  const {locale} = await params
+  const t = await getTranslations({locale, namespace: 'auth.signIn'})
 
   return (
     <div className="w-full space-y-4">
@@ -43,12 +49,21 @@ export default async function SignInPage() {
       {/* Email/Password Form */}
       <SignInForm />
 
+      <div className="text-center">
+        <Link
+          className="text-primary text-sm font-medium underline-offset-4 hover:underline"
+          href={localizedPath(locale, '/forgot-password')}
+        >
+          {t('forgotPassword')}
+        </Link>
+      </div>
+
       {/* Footer */}
       <div className="text-muted-foreground text-center text-sm">
         <p>
           {t('noAccount')}{' '}
           <Link
-            href="/sign-up"
+            href={localizedPath(locale, '/sign-up')}
             className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
             {t('signUp')}

@@ -21,7 +21,7 @@
   --color-popover-foreground: hsl(222.2 84% 4.9%);
 
   --color-input: hsl(214.3 31.8% 82%);
-  --color-primary: hsl(210 100% 50%);
+  --color-primary: hsl(210 100% 38%);
   --color-primary-foreground: hsl(0 0% 100%);
 
   --color-secondary: hsl(210 40% 85%);
@@ -108,8 +108,12 @@
 }
 
 @layer utilities {
-  .container {
+  .app-container {
     @apply mx-auto max-w-7xl space-y-5 px-4 py-3 sm:space-y-10 sm:py-7 xl:px-0;
+  }
+
+  .app-container-sm {
+    @apply mx-auto max-w-lg space-y-5 px-4 py-3 sm:space-y-10 sm:py-7 xl:px-0;
   }
 
   .admin-container {
@@ -130,39 +134,39 @@
 
   /* Custom primary color utilities */
   .text-primary-500 {
-    color: hsl(var(--color-primary-500));
+    color: var(--color-primary-500);
   }
 
   .text-primary-700 {
-    color: hsl(var(--color-primary-700));
+    color: var(--color-primary-700);
   }
 
   .text-primary-900 {
-    color: hsl(var(--color-primary-900));
+    color: var(--color-primary-900);
   }
 
   .bg-primary-500 {
-    background-color: hsl(var(--color-primary-500));
+    background-color: var(--color-primary-500);
   }
 
   .bg-primary-700 {
-    background-color: hsl(var(--color-primary-700));
+    background-color: var(--color-primary-700);
   }
 
   .bg-primary-900 {
-    background-color: hsl(var(--color-primary-900));
+    background-color: var(--color-primary-900);
   }
 
   .border-primary-500 {
-    border-color: hsl(var(--color-primary-500));
+    border-color: var(--color-primary-500);
   }
 
   .border-primary-700 {
-    border-color: hsl(var(--color-primary-700));
+    border-color: var(--color-primary-700);
   }
 
   .border-primary-900 {
-    border-color: hsl(var(--color-primary-900));
+    border-color: var(--color-primary-900);
   }
 
   /* Shadow utilities */
@@ -189,14 +193,26 @@
   }
 
   body {
-    background-color: hsl(var(--color-background));
-    color: hsl(var(--color-foreground));
+    background-color: var(--color-background);
+    color: var(--color-foreground);
     font-family:
       -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
       Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
@@ -228,6 +244,7 @@ div[data-nextjs-scroll-focus-boundary] {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -239,6 +256,7 @@ div[data-nextjs-scroll-focus-boundary] {
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -249,6 +267,7 @@ div[data-nextjs-scroll-focus-boundary] {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -260,6 +279,7 @@ div[data-nextjs-scroll-focus-boundary] {
     background-size: 200% 200%;
     background-position: left center;
   }
+
   50% {
     background-size: 200% 200%;
     background-position: right center;
@@ -270,6 +290,7 @@ div[data-nextjs-scroll-focus-boundary] {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -337,6 +358,7 @@ div[data-nextjs-scroll-focus-boundary] {
   100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -347,9 +369,11 @@ div[data-nextjs-scroll-focus-boundary] {
   100% {
     transform: translateY(0px) translateX(0px);
   }
+
   33% {
     transform: translateY(-8px) translateX(2px);
   }
+
   66% {
     transform: translateY(-4px) translateX(-2px);
   }
@@ -360,6 +384,7 @@ div[data-nextjs-scroll-focus-boundary] {
   100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-6px) rotate(5deg);
   }
@@ -370,9 +395,11 @@ div[data-nextjs-scroll-focus-boundary] {
     opacity: 0;
     transform: scaleX(0);
   }
+
   50% {
     opacity: 1;
   }
+
   100% {
     opacity: 0.3;
     transform: scaleX(1);
@@ -384,6 +411,7 @@ div[data-nextjs-scroll-focus-boundary] {
   100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-12px) rotate(10deg);
   }
@@ -394,6 +422,7 @@ div[data-nextjs-scroll-focus-boundary] {
   100% {
     transform: translateY(0px) rotate(45deg);
   }
+
   50% {
     transform: translateY(-8px) rotate(55deg);
   }
@@ -404,9 +433,11 @@ div[data-nextjs-scroll-focus-boundary] {
     transform: translateY(-20px);
     opacity: 0;
   }
+
   50% {
     opacity: 1;
   }
+
   100% {
     transform: translateY(20px);
     opacity: 0;
@@ -418,6 +449,7 @@ div[data-nextjs-scroll-focus-boundary] {
   100% {
     transform: rotate(1deg);
   }
+
   50% {
     transform: rotate(-0.5deg);
   }
@@ -428,6 +460,7 @@ div[data-nextjs-scroll-focus-boundary] {
   100% {
     transform: rotate(-1deg);
   }
+
   50% {
     transform: rotate(0.5deg);
   }
@@ -437,12 +470,15 @@ div[data-nextjs-scroll-focus-boundary] {
   0% {
     filter: hue-rotate(0deg);
   }
+
   33% {
     filter: hue-rotate(120deg);
   }
+
   66% {
     filter: hue-rotate(240deg);
   }
+
   100% {
     filter: hue-rotate(360deg);
   }
@@ -453,6 +489,7 @@ div[data-nextjs-scroll-focus-boundary] {
   100% {
     text-shadow: 0 0 5px currentColor;
   }
+
   50% {
     text-shadow:
       0 0 20px currentColor,
@@ -466,6 +503,7 @@ div[data-nextjs-scroll-focus-boundary] {
     background-size: 200% 200%;
     background-position: left center;
   }
+
   50% {
     background-size: 200% 200%;
     background-position: right center;
@@ -477,6 +515,7 @@ div[data-nextjs-scroll-focus-boundary] {
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.8;
   }

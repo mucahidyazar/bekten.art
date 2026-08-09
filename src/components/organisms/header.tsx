@@ -3,21 +3,25 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-import {useTranslations} from 'next-intl'
+import {useLocale, useTranslations} from 'next-intl'
 import {useEffect, useState} from 'react'
 
 import {Navbar} from '@/components/navbar'
+import {localizedPath} from '@/lib/localized-path'
 import {cn} from '@/utils'
-import {EnhancedUser} from '@/utils/supabase/server'
 
 import {AppTools} from '../molecules/app-tools'
 
+import type {AppLocale} from '@/lib/localized-path'
+import type {UiUser} from '@/types/ui-user'
+
 interface HeaderProps {
-  user: EnhancedUser | null
+  user: UiUser | null
 }
 
 function HeaderClient({user}: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false)
+  const locale = useLocale() as AppLocale
   const t = useTranslations()
 
   useEffect(() => {
@@ -50,7 +54,7 @@ function HeaderClient({user}: HeaderProps) {
     >
       <div
         className={cn(
-          'relative container flex w-full flex-col',
+          'app-container relative flex w-full flex-col',
           isScrolled
             ? 'md:flex-row md:items-center md:justify-between md:py-4!'
             : '',
@@ -66,14 +70,14 @@ function HeaderClient({user}: HeaderProps) {
             isScrolled ? 'md:mb-0' : '',
           )}
         >
-          <Link href="/">
+          <Link href={localizedPath(locale, '/')}>
             <Image
               src="/svg/full-logo.svg"
               alt={t('header.logoAlt')}
               width={120}
               height={40}
               priority
-              className="mb-4 h-auto w-30 cursor-pointer"
+              className="mb-4 cursor-pointer"
             />
           </Link>
           <p

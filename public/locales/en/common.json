@@ -1,4 +1,49 @@
 {
+  "passwordReset": {
+    "backToSignIn": "Back to sign in",
+    "confirmPassword": "Confirm new password",
+    "email": "Email address",
+    "genericError": "We could not process your request. Please try again.",
+    "invalidLink": "This reset link is invalid or expired.",
+    "mismatch": "Passwords do not match.",
+    "newPassword": "New password",
+    "requestButton": "Send reset link",
+    "requestSubtitle": "Enter your account email and we will send a secure, time-limited link.",
+    "requestSuccess": "Check your inbox for a reset link if the account is eligible.",
+    "requestTitle": "Reset your password",
+    "requesting": "Sending reset link...",
+    "resetButton": "Reset password",
+    "resetSubtitle": "Choose a new password with at least 12 characters.",
+    "resetSuccess": "Your password has been reset.",
+    "resetTitle": "Choose a new password",
+    "resetting": "Resetting password..."
+  },
+  "consent": {
+    "title": "Your privacy choices",
+    "description": "We use optional analytics to understand how the site is used, marketing storage only when needed, and external media to show services such as Google Maps. Necessary storage is always active.",
+    "acceptAll": "Accept all",
+    "rejectAll": "Reject optional",
+    "managePreferences": "Manage choices",
+    "openPreferences": "Open privacy preferences",
+    "preferencesTitle": "Privacy preferences",
+    "preferencesDescription": "Choose which optional services may run. You can change these choices at any time.",
+    "necessaryTitle": "Necessary",
+    "necessaryDescription": "Required for security, authentication and saving your privacy choice.",
+    "alwaysActive": "Always active",
+    "analyticsTitle": "Analytics",
+    "analyticsDescription": "Allows Google Analytics, managed through Google Tag Manager, to measure site usage.",
+    "marketingTitle": "Marketing",
+    "marketingDescription": "Allows Google advertising storage and ad personalization signals. These remain off unless you opt in.",
+    "externalMediaTitle": "External media",
+    "externalMediaDescription": "Allows content hosted by third parties, including the Google Maps studio map, to load.",
+    "savePreferences": "Save preferences",
+    "closePreferences": "Close privacy preferences",
+    "preferencesSaved": "Your privacy preferences were saved.",
+    "mapBlockedTitle": "Google Maps is blocked",
+    "mapBlockedDescription": "The map will not contact Google until you allow external media.",
+    "allowMap": "Allow and load map",
+    "mapUnavailable": "The configured studio map is unavailable."
+  },
   "about": {
     "achievements": "Achievements",
     "biography": "Biography",
@@ -50,6 +95,7 @@
       "title": "Welcome Back",
 
       "googleButton": "Continue with Google",
+      "forgotPassword": "Forgot your password?",
       "noAccount": "Don't have an account?",
       "orContinue": "Or continue with email",
       "signUp": "Sign up"
@@ -61,10 +107,16 @@
       "hasAccount": "Already have an account?",
       "orContinue": "Or create account with email",
       "signIn": "Sign in"
+    },
+    "status": {
+      "rateLimit": "Too many attempts. Please wait and try again.",
+      "verificationInvalid": "This verification link is invalid or has expired.",
+      "verificationPending": "Check your inbox and verify your email before signing in.",
+      "verificationSuccess": "Your email address has been verified. You can now sign in."
     }
   },
   "branding": {
-    "locale": "{locale, select, en {English} tr {Turkish} ru {Russian} kg {Kyrgyz} other {Unknown}}",
+    "locale": "{locale, select, en {English} tr {Turkish} ru {Russian} ky {Kyrgyz} other {Unknown}}",
     "slogan": "CONTEMPORARY OIL-FOCUSED PAINTER"
   },
   "cards": {
@@ -188,7 +240,9 @@
       "createAccount": "Create Account",
       "creatingAccount": "Creating account...",
       "signIn": "Sign In",
-      "signingIn": "Signing in..."
+      "signingIn": "Signing in...",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "labels": {
       "address": "Address",
@@ -215,7 +269,9 @@
       "unsubscribeAnytime": "Unsubscribe anytime",
       "weeklyUpdates": "Weekly updates",
 
-      "signInSuccess": "Successfully signed in"
+      "signInSuccess": "Successfully signed in",
+      "verificationSentDescription": "Check your inbox and verify your email before signing in.",
+      "verificationSentTitle": "Verification email sent"
     },
     "placeholders": {
       "confirmPassword": "Confirm your password",
@@ -292,18 +348,18 @@
 
       "additionalData": "Data from additional relations: Accounts, Sessions, Artworks, Artwork Likes, Socials, Feedbacks, Press, and News.",
       "changesNotification": "Any changes to the privacy policy will be communicated via email.",
-      "contactEmail": "Contact Email: mucahidyazar@gmail.com",
+      "contactEmail": "Contact Email: support@mucahid.dev",
       "dataSecurity": "Data Security",
       "dataSharing": "Data Sharing and Disclosure",
       "informationCollected": "Information Collected",
       "policyChanges": "Policy Changes",
       "rightsDescription": "Users have the right to access, modify, and delete their personal information.",
-      "securityDescription": "The website relies on services like Supabase, Prisma, and Vercel for security and operational functionality. No additional specific security measures are taken by bekten.art itself.",
+      "securityDescription": "bekten.art uses encrypted connections, restricted access, input validation, rate limiting, private object storage, audit records, and protected authentication tokens. No security control can eliminate every risk.",
       "servicesPurpose": "To facilitate services such as providing feedback to artists and showcasing artists' artworks on the website.",
       "userDetails": "Details from the User model: ID, Name, Email, Email Verified, Image, Profession, Description, Location, Role, Created At, Updated At, Share Data Preferences, and Email Subscription Preferences.",
       "userRights": "User Rights",
 
-      "noThirdParty": "Personal data is not shared with any third parties and is exclusively used for the functioning of bekten.art.",
+      "noThirdParty": "Data is processed only as needed to operate the service by our infrastructure and selected processors: Coolify-hosted PostgreSQL and Garage storage, Resend for transactional email, Google for sign-in and consent-based analytics, and Apify for public Instagram content. We do not sell personal data.",
       "purposeOfCollection": "Purpose of Data Collection"
     },
 
@@ -312,7 +368,7 @@
       "title": "Terms of Service",
       "website": "Website: bekten.art",
 
-      "contactEmail": "Contact Email: mucahidyazar@gmail.com",
+      "contactEmail": "Contact Email: support@mucahid.dev",
       "disputeDescription": "Disputes or concerns should be addressed to the website administrator or through the contact information provided.",
       "disputeResolution": "Dispute Resolution",
       "generalInformation": "General Information about the Site",
@@ -333,7 +389,11 @@
     "gallery": "Gallery",
     "home": "Home",
     "news": "News",
-    "store": "Store"
+    "store": "Store",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "forgotPassword": "Forgot password",
+    "resetPassword": "Reset password"
   },
   "news": {
     "address": "Address",
@@ -473,6 +533,9 @@
     "categoryJournalist": "Journalist",
     "categoryCurator": "Curator",
     "company": "Company",
-    "manualControl": "Manual Control"
+    "manualControl": "Manual Control",
+    "pauseAutoplay": "Pause testimonial autoplay",
+    "showTestimonial": "Show testimonial {index}",
+    "startAutoplay": "Start testimonial autoplay"
   }
 }

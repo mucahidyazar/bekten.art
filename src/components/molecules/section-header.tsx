@@ -65,7 +65,7 @@ export function SectionHeader({
       )}
 
       {/* Admin Edit Button */}
-      {user?.isAdmin && adminEditTrigger && (
+      {user?.role === 'ADMIN' && adminEditTrigger && (
         <div className="absolute top-0 right-0">{adminEditTrigger}</div>
       )}
     </div>

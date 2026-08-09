@@ -2,14 +2,19 @@ import {Metadata} from 'next'
 
 import {CallToAction} from '@/components/molecules/call-to-action'
 import {NewsSection} from '@/components/sections/news-section'
-import {getSectionData} from '@/services'
+import {getPublishedNewsArticles} from '@/services'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
-import type {NewsDatabaseItem, NewsDatabaseSettings} from '@/types/database'
+import {PressSection} from './components/press-section'
 
-export async function generateMetadata(): Promise<Metadata> {
+import type {AppLocale} from '@/lib/localized-path'
+
+type PageProps = Readonly<{params: Promise<{locale: AppLocale}>}>
+
+export async function generateMetadata({params}: PageProps): Promise<Metadata> {
+  const {locale} = await params
   const {getTranslations} = await import('next-intl/server')
-  const t = await getTranslations('news')
+  const t = await getTranslations({locale, namespace: 'news'})
 
   return prepareMetadata({
     title: t('metaTitle'),
@@ -18,16 +23,19 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-export default async function NewsPage() {
-  // Fetch news data from database
-  const newsData = (await getSectionData('news')) as {
-    items: NewsDatabaseItem[]
-    settings: NewsDatabaseSettings | null
-  }
+export default async function NewsPage({params}: PageProps) {
+  const {locale} = await params
+  const news = await getPublishedNewsArticles(locale)
 
   return (
     <>
-      <NewsSection newsData={newsData} />
+      <NewsSection items={news} locale={locale} />
+      <section
+        aria-labelledby="press-section-title"
+        className="app-container py-8"
+      >
+        <PressSection locale={locale} />
+      </section>
       {/* Call to Action */}
       <CallToAction />
     </>

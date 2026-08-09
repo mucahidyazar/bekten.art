@@ -1,6 +1,14 @@
 'use client'
 
-import {createContext, useContext, useState, useRef, useCallback} from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
+
+import {useConsent} from '@/components/consent/consent-provider'
 
 interface Track {
   id: string
@@ -33,6 +41,22 @@ interface MusicProviderProps {
   defaultTracks?: Track[]
 }
 
+function extractYouTubeId(url: string): string {
+  try {
+    const parsedUrl = new URL(url)
+    const candidate =
+      parsedUrl.hostname === 'youtu.be'
+        ? parsedUrl.pathname.slice(1)
+        : parsedUrl.searchParams.get('v') ||
+          parsedUrl.pathname.match(/^\/embed\/([^/]+)$/)?.[1] ||
+          ''
+
+    return /^[a-zA-Z0-9_-]{11}$/.test(candidate) ? candidate : ''
+  } catch {
+    return ''
+  }
+}
+
 export function MusicProvider({
   children,
   defaultTracks = [],
@@ -44,60 +68,48 @@ export function MusicProvider({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [youtubeTitle, setYoutubeTitle] = useState<string | null>(null)
+  const {decision, hydrated, openPreferences} = useConsent()
+  const externalMediaAllowed = hydrated && decision?.externalMedia === true
 
-  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const playTrack = useCallback(
+    async (track: Track) => {
+      try {
+        setIsLoading(true)
+        setError(null)
 
-  const extractYouTubeId = (url: string): string => {
-    const regExp =
-      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-    const match = url.match(regExp)
+        const videoId = getTrackYouTubeId(track)
 
-    return match && match[2].length === 11 ? match[2] : ''
-  }
+        if (!videoId) {
+          throw new Error('Invalid YouTube URL')
+        }
 
-  const playTrack = useCallback(async (track: Track) => {
-    // console.log('MusicProvider: playTrack called with:', track.url)
+        if (!externalMediaAllowed) {
+          setIsLoading(false)
 
-    try {
-      setIsLoading(true)
-      setError(null)
-      setCurrentTrack(track)
-      setYoutubeTitle(track.title)
+          openPreferences()
 
-      const videoId = track.youtubeId || extractYouTubeId(track.url)
+          return
+        }
 
-      if (!videoId) {
-        throw new Error('Invalid YouTube URL')
-      }
-
-      if (iframeRef.current) {
-        // Use nocookie domain and minimal parameters to reduce tracking
-        const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&loop=1&playlist=${videoId}&enablejsapi=0&disablekb=1&fs=0&cc_load_policy=0&origin=${window.location.origin}`
-
-        // console.log('Loading embed URL:', embedUrl)
-        iframeRef.current.src = embedUrl
+        setCurrentTrack(track)
+        setYoutubeTitle(track.title)
         setIsPlaying(true)
+      } catch (err) {
+        console.error('Error playing track:', err)
+        setError('Failed to load track')
         setIsLoading(false)
+        setIsPlaying(false)
       }
-    } catch (err) {
-      console.error('Error playing track:', err)
-      setError('Failed to load track')
-      setIsLoading(false)
-      setIsPlaying(false)
-    }
-  }, [])
+    },
+    [externalMediaAllowed, openPreferences],
+  )
 
   const pauseMusic = useCallback(() => {
-    // console.log('MusicProvider: pauseMusic called')
-    if (iframeRef.current) {
-      iframeRef.current.src = 'about:blank'
-    }
     setIsPlaying(false)
+    setIsLoading(false)
   }, [])
 
   const toggleMusic = useCallback(async () => {
-    // console.log('MusicProvider: toggleMusic called, isPlaying:', isPlaying, 'currentTrack:', currentTrack?.title)
-
     if (isPlaying) {
       pauseMusic()
     } else {
@@ -124,6 +136,32 @@ export function MusicProvider({
     [currentTrack, pauseMusic],
   )
 
+  useEffect(() => {
+    const pauseWhenHidden = () => {
+      if (document.hidden) pauseMusic()
+    }
+
+    document.addEventListener('visibilitychange', pauseWhenHidden)
+
+    return () => {
+      document.removeEventListener('visibilitychange', pauseWhenHidden)
+    }
+  }, [pauseMusic])
+
+  useEffect(() => {
+    if (!hydrated || decision?.externalMedia) return
+
+    const timeout = window.setTimeout(pauseMusic, 0)
+
+    return () => window.clearTimeout(timeout)
+  }, [decision?.externalMedia, hydrated, pauseMusic])
+
+  const videoId = currentTrack ? getTrackYouTubeId(currentTrack) : ''
+  const embedUrl =
+    externalMediaAllowed && isPlaying && videoId
+      ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&loop=1&playlist=${videoId}&enablejsapi=0&disablekb=1&fs=0&cc_load_policy=0`
+      : null
+
   const contextValue: MusicContextType = {
     isPlaying,
     currentTrack,
@@ -144,44 +182,43 @@ export function MusicProvider({
     <MusicContext.Provider value={contextValue}>
       {children}
 
-      {/* Hidden YouTube iframe */}
-      <iframe
-        ref={iframeRef}
-        style={{
-          position: 'fixed',
-          left: '-9999px',
-          top: '-9999px',
-          width: '1px',
-          height: '1px',
-          border: 'none',
-        }}
-        title="YouTube Music Player"
-        allow="autoplay; encrypted-media"
-        sandbox="allow-scripts allow-same-origin allow-presentation"
-        onLoad={() => {
-          // console.log('Iframe loaded')
-          setIsLoading(false)
-        }}
-        onError={() => {
-          console.error('Iframe error')
-          setError('Failed to load music')
-          setIsLoading(false)
-          setIsPlaying(false)
-        }}
-      />
+      {embedUrl ? (
+        <iframe
+          src={embedUrl}
+          style={{
+            position: 'fixed',
+            left: '-9999px',
+            top: '-9999px',
+            width: '1px',
+            height: '1px',
+            border: 'none',
+          }}
+          title="YouTube music player"
+          aria-hidden="true"
+          tabIndex={-1}
+          referrerPolicy="no-referrer"
+          allow="autoplay; encrypted-media"
+          sandbox="allow-scripts allow-same-origin allow-presentation"
+          onLoad={() => {
+            setIsLoading(false)
+          }}
+          onError={() => {
+            console.error('Iframe error')
+            setError('Failed to load music')
+            setIsLoading(false)
+            setIsPlaying(false)
+          }}
+        />
+      ) : null}
     </MusicContext.Provider>
   )
 }
 
-// Default tracks
-export const defaultTracks: Track[] = [
-  {
-    id: '1',
-    title: 'Ambient Music',
-    youtubeId: 'uxLBxGloIGo',
-    url: 'https://www.youtube.com/watch?v=uxLBxGloIGo',
-  },
-]
+function getTrackYouTubeId(track: Track) {
+  return /^[a-zA-Z0-9_-]{11}$/.test(track.youtubeId)
+    ? track.youtubeId
+    : extractYouTubeId(track.url)
+}
 
 export function useMusic() {
   const context = useContext(MusicContext)

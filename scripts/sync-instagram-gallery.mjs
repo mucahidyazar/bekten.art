@@ -1,19 +1,36 @@
 import {existsSync, readFileSync} from 'fs'
+import {createHash, randomUUID} from 'node:crypto'
 import {dirname, resolve} from 'path'
-import {fileURLToPath} from 'url'
+import {fileURLToPath, pathToFileURL} from 'url'
 
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3'
 import {PrismaPg} from '@prisma/adapter-pg'
 import {PrismaClient} from '@prisma/client'
+import {fileTypeFromBuffer} from 'file-type'
+import sharp from 'sharp'
+
+import {
+  boundedBodyBytes,
+  boundedText,
+  normalizeActorId,
+  normalizeInstagramUsername,
+  validateInstagramImageUrl,
+  validateResultsLimit,
+} from './media-safety.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT_DIR = resolve(__dirname, '..')
 const DEFAULT_ACTOR_ID = 'apify/instagram-api-scraper'
 const DEFAULT_USERNAME = 'bekten_usubaliev'
 const DEFAULT_RESULTS_LIMIT = 60
-const DEFAULT_APP_KEY = 'bekten-art'
-const DEFAULT_BUCKET = 'images'
 const DEFAULT_FOLDER = 'instagram'
-const DEFAULT_STORAGE_COLLECTION = 'shared_uploads'
+const MAX_IMAGE_BYTES = 12 * 1024 * 1024
+const MAX_APIFY_RESPONSE_BYTES = 10 * 1024 * 1024
+const RETRY_DELAYS_MS = Object.freeze([500, 1_500, 4_000])
 
 function loadEnvFile() {
   const envPath = resolve(ROOT_DIR, '.env')
@@ -63,39 +80,8 @@ function requireEnv(name) {
   return value
 }
 
-function normalizeActorId(actorId) {
-  return actorId.replace('/', '~')
-}
-
-function normalizeUsername(value) {
-  return value.trim().replace(/^@/, '').toLowerCase()
-}
-
 function sanitizeFileName(value) {
-  return value.replace(/[^a-zA-Z0-9._-]/g, '-')
-}
-
-function getExtensionFromValue(value) {
-  const cleanValue = value.split('?')[0] || ''
-  const match = cleanValue.match(/\.([a-zA-Z0-9]+)$/)
-
-  return match ? match[1].toLowerCase() : ''
-}
-
-function getExtensionFromContentType(contentType) {
-  if (contentType === 'image/png') {
-    return 'png'
-  }
-
-  if (contentType === 'image/webp') {
-    return 'webp'
-  }
-
-  if (contentType === 'image/gif') {
-    return 'gif'
-  }
-
-  return 'jpg'
+  return value.replace(/[^a-zA-Z0-9._-]/gu, '-').slice(0, 120)
 }
 
 async function createPrismaClient() {
@@ -107,43 +93,64 @@ async function createPrismaClient() {
   })
 }
 
-async function getPocketBaseAdminAuth() {
-  const baseUrl = requireEnv('POCKETBASE_URL')
-    .replace(/\/_\/?$/, '')
-    .replace(/\/$/, '')
-  const identity = requireEnv('POCKETBASE_ADMIN_EMAIL')
-  const password = requireEnv('POCKETBASE_ADMIN_PASSWORD')
+function createStorage() {
+  const endpoint = new URL(requireEnv('MEDIA_S3_ENDPOINT'))
+  const bucket = requireEnv('MEDIA_S3_BUCKET')
 
-  const response = await fetch(
-    `${baseUrl}/api/collections/_superusers/auth-with-password`,
-    {
-      body: JSON.stringify({identity, password}),
-      headers: {
-        'Content-Type': 'application/json',
+  if (
+    endpoint.protocol !== 'https:' ||
+    endpoint.username ||
+    endpoint.password ||
+    endpoint.pathname !== '/' ||
+    endpoint.search ||
+    endpoint.hash ||
+    !/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/u.test(bucket) ||
+    bucket.includes('..') ||
+    requireEnv('MEDIA_S3_FORCE_PATH_STYLE') !== 'true'
+  ) {
+    throw new Error('Garage storage configuration is invalid')
+  }
+
+  return Object.freeze({
+    bucket,
+    client: new S3Client({
+      credentials: {
+        accessKeyId: requireEnv('MEDIA_S3_ACCESS_KEY_ID'),
+        secretAccessKey: requireEnv('MEDIA_S3_SECRET_ACCESS_KEY'),
       },
-      method: 'POST',
-    },
-  )
-
-  if (!response.ok) {
-    throw new Error(`PocketBase auth failed: ${await response.text()}`)
-  }
-
-  const payload = await response.json()
-
-  return {
-    baseUrl,
-    token: payload.token,
-  }
+      endpoint: endpoint.toString(),
+      forcePathStyle: true,
+      region: requireEnv('MEDIA_S3_REGION'),
+    }),
+  })
 }
 
-function buildPocketBaseFileUrl(
-  baseUrl,
-  storageCollection,
-  recordId,
-  fileName,
-) {
-  return `${baseUrl}/api/files/${storageCollection}/${recordId}/${fileName}`
+async function fetchWithRetry(url, options, label) {
+  let lastError
+  const {timeoutMs, ...fetchOptions} = options
+
+  for (const [attempt, delayMs] of [...RETRY_DELAYS_MS, 0].entries()) {
+    try {
+      const response = await fetch(url, {
+        ...fetchOptions,
+        signal: AbortSignal.timeout(timeoutMs),
+      })
+
+      if (response.ok || (response.status < 500 && response.status !== 429)) {
+        return response
+      }
+
+      lastError = new Error(`${label} failed (${response.status})`)
+    } catch (error) {
+      lastError = error
+    }
+
+    if (attempt < RETRY_DELAYS_MS.length) {
+      await new Promise(resolveDelay => setTimeout(resolveDelay, delayMs))
+    }
+  }
+
+  throw new Error(`${label} failed after retries`, {cause: lastError})
 }
 
 async function fetchApifyPayload({actorId, resultsLimit, token, username}) {
@@ -158,22 +165,42 @@ async function fetchApifyPayload({actorId, resultsLimit, token, username}) {
         usernames: [username],
       }
 
-  const response = await fetch(
-    `https://api.apify.com/v2/acts/${normalizeActorId(actorId)}/run-sync-get-dataset-items?token=${token}&timeout=180`,
+  const response = await fetchWithRetry(
+    `https://api.apify.com/v2/acts/${normalizeActorId(actorId)}/run-sync-get-dataset-items?timeout=180`,
     {
       body: JSON.stringify(body),
       headers: {
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       method: 'POST',
+      timeoutMs: 195_000,
     },
+    'Apify request',
   )
 
   if (!response.ok) {
-    throw new Error(`Apify request failed: ${await response.text()}`)
+    throw new Error(`Apify request failed (${response.status})`)
   }
 
-  const payload = await response.json()
+  const declaredSize = Number(response.headers.get('content-length') || '0')
+
+  if (declaredSize > MAX_APIFY_RESPONSE_BYTES) {
+    throw new Error('Apify response exceeds the size limit')
+  }
+
+  let payload
+
+  try {
+    const bytes = await boundedBodyBytes(
+      response.body,
+      MAX_APIFY_RESPONSE_BYTES,
+    )
+
+    payload = JSON.parse(bytes.toString('utf8'))
+  } catch (error) {
+    throw new Error('Apify returned an invalid response', {cause: error})
+  }
 
   if (!Array.isArray(payload) || payload.length === 0) {
     throw new Error('Apify returned no Instagram profile data')
@@ -182,8 +209,50 @@ async function fetchApifyPayload({actorId, resultsLimit, token, username}) {
   return payload
 }
 
-function normalizePosts(payload, username) {
-  const normalizedUsername = normalizeUsername(username)
+function safeInstagramPermalink(value, shortCode) {
+  try {
+    const parsed = new URL(value)
+
+    if (
+      parsed.protocol === 'https:' &&
+      (parsed.hostname === 'instagram.com' ||
+        parsed.hostname === 'www.instagram.com') &&
+      !parsed.username &&
+      !parsed.password
+    ) {
+      return parsed.toString()
+    }
+  } catch {
+    // Fall back to a permalink constructed from the validated shortcode.
+  }
+
+  return `https://www.instagram.com/p/${encodeURIComponent(shortCode)}/`
+}
+
+function safeTimestamp(value) {
+  if (typeof value !== 'string' && typeof value !== 'number') {
+    return null
+  }
+
+  const parsed = new Date(value)
+
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function normalizedOwnerUsername(value) {
+  if (typeof value !== 'string' || !value.trim()) {
+    return null
+  }
+
+  try {
+    return normalizeInstagramUsername(value)
+  } catch {
+    return null
+  }
+}
+
+export function normalizePosts(payload, username, resultsLimit) {
+  const normalizedUsername = normalizeInstagramUsername(username)
   const posts = Array.isArray(payload)
     ? payload
     : Array.isArray(payload?.latestPosts)
@@ -191,170 +260,264 @@ function normalizePosts(payload, username) {
       : []
   const seenIds = new Set()
 
-  return posts.filter(post => {
-    if (!post?.id || !post?.shortCode || !post?.displayUrl) {
-      return false
+  const normalizedPosts = []
+
+  for (const post of posts) {
+    const id = boundedText(post?.id, 160)
+    const shortCode = boundedText(post?.shortCode, 80)
+    const ownerUsername = normalizedOwnerUsername(post?.ownerUsername)
+
+    if (
+      !id ||
+      !shortCode ||
+      seenIds.has(id) ||
+      (ownerUsername && ownerUsername !== normalizedUsername)
+    ) {
+      continue
     }
 
-    if (seenIds.has(post.id)) {
-      return false
+    let displayUrl
+
+    try {
+      displayUrl = validateInstagramImageUrl(post?.displayUrl).toString()
+    } catch {
+      continue
     }
 
-    seenIds.add(post.id)
+    seenIds.add(id)
 
-    if (Array.isArray(payload)) {
-      return true
+    const caption = boundedText(post.caption, 10_000)
+    const alt = boundedText(post.alt, 2_000)
+    const mediaType = boundedText(post.type, 32) || 'Image'
+    const permalink = safeInstagramPermalink(post.url, shortCode)
+    const timestamp = safeTimestamp(post.timestamp)
+
+    normalizedPosts.push(
+      Object.freeze({
+        alt,
+        caption,
+        displayUrl,
+        id,
+        isPinned: Boolean(post.isPinned),
+        ownerUsername,
+        rawPayload: {
+          alt,
+          caption,
+          displayUrl,
+          id,
+          isPinned: Boolean(post.isPinned),
+          mediaType,
+          ownerUsername,
+          permalink,
+          shortCode,
+          timestamp: timestamp?.toISOString() || null,
+        },
+        shortCode,
+        timestamp,
+        type: mediaType,
+        url: permalink,
+      }),
+    )
+
+    if (normalizedPosts.length >= resultsLimit) {
+      break
     }
+  }
 
-    return normalizeUsername(post.ownerUsername || '') === normalizedUsername
-  })
+  return normalizedPosts
 }
 
 async function downloadImage(url, fileBaseName) {
-  const response = await fetch(url)
+  const parsedUrl = validateInstagramImageUrl(url)
+
+  const response = await fetchWithRetry(
+    parsedUrl,
+    {headers: {Accept: 'image/*'}, redirect: 'error', timeoutMs: 20_000},
+    'Instagram image download',
+  )
 
   if (!response.ok) {
     throw new Error(`Image download failed: ${response.status}`)
   }
 
-  const contentType = response.headers.get('content-type') || 'image/jpeg'
-  const extension =
-    getExtensionFromValue(url) || getExtensionFromContentType(contentType)
-  const fileName = `${fileBaseName}.${extension}`
-  const fileBuffer = Buffer.from(await response.arrayBuffer())
+  const declaredSize = Number(response.headers.get('content-length') || '0')
+
+  if (declaredSize > MAX_IMAGE_BYTES) {
+    throw new Error('Instagram image exceeds the size limit')
+  }
+
+  const source = await boundedBodyBytes(response.body, MAX_IMAGE_BYTES)
+
+  if (source.byteLength < 1 || source.byteLength > MAX_IMAGE_BYTES) {
+    throw new Error('Instagram image size is invalid')
+  }
+
+  const detected = await fileTypeFromBuffer(source)
+
+  if (!detected || !['image/jpeg', 'image/png', 'image/webp'].includes(detected.mime)) {
+    throw new Error('Instagram response is not a supported image')
+  }
+
+  const transformed = await sharp(source, {
+    animated: false,
+    failOn: 'warning',
+    limitInputPixels: 40_000_000,
+  })
+    .rotate()
+    .resize({
+      fit: 'inside',
+      height: 4096,
+      width: 4096,
+      withoutEnlargement: true,
+    })
+    .webp({effort: 5, quality: 88, smartSubsample: true})
+    .toBuffer({resolveWithObject: true})
+  const checksumBase64 = createHash('sha256')
+    .update(transformed.data)
+    .digest('base64')
+  const checksumHex = createHash('sha256')
+    .update(transformed.data)
+    .digest('hex')
 
   return {
-    contentType,
-    extension,
-    file: new File([fileBuffer], fileName, {type: contentType}),
-    fileName,
-    size: fileBuffer.byteLength,
+    bytes: transformed.data,
+    checksumBase64,
+    checksumHex,
+    contentType: 'image/webp',
+    fileName: `${fileBaseName}.webp`,
+    height: transformed.info.height,
+    size: transformed.data.byteLength,
+    width: transformed.info.width,
   }
 }
 
-async function uploadImageToPocketBase({
-  auth,
-  file,
-  filePath,
-  originalName,
-  sourceUrl,
-}) {
-  const storageCollection =
-    process.env.POCKETBASE_STORAGE_COLLECTION || DEFAULT_STORAGE_COLLECTION
-  const formData = new FormData()
-
-  formData.set('app_key', DEFAULT_APP_KEY)
-  formData.set('bucket_name', DEFAULT_BUCKET)
-  formData.set('file_path', filePath)
-  formData.set('folder', DEFAULT_FOLDER)
-  formData.set('original_name', originalName)
-  formData.set('file_size', String(file.size))
-  formData.set('file_type', file.type)
-  formData.set('source_url', sourceUrl)
-  formData.set('file', file)
-
-  const response = await fetch(
-    `${auth.baseUrl}/api/collections/${storageCollection}/records`,
-    {
-      body: formData,
-      headers: {
-        Authorization: auth.token,
-      },
-      method: 'POST',
-    },
+async function uploadImageToGarage({download, filePath, storage}) {
+  await storage.client.send(
+    new PutObjectCommand({
+      Body: download.bytes,
+      Bucket: storage.bucket,
+      CacheControl: 'public, max-age=31536000, immutable, no-transform',
+      ChecksumSHA256: download.checksumBase64,
+      ContentLength: download.size,
+      ContentType: download.contentType,
+      Key: filePath,
+      Metadata: {sha256: download.checksumBase64},
+    }),
   )
-
-  if (!response.ok) {
-    throw new Error(`PocketBase upload failed: ${await response.text()}`)
-  }
-
-  const payload = await response.json()
-  const uploadedFileName = payload.file || file.name
-
-  return {
-    public_url: buildPocketBaseFileUrl(
-      auth.baseUrl,
-      storageCollection,
-      payload.id,
-      uploadedFileName,
-    ),
-    storage_collection: payload.collectionName,
-    storage_record_id: payload.id,
-  }
 }
 
-async function ensureUploadedFile({auth, post, prisma}) {
+async function ensureMediaObject({post, prisma, storage}) {
   const existingPost = await prisma.instagramPost.findUnique({
     include: {
-      uploaded_file: true,
+      media_object: true,
     },
     where: {
       instagram_media_id: post.id,
     },
   })
 
-  if (existingPost?.uploaded_file) {
-    return existingPost.uploaded_file
+  if (
+    existingPost?.media_object?.provider === 'garage' &&
+    existingPost.media_object.status === 'READY'
+  ) {
+    return existingPost.media_object
   }
 
   const fileBaseName = sanitizeFileName(post.shortCode)
-  const possibleExistingUploads = await prisma.uploadedFile.findMany({
-    take: 1,
-    where: {
-      file_path: {
-        startsWith: `${DEFAULT_FOLDER}/${fileBaseName}.`,
-      },
-    },
+  const objectPrefix = sanitizeFileName(post.id)
+  const filePath = `${DEFAULT_FOLDER}/${objectPrefix}-${fileBaseName}.webp`
+  const existingMedia = await prisma.mediaObject.findUnique({
+    where: {objectKey: filePath},
   })
 
-  if (possibleExistingUploads[0]) {
-    return possibleExistingUploads[0]
+  if (existingMedia?.provider === 'garage' && existingMedia.status === 'READY') {
+    return existingMedia
   }
 
   const download = await downloadImage(post.displayUrl, fileBaseName)
-  const filePath = `${DEFAULT_FOLDER}/${fileBaseName}.${download.extension}`
-  const upload = await uploadImageToPocketBase({
-    auth,
-    file: download.file,
-    filePath,
-    originalName: download.fileName,
-    sourceUrl: post.displayUrl,
-  })
-
-  return prisma.uploadedFile.create({
-    data: {
-      app_key: DEFAULT_APP_KEY,
-      bucket_name: DEFAULT_BUCKET,
-      file_path: filePath,
-      file_size: download.size,
-      file_type: download.contentType,
-      folder: DEFAULT_FOLDER,
-      name: download.fileName,
-      original_name: download.fileName,
-      public_url: upload.public_url,
-      source_url: post.displayUrl,
-      storage_collection: upload.storage_collection,
-      storage_provider: 'pocketbase',
-      storage_record_id: upload.storage_record_id,
-      uploaded_at: new Date(),
+  const provisionalId = randomUUID()
+  const media = await prisma.mediaObject.upsert({
+    create: {
+      checksumSha256: download.checksumHex,
+      filename: download.fileName,
+      height: download.height,
+      id: provisionalId,
+      mimeType: download.contentType,
+      objectKey: filePath,
+      originalFilename: download.fileName,
+      provider: 'garage',
+      sizeBytes: download.size,
+      status: 'UPLOADING',
+      visibility: 'PUBLIC',
+      width: download.width,
     },
+    update: {
+      checksumSha256: download.checksumHex,
+      filename: download.fileName,
+      height: download.height,
+      mimeType: download.contentType,
+      originalFilename: download.fileName,
+      provider: 'garage',
+      sizeBytes: download.size,
+      status: 'UPLOADING',
+      visibility: 'PUBLIC',
+      width: download.width,
+    },
+    where: {objectKey: filePath},
   })
+  const id = media.id
+
+  try {
+    await uploadImageToGarage({download, filePath, storage})
+  } catch (error) {
+    await prisma.mediaObject
+      .update({data: {status: 'FAILED'}, where: {id}})
+      .catch(() => undefined)
+    throw error
+  }
+
+  try {
+    return await prisma.$transaction(async transaction => {
+      await transaction.mediaObject.update({
+        data: {status: 'READY'},
+        where: {id, status: 'UPLOADING'},
+      })
+
+      await transaction.auditEvent.create({
+        data: {
+          action: 'media.instagram_synced',
+          entityId: id,
+          entityType: 'MediaObject',
+          metadata: {instagramMediaId: post.id, shortcode: post.shortCode},
+        },
+      })
+
+      return transaction.mediaObject.findUniqueOrThrow({where: {id}})
+    })
+  } catch (error) {
+    await storage.client
+      .send(new DeleteObjectCommand({Bucket: storage.bucket, Key: filePath}))
+      .catch(() => console.error(`Garage cleanup failed for ${post.shortCode}`))
+    await prisma.mediaObject
+      .update({data: {status: 'FAILED'}, where: {id}})
+      .catch(() => undefined)
+    throw error
+  }
 }
 
 async function main() {
   loadEnvFile()
 
   const actorId = process.env.APIFY_ACTOR_ID?.trim() || DEFAULT_ACTOR_ID
-  const resultsLimit = Number.parseInt(
+  const resultsLimit = validateResultsLimit(
     process.env.APIFY_RESULTS_LIMIT?.trim() || String(DEFAULT_RESULTS_LIMIT),
-    10,
   )
   const token = requireEnv('APIFY_TOKEN')
   const username =
     process.env.APIFY_INSTAGRAM_USERNAME?.trim() || DEFAULT_USERNAME
-  const normalizedUsername = normalizeUsername(username)
+  const normalizedUsername = normalizeInstagramUsername(username)
   const prisma = await createPrismaClient()
-  const auth = await getPocketBaseAdminAuth()
+  const storage = createStorage()
   const now = new Date()
 
   try {
@@ -362,9 +525,13 @@ async function main() {
       actorId,
       resultsLimit,
       token,
-      username,
+      username: normalizedUsername,
     })
-    const posts = normalizePosts(payload, username)
+    const posts = normalizePosts(payload, username, resultsLimit)
+
+    if (posts.length === 0) {
+      throw new Error('Apify returned no valid Instagram posts')
+    }
     const existingPosts = await prisma.instagramPost.findMany({
       orderBy: [
         {display_order: 'asc'},
@@ -390,7 +557,11 @@ async function main() {
             instagram_media_id: post.id,
           },
         })
-        const uploadedFile = await ensureUploadedFile({auth, post, prisma})
+        const mediaObject = await ensureMediaObject({
+          post,
+          prisma,
+          storage,
+        })
         const record = await prisma.instagramPost.upsert({
           create: {
             alt_text: post.alt || null,
@@ -401,14 +572,14 @@ async function main() {
             is_pinned: Boolean(post.isPinned),
             media_type: post.type || 'Image',
             owner_username: post.ownerUsername || null,
-            posted_at: post.timestamp ? new Date(post.timestamp) : null,
-            raw_payload: post,
+            posted_at: post.timestamp,
+            raw_payload: post.rawPayload,
             shortcode: post.shortCode,
             source_display_url: post.displayUrl,
             source_permalink: post.url,
             synced_at: now,
             thumbnail_url: post.displayUrl,
-            uploaded_file_id: uploadedFile.id,
+            media_object_id: mediaObject.id,
             username: normalizedUsername,
           },
           update: {
@@ -419,13 +590,13 @@ async function main() {
             is_pinned: Boolean(post.isPinned),
             media_type: post.type || 'Image',
             owner_username: post.ownerUsername || null,
-            posted_at: post.timestamp ? new Date(post.timestamp) : null,
-            raw_payload: post,
+            posted_at: post.timestamp,
+            raw_payload: post.rawPayload,
             source_display_url: post.displayUrl,
             source_permalink: post.url,
             synced_at: now,
             thumbnail_url: post.displayUrl,
-            uploaded_file_id: uploadedFile.id,
+            media_object_id: mediaObject.id,
             username: normalizedUsername,
           },
           where: {
@@ -453,6 +624,10 @@ async function main() {
     const untouchedPosts = existingPosts.filter(
       post => !touchedIds.has(post.id),
     )
+
+    if (created + updated === 0) {
+      throw new Error('Instagram sync did not persist any posts')
+    }
 
     for (const [offset, post] of untouchedPosts.entries()) {
       await prisma.instagramPost.update({
@@ -483,13 +658,18 @@ async function main() {
       ),
     )
   } finally {
+    storage.client.destroy()
     await prisma.$disconnect()
   }
 }
 
-main().catch(error => {
-  console.error(
-    error instanceof Error ? error.message : 'Instagram gallery sync failed',
-  )
-  process.exitCode = 1
-})
+const invokedPath = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).href : ''
+
+if (import.meta.url === invokedPath) {
+  main().catch(error => {
+    console.error(
+      error instanceof Error ? error.message : 'Instagram gallery sync failed',
+    )
+    process.exitCode = 1
+  })
+}

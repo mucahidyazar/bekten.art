@@ -1,81 +1,38 @@
 import {MetadataRoute} from 'next'
 
-const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art'
+const DOMAIN = new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art')
+  .origin
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: ['/', '/api/og'],
         disallow: [
-          '/api/*',
-          '/admin/*',
-          '/auth/*',
-          '/_next/*',
-          '/private/*',
-          '/*.json$',
-          '/node_modules/*',
-        ],
-        crawlDelay: 1,
-      },
-      {
-        userAgent: 'Googlebot',
-        allow: [
-          '/',
-          '/api/og*', // Allow OG image generation for Google
-        ],
-        disallow: [
-          '/api/*',
-          '/admin/*',
-          '/auth/*',
-          '/_next/static/*',
-          '/private/*',
+          '/api/',
+          '/admin/',
+          '/*/admin/',
+          '/auth/',
+          '/*/sign-in',
+          '/*/sign-up',
+          '/*/profile/',
+          '/_next/',
+          '/private/',
         ],
       },
       {
-        userAgent: 'facebookexternalhit',
-        allow: [
-          '/',
-          '/api/og*', // Allow OG image generation for Facebook/WhatsApp
+        userAgent: ['facebookexternalhit', 'Twitterbot', 'WhatsApp'],
+        allow: ['/api/og', '/link-preview.jpg'],
+      },
+      {
+        userAgent: [
+          'GPTBot',
+          'Google-Extended',
+          'CCBot',
+          'anthropic-ai',
+          'Claude-Web',
         ],
-        disallow: ['/admin/*', '/auth/*', '/private/*'],
-      },
-      {
-        userAgent: 'Twitterbot',
-        allow: [
-          '/',
-          '/api/og*', // Allow OG image generation for Twitter
-        ],
-        disallow: ['/admin/*', '/auth/*', '/private/*'],
-      },
-      {
-        userAgent: 'WhatsApp',
-        allow: [
-          '/',
-          '/api/og*', // Allow OG image generation for WhatsApp
-          '/link-preview.jpg',
-        ],
-        disallow: ['/admin/*', '/auth/*', '/private/*'],
-      },
-      {
-        userAgent: 'GPTBot',
-        disallow: '/',
-      },
-      {
-        userAgent: 'Google-Extended',
-        disallow: '/',
-      },
-      {
-        userAgent: 'CCBot',
-        disallow: '/',
-      },
-      {
-        userAgent: 'anthropic-ai',
-        disallow: '/',
-      },
-      {
-        userAgent: 'Claude-Web',
         disallow: '/',
       },
     ],

@@ -21,7 +21,7 @@ export default async function Home() {
   const imagesArrays = await getGalleryImageArrays()
 
   return (
-    <div className="container">
+    <div className="app-container">
       <div id="gallery" className="px-1 lg:px-4">
         <GalleryTemplate imageArrays={imagesArrays} />
       </div>

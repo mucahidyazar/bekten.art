@@ -2,52 +2,93 @@
 
 import {usePathname} from 'next/navigation'
 
-interface HrefLangProps {
-  locales: string[]
-  defaultLocale?: string
+import {
+  APP_LOCALES,
+  type AppLocale,
+  localizedAlternates,
+} from '@/lib/localized-path'
+
+const HREFLANG_BY_LOCALE: Record<AppLocale, string> = {
+  en: 'en-US',
+  tr: 'tr-TR',
+  ru: 'ru-RU',
+  ky: 'ky-KG',
 }
 
-export function HrefLang({locales, defaultLocale = 'en'}: HrefLangProps) {
-  const pathname = usePathname()
+interface HrefLangProps {
+  locales?: readonly string[]
+  defaultLocale?: AppLocale
+}
 
-  // Extract path without locale
+function getLocalizedRoute(pathname: string) {
   const segments = pathname.split('/').filter(Boolean)
-  const pathWithoutLocale = segments.slice(1).join('/')
+  const routeLocale = segments[0]
+  const isSupportedLocale = APP_LOCALES.includes(routeLocale as AppLocale)
+  const isLegacyKyrgyzLocale = routeLocale === 'kg'
+  const locale = isSupportedLocale
+    ? (routeLocale as AppLocale)
+    : isLegacyKyrgyzLocale
+      ? 'ky'
+      : 'en'
+  const publicSegments =
+    isSupportedLocale || isLegacyKyrgyzLocale ? segments.slice(1) : segments
 
-  const domain =
-    typeof window !== 'undefined'
-      ? window.location.origin
-      : process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art'
+  return {
+    locale,
+    publicPath: publicSegments.length ? `/${publicSegments.join('/')}` : '/',
+  }
+}
+
+function buildLocalizedLinks(
+  pathname: string,
+  baseUrl: string,
+  locales: readonly AppLocale[] = APP_LOCALES,
+  defaultLocale: AppLocale = 'en',
+) {
+  const {locale, publicPath} = getLocalizedRoute(pathname)
+  const urls = localizedAlternates(baseUrl, publicPath)
+
+  return {
+    canonical: urls[locale],
+    alternates: [
+      ...locales.map(currentLocale => ({
+        hrefLang: HREFLANG_BY_LOCALE[currentLocale],
+        href: urls[currentLocale],
+      })),
+      {hrefLang: 'x-default', href: urls[defaultLocale]},
+    ],
+  }
+}
+
+export function HrefLang({
+  locales = APP_LOCALES,
+  defaultLocale = 'en',
+}: HrefLangProps) {
+  const pathname = usePathname()
+  const supportedLocales = locales.filter(locale =>
+    APP_LOCALES.includes(locale as AppLocale),
+  ) as AppLocale[]
+  const domain = process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art'
+  const links = buildLocalizedLinks(
+    pathname,
+    domain,
+    supportedLocales,
+    defaultLocale,
+  )
 
   return (
     <>
-      {locales.map(locale => {
-        const url = `${domain}/${locale}${pathWithoutLocale ? `/${pathWithoutLocale}` : ''}`
-
-        return (
-          <link
-            key={locale}
-            rel="alternate"
-            hrefLang={
-              locale === 'kg'
-                ? 'ky-KG'
-                : locale === 'en'
-                  ? 'en-US'
-                  : locale === 'tr'
-                    ? 'tr-TR'
-                    : 'ru-RU'
-            }
-            href={url}
-          />
-        )
-      })}
-
-      {/* Default language fallback */}
-      <link
-        rel="alternate"
-        hrefLang="x-default"
-        href={`${domain}/${defaultLocale}${pathWithoutLocale ? `/${pathWithoutLocale}` : ''}`}
-      />
+      <link rel="canonical" href={links.canonical} />
+      {links.alternates.map(alternate => (
+        <link
+          key={alternate.hrefLang}
+          rel="alternate"
+          hrefLang={alternate.hrefLang}
+          href={alternate.href}
+        />
+      ))}
     </>
   )
 }
+
+export {buildLocalizedLinks}

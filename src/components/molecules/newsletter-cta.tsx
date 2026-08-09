@@ -1,11 +1,41 @@
 'use client'
 
-import { MailIcon, ArrowRightIcon, CheckIcon } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  LoaderCircleIcon,
+  MailIcon,
+} from 'lucide-react'
+import {useLocale, useTranslations} from 'next-intl'
+import {type FormEvent, useState} from 'react'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import {Button} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+
+type AppLocale = 'en' | 'tr' | 'ru' | 'ky'
+
+const additionalCopy = {
+  en: {
+    consent: 'I agree to receive newsletter emails.',
+    email: 'Email address',
+    error: 'We could not start your subscription. Please try again.',
+  },
+  ky: {
+    consent: 'Жаңылык каттарын алууга макулмун.',
+    email: 'Электрондук почта',
+    error: 'Жазылууну баштай алган жокпуз. Кайра аракет кылыңыз.',
+  },
+  ru: {
+    consent: 'Я согласен получать письма рассылки.',
+    email: 'Электронная почта',
+    error: 'Не удалось начать подписку. Попробуйте ещё раз.',
+  },
+  tr: {
+    consent: 'Bülten e-postaları almayı kabul ediyorum.',
+    email: 'E-posta adresi',
+    error: 'Aboneliğinizi başlatamadık. Lütfen tekrar deneyin.',
+  },
+} as const
 
 interface NewsletterCTAProps {
   title?: string
@@ -16,115 +46,165 @@ interface NewsletterCTAProps {
 export function NewsletterCTA({
   title,
   description,
-  className = ""
+  className = '',
 }: NewsletterCTAProps) {
+  const locale = useLocale() as AppLocale
+  const labels = additionalCopy[locale] ?? additionalCopy.en
+  const [consent, setConsent] = useState(false)
   const [email, setEmail] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const t = useTranslations('cta.newsletter')
   const tForms = useTranslations('forms')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
-
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError(null)
     setIsSubmitting(true)
-    // TODO: Implement newsletter subscription
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setIsSuccess(true)
+
+    const form = new FormData(event.currentTarget)
+
+    try {
+      const response = await fetch('/api/newsletter', {
+        body: JSON.stringify({
+          consent,
+          email,
+          locale,
+          source: 'newsletter',
+          website: String(form.get('website') ?? ''),
+        }),
+        headers: {'Content-Type': 'application/json'},
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error('NEWSLETTER_SUBMISSION_FAILED')
+      }
+
       setEmail('')
-      // Reset success state after 3 seconds
-      setTimeout(() => setIsSuccess(false), 3000)
-    }, 1000)
+      setConsent(false)
+      setIsSuccess(true)
+    } catch {
+      setError(labels.error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (isSuccess) {
     return (
-      <div className={`relative overflow-hidden bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800 rounded-xl p-6 ${className}`}>
-        <div className="flex items-center justify-center space-x-4">
-          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-            <CheckIcon className="w-6 h-6 text-white" />
+      <div
+        className={`relative overflow-hidden rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-6 dark:border-green-800 dark:from-green-950/20 dark:to-emerald-950/20 ${className}`}
+        role="status"
+      >
+        <div className="flex items-center justify-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500">
+            <CheckIcon aria-hidden="true" className="h-6 w-6 text-white" />
           </div>
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">{tForms('messages.subscribeSuccess')}</h3>
-            <p className="text-sm text-green-600 dark:text-green-300">{tForms('messages.subscribeDescription')}</p>
+            <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">
+              {tForms('messages.subscribeSuccess')}
+            </h3>
+            <p className="text-sm text-green-600 dark:text-green-300">
+              {tForms('messages.subscribeDescription')}
+            </p>
           </div>
         </div>
-        {/* Decorative elements */}
-        <div className="absolute -top-4 -right-4 w-24 h-24 bg-green-200/30 dark:bg-green-700/20 rounded-full blur-2xl" />
-        <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-emerald-200/30 dark:bg-emerald-700/20 rounded-full blur-xl" />
       </div>
     )
   }
 
   return (
-    <div className={`relative overflow-hidden bg-gradient-to-br from-card via-card to-muted/20 border border-ring/20 rounded-xl p-6 ${className}`}>
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5" />
-      <div className="absolute -top-8 -right-8 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
-
+    <section
+      className={`border-ring/20 bg-card relative overflow-hidden rounded-xl border bg-gradient-to-br via-card to-muted/20 p-6 ${className}`}
+    >
+      <div aria-hidden="true" className="from-primary/5 absolute inset-0 bg-gradient-to-r via-transparent to-primary/5" />
       <div className="relative">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/25">
-            <MailIcon className="w-7 h-7 text-primary-foreground" />
+        <div className="mb-6 text-center">
+          <div className="from-primary to-primary/80 shadow-primary/25 mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg">
+            <MailIcon aria-hidden="true" className="text-primary-foreground h-7 w-7" />
           </div>
-          <h3 className="text-xl font-bold text-foreground mb-2">{title || t('title')}</h3>
-          <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
+          <h3 className="text-foreground mb-2 text-xl font-bold" id="newsletter-title">
+            {title || t('title')}
+          </h3>
+          <p className="text-muted-foreground mx-auto max-w-md leading-relaxed">
             {description || t('description')}
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <div className="relative flex-1">
-              <Input
-                type="email"
-                placeholder={t('placeholder')}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-12 pl-4 pr-4 bg-background/80 backdrop-blur-sm border-ring/30 focus:border-primary/50 focus:bg-background shadow-sm"
-                required
-              />
-            </div>
+        <form
+          aria-labelledby="newsletter-title"
+          className="mx-auto max-w-md space-y-4"
+          onSubmit={handleSubmit}
+        >
+          <label className="sr-only" htmlFor="newsletter-email">
+            {labels.email}
+          </label>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Input
+              aria-describedby={error ? 'newsletter-error' : undefined}
+              autoComplete="email"
+              className="border-ring/30 bg-background/80 focus:border-primary/50 h-12 flex-1 shadow-sm backdrop-blur-sm"
+              disabled={isSubmitting}
+              id="newsletter-email"
+              maxLength={320}
+              onChange={event => setEmail(event.target.value)}
+              placeholder={t('placeholder')}
+              required
+              type="email"
+              value={email}
+            />
             <Button
+              className="from-primary to-primary/90 h-12 bg-gradient-to-r px-8"
+              disabled={isSubmitting || !email || !consent}
               type="submit"
-              disabled={isSubmitting || !email}
-              className="h-12 px-8 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
             >
               {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
-                  {tForms('buttons.subscribing')}
-                </>
+                <LoaderCircleIcon aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <>
-                  {tForms('buttons.subscribe')}
-                  <ArrowRightIcon className="w-4 h-4 ml-2" />
-                </>
+                <ArrowRightIcon aria-hidden="true" className="ml-2 h-4 w-4" />
               )}
+              {isSubmitting
+                ? tForms('buttons.subscribing')
+                : tForms('buttons.subscribe')}
             </Button>
           </div>
-
-          <div className="flex items-center justify-center space-x-6 text-xs text-muted-foreground">
-            <div className="flex items-center space-x-1">
-              <div className="w-1 h-1 bg-green-500 rounded-full" />
-              <span>{tForms('messages.noSpam')}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <div className="w-1 h-1 bg-blue-500 rounded-full" />
-              <span>{tForms('messages.unsubscribeAnytime')}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <div className="w-1 h-1 bg-purple-500 rounded-full" />
-              <span>{tForms('messages.weeklyUpdates')}</span>
-            </div>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"
+          >
+            <label htmlFor="newsletter-website">Website</label>
+            <input
+              autoComplete="off"
+              id="newsletter-website"
+              name="website"
+              tabIndex={-1}
+            />
+          </div>
+          <label className="text-muted-foreground flex items-start gap-2 text-sm">
+            <input
+              checked={consent}
+              className="border-input mt-0.5 h-4 w-4 rounded"
+              disabled={isSubmitting}
+              onChange={event => setConsent(event.target.checked)}
+              required
+              type="checkbox"
+            />
+            <span>{labels.consent}</span>
+          </label>
+          {error ? (
+            <p className="text-destructive text-sm" id="newsletter-error" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs">
+            <span>{tForms('messages.noSpam')}</span>
+            <span>{tForms('messages.unsubscribeAnytime')}</span>
+            <span>{tForms('messages.weeklyUpdates')}</span>
           </div>
         </form>
       </div>
-    </div>
+    </section>
   )
 }

@@ -1,4 +1,49 @@
 {
+  "passwordReset": {
+    "backToSignIn": "Giriş sayfasına dön",
+    "confirmPassword": "Yeni parolayı doğrula",
+    "email": "E-posta adresi",
+    "genericError": "İsteğinizi işleyemedik. Lütfen tekrar deneyin.",
+    "invalidLink": "Bu sıfırlama bağlantısı geçersiz veya süresi dolmuş.",
+    "mismatch": "Parolalar eşleşmiyor.",
+    "newPassword": "Yeni parola",
+    "requestButton": "Sıfırlama bağlantısı gönder",
+    "requestSubtitle": "Hesap e-postanızı girin; güvenli ve süreli bir bağlantı gönderelim.",
+    "requestSuccess": "Hesap uygunsa sıfırlama bağlantısı için gelen kutunuzu kontrol edin.",
+    "requestTitle": "Parolanızı sıfırlayın",
+    "requesting": "Bağlantı gönderiliyor...",
+    "resetButton": "Parolayı sıfırla",
+    "resetSubtitle": "En az 12 karakterli yeni bir parola seçin.",
+    "resetSuccess": "Parolanız sıfırlandı.",
+    "resetTitle": "Yeni parola seçin",
+    "resetting": "Parola sıfırlanıyor..."
+  },
+  "consent": {
+    "title": "Gizlilik tercihleriniz",
+    "description": "Sitenin nasıl kullanıldığını anlamak için isteğe bağlı analitik, yalnızca gerektiğinde pazarlama depolaması ve Google Haritalar gibi hizmetleri göstermek için harici medya kullanıyoruz. Zorunlu depolama her zaman etkindir.",
+    "acceptAll": "Tümünü kabul et",
+    "rejectAll": "İsteğe bağlıları reddet",
+    "managePreferences": "Tercihleri yönet",
+    "openPreferences": "Gizlilik tercihlerini aç",
+    "preferencesTitle": "Gizlilik tercihleri",
+    "preferencesDescription": "Hangi isteğe bağlı hizmetlerin çalışabileceğini seçin. Bu tercihleri istediğiniz zaman değiştirebilirsiniz.",
+    "necessaryTitle": "Zorunlu",
+    "necessaryDescription": "Güvenlik, kimlik doğrulama ve gizlilik tercihinizi kaydetmek için gereklidir.",
+    "alwaysActive": "Her zaman etkin",
+    "analyticsTitle": "Analitik",
+    "analyticsDescription": "Google Tag Manager üzerinden yönetilen Google Analytics'in site kullanımını ölçmesine izin verir.",
+    "marketingTitle": "Pazarlama",
+    "marketingDescription": "Google reklam depolamasına ve reklam kişiselleştirme sinyallerine izin verir. Siz onay vermedikçe kapalı kalır.",
+    "externalMediaTitle": "Harici medya",
+    "externalMediaDescription": "Google Haritalar stüdyo haritası dahil üçüncü taraflarda barındırılan içeriklerin yüklenmesine izin verir.",
+    "savePreferences": "Tercihleri kaydet",
+    "closePreferences": "Gizlilik tercihlerini kapat",
+    "preferencesSaved": "Gizlilik tercihleriniz kaydedildi.",
+    "mapBlockedTitle": "Google Haritalar engellendi",
+    "mapBlockedDescription": "Harici medyaya izin verene kadar harita Google ile bağlantı kurmaz.",
+    "allowMap": "İzin ver ve haritayı yükle",
+    "mapUnavailable": "Yapılandırılan stüdyo haritası kullanılamıyor."
+  },
   "about": {
     "achievements": "Başarılar",
     "biography": "Biyografi",
@@ -50,6 +95,7 @@
       "title": "Tekrar Hoş Geldiniz",
 
       "googleButton": "Google ile Devam Et",
+      "forgotPassword": "Parolanızı mı unuttunuz?",
       "noAccount": "Hesabınız yok mu?",
       "orContinue": "Veya e-posta ile devam et",
       "signUp": "Kaydol"
@@ -61,10 +107,16 @@
       "hasAccount": "Zaten hesabınız var mı?",
       "orContinue": "Veya e-posta ile hesap oluştur",
       "signIn": "Giriş yap"
+    },
+    "status": {
+      "rateLimit": "Çok fazla deneme yapıldı. Lütfen bekleyip yeniden deneyin.",
+      "verificationInvalid": "Bu doğrulama bağlantısı geçersiz veya süresi dolmuş.",
+      "verificationPending": "Giriş yapmadan önce gelen kutunuzdaki e-postayı doğrulayın.",
+      "verificationSuccess": "E-posta adresiniz doğrulandı. Şimdi giriş yapabilirsiniz."
     }
   },
   "branding": {
-    "locale": "{locale, select, en {İngilizce} tr {Türkçe} ru {Rusça} kg {Kırgızca} other {Bilinmeyen}}",
+    "locale": "{locale, select, en {İngilizce} tr {Türkçe} ru {Rusça} ky {Kırgızca} other {Bilinmeyen}}",
     "slogan": "ÇAĞDAŞ YAĞLI BOYA ODAKLI RESSAM"
   },
   "cards": {
@@ -188,7 +240,9 @@
       "createAccount": "Hesap Oluştur",
       "creatingAccount": "Hesap oluşturuluyor...",
       "signIn": "Giriş Yap",
-      "signingIn": "Giriş yapılıyor..."
+      "signingIn": "Giriş yapılıyor...",
+      "showPassword": "Parolayı göster",
+      "hidePassword": "Parolayı gizle"
     },
     "labels": {
       "address": "Adres",
@@ -215,7 +269,9 @@
       "unsubscribeAnytime": "İstediğiniz zaman abonelikten çıkın",
       "weeklyUpdates": "Haftalık güncellemeler",
 
-      "signInSuccess": "Başarıyla giriş yapıldı"
+      "signInSuccess": "Başarıyla giriş yapıldı",
+      "verificationSentDescription": "Giriş yapmadan önce gelen kutunuzdaki e-postayı doğrulayın.",
+      "verificationSentTitle": "Doğrulama e-postası gönderildi"
     },
     "placeholders": {
       "confirmPassword": "Şifrenizi onaylayın",
@@ -292,18 +348,18 @@
 
       "additionalData": "Ek ilişkilerden veriler: Hesaplar, Oturumlar, Sanat Eserleri, Sanat Eseri Beğenileri, Sosyal Medya, Geri Bildirimler, Basın ve Haberler.",
       "changesNotification": "Gizlilik politikasındaki herhangi bir değişiklik e-posta yoluyla bildirilecektir.",
-      "contactEmail": "İletişim E-postası: mucahidyazar@gmail.com",
+      "contactEmail": "İletişim E-postası: support@mucahid.dev",
       "dataSecurity": "Veri Güvenliği",
       "dataSharing": "Veri Paylaşımı ve İfşası",
       "informationCollected": "Toplanan Bilgiler",
       "policyChanges": "Politika Değişiklikleri",
       "rightsDescription": "Kullanıcılar kişisel bilgilerine erişme, değiştirme ve silme hakkına sahiptir.",
-      "securityDescription": "Web sitesi güvenlik ve operasyonel işlevsellik için Supabase, Prisma ve Vercel gibi hizmetlere dayanır. bekten.art tarafından ek özel güvenlik önlemleri alınmamıştır.",
+      "securityDescription": "bekten.art şifreli bağlantılar, kısıtlı erişim, girdi doğrulama, hız sınırlama, özel nesne depolama, denetim kayıtları ve korumalı kimlik doğrulama belirteçleri kullanır. Hiçbir güvenlik önlemi tüm riskleri ortadan kaldıramaz.",
       "servicesPurpose": "Sanatçılara geri bildirim sağlama ve sanatçıların eserlerini web sitesinde sergileme gibi hizmetleri kolaylaştırmak için.",
       "userDetails": "Kullanıcı modelinden ayrıntılar: ID, İsim, E-posta, E-posta Doğrulandı, Resim, Meslek, Açıklama, Konum, Rol, Oluşturulma Tarihi, Güncellenme Tarihi, Veri Paylaşım Tercihleri ve E-posta Abonelik Tercihleri.",
       "userRights": "Kullanıcı Hakları",
 
-      "noThirdParty": "Kişisel veriler hiçbir üçüncü tarafla paylaşılmaz ve yalnızca bekten.art'ın işleyişi için kullanılır.",
+      "noThirdParty": "Veriler yalnızca hizmeti işletmek için gerekli ölçüde altyapımız ve seçili veri işleyenler tarafından işlenir: Coolify üzerinde PostgreSQL ve Garage depolama, işlem e-postaları için Resend, giriş ve onaya bağlı analiz için Google, herkese açık Instagram içerikleri için Apify. Kişisel verileri satmayız.",
       "purposeOfCollection": "Veri Toplama Amacı"
     },
 
@@ -312,7 +368,7 @@
       "title": "Hizmet Şartları",
       "website": "Web sitesi: bekten.art",
 
-      "contactEmail": "İletişim E-postası: mucahidyazar@gmail.com",
+      "contactEmail": "İletişim E-postası: support@mucahid.dev",
       "disputeDescription": "Anlaşmazlıklar veya endişeler web sitesi yöneticisine veya sağlanan iletişim bilgileri aracılığıyla iletilmelidir.",
       "disputeResolution": "Anlaşmazlık Çözümü",
       "generalInformation": "Site Hakkında Genel Bilgiler",
@@ -333,7 +389,11 @@
     "gallery": "Galeri",
     "home": "Ana Sayfa",
     "news": "Haberler",
-    "store": "Mağaza"
+    "store": "Mağaza",
+    "signIn": "Giriş yap",
+    "signUp": "Kayıt ol",
+    "forgotPassword": "Parolamı unuttum",
+    "resetPassword": "Parola sıfırlama"
   },
   "news": {
     "address": "Adres",
@@ -473,6 +533,9 @@
     "categoryJournalist": "Gazeteci",
     "categoryCurator": "Küratör",
     "company": "Şirket",
-    "manualControl": "Manuel Kontrol"
+    "manualControl": "Manuel Kontrol",
+    "pauseAutoplay": "Görüşlerin otomatik geçişini duraklat",
+    "showTestimonial": "{index}. görüşü göster",
+    "startAutoplay": "Görüşlerin otomatik geçişini başlat"
   }
 }

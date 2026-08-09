@@ -1,91 +1,188 @@
-import {PrismaAdapter} from '@auth/prisma-adapter'
+import {PrismaAdapter} from '@next-auth/prisma-adapter'
 import {compare} from 'bcryptjs'
-import NextAuth from 'next-auth'
+import {getServerSession, type NextAuthOptions} from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
 
 import {prisma} from '@/lib/db'
+import {consumeConfiguredRateLimit} from '@/server/auth/configured-rate-limit'
+import {authorizeCredentials} from '@/server/auth/credentials'
+import {
+  getClientAddress,
+  shouldTrustProxy,
+} from '@/server/auth/request-context'
+import {safeAuthRedirect} from '@/server/auth/safe-redirect'
+import {
+  applySessionClaims,
+  refreshJwtClaims,
+} from '@/server/auth/session-utils'
 
-const providers: any[] = [
+import type {Provider} from 'next-auth/providers/index'
+
+const LOGIN_POLICY = Object.freeze({
+  limit: 10,
+  windowMs: 15 * 60 * 1_000,
+})
+
+const googleClientId = process.env.AUTH_GOOGLE_ID
+const googleClientSecret = process.env.AUTH_GOOGLE_SECRET
+
+export function auth() {
+  return getServerSession(authOptions)
+}
+
+const providers: Provider[] = [
   Credentials({
     credentials: {
       email: {label: 'Email', type: 'email'},
       password: {label: 'Password', type: 'password'},
     },
-    authorize: async credentials => {
-      const email = String(credentials?.email ?? '').trim().toLowerCase()
-      const password = String(credentials?.password ?? '')
-
-      if (!email || !password) {
-        return null
-      }
-
-      const user = await prisma.user.findUnique({
-        where: {email},
+    async authorize(credentials, request) {
+      const normalizedEmail = String(credentials?.email ?? '')
+        .trim()
+        .toLowerCase()
+        .slice(0, 320)
+      const address = getClientAddress(request, shouldTrustProxy())
+      const networkLimit = await consumeConfiguredRateLimit({
+        action: 'login_ip',
+        identifier: address,
+        policy: LOGIN_POLICY,
       })
 
-      if (!user?.passwordHash) {
+      if (!networkLimit.allowed) {
         return null
       }
 
-      const isValidPassword = await compare(password, user.passwordHash)
+      const identityLimit = await consumeConfiguredRateLimit({
+        action: 'login_identity',
+        identifier: normalizedEmail || 'invalid',
+        policy: LOGIN_POLICY,
+      })
 
-      if (!isValidPassword) {
+      if (!identityLimit.allowed) {
         return null
       }
 
-      return {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        image: user.image,
-        role: user.role,
-        passwordResetRequired: user.passwordResetRequired,
-      }
+      return authorizeCredentials(credentials, {
+        comparePassword: compare,
+        findUserByEmail: email =>
+          prisma.user.findUnique({
+            select: {
+              email: true,
+              emailVerified: true,
+              id: true,
+              image: true,
+              name: true,
+              passwordHash: true,
+              passwordResetRequired: true,
+              role: true,
+              sessionVersion: true,
+            },
+            where: {email},
+          }),
+      })
     },
   }),
+  ...(googleClientId && googleClientSecret
+    ? [
+        Google({
+          authorization: {
+            params: {
+              prompt: 'select_account',
+              response_type: 'code',
+              scope: 'openid email profile',
+            },
+          },
+          clientId: googleClientId,
+          clientSecret: googleClientSecret,
+        }),
+      ]
+    : []),
 ]
 
-if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
-  providers.push(
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
-  )
-}
-
-export const {handlers, auth, signIn, signOut} = NextAuth({
-  adapter: PrismaAdapter(prisma) as any,
-  session: {
-    strategy: 'jwt',
-  },
-  pages: {
-    signIn: '/sign-in',
-  },
-  providers,
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   callbacks: {
-    session: async ({session, user}) => {
-      if (session.user) {
-        session.user.id = user.id
-        session.user.role = (user.role as 'USER' | 'ARTIST' | 'ADMIN') ?? 'USER'
+    async jwt({token, user}) {
+      return refreshJwtClaims(token, user, userId =>
+        prisma.user.findUnique({
+          select: {
+            id: true,
+            passwordResetRequired: true,
+            role: true,
+            sessionVersion: true,
+          },
+          where: {id: userId},
+        }),
+      )
+    },
+    async redirect({baseUrl, url}) {
+      return safeAuthRedirect(url, baseUrl, '/en')
+    },
+    async session({session, token}) {
+      return applySessionClaims(session, token)
+    },
+    async signIn({account, profile}) {
+      if (account?.provider !== 'google') {
+        return true
       }
 
-      return session
+      const googleProfile = profile as
+        | {email?: unknown; email_verified?: unknown}
+        | undefined
+
+      return Boolean(
+        googleProfile?.email_verified === true &&
+          typeof googleProfile.email === 'string' &&
+          googleProfile.email.length <= 320,
+      )
     },
   },
   events: {
-    signIn: async message => {
-      if (message.user?.id) {
-        await prisma.user.update({
-          where: {id: message.user.id},
-          data: {
-            last_sign_in_at: new Date(),
-            passwordResetRequired: false,
-          },
-        })
+    async signIn({account, user}) {
+      if (!user.id) {
+        return
       }
+
+      await Promise.all([
+        prisma.user.updateMany({
+          data: {last_sign_in_at: new Date()},
+          where: {id: user.id},
+        }),
+        ...(account?.provider === 'google'
+          ? [
+              prisma.account.updateMany({
+                data: {
+                  access_token: null,
+                  expires_at: null,
+                  id_token: null,
+                  refresh_token: null,
+                  session_state: null,
+                  token_type: null,
+                },
+                where: {
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                },
+              }),
+            ]
+          : []),
+      ])
     },
   },
-  trustHost: true,
-})
+  pages: {
+    error: '/en/sign-in',
+    signIn: '/en/sign-in',
+  },
+  providers,
+  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
+  session: {
+    maxAge: 12 * 60 * 60,
+    strategy: 'jwt',
+    updateAge: 60 * 60,
+  },
+}
+
+export const googleAuthEnabled = Boolean(
+  googleClientId && googleClientSecret,
+)
