@@ -125,14 +125,14 @@ export function AppTools({className, user}: AppToolsProps) {
       ) : (
         <Link
           href={localizedPath(locale, '/sign-in')}
-          aria-label={t('auth.signIn.signIn')}
+          aria-label={t('navigation.signIn')}
           className={cn(
             buttonVariants({variant: 'outline', size: 'sm'}),
             'border-border bg-card text-foreground hover:bg-muted relative z-50 h-9 w-9 justify-center gap-2 rounded border text-xs uppercase transition-colors sm:w-fit',
           )}
         >
           <LogInIcon aria-hidden="true" className="h-4 w-4" />
-          <span className="hidden md:block">{t('auth.signIn.signIn')}</span>
+          <span className="hidden md:block">{t('navigation.signIn')}</span>
         </Link>
       )}
 

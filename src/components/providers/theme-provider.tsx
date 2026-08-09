@@ -8,6 +8,7 @@ type ThemeProviderProps = {
   attribute?: 'class' | 'data-theme'
   defaultTheme?: string
   enableSystem?: boolean
+  nonce?: string
   themes?: string[]
   storageKey?: string
 }

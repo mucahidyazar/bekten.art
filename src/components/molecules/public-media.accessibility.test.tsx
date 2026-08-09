@@ -177,6 +177,9 @@ describe('public media accessibility', () => {
       screen.getByRole('button', {name: /show testimonial 1/i}),
     ).toHaveAttribute('aria-current', 'true')
     expect(
+      screen.getByRole('button', {name: /show testimonial 2/i}),
+    ).toHaveClass('h-6', 'w-6')
+    expect(
       screen.getByRole('button', {name: /start testimonial autoplay/i}),
     ).toBeVisible()
   })

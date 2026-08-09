@@ -25,7 +25,7 @@ vi.mock('next/navigation', () => ({
 vi.mock('next-intl', () => ({
   useLocale: () => 'en',
   useTranslations: () => (key: string, values?: {locale?: string}) =>
-    values?.locale ?? (key === 'auth.signIn.signIn' ? 'Sign in' : key),
+    values?.locale ?? (key === 'navigation.signIn' ? 'Sign in' : key),
 }))
 
 vi.mock('next-themes', () => ({

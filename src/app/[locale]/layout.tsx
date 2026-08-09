@@ -91,6 +91,7 @@ export default async function RootLayout({children, params}: LayoutProps) {
                   attribute="class"
                   defaultTheme="light"
                   enableSystem
+                  nonce={nonce}
                   themes={['light', 'dark', 'navy', 'system']}
                 >
                   <UserProvider initialUser={user}>

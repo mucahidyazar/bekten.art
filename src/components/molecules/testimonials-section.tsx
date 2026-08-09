@@ -201,10 +201,10 @@ export function TestimonialsSection({items}: TestimonialsSectionProps) {
                       setCurrentIndex(index)
                       setIsAutoPlaying(false)
                     }}
-                    className={`h-3 rounded-full transition-all ${
+                    className={`h-6 rounded-full transition-all ${
                       index === currentIndex
                         ? 'bg-primary w-8'
-                        : 'bg-primary/30 w-3'
+                        : 'bg-primary/30 w-6'
                     }`}
                   />
                 ))}
