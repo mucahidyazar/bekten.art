@@ -41,7 +41,8 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
   - [x] Eski medya metadata envanterini çıkar (50 kayıt, 14.799.786 byte);
         kaynak servis son cutover öncesinde silindiği için nesne gövdelerinin
         geri alınamadığını Coolify kaynak listesi ve bağlantı kontrolüyle
-        doğrula
+        doğrula; 9 Ağustos 2026 son kontrolünde Coolify `Services` listesinde
+        PocketBase bulunmadığını ve `garage-s3` servisinin çalıştığını teyit et
   - [x] Coolify/Garage/Resend yapılandırmalarının secret içermeyen snapshot'ını
         tamamla
 
@@ -92,7 +93,7 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
         değiştir
   - [x] Supabase import/export ve artık scriptleri temizle
 
-- [ ] Database/backend mimarisini iyileştir
+- [x] Database/backend mimarisini iyileştir
   - [x] Heremio’daki repository/service/handler ayrımından uygun olan yapıyı bu
         projeye uyarla
   - [x] Ortak database erişim katmanını tanımla

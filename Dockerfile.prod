@@ -17,6 +17,13 @@ COPY prisma ./prisma
 COPY prisma.config.ts ./prisma.config.ts
 RUN pnpm install --frozen-lockfile
 
+FROM base AS migration-runtime
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY scripts/migration-runtime/package.json ./scripts/migration-runtime/package.json
+RUN pnpm --filter @bekten/migration-runtime deploy --prod /migration-runtime
+COPY scripts/migration-runtime/prisma.config.ts /migration-runtime/prisma.config.ts
+
 FROM base AS builder
 
 ARG NEXT_PUBLIC_APP_URL=https://bekten.art
@@ -43,12 +50,11 @@ ENV PORT=$PORT
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 --ingroup nodejs nextjs
 
-COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=migration-runtime --chown=nextjs:nodejs /migration-runtime ./scripts/migration-runtime
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/start-production.mjs ./scripts/start-production.mjs
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/media-safety.mjs ./scripts/media-safety.mjs
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/lib ./scripts/lib

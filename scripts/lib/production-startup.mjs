@@ -52,8 +52,13 @@ function validatedHttpsOrigin(environment, name, errors) {
 export function createProductionStartupPlan(_environment) {
   const migrationPlan = [
     Object.freeze({
-      arguments: ['migrate', 'deploy'],
-      command: './node_modules/.bin/prisma',
+      arguments: [
+        'migrate',
+        'deploy',
+        '--config',
+        './scripts/migration-runtime/prisma.config.ts',
+      ],
+      command: './scripts/migration-runtime/node_modules/.bin/prisma',
       label: 'database migrations',
     }),
   ]
