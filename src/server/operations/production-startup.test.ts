@@ -29,10 +29,7 @@ const completeEnvironment = Object.freeze({
   RESEND_WEBHOOK_SECRET: 'whsec_base64/secret+value==',
 })
 
-const productionDockerfile = readFileSync(
-  'Dockerfile.prod',
-  'utf8',
-)
+const productionDockerfile = readFileSync('Dockerfile.prod', 'utf8')
 
 const migrationStep = Object.freeze({
   arguments: [

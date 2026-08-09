@@ -136,7 +136,7 @@ export function validateProductionStartupEnvironment(environment) {
   }
 
   if (
-    !/^whsec_[A-Za-z0-9_-]{8,}$/u.test(
+    !/^whsec_[A-Za-z0-9+/]{8,}={0,2}$/u.test(
       value(environment, 'RESEND_WEBHOOK_SECRET'),
     )
   ) {

@@ -73,7 +73,7 @@ function resendApiKeyIssue(environment: Environment) {
 }
 
 function resendWebhookSecretIssue(environment: Environment) {
-  return /^whsec_[A-Za-z0-9_-]{8,}$/u.test(
+  return /^whsec_[A-Za-z0-9+/]{8,}={0,2}$/u.test(
     value(environment, 'RESEND_WEBHOOK_SECRET'),
   )
     ? null
@@ -89,7 +89,9 @@ function googleClientIdIssue(environment: Environment) {
 }
 
 function tagManagerIssue(environment: Environment) {
-  return /^GTM-[A-Z0-9]+$/u.test(value(environment, 'NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID'))
+  return /^GTM-[A-Z0-9]+$/u.test(
+    value(environment, 'NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID'),
+  )
     ? null
     : 'NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID must be a valid GTM container ID'
 }
