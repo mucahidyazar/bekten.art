@@ -26,7 +26,7 @@ const completeEnvironment = Object.freeze({
   RESEND_API_KEY: 're_test_key',
   RESEND_FROM_EMAIL: 'noreply@mucahid.dev',
   RESEND_REPLY_TO: 'support@mucahid.dev',
-  RESEND_WEBHOOK_SECRET: 'whsec_testsecret',
+  RESEND_WEBHOOK_SECRET: 'whsec_base64/secret+value==',
 })
 
 const productionDockerfile = readFileSync(
