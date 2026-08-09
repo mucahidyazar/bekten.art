@@ -133,20 +133,24 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
   - [x] GA/GTM yardımcılarını sadeleştir ve doğrula
   - [x] Site verification ve metadata entegrasyonlarını güncelle
 
-- [ ] Resend e-posta altyapısını kur
+- [x] Resend e-posta altyapısını kur
   - [x] Resend oturumunda `mucahid.dev` domain doğrulamasını teyit et
   - [x] Sadece Bekten Art için sınırlandırılmış Resend API anahtarı oluştur
   - [x] Uygulama içi mailer katmanını ekle
   - [x] Support/gerekli operasyon adreslerini yapılandır
   - [x] Contact/notification/auth maillerini bağla
   - [x] Browser üzerinden Resend yapılandırmasını tamamla
-  - [ ] Sender ile inbound mailbox ayrımını doğrula; çalışan reply-to adresiyle
-        gerçek teslimat testi yap
+  - [x] Sender ile inbound mailbox ayrımını doğrula; `noreply@mucahid.dev`
+        sender, `support@mucahid.dev` reply-to/operasyon adresiyle gerçek
+        teslimat testini Resend `Delivered` sonucu üzerinden doğrula
   - [x] Contact, newsletter ve auth e-postalarını outbox/idempotency ile bağla
   - [x] Resend webhook imza doğrulama, idempotency ve bounce/complaint
         suppression akışını kodla ve test et
   - [x] Resend webhook signing secret'ını production ortamına secret olarak ekle
-  - [ ] Gerçek Resend webhook teslimatını production üzerinde doğrula
+  - [x] Gerçek Resend webhook teslimatını production üzerinde doğrula;
+        production feedback outbox'ı tamamlandı ve imzası doğrulanmış
+        `email.sent`/`email.delivered` olayları `email_webhook_events` tablosunda
+        işlenmiş olarak görüldü
   - [x] Apify/Instagram çağrılarına timeout, retry/backoff, validation ve
         gözlemlenebilir hata ekle
 
@@ -195,7 +199,7 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
 
 ## Faz 8 — Production operasyonları ve paketler
 
-- [ ] Production readiness eksiklerini kapat
+- [x] Production readiness eksiklerini kapat
   - [x] Link preview SSRF açığını kapat veya mimariyi değiştir
   - [x] Upload validation ve içerik güvenliğini güçlendir
   - [x] Security headers, CSP ve HSTS ayarlarını ekle
@@ -235,7 +239,7 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
         function %93,38 ve line %91,37 ile tüm eşikleri geçir
   - [x] Build, typecheck, lint, test ve smoke doğrulamalarını temiz geçir
 
-- [ ] Browser tabları üzerinden dış sistem ayarlarını tamamla
+- [x] Browser tabları üzerinden dış sistem ayarlarını tamamla
   - [x] Coolify içindeki mevcut Bekten uygulaması, PostgreSQL ve Garage
         servislerini tespit et
   - [x] Resend oturumunu ve doğrulanmış domaini tespit et
@@ -244,26 +248,35 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
   - [x] Resend domain ve sender ayarlarını tamamla
   - [x] Resend webhook ve outbox/retention cron ayarlarını Coolify üzerinde
         tamamla; outbox ve retention görevlerini `Last run: success` ile doğrula
-  - [ ] Gerekirse Google servis ayarlarını doğrula
-  - [ ] Coolify migration/startup/healthcheck/deploy ayarlarını doğrula
-  - [ ] Bekten production deploy sonrası health/readiness ve kritik smoke
-        akışlarını doğrula
+  - [x] Google OAuth istemcisinde canonical
+        `https://bekten.art/api/auth/callback/google` redirect URI'sini kaydet;
+        canlı Google account chooser'a ulaşıp `redirect_uri_mismatch` hatasının
+        kalktığını doğrula
+  - [x] Coolify migration/startup/healthcheck/deploy ayarlarını doğrula;
+        `f8352c1` deployment'ı 6 dakika 23 saniyede `Success`, uygulama
+        `Running (healthy)` durumuna ulaştı
+  - [x] Bekten production deploy sonrası `/api/health` 200, `/api/ready` 200
+        (`configuration`, `database`, `email`, `objectStorage`: `ok`), locale
+        sayfaları, sitemap, canonical redirect, auth guard ve gerçek feedback
+        outbox/webhook smoke akışlarını doğrula
 
 ## Faz 9 — Final doğrulama ve devir
 
-- [ ] Final temizleme ve completion audit
+- [x] Final temizleme ve completion audit
   - [x] `progress.md` üzerindeki tamamlanmış maddeleri kanıta göre güncelle
   - [x] Son kod güvenlik/SEO/accessibility taramalarını çalıştır
   - [x] Son build/type/lint/test/e2e doğrulamasını çalıştır
   - [x] Runtime placeholder/mock/broken path olmadığını doğrula; form
         placeholder metinleri, test mock'ları ve tarihsel migration kayıtları
         dışında runtime kalıntısı bırakma
-  - [ ] Goal completion için kanıtları topla
+  - [x] Goal completion için kanıtları topla; final kod `f8352c1`, Coolify
+        deploy `Success`, production health/readiness ve Resend webhook akışı
+        yeşil, worktree temiz
   - [x] `rg -i "TODO|mock|placeholder|supabase|legacy storage"` sonuçlarını tek
         tek temizle veya bilinçli istisna olarak belgele
   - [x] `pnpm lint`, `pnpm type-check`, `pnpm test:coverage`, `pnpm build`,
         Playwright E2E (48/48) ve Docker startup/health smoke'u aynı final kod
         üzerinde geçir
-  - [ ] Lighthouse hedefleri: performance ≥85, accessibility/SEO/best-practices
-        ≥95
-  - [ ] Tüm checklist maddeleri `[x]` olmadan goal'i complete yapma
+  - [x] Lighthouse hedefleri: canlı `https://bekten.art/en` üzerinde performance
+        86, accessibility 100, SEO 100 ve best-practices 100
+  - [x] Tüm checklist maddeleri `[x]` olmadan goal'i complete yapma
