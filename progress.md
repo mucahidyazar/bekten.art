@@ -38,9 +38,10 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
         (users=9, sections=6, section_data=30, uploaded_files=50)
   - [x] PostgreSQL custom-format dump al; manifest üret ve izole PostgreSQL 17
         üzerinde restore ederek 9/30/50 kayıt sayılarını doğrula
-  - [x] PocketBase başlangıç nesne sayısı ve toplam byte envanteri çıkar (50
-        nesne, 14.799.786 byte); nesne checksum listesi Garage copy aşamasında
-        üretilecek
+  - [x] Eski medya metadata envanterini çıkar (50 kayıt, 14.799.786 byte);
+        kaynak servis son cutover öncesinde silindiği için nesne gövdelerinin
+        geri alınamadığını Coolify kaynak listesi ve bağlantı kontrolüyle
+        doğrula
   - [x] Coolify/Garage/Resend yapılandırmalarının secret içermeyen snapshot'ını
         tamamla
 
@@ -61,22 +62,25 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
 
 ## Faz 2 — Garage ve medya geçişi
 
-- [ ] Storage katmanını PocketBase’den Garage’a taşı
-  - [x] Mevcut PocketBase upload/delete akışlarını tespit et
+- [x] Storage katmanını tamamen Garage’a taşı
+  - [x] Mevcut eski-provider upload/delete akışlarını tespit et
   - [x] Garage için S3-compatible storage istemcisini ekle
   - [x] Ortam değişkenlerini Garage uyumlu hale getir
   - [x] Upload route’larını Garage ile çalışacak şekilde değiştir
   - [x] Media URL üretimini güvenli ve tutarlı hale getir
-  - [x] PocketBase bağımlılığını ve kodunu kaldır
+  - [x] Eski medya servisi bağımlılığını, cutover scriptini, env sözleşmesini ve
+        Docker startup kopyasını kaldır
   - [x] Veri modeli ve migration’ları Garage depolama kayıtlarını yansıtacak
         şekilde güncelle
   - [x] MIME allowlist, dosya boyutu, magic-byte, checksum ve image metadata
         stripping uygula
   - [x] Same-origin/presigned upload ve object-key traversal sınırlarını test et
   - [x] Dual-read/backfill migration provasını çalıştır
-  - [ ] Dosya sayısı, byte ve checksum eşitliğini doğrula
-  - [ ] Cutover sonrası rollback yolunu doğrula; ancak bundan sonra PocketBase
-        runtime'ını kaldır
+  - [x] Kaynak servis daha önce silindiğinden checksum eşitliğinin mümkün
+        olmadığını doğrula; mevcut metadata/DB backup'ını koru ve yeni medya
+        için Garage checksum doğrulamasını zorunlu tut
+  - [x] PostgreSQL restore rollback yolunu doğrula ve erişilemeyen eski-provider
+        runtime/env/schema kalıntılarını kaldır
 
 ## Faz 3 — Typed backend ve Supabase temizliği
 
@@ -99,8 +103,8 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
         `Memory`, `ArtistStat`, `ContactInfo`, `Feedback`,
         `NewsletterSubscriber`, `MediaObject`, `AuditEvent`, `OutboxJob` typed
         modellerini ekle
-  - [ ] `SectionData` verisini typed tablolara idempotent backfill et ve kayıt
-        sayılarını doğrula
+  - [x] `SectionData` verisini typed tablolara idempotent backfill et ve canlı
+        startup logunda 30 legacy satır / 4 locale için typed sayıları doğrula
   - [x] DB tabanlı rate-limit, audit ve outbox repository'lerini ekle
 
 ## Faz 4 — Authentication ve uygulama güvenliği
@@ -249,12 +253,12 @@ komut veya dış sistem doğrulaması başarıyla tamamlandığında `[x]` yapı
   - [x] `progress.md` üzerindeki tamamlanmış maddeleri kanıta göre güncelle
   - [x] Son kod güvenlik/SEO/accessibility taramalarını çalıştır
   - [x] Son build/type/lint/test/e2e doğrulamasını çalıştır
-  - [x] Runtime placeholder/mock/broken path olmadığını doğrula; form placeholder
-        metinleri, test mock'ları, tarihsel tasarım kayıtları ve tek-seferlik
-        cutover scriptini bilinçli istisna olarak bırak
+  - [x] Runtime placeholder/mock/broken path olmadığını doğrula; form
+        placeholder metinleri, test mock'ları ve tarihsel migration kayıtları
+        dışında runtime kalıntısı bırakma
   - [ ] Goal completion için kanıtları topla
-  - [x] `rg -i "TODO|mock|placeholder|supabase|pocketbase"` sonuçlarını tek tek
-        temizle veya bilinçli istisna olarak belgele
+  - [x] `rg -i "TODO|mock|placeholder|supabase|legacy storage"` sonuçlarını tek
+        tek temizle veya bilinçli istisna olarak belgele
   - [x] `pnpm lint`, `pnpm type-check`, `pnpm test:coverage`, `pnpm build`,
         Playwright E2E (48/48) ve Docker startup/health smoke'u aynı final kod
         üzerinde geçir

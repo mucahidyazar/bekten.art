@@ -6,9 +6,15 @@ const TABLES = Object.freeze([
   'users',
   'accounts',
   'sessions',
-  'sections',
-  'section_data',
-  'uploaded_files',
+  'artworks',
+  'news_articles',
+  'press_items',
+  'testimonials',
+  'workshop_items',
+  'memories',
+  'artist_stats',
+  'contact_info',
+  'media_objects',
   'instagram_posts',
   'password_reset_tokens',
   'verification_tokens',
@@ -42,19 +48,21 @@ try {
       continue
     }
 
-    const result = await pool.query(`SELECT COUNT(*)::int AS count FROM "${table}"`)
+    const result = await pool.query(
+      `SELECT COUNT(*)::int AS count FROM "${table}"`,
+    )
 
     counts[table] = result.rows[0].count
   }
 
-  const media = existingTables.has('uploaded_files')
+  const media = existingTables.has('media_objects')
     ? await pool.query(
-        `SELECT storage_provider AS provider,
+        `SELECT provider,
                 COUNT(*)::int AS objects,
-                COALESCE(SUM(file_size), 0)::bigint::text AS bytes
-           FROM uploaded_files
-          GROUP BY storage_provider
-          ORDER BY storage_provider`,
+                COALESCE(SUM(size_bytes), 0)::bigint::text AS bytes
+           FROM media_objects
+          GROUP BY provider
+          ORDER BY provider`,
       )
     : {rows: []}
 

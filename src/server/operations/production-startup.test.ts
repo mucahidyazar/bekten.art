@@ -55,56 +55,30 @@ describe('production startup contract', () => {
     ])
   })
 
-  it('gates the one-time typed and Garage cutover before the server starts', () => {
-    const environment = {
+  it('never schedules a removed legacy storage cutover', () => {
+    const environmentWithStaleLegacyFlags = {
       ...completeEnvironment,
-      POCKETBASE_ADMIN_EMAIL: 'admin@example.com',
-      POCKETBASE_ADMIN_PASSWORD: 'legacy-secret',
-      POCKETBASE_STORAGE_COLLECTION: 'uploads',
-      POCKETBASE_URL: 'https://pocketbase.example.com',
-      RUN_LEGACY_CUTOVER: 'true',
+      REMOVED_STORAGE_CUTOVER: 'true',
+      REMOVED_STORAGE_URL: 'http://192.168.50.130:45000/',
     }
 
-    expect(validateProductionStartupEnvironment(environment)).toBeUndefined()
     expect(
-      createProductionStartupPlan(environment).map(step => step.label),
-    ).toEqual([
-      'database migrations',
-      'typed content cutover',
-      'Garage media cutover',
-      'application server',
-    ])
-  })
-
-  it('requires every legacy source credential only when cutover is enabled', () => {
-    expect(() =>
-      validateProductionStartupEnvironment({
-        ...completeEnvironment,
-        RUN_LEGACY_CUTOVER: 'true',
-      }),
-    ).toThrow(/POCKETBASE_URL/)
-  })
-
-  it('allows the one-time private HTTP legacy source only behind an explicit flag', () => {
-    const privateLegacyEnvironment = {
-      ...completeEnvironment,
-      ALLOW_PRIVATE_HTTP_LEGACY_SOURCE: 'true',
-      POCKETBASE_ADMIN_EMAIL: 'admin@example.com',
-      POCKETBASE_ADMIN_PASSWORD: 'legacy-secret',
-      POCKETBASE_STORAGE_COLLECTION: 'uploads',
-      POCKETBASE_URL: 'http://192.168.50.130:45000/_/',
-      RUN_LEGACY_CUTOVER: 'true',
-    }
-
-    expect(() =>
-      validateProductionStartupEnvironment({
-        ...privateLegacyEnvironment,
-        ALLOW_PRIVATE_HTTP_LEGACY_SOURCE: 'false',
-      }),
-    ).toThrow(/POCKETBASE_URL/)
-    expect(
-      validateProductionStartupEnvironment(privateLegacyEnvironment),
+      validateProductionStartupEnvironment(environmentWithStaleLegacyFlags),
     ).toBeUndefined()
+    expect(
+      createProductionStartupPlan(environmentWithStaleLegacyFlags),
+    ).toEqual([
+      {
+        arguments: ['migrate', 'deploy'],
+        command: './node_modules/.bin/prisma',
+        label: 'database migrations',
+      },
+      {
+        arguments: ['server.js'],
+        command: process.execPath,
+        label: 'application server',
+      },
+    ])
   })
 
   it('fails before migration when provider configuration is superficially present but unsafe', () => {
@@ -116,6 +90,8 @@ describe('production startup contract', () => {
         RESEND_API_KEY: 'not-a-resend-key',
         RESEND_FROM_EMAIL: 'not-an-email',
       }),
-    ).toThrow(/MEDIA_S3_ENDPOINT.*AUTH_GOOGLE_ID.*RESEND_API_KEY.*RESEND_FROM_EMAIL/)
+    ).toThrow(
+      /MEDIA_S3_ENDPOINT.*AUTH_GOOGLE_ID.*RESEND_API_KEY.*RESEND_FROM_EMAIL/,
+    )
   })
 })

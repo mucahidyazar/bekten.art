@@ -30,14 +30,9 @@ the same HTTPS origin. Behind Coolify, `AUTH_TRUST_PROXY` must be exactly
 
 The container entrypoint validates the production contract, performs
 `prisma migrate deploy` and starts the standalone server only if those gates
-succeed. For the first verified legacy cutover only, set
-`RUN_LEGACY_CUTOVER=true`; the startup plan then runs typed-content backfill and
-the checksum-validating PocketBase-to-Garage copy before the server starts.
-Remove the flag and PocketBase variables after the cutover is verified.
-If the one-time legacy source exists only on a private RFC1918 HTTP address,
-`ALLOW_PRIVATE_HTTP_LEGACY_SOURCE=true` must also be set explicitly; public HTTP,
-link-local and credential-bearing URLs remain rejected. Remove this exception
-with the other legacy variables immediately after verification.
+succeed. The application has no legacy object-storage startup mode or fallback;
+all media reads and writes use the private Garage bucket through the typed media
+catalog.
 
 Configure Coolify's health check to `/api/ready`. `/api/health` remains the
 dependency-free liveness endpoint for diagnostics, but it must not be used as a
@@ -83,9 +78,9 @@ backup can be restored into an isolated database. Store the dump and checksum
 outside the application repository. A backup is accepted only after a full
 restore test and critical-record count comparison.
 
-Garage objects are immutable during migration verification. Record object key,
-byte length and SHA-256 for each copied object, then read each destination
-object back and compare the digest before switching database metadata.
+Garage objects are immutable during backup verification. Record object key, byte
+length and SHA-256, then read each object back and compare the digest when
+validating a storage restore.
 
 ## Rollback
 
@@ -96,8 +91,8 @@ restore the verified pre-cutover database into a new instance, point Coolify to
 that instance, deploy the previous application image and re-run readiness and
 smoke checks.
 
-Do not delete the previous storage data until the new Garage copy, database
-metadata, public media responses and restore path have all been verified.
+Do not delete a Garage backup until database metadata, public media responses
+and the restore path have all been verified.
 
 ## Incident response
 

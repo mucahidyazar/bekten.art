@@ -13,18 +13,6 @@ enum UserRole {
   ADMIN
 }
 
-enum SectionType {
-  workshop
-  gallery
-  portfolio
-  testimonials
-  services
-  artist
-  memories
-  store
-  news
-}
-
 enum ContentStatus {
   DRAFT
   PUBLISHED
@@ -137,36 +125,6 @@ model Social {
 
   @@index([user_id])
   @@map("socials")
-}
-
-model Section {
-  id                  String      @id @default(uuid()) @db.Uuid
-  section_type        SectionType @unique
-  section_title       String
-  section_description String
-  badge_text          String
-  max_items           Int         @default(6)
-  is_active           Boolean     @default(true)
-  display_order       Int         @default(0)
-  created_at          DateTime    @default(now())
-  updated_at          DateTime    @updatedAt
-
-  @@index([display_order])
-  @@map("sections")
-}
-
-model SectionData {
-  id           String      @id @default(uuid()) @db.Uuid
-  section_type SectionType
-  order        Int         @default(0)
-  is_active    Boolean     @default(true)
-  created_at   DateTime    @default(now())
-  updated_at   DateTime    @updatedAt
-  data         Json
-
-  @@index([section_type, order])
-  @@index([section_type, is_active])
-  @@map("section_data")
 }
 
 model Artwork {
@@ -493,9 +451,9 @@ model RateLimitBucket {
 }
 
 model InstagramPost {
-  id                 String        @id @default(uuid()) @db.Uuid
-  instagram_media_id String        @unique
-  shortcode          String        @unique
+  id                 String       @id @default(uuid()) @db.Uuid
+  instagram_media_id String       @unique
+  shortcode          String       @unique
   username           String
   owner_username     String?
   caption            String?
@@ -505,15 +463,15 @@ model InstagramPost {
   thumbnail_url      String?
   alt_text           String?
   posted_at          DateTime?
-  display_order      Int           @default(0)
-  is_active          Boolean       @default(true)
-  is_pinned          Boolean       @default(false)
+  display_order      Int          @default(0)
+  is_active          Boolean      @default(true)
+  is_pinned          Boolean      @default(false)
   raw_payload        Json
-  synced_at          DateTime      @default(now())
-  media_object_id    String?       @unique @db.Uuid
-  created_at         DateTime      @default(now())
-  updated_at         DateTime      @updatedAt
-  media_object       MediaObject?  @relation(fields: [media_object_id], references: [id], onDelete: SetNull)
+  synced_at          DateTime     @default(now())
+  media_object_id    String?      @unique @db.Uuid
+  created_at         DateTime     @default(now())
+  updated_at         DateTime     @updatedAt
+  media_object       MediaObject? @relation(fields: [media_object_id], references: [id], onDelete: SetNull)
 
   @@index([is_active, display_order])
   @@index([username, is_active, posted_at])

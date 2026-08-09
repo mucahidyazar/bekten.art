@@ -3,8 +3,8 @@
 ## Context
 
 Bekten Art is a Next.js 16 application backed by PostgreSQL and Prisma. The
-current runtime still carries a Supabase-shaped compatibility facade, uses
-PocketBase for media, contains incomplete admin/product surfaces, and lacks the
+current runtime still carries a Supabase-shaped compatibility facade, uses a
+legacy media service, contains incomplete admin/product surfaces, and lacks the
 security, observability, testing, SEO and accessibility gates required for a
 production release.
 
@@ -32,9 +32,9 @@ maintenance and performance problems.
 ### 3. Selective architectural port (selected)
 
 Keep the single Next.js application and Prisma/PostgreSQL foundation, remove the
-Supabase facade completely, and port Heremio's backend boundaries and
-production patterns. This provides the architectural benefit without an
-unnecessary ORM or monorepo rewrite.
+Supabase facade completely, and port Heremio's backend boundaries and production
+patterns. This provides the architectural benefit without an unnecessary ORM or
+monorepo rewrite.
 
 ## Target architecture
 
@@ -66,16 +66,16 @@ removed after their data paths have been replaced.
 The generic `SectionData.data` JSON table is a migration source, not the target
 domain model. Typed tables are introduced additively for artwork, news, press,
 testimonials, workshops, memories, artist facts, contact data, feedback,
-newsletter subscriptions, media, audit events, outbox jobs and rate limits.
-Each vertical slice is dual-read/backfilled and count-verified before the legacy
-JSON path is retired. This prevents a flag-day schema cutover while eliminating
-the runtime type ambiguity that currently leaks into pages and admin actions.
+newsletter subscriptions, media, audit events, outbox jobs and rate limits. Each
+vertical slice is dual-read/backfilled and count-verified before the legacy JSON
+path is retired. This prevents a flag-day schema cutover while eliminating the
+runtime type ambiguity that currently leaks into pages and admin actions.
 
 ## Media and Garage
 
-PocketBase will be replaced with a provider-neutral object storage contract and
-an AWS SDK v3 Garage implementation. Garage is configured with a private,
-dedicated bucket, explicit region, endpoint, credentials and
+The legacy media service will be replaced with a provider-neutral object storage
+contract and an AWS SDK v3 Garage implementation. Garage is configured with a
+private, dedicated bucket, explicit region, endpoint, credentials and
 `forcePathStyle: true`.
 
 Uploads are admin-only, size-bounded and MIME/signature validated. The database
@@ -84,15 +84,15 @@ Public media uses a stable application URL backed by a cacheable read route so
 private Garage credentials and expiring signed URLs never appear in persisted
 content.
 
-A one-time migration script will copy existing PocketBase objects to Garage and
-update their database records transactionally. After migration verification,
-PocketBase code and environment variables are removed.
+Existing recoverable objects will be copied to Garage and their database records
+updated transactionally. The retired provider has no runtime code or environment
+variables in the final architecture.
 
 ## Authentication
 
 The user explicitly requires a stable NextAuth release. The application will
-migrate from the v5 beta API to the latest stable `next-auth` v4 line and use its
-Prisma adapter. Credentials and Google OAuth remain enabled.
+migrate from the v5 beta API to the latest stable `next-auth` v4 line and use
+its Prisma adapter. Credentials and Google OAuth remain enabled.
 
 JWT sessions will persist only bounded identity and authorization state. Login
 and registration receive database-backed rate limits, generic authentication
@@ -110,15 +110,15 @@ revoked.
 
 ## Email and Resend
 
-Resend provides transactional delivery. `mucahid.dev` is already verified in
-the authenticated Resend account. The application uses a branded sender on the
+Resend provides transactional delivery. `mucahid.dev` is already verified in the
+authenticated Resend account. The application uses a branded sender on the
 verified domain and a separately configurable reply-to mailbox. The mailer has
 validated server-only configuration, text and HTML variants, idempotency keys,
 and non-sensitive delivery logging.
 
-Initial email flows are password reset, contact/inquiry notification,
-newsletter confirmation and relevant admin notifications. Delivery failure is
-reported to the caller without leaking provider responses.
+Initial email flows are password reset, contact/inquiry notification, newsletter
+confirmation and relevant admin notifications. Delivery failure is reported to
+the caller without leaking provider responses.
 
 ## Admin product surface
 
@@ -187,8 +187,8 @@ Playwright. The required final gates are:
   reachable from the application
 - accessibility and SEO browser assertions green
 - health/readiness and Coolify deployment verified
-- no PocketBase/Supabase runtime code, mock admin data, placeholder actions or
-  broken navigation paths remain
+- no legacy database/storage runtime code, mock admin data, placeholder actions
+  or broken navigation paths remain
 
 ## Data safety
 

@@ -21,7 +21,8 @@ Browser -> Next.js pages/API -> domain service -> repository -> PostgreSQL
 ```
 
 Google OAuth remains the identity provider. GTM/GA are loaded only after the
-visitor's consent decision. No Supabase or PocketBase runtime is used.
+visitor's consent decision. No legacy database or object-storage runtime is
+used.
 
 ## Local development
 

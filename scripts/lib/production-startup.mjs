@@ -1,5 +1,3 @@
-import {validateLegacySourceUrl} from './legacy-source.mjs'
-
 const BASE_REQUIRED = Object.freeze([
   'DATABASE_URL',
   'NEXT_PUBLIC_APP_URL',
@@ -20,13 +18,6 @@ const BASE_REQUIRED = Object.freeze([
   'RESEND_REPLY_TO',
   'RESEND_WEBHOOK_SECRET',
   'OUTBOX_DISPATCH_SECRET',
-])
-
-const LEGACY_REQUIRED = Object.freeze([
-  'POCKETBASE_URL',
-  'POCKETBASE_ADMIN_EMAIL',
-  'POCKETBASE_ADMIN_PASSWORD',
-  'POCKETBASE_STORAGE_COLLECTION',
 ])
 
 function value(environment, name) {
@@ -58,7 +49,7 @@ function validatedHttpsOrigin(environment, name, errors) {
   }
 }
 
-export function createProductionStartupPlan(environment) {
+export function createProductionStartupPlan(_environment) {
   const migrationPlan = [
     Object.freeze({
       arguments: ['migrate', 'deploy'],
@@ -66,21 +57,6 @@ export function createProductionStartupPlan(environment) {
       label: 'database migrations',
     }),
   ]
-  const legacyPlan =
-    value(environment, 'RUN_LEGACY_CUTOVER') === 'true'
-      ? [
-          Object.freeze({
-            arguments: ['scripts/backfill-typed-content.mjs', '--apply'],
-            command: process.execPath,
-            label: 'typed content cutover',
-          }),
-          Object.freeze({
-            arguments: ['scripts/migrate-pocketbase-to-garage.mjs', '--apply'],
-            command: process.execPath,
-            label: 'Garage media cutover',
-          }),
-        ]
-      : []
   const serverPlan = [
     Object.freeze({
       arguments: ['server.js'],
@@ -89,15 +65,11 @@ export function createProductionStartupPlan(environment) {
     }),
   ]
 
-  return Object.freeze([...migrationPlan, ...legacyPlan, ...serverPlan])
+  return Object.freeze([...migrationPlan, ...serverPlan])
 }
 
 export function validateProductionStartupEnvironment(environment) {
-  const cutover = value(environment, 'RUN_LEGACY_CUTOVER') === 'true'
-  const required = cutover
-    ? [...BASE_REQUIRED, ...LEGACY_REQUIRED]
-    : BASE_REQUIRED
-  const errors = required.filter(name => !value(environment, name))
+  const errors = BASE_REQUIRED.filter(name => !value(environment, name))
   const appOrigin = validatedHttpsOrigin(
     environment,
     'NEXT_PUBLIC_APP_URL',
@@ -172,33 +144,6 @@ export function validateProductionStartupEnvironment(environment) {
     )
   ) {
     errors.push('NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID')
-  }
-
-  if (
-    value(environment, 'RUN_LEGACY_CUTOVER') &&
-    !['false', 'true'].includes(value(environment, 'RUN_LEGACY_CUTOVER'))
-  ) {
-    errors.push('RUN_LEGACY_CUTOVER')
-  }
-
-  if (cutover) {
-    try {
-      validateLegacySourceUrl(value(environment, 'POCKETBASE_URL'), {
-        allowPrivateHttp:
-          value(environment, 'ALLOW_PRIVATE_HTTP_LEGACY_SOURCE') === 'true',
-      })
-    } catch {
-      errors.push('POCKETBASE_URL')
-    }
-  }
-
-  if (
-    value(environment, 'ALLOW_PRIVATE_HTTP_LEGACY_SOURCE') &&
-    !['false', 'true'].includes(
-      value(environment, 'ALLOW_PRIVATE_HTTP_LEGACY_SOURCE'),
-    )
-  ) {
-    errors.push('ALLOW_PRIVATE_HTTP_LEGACY_SOURCE')
   }
 
   const uniqueErrors = [...new Set(errors)]
