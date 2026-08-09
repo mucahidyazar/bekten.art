@@ -1,3 +1,5 @@
+import {readFileSync} from 'node:fs'
+
 import {describe, expect, it} from 'vitest'
 
 import {
@@ -27,6 +29,22 @@ const completeEnvironment = Object.freeze({
   RESEND_WEBHOOK_SECRET: 'whsec_testsecret',
 })
 
+const productionDockerfile = readFileSync(
+  'Dockerfile.prod',
+  'utf8',
+)
+
+const migrationStep = Object.freeze({
+  arguments: [
+    'migrate',
+    'deploy',
+    '--config',
+    './scripts/migration-runtime/prisma.config.ts',
+  ],
+  command: './scripts/migration-runtime/node_modules/.bin/prisma',
+  label: 'database migrations',
+})
+
 describe('production startup contract', () => {
   it('fails fast with secret-free field names when required configuration is missing', () => {
     expect(() => validateProductionStartupEnvironment({})).toThrow(
@@ -42,11 +60,7 @@ describe('production startup contract', () => {
       validateProductionStartupEnvironment(completeEnvironment),
     ).toBeUndefined()
     expect(createProductionStartupPlan(completeEnvironment)).toEqual([
-      {
-        arguments: ['migrate', 'deploy'],
-        command: './node_modules/.bin/prisma',
-        label: 'database migrations',
-      },
+      migrationStep,
       {
         arguments: ['server.js'],
         command: process.execPath,
@@ -68,11 +82,7 @@ describe('production startup contract', () => {
     expect(
       createProductionStartupPlan(environmentWithStaleLegacyFlags),
     ).toEqual([
-      {
-        arguments: ['migrate', 'deploy'],
-        command: './node_modules/.bin/prisma',
-        label: 'database migrations',
-      },
+      migrationStep,
       {
         arguments: ['server.js'],
         command: process.execPath,
@@ -92,6 +102,16 @@ describe('production startup contract', () => {
       }),
     ).toThrow(
       /MEDIA_S3_ENDPOINT.*AUTH_GOOGLE_ID.*RESEND_API_KEY.*RESEND_FROM_EMAIL/,
+    )
+  })
+
+  it('ships an isolated migration runtime instead of the full development dependency tree', () => {
+    expect(productionDockerfile).toContain('FROM base AS migration-runtime')
+    expect(productionDockerfile).toContain(
+      'COPY --from=migration-runtime --chown=nextjs:nodejs /migration-runtime ./scripts/migration-runtime',
+    )
+    expect(productionDockerfile).not.toContain(
+      'COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules ./node_modules',
     )
   })
 })
