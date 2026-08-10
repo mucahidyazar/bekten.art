@@ -162,8 +162,8 @@ async function relatedArtworkSnapshot(
 }
 
 export class InquirySubmissionError extends Error {
-  constructor(cause?: unknown) {
-    super('INQUIRY_SUBMISSION_FAILED', {cause})
+  constructor() {
+    super('INQUIRY_SUBMISSION_FAILED')
     this.name = 'InquirySubmissionError'
   }
 }
@@ -244,8 +244,8 @@ export function createInquiryService(dependencies: InquiryServiceDependencies) {
         })
 
         return {accepted: true} as const
-      } catch (cause) {
-        throw new InquirySubmissionError(cause)
+      } catch {
+        throw new InquirySubmissionError()
       }
     },
   })
