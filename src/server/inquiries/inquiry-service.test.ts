@@ -273,10 +273,17 @@ describe('inquiry service', () => {
       new Error('postgresql://private-user:private-password@database'),
     )
 
-    const result = service.submit(validInput, submissionContext)
+    const error: unknown = await service
+      .submit(validInput, submissionContext)
+      .catch(cause => cause)
 
-    await expect(result).rejects.toBeInstanceOf(InquirySubmissionError)
-    await expect(result).rejects.toThrow('INQUIRY_SUBMISSION_FAILED')
-    await expect(result).rejects.not.toThrow('private-password')
+    expect(error).toBeInstanceOf(InquirySubmissionError)
+
+    if (!(error instanceof Error)) throw new Error('Expected a safe error')
+
+    expect(error.message).toBe('INQUIRY_SUBMISSION_FAILED')
+    expect(Object.hasOwn(error, 'cause')).toBe(false)
+    expect(error.stack).not.toContain('private-password')
+    expect(JSON.stringify(error)).not.toContain('private-password')
   })
 })
