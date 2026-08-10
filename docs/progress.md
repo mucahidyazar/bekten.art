@@ -1,0 +1,89 @@
+# Bekten.art V2 Progress
+
+Bir iş yalnız ilgili kod, test ve doğrulama kanıtı tamamlandığında `[x]` yapılır.
+Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşağı ilerler.
+
+## 0. Tasarım ve hazırlık
+
+- [x] Editorial heritage görsel yönünü onayla
+- [x] Public hesapları kaldırma kararını onayla
+- [x] Satış yerine inquiry / commission / private viewing modelini onayla
+- [x] Harici CMS yerine Bekten Studio yaklaşımını onayla
+- [x] V2 tasarım, mimari, veri, güvenlik ve test sözleşmesini belgele
+- [x] Referans görselleri kaynak kontrolüne al
+- [x] V1 baseline lint, typecheck, unit test ve build kapılarını geçir
+- [x] V2 blueprint'i yaz ve adversarial review ile doğrula
+- [x] V1 kaldırma envanterini kaynak yollarıyla tamamla
+
+## 1. Kontrollü V1 temizliği
+
+- [ ] Tekrar kullanılabilecek V1 parçalarını geçici `backup/` yapısına taşı
+- [ ] Public login, kayıt, reset-password ve verification sayfalarını kaldır
+- [ ] Public profil, kullanıcı provider ve kullanıcı araçlarını kaldır
+- [ ] Store, create-store, fiyat ve satış dilini kaldır
+- [ ] Eski admin UI'ı kaldır; reusable operasyon kodunu koru
+- [ ] Kullanılmayan component, test, dependency, env ve locale anahtarlarını temizle
+- [ ] Route, import ve dependency taramasını geçir
+- [ ] Cleanup sonrası lint, typecheck, test ve build kanıtını al
+- [ ] V1 cleanup commit'ini oluştur
+
+## 2. Domain ve içerik altyapısı
+
+- [ ] Collection domainini ve migration'ını test-first ekle
+- [ ] Exhibition domainini ve migration'ını test-first ekle
+- [ ] Journal entry ve editable page domainlerini test-first ekle
+- [ ] Inquiry domainini ve retention kurallarını test-first ekle
+- [ ] Content revision domainini ve immutable restore akışını test-first ekle
+- [ ] Artwork'i availability ve editorial metadata ile geliştir
+- [ ] Locale, slug, sıralama ve draft/published/archived sözleşmesini tamamla
+- [ ] Publish transaction ve cache invalidation akışını tamamla
+- [ ] Düzenlenebilir demo seed'i production gate ile ekle
+
+## 3. Bekten Studio erişimi ve temel deneyim
+
+- [ ] Resend magic-link akışını test-first geliştir
+- [ ] EDITOR ve OWNER authorization sınırlarını tamamla
+- [ ] Public auth route ve bağımlılıklarının kalmadığını doğrula
+- [ ] Bekten Studio responsive shell'ini geliştir
+- [ ] Owner-only operasyon alanını editörden ayır
+- [ ] Studio genel bakış ve görev odaklı boş durumları geliştir
+- [ ] Studio error, loading ve accessibility durumlarını tamamla
+
+## 4. Bekten Studio içerik yönetimi
+
+- [ ] Eser CRUD, sıralama, preview ve publish akışını geliştir
+- [ ] Koleksiyon CRUD, sıralama, preview ve publish akışını geliştir
+- [ ] Sergi CRUD, preview ve publish akışını geliştir
+- [ ] Journal, press ve sayfa CRUD akışlarını geliştir
+- [ ] Garage medya yükleme, seçme, sıralama ve alt-text akışını geliştir
+- [ ] Inquiry inbox, filtre, durum ve not akışını geliştir
+- [ ] Revision geçmişi, karşılaştırma ve geri alma deneyimini geliştir
+
+## 5. Public editorial heritage deneyimi
+
+- [ ] Tasarım tokenları, tipografi, parşömen/grain ve responsive grid'i uygula
+- [ ] Header, footer ve locale-aware navigasyonu yeniden tasarla
+- [ ] Home sayfasını geliştir
+- [ ] Collections ve collection detail sayfalarını geliştir
+- [ ] Works, available works ve work detail sayfalarını geliştir
+- [ ] Exhibitions ve exhibition detail sayfalarını geliştir
+- [ ] Artist, studio ve archive sayfalarını geliştir
+- [ ] Journal, journal detail ve press sayfalarını geliştir
+- [ ] Collectors, commission ve private-viewings sayfalarını geliştir
+- [ ] Availability, commission ve private-viewings formlarını geliştir
+- [ ] Demo içeriğin Studio'dan tamamen değiştirilebilir olduğunu doğrula
+
+## 6. Kalite ve production
+
+- [ ] Inquiry ve Resend outbox akışını idempotent tamamla
+- [ ] Garage private/public medya güvenlik sınırlarını doğrula
+- [ ] Dört locale çeviri, canonical, hreflang, sitemap ve structured data'yı tamamla
+- [ ] WCAG 2.1 AA, keyboard, focus, contrast ve reduced-motion testlerini geçir
+- [ ] Analytics consent ve hassas URL redaction'ını doğrula
+- [ ] Unit/integration coverage'i tüm metriklerde en az `%80` geçir
+- [ ] Kritik Playwright E2E akışlarını geçir
+- [ ] Lint, typecheck, test, coverage, build, audit ve Docker readiness'i geçir
+- [ ] Coolify migration, env, deploy, health ve readiness doğrulamasını tamamla
+- [ ] Geçici `backup/` klasörünü tamamen sil
+- [ ] Requirement-by-requirement final audit yap
+- [ ] V2 goal'ünü yalnız bütün kanıtlar tamamlandığında kapat

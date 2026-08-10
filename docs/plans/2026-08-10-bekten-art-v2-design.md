@@ -29,6 +29,11 @@ kullanılacak.
   gerçek içerik kontrolü bitmeden production yayınına alınmaz.
 - `en`, `tr`, `ru`, `ky` locale modeli, SEO, accessibility ve consent
   gereksinimleri korunacak.
+- Yeni dosya, klasör ve route URL adları kebab-case olacak.
+- Kanonik ilerleme listesi `docs/progress.md`, karar günlüğü `docs/readme.md`
+  olacak.
+- Görsel ihtiyacında önce mevcut proje arşivi; yalnız eksik stil varlığında
+  `gpt-image-2`, gerekli şeffaf kesimde background-removal akışı kullanılacak.
 
 ## 3. Bilgi mimarisi
 
@@ -105,11 +110,13 @@ durumunu taşıyacak.
 
 ## 7. Erişim modeli
 
-Public hesap yoktur. Studio erişimi Resend üzerinden kısa ömürlü, tek kullanımlık
-ve hash olarak saklanan magic-link tokenıyla sağlanır. Kullanıcı rolleri `EDITOR`
-ve `OWNER` ile sınırlandırılır. İçerik işlemleri server-side authorization,
-same-origin/CSRF doğrulaması, rate limiting ve audit event gerektirir. Teknik
-operasyonlar yalnız `OWNER` rolüne açıktır.
+Public hesap yoktur. Studio erişimi stabil NextAuth session/Prisma adapter
+altyapısının yalnız e-posta provider'ı üzerinden, Resend ile gönderilen kısa
+ömürlü, tek kullanımlık ve hash olarak saklanan magic-link tokenıyla sağlanır.
+Credentials ve Google provider public auth ile birlikte kaldırılır. Kullanıcı
+rolleri `EDITOR` ve `OWNER` ile sınırlandırılır. İçerik işlemleri server-side
+authorization, same-origin/CSRF doğrulaması, rate limiting ve audit event
+gerektirir. Teknik operasyonlar yalnız `OWNER` rolüne açıktır.
 
 ## 8. Inquiry ve e-posta akışı
 
