@@ -6,13 +6,10 @@ import {cn} from '@/utils'
 
 import {NavbarItem} from './navbar-item'
 
-import type {UiUser} from '@/types/ui-user'
-
 type NavbarProps = {
   className?: string
-  user?: UiUser | null
 }
-export function Navbar({className, user}: NavbarProps) {
+export function Navbar({className}: NavbarProps) {
   const t = useTranslations()
 
   const NAV_ITEMS = [
@@ -36,13 +33,6 @@ export function Navbar({className, user}: NavbarProps) {
       label: t('navigation.contact'),
       path: '/contact',
     },
-    {
-      label: t('navigation.store'),
-      path: '/store',
-    },
-    ...(user?.role === 'ADMIN'
-      ? [{label: 'Admin', path: '/admin'}]
-      : []),
   ]
 
   return (

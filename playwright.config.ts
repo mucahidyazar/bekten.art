@@ -4,7 +4,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3000'
 const startLocalServer = !process.env.PLAYWRIGHT_BASE_URL
 const webServerCommand =
   process.env.PLAYWRIGHT_WEB_SERVER_COMMAND ??
-  'pnpm build && pnpm start --hostname 127.0.0.1'
+  `NEXT_PUBLIC_APP_URL=${baseURL} NEXTAUTH_URL=${baseURL} pnpm build && NEXT_PUBLIC_APP_URL=${baseURL} NEXTAUTH_URL=${baseURL} exec node node_modules/next/dist/bin/next start --hostname 127.0.0.1`
 
 export default defineConfig({
   testDir: './e2e',
@@ -45,7 +45,7 @@ export default defineConfig({
   webServer: startLocalServer
     ? {
         command: webServerCommand,
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: false,
         timeout: 300_000,
         url: baseURL,
       }

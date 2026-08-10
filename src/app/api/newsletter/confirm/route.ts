@@ -22,14 +22,22 @@ function locale(value: string | null | undefined) {
 }
 
 function resultRedirect(path: string) {
-  const response = NextResponse.redirect(new URL(path, getPublicAppOrigin()), 303)
+  const response = NextResponse.redirect(
+    new URL(path, getPublicAppOrigin()),
+    303,
+  )
 
   response.headers.set('Cache-Control', 'private, no-store')
 
   return response
 }
 
-function stageCookie(response: NextResponse, name: string, value: string, path: string) {
+function stageCookie(
+  response: NextResponse,
+  name: string,
+  value: string,
+  path: string,
+) {
   response.cookies.set(name, value, {
     httpOnly: true,
     maxAge: 10 * 60,
@@ -61,7 +69,7 @@ export async function GET(request: Request) {
   }
 
   const response = resultRedirect(
-    `/${targetLocale}/confirm-email-action?action=newsletter-confirm`,
+    `/${targetLocale}/newsletter-preferences?action=newsletter-confirm`,
   )
 
   stageCookie(response, COOKIE_NAME, token, '/api/newsletter/confirm')

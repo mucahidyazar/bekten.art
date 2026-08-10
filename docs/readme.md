@@ -1,25 +1,25 @@
 # Bekten.art V2 Karar Günlüğü
 
 Bu dosya kullanıcı onayı gerektiren kararları ve gözden kaçmaması gereken kalıcı
-sözleşmeleri kısa biçimde tutar. Yeni kararlar tarih sırasıyla eklenir; tamamlanan
-kararlar silinmez.
+sözleşmeleri kısa biçimde tutar. Yeni kararlar tarih sırasıyla eklenir;
+tamamlanan kararlar silinmez.
 
 ## Onaylanan kararlar
 
 - [x] **2026-08-10 — Görsel yön:** Editorial heritage yaklaşımı kullanılacak.
-- [x] **2026-08-10 — Public hesaplar:** Login, kayıt, profil ve kullanıcı araçları
-      tamamen kaldırılacak.
+- [x] **2026-08-10 — Public hesaplar:** Login, kayıt, profil ve kullanıcı
+      araçları tamamen kaldırılacak.
 - [x] **2026-08-10 — Ticari akış:** Sepet, ödeme ve doğrudan satış yerine
       availability inquiry, commission request ve private viewing kullanılacak.
 - [x] **2026-08-10 — İçerik yönetimi:** Harici CMS kurulmayacak; PostgreSQL,
       Prisma, Garage ve Resend üzerinde Bekten Studio geliştirilecek.
-- [x] **2026-08-10 — Studio erişimi:** Public auth olmayacak; editörler `/studio`
-      alanına Resend magic-link ile girecek. Teknik ekranlar yalnız owner'a açık
-      olacak.
+- [x] **2026-08-10 — Studio erişimi:** Public auth olmayacak; editörler
+      `/studio` alanına Resend magic-link ile girecek. Teknik ekranlar yalnız
+      owner'a açık olacak.
 - [x] **2026-08-10 — Studio auth altyapısı:** Yeni ve özel bir session sistemi
-      yazılmayacak. Stabil NextAuth + Prisma adapter yalnız Studio email provider
-      için korunacak; Credentials, Google, public kayıt ve password-reset
-      yüzeyleri kaldırılacak.
+      yazılmayacak. Stabil NextAuth + Prisma adapter yalnız Studio email
+      provider için korunacak; Credentials, Google, public kayıt ve
+      password-reset yüzeyleri kaldırılacak.
 - [x] **2026-08-10 — Rol geçişi:** `EDITOR` ve `OWNER` additif eklenecek; mevcut
       `ADMIN` operatörleri sayım/audit ile `OWNER` rolüne taşınana kadar tek
       release uyumluluk penceresi kullanılacak.
@@ -39,6 +39,11 @@ kararlar silinmez.
 - [x] **2026-08-10 — Geçici backup:** V1'den tekrar kullanılabilecek öğeler
       kaynak yolunu koruyarak geçici `backup/` altında tutulacak ve V2 final
       doğrulamasından sonra tamamen silinecek.
+- [x] **2026-08-10 — PocketBase sınırı:** Runtime, script, environment ve deploy
+      akışında PocketBase bulunmayacak. Daha önce uygulanmış Prisma migration
+      dosyalarındaki tarihsel isimler checksum/audit bütünlüğü için
+      değiştirilmeyecek; production doğrulaması Garage kayıt ve obje
+      sayımlarıyla yapılacak.
 
 ## Bekleyen kullanıcı kararları
 

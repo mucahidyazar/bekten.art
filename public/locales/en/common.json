@@ -1,23 +1,4 @@
 {
-  "passwordReset": {
-    "backToSignIn": "Back to sign in",
-    "confirmPassword": "Confirm new password",
-    "email": "Email address",
-    "genericError": "We could not process your request. Please try again.",
-    "invalidLink": "This reset link is invalid or expired.",
-    "mismatch": "Passwords do not match.",
-    "newPassword": "New password",
-    "requestButton": "Send reset link",
-    "requestSubtitle": "Enter your account email and we will send a secure, time-limited link.",
-    "requestSuccess": "Check your inbox for a reset link if the account is eligible.",
-    "requestTitle": "Reset your password",
-    "requesting": "Sending reset link...",
-    "resetButton": "Reset password",
-    "resetSubtitle": "Choose a new password with at least 12 characters.",
-    "resetSuccess": "Your password has been reset.",
-    "resetTitle": "Choose a new password",
-    "resetting": "Resetting password..."
-  },
   "consent": {
     "title": "Your privacy choices",
     "description": "We use optional analytics to understand how the site is used, marketing storage only when needed, and external media to show services such as Google Maps. Necessary storage is always active.",
@@ -56,7 +37,6 @@
     "teaching": "Teaching",
     "technique": "Technique",
     "year": "Year",
-
     "artisticPhilosophy": "Artistic Philosophy",
     "artworkDescription": "This piece represents the journey of life, where each brushstroke tells a story of movement, growth, and the eternal quest for meaning. The interplay of colors captures the essence of wandering through both physical and emotional landscapes.",
     "artworksCreated": "Artworks Created",
@@ -76,7 +56,6 @@
     "teachingDescription": "Sharing knowledge and inspiring the next generation of artists",
     "techniqueDescription": "Mastering traditional methods while embracing innovation",
     "viewGallery": "View Gallery",
-
     "featuredWorkDescription": "One of my most celebrated pieces, showcasing the depth of human emotion through color and form",
     "getInTouch": "Get in Touch",
     "yearsOfExperience": "Years of Experience"
@@ -89,32 +68,6 @@
     "defaultQuote": "Art is the language of the soul, speaking truths that words cannot express.",
     "defaultTitle": "Kyrgyz Painter & Art Lecturer"
   },
-  "auth": {
-    "signIn": {
-      "subtitle": "Sign in to your account to continue",
-      "title": "Welcome Back",
-
-      "googleButton": "Continue with Google",
-      "forgotPassword": "Forgot your password?",
-      "noAccount": "Don't have an account?",
-      "orContinue": "Or continue with email",
-      "signUp": "Sign up"
-    },
-    "signUp": {
-      "subtitle": "Join Bekten Art community today",
-      "title": "Create Account",
-
-      "hasAccount": "Already have an account?",
-      "orContinue": "Or create account with email",
-      "signIn": "Sign in"
-    },
-    "status": {
-      "rateLimit": "Too many attempts. Please wait and try again.",
-      "verificationInvalid": "This verification link is invalid or has expired.",
-      "verificationPending": "Check your inbox and verify your email before signing in.",
-      "verificationSuccess": "Your email address has been verified. You can now sign in."
-    }
-  },
   "branding": {
     "locale": "{locale, select, en {English} tr {Turkish} ru {Russian} ky {Kyrgyz} other {Unknown}}",
     "slogan": "CONTEMPORARY OIL-FOCUSED PAINTER"
@@ -125,17 +78,14 @@
       "like": "like",
       "likes": "likes",
       "untitled": "Untitled",
-
       "defaultAlt": "Artwork",
       "noDescription": "No description available"
     },
     "eventCard": {
       "free": "Free",
-
       "defaultAddress": "1015 Chestnut St. Philadelphia, PA 19107",
       "defaultTime": "7:00 PM - 9:00 PM",
       "viewDetails": "View Event Details",
-
       "months": {
         "apr": "APR",
         "aug": "AUG",
@@ -182,7 +132,6 @@
     "success": "Success",
     "upload": "Upload",
     "view": "View",
-
     "learnMore": "Learn More",
     "showLess": "Show Less",
     "showMore": "Show More"
@@ -195,7 +144,6 @@
     "phone": "Phone",
     "subtitle": "Let's Create Something Beautiful Together",
     "title": "Get in Touch",
-
     "callNow": "Call Now",
     "contactUnavailable": "Contact Information",
     "findStudio": "Find My Studio",
@@ -207,14 +155,11 @@
     "studioInfo": "Studio Information",
     "studioLocation": "Bishkek, Kyrgyzstan",
     "studioName": "Bekten's Art Studio",
-
     "contactUnavailableDescription": "Contact information is currently unavailable. Please try again later.",
     "readyToTalk": "Ready to Start a Conversation?",
-
     "defaultWorkingHours": {
       "Saturday": "10:00 AM - 4:00 PM",
       "Sunday": "By Appointment",
-
       "Monday - Friday": "9:00 AM - 6:00 PM"
     }
   },
@@ -233,69 +178,15 @@
   },
   "forms": {
     "buttons": {
-      "create": "Create",
       "subscribe": "Subscribe",
-      "subscribing": "Subscribing...",
-
-      "createAccount": "Create Account",
-      "creatingAccount": "Creating account...",
-      "signIn": "Sign In",
-      "signingIn": "Signing in...",
-      "showPassword": "Show password",
-      "hidePassword": "Hide password"
-    },
-    "labels": {
-      "address": "Address",
-      "description": "Description",
-      "email": "Email Address",
-      "image": "Image",
-      "link": "Link",
-      "message": "Message",
-      "note": "Note",
-      "password": "Password",
-      "subtitle": "Subtitle",
-      "title": "Title",
-
-      "confirmPassword": "Confirm Password",
-      "fullName": "Full Name"
+      "subscribing": "Subscribing..."
     },
     "messages": {
-      "forgotPassword": "Forgot password?",
       "noSpam": "No spam",
-      "rememberMe": "Remember me",
       "subscribeDescription": "You'll receive our latest updates soon.",
       "subscribeSuccess": "Successfully subscribed!",
-      "termsAgreement": "By creating an account, you agree to our Terms of Service and Privacy Policy",
       "unsubscribeAnytime": "Unsubscribe anytime",
-      "weeklyUpdates": "Weekly updates",
-
-      "signInSuccess": "Successfully signed in",
-      "verificationSentDescription": "Check your inbox and verify your email before signing in.",
-      "verificationSentTitle": "Verification email sent"
-    },
-    "placeholders": {
-      "confirmPassword": "Confirm your password",
-      "createPassword": "Create a password",
-      "enterAddress": "Address",
-      "enterDescription": "Description",
-      "enterEmail": "Enter your email",
-      "enterLink": "Link",
-      "enterLocation": "Location: Bishkek, Kyrgyzstan or Moscow, Russia",
-      "enterName": "Enter your full name",
-      "enterNote": "Note",
-      "enterPassword": "Enter your password",
-      "enterSubtitle": "Subtitle",
-      "enterTitle": "Title",
-      "pickDate": "Pick a date",
-      "typeMessage": "Type your message here."
-    },
-    "validation": {
-      "emailInvalid": "Please enter a valid email address",
-      "loginRequired": "You must be logged in to send feedback.",
-      "nameRequired": "Name must be at least 2 characters",
-      "passwordConfirm": "Please confirm your password",
-      "passwordLength": "Password must be at least 8 characters",
-      "passwordsMatch": "Passwords don't match"
+      "weeklyUpdates": "Weekly updates"
     }
   },
   "gallery": {
@@ -328,9 +219,6 @@
     "stat3Title": "100+ Happy Collectors",
     "statsButton1": "Explore Gallery",
     "statsButton2": "About Artist",
-    "storeBadge": "Limited Collection",
-    "storeDescription": "Exclusive opportunity to own an original Bekten Usubaliev masterpiece",
-    "storeTitle": "Artworks on Sale",
     "workshopBadge": "Behind the Art",
     "workshopDescription": "Step into the creative sanctuary where masterpieces come to life, where tradition meets innovation",
     "workshopTitle": "The Creative Workshop"
@@ -338,36 +226,30 @@
   "legal": {
     "copyRight": "© {year} Bekten. All rights reserved. Designed by",
     "privacyPolicy": "Privacy Policy",
-
     "termsOfService": "Terms of Service",
-
     "privacyPolicyPage": {
       "introduction": "Introduction",
       "title": "Privacy Policy",
       "website": "Website: bekten.art",
-
-      "additionalData": "Data from additional relations: Accounts, Sessions, Artworks, Artwork Likes, Socials, Feedbacks, Press, and News.",
+      "additionalData": "Operational data includes published content, media metadata, inquiries, newsletter preferences, audit events and limited Studio editor account/session records.",
       "changesNotification": "Any changes to the privacy policy will be communicated via email.",
       "contactEmail": "Contact Email: support@mucahid.dev",
       "dataSecurity": "Data Security",
       "dataSharing": "Data Sharing and Disclosure",
       "informationCollected": "Information Collected",
       "policyChanges": "Policy Changes",
-      "rightsDescription": "Users have the right to access, modify, and delete their personal information.",
+      "rightsDescription": "Visitors, inquiry senders and subscribers may request access, correction or deletion of their personal data, subject to legal retention duties.",
       "securityDescription": "bekten.art uses encrypted connections, restricted access, input validation, rate limiting, private object storage, audit records, and protected authentication tokens. No security control can eliminate every risk.",
-      "servicesPurpose": "To facilitate services such as providing feedback to artists and showcasing artists' artworks on the website.",
-      "userDetails": "Details from the User model: ID, Name, Email, Email Verified, Image, Profession, Description, Location, Role, Created At, Updated At, Share Data Preferences, and Email Subscription Preferences.",
+      "servicesPurpose": "To present Bekten’s work, respond to availability, commission and private-viewing inquiries, manage newsletters and operate the private editorial Studio.",
+      "userDetails": "Inquiry and newsletter data may include name, email address, optional phone number, message, language, consent time and request status.",
       "userRights": "User Rights",
-
-      "noThirdParty": "Data is processed only as needed to operate the service by our infrastructure and selected processors: Coolify-hosted PostgreSQL and Garage storage, Resend for transactional email, Google for sign-in and consent-based analytics, and Apify for public Instagram content. We do not sell personal data.",
+      "noThirdParty": "Data is processed only as needed by selected processors: Coolify-hosted PostgreSQL and Garage storage, Resend for transactional email, consent-based Google analytics and maps, and Apify for public Instagram content. We do not sell personal data.",
       "purposeOfCollection": "Purpose of Data Collection"
     },
-
     "termsOfServicePage": {
       "introduction": "Introduction",
       "title": "Terms of Service",
       "website": "Website: bekten.art",
-
       "contactEmail": "Contact Email: support@mucahid.dev",
       "disputeDescription": "Disputes or concerns should be addressed to the website administrator or through the contact information provided.",
       "disputeResolution": "Dispute Resolution",
@@ -376,9 +258,9 @@
       "liabilityDescription": "bekten.art is not liable for any direct or indirect consequences of user activities on the site.",
       "liabilityLimitations": "Liability Limitations",
       "propertyDescription": "Artworks and content displayed on the site are the property of their respective artists and protected under copyright laws.",
-      "responsibilitiesDescription": "Users are expected to abide by the rules of conduct on the site, respecting the intellectual property rights of artists and refraining from any form of harassment or abusive behavior.",
-      "siteDescription": "bekten.art is a platform showcasing artworks by various artists, including your father. It allows users to leave feedback on artist profiles and view artworks in a store section. The purchase of artworks is facilitated through direct communication with the artists, and no online transactions are conducted through the website.",
-      "usageDescription": "The website is designed for showcasing artworks and providing feedback to artists. Users are prohibited from posting offensive content, including but not limited to hate speech, pornography, and abusive language.",
+      "responsibilitiesDescription": "Visitors must respect the artist’s intellectual-property rights and must not misuse inquiry, newsletter or Studio access mechanisms.",
+      "siteDescription": "bekten.art is Bekten’s official editorial portfolio and archive. Artwork availability, commissions and private viewings are discussed directly; the website does not provide a cart, checkout or online payment.",
+      "usageDescription": "The website presents artworks, exhibitions and editorial material and accepts private inquiries. Automated abuse, unauthorized copying and interference with the service are prohibited.",
       "usageTerms": "Usage Terms",
       "userResponsibilities": "User Responsibilities"
     }
@@ -388,19 +270,13 @@
     "contact": "Contact",
     "gallery": "Gallery",
     "home": "Home",
-    "news": "News",
-    "store": "Store",
-    "signIn": "Sign in",
-    "signUp": "Sign up",
-    "forgotPassword": "Forgot password",
-    "resetPassword": "Reset password"
+    "news": "News"
   },
   "news": {
     "address": "Address",
     "featured": "Featured",
     "location": "Location",
     "published": "Published",
-
     "dateTime": "Date & Time",
     "extendedContent1": "This event represents another milestone in Bekten Usubaliev's distinguished career as one of Kyrgyzstan's most celebrated contemporary artists. With over 25 years of experience in the art world, Usubaliev continues to push the boundaries of traditional painting while honoring his cultural heritage.",
     "extendedContent2": "The artist's work has been featured in numerous international exhibitions, from Luxembourg and Hungary to Turkey, where his paintings were showcased as part of the TÜRKSOY plein air program. His unique approach to oil painting combines classical techniques with modern sensibilities, creating works that speak to both local and global audiences.",
@@ -415,7 +291,6 @@
     "readOriginal": "Read Original",
     "relatedNews": "Related News",
     "stayConnected": "Stay Connected",
-
     "allNewsEvents": "All News & Events",
     "backToNews": "Back to News",
     "newsNotFound": "News Not Found",
@@ -424,105 +299,11 @@
     "editNews": "Edit News",
     "subtitle": "Subtitle",
     "category": "Category",
-
     "newsNotFoundDescription": "The requested news article could not be found."
-  },
-  "profile": {
-    "defaultBio": "Art enthusiast and collector. Passionate about contemporary and digital art.",
-    "defaultInterests": [
-      "Contemporary Art",
-      "Digital Art",
-      "Paintings",
-      "Sculptures",
-      "Photography"
-    ],
-    "defaultLocation": "Bishkek, Kyrgyzstan",
-    "defaultWebsite": "https://bekten.art",
-    "metaDescription": "View and manage your Bekten Art profile, artworks, and collections.",
-    "metaTitle": "User Profile - Bekten Art",
-
-    "activities": {
-      "liked": "Liked \"{title}\" artwork",
-      "subscribed": "Subscribed to newsletter",
-
-      "addedToCollection": "Added to \"{collection}\" collection"
-    },
-    "labels": {
-      "bio": "Bio",
-      "email": "Email",
-      "location": "Location",
-      "name": "Name",
-      "role": "Role",
-      "website": "Website",
-
-      "editProfile": "Edit Profile",
-      "memberSince": "Member since",
-      "signOut": "Sign Out",
-
-      "lastSignIn": "Last sign in"
-    },
-    "messages": {
-      "anonymousUser": "Anonymous User",
-      "noActivities": "No recent activities",
-      "noInterests": "No interests added yet",
-
-      "profileNotFound": "Profile not found",
-
-      "profileNotFoundDescription": "The requested profile could not be found."
-    },
-    "roles": {
-      "administrator": "Administrator",
-      "artist": "Artist",
-      "user": "User"
-    },
-    "sections": {
-      "interests": "Interests",
-
-      "accountStats": "Account Statistics",
-      "profileInfo": "Profile Information",
-      "recentActivity": "Recent Activity"
-    },
-    "stats": {
-      "collections": "Collections",
-      "followers": "Followers",
-      "following": "Following",
-
-      "artworksLiked": "Artworks Liked"
-    }
-  },
-  "store": {
-    "available": "Available",
-    "inquire": "Inquire",
-    "reserved": "Reserved",
-    "sold": "Sold",
-    "unavailable": "Unavailable",
-    "original": "Original",
-    "reproduction": "Reproduction",
-    "storeManagement": "Store Management",
-    "storeBadge": "Store",
-    "artStore": "Art Store",
-    "mainImage": "Main Image",
-    "price": "Price",
-    "viewDetails": "View Details",
-    "category": "Category",
-
-    "adjustFilters": "Try adjusting your filters or browse all categories.",
-    "featuredFirst": "Featured First",
-    "newestFirst": "Newest First",
-    "newsletterDescription": "Be the first to know about new artworks, exclusive collections, and special exhibitions.",
-    "oldestFirst": "Oldest First",
-    "quickView": "Quick View",
-    "sortBy": "Sort by",
-
-    "filterByCategory": "Filter by Category",
-    "noArtworksFound": "No artworks found",
-    "priceHighLow": "Price: High to Low",
-    "priceLowHigh": "Price: Low to High"
   },
   "testimonials": {
     "description": "Thoughts about Bekten Usubaliev from important figures in the art world and different segments of society",
     "title": "Valued Opinions",
-
     "autoPlaying": "Auto Playing",
     "badgeText": "About Artist",
     "categoryArtist": "Artist",

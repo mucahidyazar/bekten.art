@@ -30,12 +30,6 @@ function getBreadcrumbName(
     gallery: 'gallery',
     news: 'news',
     contact: 'contact',
-    store: 'store',
-    'sign-in': 'signIn',
-    'sign-up': 'signUp',
-    'forgot-password': 'forgotPassword',
-    'reset-password': 'resetPassword',
-    profile: 'profile',
   }
 
   if (translationKeys[segment]) {
@@ -44,10 +38,6 @@ function getBreadcrumbName(
 
   if (parentSegment === 'news') {
     return translate('newsDetail')
-  }
-
-  if (parentSegment === 'profile') {
-    return translate('userProfile')
   }
 
   return segment

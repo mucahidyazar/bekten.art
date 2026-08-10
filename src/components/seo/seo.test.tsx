@@ -61,10 +61,10 @@ describe('localized SEO components', () => {
       {name: 'news', url: '/ky/news'},
       {name: 'newsDetail', url: '/ky/news/42'},
     ])
-    expect(buildBreadcrumbItems('/kg/profile/user-id', translate)).toEqual([
+    expect(buildBreadcrumbItems('/kg/gallery/artwork-id', translate)).toEqual([
       {name: 'home', url: '/ky'},
-      {name: 'profile', url: '/ky/profile'},
-      {name: 'userProfile', url: '/ky/profile/user-id'},
+      {name: 'gallery', url: '/ky/gallery'},
+      {name: 'Artwork Id', url: '/ky/gallery/artwork-id'},
     ])
     expect(buildBreadcrumbItems('/custom-page', translate)).toEqual([
       {name: 'home', url: '/en'},

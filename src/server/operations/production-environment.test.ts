@@ -4,8 +4,6 @@ import {validateProductionEnvironment} from './production-environment'
 
 const validEnvironment = Object.freeze({
   AUTH_TRUST_PROXY: 'true',
-  AUTH_GOOGLE_ID: '123456789-example.apps.googleusercontent.com',
-  AUTH_GOOGLE_SECRET: 'google-secret',
   DATABASE_URL: 'postgresql://user:password@database:5432/bekten',
   MEDIA_S3_ACCESS_KEY_ID: 'garage-access-key',
   MEDIA_S3_BUCKET: 'bekten-art-private-media',

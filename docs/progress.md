@@ -1,7 +1,7 @@
 # Bekten.art V2 Progress
 
-Bir iş yalnız ilgili kod, test ve doğrulama kanıtı tamamlandığında `[x]` yapılır.
-Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşağı ilerler.
+Bir iş yalnız ilgili kod, test ve doğrulama kanıtı tamamlandığında `[x]`
+yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşağı ilerler.
 
 ## 0. Tasarım ve hazırlık
 
@@ -17,15 +17,16 @@ Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşağı ilerler
 
 ## 1. Kontrollü V1 temizliği
 
-- [ ] Tekrar kullanılabilecek V1 parçalarını geçici `backup/` yapısına taşı
-- [ ] Public login, kayıt, reset-password ve verification sayfalarını kaldır
-- [ ] Public profil, kullanıcı provider ve kullanıcı araçlarını kaldır
-- [ ] Store, create-store, fiyat ve satış dilini kaldır
-- [ ] Eski admin UI'ı kaldır; reusable operasyon kodunu koru
-- [ ] Kullanılmayan component, test, dependency, env ve locale anahtarlarını temizle
-- [ ] Route, import ve dependency taramasını geçir
-- [ ] Cleanup sonrası lint, typecheck, test ve build kanıtını al
-- [ ] V1 cleanup commit'ini oluştur
+- [x] Tekrar kullanılabilecek V1 parçalarını geçici `backup/` yapısına taşı
+- [x] Public login, kayıt, reset-password ve verification sayfalarını kaldır
+- [x] Public profil, kullanıcı provider ve kullanıcı araçlarını kaldır
+- [x] Store, create-store, fiyat ve satış dilini kaldır
+- [x] Eski admin UI'ı kaldır; reusable operasyon kodunu koru
+- [x] Kullanılmayan component, test, dependency, env ve locale anahtarlarını
+      temizle
+- [x] Route, import ve dependency taramasını geçir
+- [x] Cleanup sonrası lint, typecheck, test ve build kanıtını al
+- [x] V1 cleanup commit'ini oluştur
 
 ## 2. Domain ve içerik altyapısı
 
@@ -77,7 +78,8 @@ Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşağı ilerler
 
 - [ ] Inquiry ve Resend outbox akışını idempotent tamamla
 - [ ] Garage private/public medya güvenlik sınırlarını doğrula
-- [ ] Dört locale çeviri, canonical, hreflang, sitemap ve structured data'yı tamamla
+- [ ] Dört locale çeviri, canonical, hreflang, sitemap ve structured data'yı
+      tamamla
 - [ ] WCAG 2.1 AA, keyboard, focus, contrast ve reduced-motion testlerini geçir
 - [ ] Analytics consent ve hassas URL redaction'ını doğrula
 - [ ] Unit/integration coverage'i tüm metriklerde en az `%80` geçir

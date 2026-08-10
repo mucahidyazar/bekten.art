@@ -4,8 +4,6 @@ const BASE_REQUIRED = Object.freeze([
   'NEXTAUTH_URL',
   'NEXTAUTH_SECRET',
   'AUTH_TRUST_PROXY',
-  'AUTH_GOOGLE_ID',
-  'AUTH_GOOGLE_SECRET',
   'NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID',
   'MEDIA_S3_BUCKET',
   'MEDIA_S3_REGION',
@@ -115,14 +113,6 @@ export function validateProductionStartupEnvironment(environment) {
     value(environment, 'MEDIA_S3_BUCKET').includes('..')
   ) {
     errors.push('MEDIA_S3_BUCKET')
-  }
-
-  if (
-    !/^[0-9]+-[A-Za-z0-9_-]+\.apps\.googleusercontent\.com$/u.test(
-      value(environment, 'AUTH_GOOGLE_ID'),
-    )
-  ) {
-    errors.push('AUTH_GOOGLE_ID')
   }
 
   if (!/^re_[A-Za-z0-9_-]{3,}$/u.test(value(environment, 'RESEND_API_KEY'))) {

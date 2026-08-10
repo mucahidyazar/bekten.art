@@ -15,21 +15,17 @@ import {
   ConsentProvider,
 } from '@/components/consent/consent-provider'
 import {GoogleTagManager} from '@/components/lib/google-tag-manager'
-import {MusicProvider} from '@/components/providers/music-provider'
 import {QueryProvider} from '@/components/providers/query-provider'
 import {ThemeProvider} from '@/components/providers/theme-provider'
-import {UserProvider} from '@/components/providers/user-provider'
 import {HrefLang} from '@/components/seo/hreflang'
 import {
   OrganizationStructuredData,
   PersonStructuredData,
   WebsiteStructuredData,
 } from '@/components/seo/structured-data'
-import {MusicPlayer} from '@/components/ui/music-player'
 import {Toaster} from '@/components/ui/toaster'
 import {ME} from '@/constants'
 import {LOCALES} from '@/constants/locales'
-import {getUiUser} from '@/server/auth/ui-user'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
 import {resolveMessagesLocale} from '../../../i18n'
@@ -61,9 +57,6 @@ export default async function RootLayout({children, params}: LayoutProps) {
   const messages = await getMessages(locale)
   const nonce = requestHeaders.get('x-nonce') ?? undefined
 
-  // Get initial user data for UserProvider
-  const user = await getUiUser()
-
   // Determine domain for structured data
   const domain =
     process.env.NEXT_PUBLIC_APP_URL ||
@@ -94,13 +87,8 @@ export default async function RootLayout({children, params}: LayoutProps) {
                   nonce={nonce}
                   themes={['light', 'dark', 'navy', 'system']}
                 >
-                  <UserProvider initialUser={user}>
-                    <MusicProvider>
-                      {children}
-                      <MusicPlayer />
-                      <ConsentManager />
-                    </MusicProvider>
-                  </UserProvider>
+                  {children}
+                  <ConsentManager />
                 </ThemeProvider>
               </QueryProvider>
 

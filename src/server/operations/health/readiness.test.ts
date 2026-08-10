@@ -27,14 +27,9 @@ vi.mock('@aws-sdk/client-s3', () => ({
   },
 }))
 
-import {
-  checkReadiness,
-  type ReadinessDependencies,
-} from './readiness'
+import {checkReadiness, type ReadinessDependencies} from './readiness'
 
 const validEnvironment = Object.freeze({
-  AUTH_GOOGLE_ID: '123456789-example.apps.googleusercontent.com',
-  AUTH_GOOGLE_SECRET: 'google-secret',
   AUTH_TRUST_PROXY: 'true',
   DATABASE_URL: 'postgresql://user:password@database:5432/bekten',
   MEDIA_S3_ACCESS_KEY_ID: 'garage-access-key',
@@ -108,10 +103,7 @@ describe('checkReadiness', () => {
   it('fails closed and skips network checks for invalid production configuration', async () => {
     const deps = dependencies()
 
-    const result = await checkReadiness(
-      {environment: {}, timeoutMs: 50},
-      deps,
-    )
+    const result = await checkReadiness({environment: {}, timeoutMs: 50}, deps)
 
     expect(result).toEqual({
       checks: {
@@ -127,7 +119,13 @@ describe('checkReadiness', () => {
   })
 
   it.each([
-    ['database', {checkDatabase: async () => Promise.reject(new Error('secret database detail'))}],
+    [
+      'database',
+      {
+        checkDatabase: async () =>
+          Promise.reject(new Error('secret database detail')),
+      },
+    ],
     [
       'objectStorage',
       {
@@ -135,15 +133,18 @@ describe('checkReadiness', () => {
           Promise.reject(new Error('Garage access key is invalid')),
       },
     ],
-  ] as const)('reports a generic %s failure without leaking details', async (_name, override) => {
-    const result = await checkReadiness(
-      {environment: validEnvironment, timeoutMs: 50},
-      dependencies(override),
-    )
+  ] as const)(
+    'reports a generic %s failure without leaking details',
+    async (_name, override) => {
+      const result = await checkReadiness(
+        {environment: validEnvironment, timeoutMs: 50},
+        dependencies(override),
+      )
 
-    expect(result.status).toBe('not_ready')
-    expect(JSON.stringify(result)).not.toMatch(/secret|access key|garage/i)
-  })
+      expect(result.status).toBe('not_ready')
+      expect(JSON.stringify(result)).not.toMatch(/secret|access key|garage/i)
+    },
+  )
 
   it('times out slow dependencies and aborts their signals', async () => {
     let observedSignal: AbortSignal | undefined
@@ -167,10 +168,7 @@ describe('checkReadiness', () => {
     const validateEmailConfiguration = vi.fn(() => undefined)
     const deps = dependencies({validateEmailConfiguration})
 
-    await checkReadiness(
-      {environment: validEnvironment, timeoutMs: 50},
-      deps,
-    )
+    await checkReadiness({environment: validEnvironment, timeoutMs: 50}, deps)
 
     expect(validateEmailConfiguration).toHaveBeenCalledOnce()
     expect(validateEmailConfiguration).toHaveBeenCalledWith(validEnvironment)

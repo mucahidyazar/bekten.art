@@ -43,7 +43,10 @@ export function createResendMailer(
     let result: ResendResult
     const replyTo = input.replyTo ?? configuration.replyTo
 
-    if (!emailPattern.test(input.to) || (replyTo && !emailPattern.test(replyTo))) {
+    if (
+      !emailPattern.test(input.to) ||
+      (replyTo && !emailPattern.test(replyTo))
+    ) {
       throw new Error('EMAIL_DELIVERY_FAILED')
     }
 
@@ -72,40 +75,24 @@ export function createResendMailer(
   }
 
   return {
-    async sendEmailVerification(input: Readonly<{
-      idempotencyKey: string
-      locale: AppLocale
-      name: string | null
-      to: string
-      verificationUrl: string
-    }>) {
-      return deliver(emailVerificationContent(input), input)
-    },
-    async sendPasswordReset(input: Readonly<{
-      idempotencyKey: string
-      locale: AppLocale
-      name: string | null
-      resetUrl: string
-      to: string
-    }>) {
-      const content = passwordResetContent(input)
-
-      return deliver(content, input)
-    },
-    async sendFeedbackAcknowledgement(input: Readonly<{
-      idempotencyKey: string
-      name: string
-      to: string
-    }>) {
+    async sendFeedbackAcknowledgement(
+      input: Readonly<{
+        idempotencyKey: string
+        name: string
+        to: string
+      }>,
+    ) {
       return deliver(feedbackAcknowledgementContent(input), input)
     },
-    async sendFeedbackNotification(input: Readonly<{
-      idempotencyKey: string
-      message: string
-      name: string
-      replyTo: string
-      subject: string
-    }>) {
+    async sendFeedbackNotification(
+      input: Readonly<{
+        idempotencyKey: string
+        message: string
+        name: string
+        replyTo: string
+        subject: string
+      }>,
+    ) {
       if (!configuration.replyTo) {
         throw new Error('EMAIL_DELIVERY_FAILED')
       }
@@ -116,20 +103,24 @@ export function createResendMailer(
         to: configuration.replyTo,
       })
     },
-    async sendNewsletterConfirmation(input: Readonly<{
-      confirmationUrl: string
-      idempotencyKey: string
-      locale: AppLocale
-      to: string
-    }>) {
+    async sendNewsletterConfirmation(
+      input: Readonly<{
+        confirmationUrl: string
+        idempotencyKey: string
+        locale: AppLocale
+        to: string
+      }>,
+    ) {
       return deliver(newsletterConfirmationContent(input), input)
     },
-    async sendNewsletterWelcome(input: Readonly<{
-      idempotencyKey: string
-      locale: AppLocale
-      to: string
-      unsubscribeUrl: string
-    }>) {
+    async sendNewsletterWelcome(
+      input: Readonly<{
+        idempotencyKey: string
+        locale: AppLocale
+        to: string
+        unsubscribeUrl: string
+      }>,
+    ) {
       return deliver(newsletterWelcomeContent(input), {
         ...input,
         headers: {
@@ -166,12 +157,14 @@ function greeting(name: string | null, locale: AppLocale) {
   return `Hello ${name},`
 }
 
-function emailCard(input: Readonly<{
-  action?: Readonly<{label: string; url: string}>
-  body: string
-  locale: AppLocale | 'en'
-  title: string
-}>) {
+function emailCard(
+  input: Readonly<{
+    action?: Readonly<{label: string; url: string}>
+    body: string
+    locale: AppLocale | 'en'
+    title: string
+  }>,
+) {
   const safeActionUrl = input.action ? escapeHtml(input.action.url) : null
 
   return `<!doctype html>
@@ -188,11 +181,13 @@ function emailCard(input: Readonly<{
 </html>`
 }
 
-function feedbackNotificationContent(input: Readonly<{
-  message: string
-  name: string
-  subject: string
-}>) {
+function feedbackNotificationContent(
+  input: Readonly<{
+    message: string
+    name: string
+    subject: string
+  }>,
+) {
   const safeName = escapeHtml(input.name)
   const safeSubject = escapeHtml(input.subject)
   const safeMessage = escapeHtml(input.message).replaceAll('\n', '<br>')
@@ -276,10 +271,12 @@ function newsletterCopy(locale: AppLocale) {
   }
 }
 
-function newsletterConfirmationContent(input: Readonly<{
-  confirmationUrl: string
-  locale: AppLocale
-}>) {
+function newsletterConfirmationContent(
+  input: Readonly<{
+    confirmationUrl: string
+    locale: AppLocale
+  }>,
+) {
   const copy = newsletterCopy(input.locale)
 
   return {
@@ -294,10 +291,12 @@ function newsletterConfirmationContent(input: Readonly<{
   }
 }
 
-function newsletterWelcomeContent(input: Readonly<{
-  locale: AppLocale
-  unsubscribeUrl: string
-}>) {
+function newsletterWelcomeContent(
+  input: Readonly<{
+    locale: AppLocale
+    unsubscribeUrl: string
+  }>,
+) {
   const copy = newsletterCopy(input.locale)
 
   return {
@@ -309,124 +308,6 @@ function newsletterWelcomeContent(input: Readonly<{
     }),
     subject: copy.welcomeSubject,
     text: `${copy.welcomeBody}\n\n${copy.unsubscribe}: ${input.unsubscribeUrl}`,
-  }
-}
-
-function passwordResetCopy(locale: AppLocale) {
-  return locale === 'tr'
-    ? {
-        action: 'Şifremi sıfırla',
-        intro:
-          'Bekten Art hesabın için bir şifre sıfırlama isteği aldık. Bu bağlantı 30 dakika geçerlidir.',
-        outro:
-          'Bu isteği sen yapmadıysan e-postayı yok sayabilirsin; şifren değişmez.',
-        subject: 'Bekten Art şifre sıfırlama bağlantın',
-      }
-    : {
-        action: 'Reset my password',
-        intro:
-          'We received a password reset request for your Bekten Art account. This link expires in 30 minutes.',
-        outro:
-          'If you did not request this, you can ignore this email; your password will not change.',
-        subject: 'Your Bekten Art password reset link',
-      }
-}
-
-function passwordResetContent(input: Readonly<{
-  locale: AppLocale
-  name: string | null
-  resetUrl: string
-}>) {
-  const copy = passwordResetCopy(input.locale)
-  const salutation = greeting(input.name, input.locale)
-  const safeUrl = escapeHtml(input.resetUrl)
-
-  return {
-    html: `<!doctype html>
-<html lang="${input.locale}">
-  <body style="margin:0;background:#f7f5ff;color:#17142b;font-family:Arial,sans-serif">
-    <div style="max-width:560px;margin:0 auto;padding:32px 20px">
-      <div style="border:1px solid #e4defa;border-radius:24px;background:#fff;padding:32px">
-        <p style="margin:0 0 18px;font-size:16px;font-weight:700">${escapeHtml(salutation)}</p>
-        <p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#5f5975">${escapeHtml(copy.intro)}</p>
-        <a href="${safeUrl}" style="display:inline-block;border-radius:12px;background:#6f4cff;color:#fff;padding:13px 20px;text-decoration:none;font-weight:700">${escapeHtml(copy.action)}</a>
-        <p style="margin:24px 0 0;font-size:13px;line-height:1.7;color:#777087">${escapeHtml(copy.outro)}</p>
-        <p style="margin:18px 0 0;word-break:break-all;font-size:12px;color:#777087">${safeUrl}</p>
-      </div>
-    </div>
-  </body>
-</html>`,
-    subject: copy.subject,
-    text: `${salutation}\n\n${copy.intro}\n\n${copy.action}: ${input.resetUrl}\n\n${copy.outro}`,
-  }
-}
-
-function emailVerificationCopy(locale: AppLocale) {
-  if (locale === 'tr') {
-    return {
-      action: 'E-postamı doğrula',
-      intro:
-        'Bekten Art hesabını etkinleştirmek için e-posta adresini doğrula. Bu bağlantı bir saat geçerlidir.',
-      outro: 'Bu hesabı sen oluşturmadıysan bu e-postayı yok sayabilirsin.',
-      subject: 'Bekten Art e-posta adresini doğrula',
-    }
-  }
-
-  if (locale === 'ru') {
-    return {
-      action: 'Подтвердить адрес',
-      intro:
-        'Подтвердите адрес электронной почты, чтобы активировать аккаунт Bekten Art. Ссылка действует один час.',
-      outro: 'Если вы не создавали аккаунт, просто проигнорируйте письмо.',
-      subject: 'Подтвердите адрес электронной почты Bekten Art',
-    }
-  }
-
-  if (locale === 'ky') {
-    return {
-      action: 'Электрондук почтаны ырастоо',
-      intro:
-        'Bekten Art аккаунтуңузду иштетүү үчүн электрондук почтаңызды ырастаңыз. Шилтеме бир саат жарактуу.',
-      outro: 'Эгер аккаунтту сиз түзбөсөңүз, бул катты этибарга албаңыз.',
-      subject: 'Bekten Art электрондук почтаңызды ырастаңыз',
-    }
-  }
-
-  return {
-    action: 'Verify my email',
-    intro:
-      'Verify your email address to activate your Bekten Art account. This link expires in one hour.',
-    outro: 'If you did not create this account, you can ignore this email.',
-    subject: 'Verify your Bekten Art email address',
-  }
-}
-
-function emailVerificationContent(input: Readonly<{
-  locale: AppLocale
-  name: string | null
-  verificationUrl: string
-}>) {
-  const copy = emailVerificationCopy(input.locale)
-  const salutation = greeting(input.name, input.locale)
-  const safeUrl = escapeHtml(input.verificationUrl)
-
-  return {
-    html: `<!doctype html>
-<html lang="${input.locale}">
-  <body style="margin:0;background:#f7f5ff;color:#17142b;font-family:Arial,sans-serif">
-    <div style="max-width:560px;margin:0 auto;padding:32px 20px">
-      <div style="border:1px solid #e4defa;border-radius:24px;background:#fff;padding:32px">
-        <p style="margin:0 0 18px;font-size:16px;font-weight:700">${escapeHtml(salutation)}</p>
-        <p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#5f5975">${escapeHtml(copy.intro)}</p>
-        <a href="${safeUrl}" style="display:inline-block;border-radius:12px;background:#6f4cff;color:#fff;padding:13px 20px;text-decoration:none;font-weight:700">${escapeHtml(copy.action)}</a>
-        <p style="margin:24px 0 0;font-size:13px;line-height:1.7;color:#777087">${escapeHtml(copy.outro)}</p>
-        <p style="margin:18px 0 0;word-break:break-all;font-size:12px;color:#777087">${safeUrl}</p>
-      </div>
-    </div>
-  </body>
-</html>`,
-    subject: copy.subject,
-    text: `${salutation}\n\n${copy.intro}\n\n${copy.action}: ${input.verificationUrl}\n\n${copy.outro}`,
   }
 }
 

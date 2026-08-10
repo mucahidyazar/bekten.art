@@ -37,7 +37,7 @@ describe('/api/newsletter/confirm', () => {
     expect(mocks.confirm).not.toHaveBeenCalled()
     expect(response.status).toBe(303)
     expect(response.headers.get('location')).toBe(
-      'https://bekten.art/tr/confirm-email-action?action=newsletter-confirm',
+      'https://bekten.art/tr/newsletter-preferences?action=newsletter-confirm',
     )
     expect(response.headers.get('set-cookie')).toContain(
       `bekten_newsletter_confirmation=${token}`,

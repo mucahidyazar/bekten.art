@@ -34,11 +34,6 @@ export async function GET(request: Request) {
           bg: 'linear-gradient(135deg, #1b4332 0%, #2d5016 100%)',
           accent: '#95e5a6',
         }
-      case 'store':
-        return {
-          bg: 'linear-gradient(135deg, #722f37 0%, #8b1538 100%)',
-          accent: '#f1948a',
-        }
       default:
         return {
           bg: 'radial-gradient(circle, rgba(70, 71, 122, 1) 0%, rgba(11, 17, 32, 1) 100%)',

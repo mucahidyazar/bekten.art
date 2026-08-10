@@ -62,7 +62,9 @@ describe('outbox dispatcher', () => {
   it('delivers feedback to support and sends a retry-safe acknowledgement', async () => {
     const {dispatcher, mailer, store} = configuredDispatcher()
 
-    await expect(dispatcher.dispatchOne()).resolves.toEqual({status: 'completed'})
+    await expect(dispatcher.dispatchOne()).resolves.toEqual({
+      status: 'completed',
+    })
 
     expect(mailer.sendFeedbackNotification).toHaveBeenCalledWith(
       expect.objectContaining({replyTo: 'ada@example.com'}),
@@ -107,7 +109,9 @@ describe('outbox dispatcher', () => {
       new Error('secret provider response'),
     )
 
-    await expect(dispatcher.dispatchOne()).resolves.toEqual({status: 'retrying'})
+    await expect(dispatcher.dispatchOne()).resolves.toEqual({
+      status: 'retrying',
+    })
     expect(store.retry).toHaveBeenCalledWith(
       job().id,
       'worker-1',
@@ -174,7 +178,9 @@ describe('outbox dispatcher', () => {
       type: 'newsletter.welcome',
     })
 
-    await expect(dispatcher.dispatchOne()).resolves.toEqual({status: 'completed'})
+    await expect(dispatcher.dispatchOne()).resolves.toEqual({
+      status: 'completed',
+    })
     expect(mailer.sendNewsletterWelcome).toHaveBeenCalledWith({
       idempotencyKey: 'newsletter.welcome:hash',
       locale: 'en',
@@ -198,9 +204,8 @@ describe('outbox dispatcher', () => {
     )
   })
 
-  it('delivers encrypted auth links without storing plaintext tokens in the job', async () => {
-    const {dispatcher, mailer, tokens} = configuredDispatcher({
-      idempotencyKey: `verify-email:${'a'.repeat(64)}`,
+  it.each([
+    {
       payload: {
         locale: 'en',
         name: 'Artist',
@@ -208,21 +213,37 @@ describe('outbox dispatcher', () => {
         verificationUrlEncrypted: 'v1.encrypted.verification.envelope',
       },
       type: 'auth.email_verification',
-    })
+    },
+    {
+      payload: {
+        locale: 'en',
+        name: 'Artist',
+        resetUrlEncrypted: 'v1.encrypted.password-reset.envelope',
+        to: 'artist@example.com',
+      },
+      type: 'auth.password_reset',
+    },
+  ])('terminally rejects the retired $type job', async retiredJob => {
+    const {dispatcher, mailer, store, tokens} = configuredDispatcher(retiredJob)
 
     tokens.decrypt.mockReturnValueOnce(
-      'https://bekten.art/api/auth/verify-email?token=plain-token',
+      retiredJob.type === 'auth.email_verification'
+        ? 'https://bekten.art/api/auth/verify-email?token=plain-token'
+        : 'https://bekten.art/en/reset-password?token=plain-token',
     )
 
-    await expect(dispatcher.dispatchOne()).resolves.toEqual({status: 'completed'})
-    expect(mailer.sendEmailVerification).toHaveBeenCalledWith({
-      idempotencyKey: `verify-email:${'a'.repeat(64)}`,
-      locale: 'en',
-      name: 'Artist',
-      to: 'artist@example.com',
-      verificationUrl:
-        'https://bekten.art/api/auth/verify-email?token=plain-token',
-    })
+    await expect(dispatcher.dispatchOne()).resolves.toEqual({status: 'failed'})
+    expect(tokens.decrypt).not.toHaveBeenCalled()
+    expect(mailer.sendEmailVerification).not.toHaveBeenCalled()
+    expect(mailer.sendPasswordReset).not.toHaveBeenCalled()
+    expect(store.retry).toHaveBeenCalledWith(
+      job().id,
+      'worker-1',
+      expect.objectContaining({
+        error: 'OUTBOX_PAYLOAD_INVALID',
+        terminal: true,
+      }),
+    )
   })
 
   it('dispatches a bounded batch and stops as soon as the queue is idle', async () => {
@@ -230,9 +251,11 @@ describe('outbox dispatcher', () => {
 
     store.claim
       .mockResolvedValueOnce(job())
-      .mockResolvedValueOnce(job({
-        id: 'aa5de1ea-50e0-4bd2-8b16-004cf6348b43',
-      }))
+      .mockResolvedValueOnce(
+        job({
+          id: 'aa5de1ea-50e0-4bd2-8b16-004cf6348b43',
+        }),
+      )
       .mockResolvedValueOnce(null)
 
     await expect(dispatcher.dispatchBatch(10)).resolves.toEqual({

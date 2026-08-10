@@ -13,13 +13,8 @@ import {cn} from '@/utils'
 import {AppTools} from '../molecules/app-tools'
 
 import type {AppLocale} from '@/lib/localized-path'
-import type {UiUser} from '@/types/ui-user'
 
-interface HeaderProps {
-  user: UiUser | null
-}
-
-function HeaderClient({user}: HeaderProps) {
+function HeaderClient() {
   const [isScrolled, setIsScrolled] = useState(false)
   const locale = useLocale() as AppLocale
   const t = useTranslations()
@@ -60,10 +55,7 @@ function HeaderClient({user}: HeaderProps) {
             : '',
         )}
       >
-        <AppTools
-          user={user}
-          className={cn(isScrolled ? 'md:static md:order-3' : '')}
-        />
+        <AppTools className={cn(isScrolled ? 'md:static md:order-3' : '')} />
         <aside
           className={cn(
             'mb-4 flex flex-col items-center',
@@ -89,7 +81,6 @@ function HeaderClient({user}: HeaderProps) {
           </p>
         </aside>
         <Navbar
-          user={user}
           className={cn(
             isScrolled
               ? 'md:absolute md:top-1/2 md:right-0 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2'

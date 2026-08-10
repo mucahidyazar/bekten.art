@@ -20,12 +20,11 @@ Browser -> Next.js pages/API -> domain service -> repository -> PostgreSQL
                                +--------------> Resend (outbox dispatcher)
 ```
 
-The approved V2 migration removes public accounts, Credentials and Google OAuth.
-Its target identity model keeps NextAuth only for private Bekten Studio email
-magic-link sessions. Until V2 step S3 is deployed, the current production
-revision still uses Google OAuth; follow `docs/progress.md` for cutover status.
-GTM/GA are loaded only after the visitor's consent decision. No legacy database
-or object-storage runtime is used.
+The V2 cleanup removes public accounts, Credentials and Google OAuth. NextAuth
+is retained only as the session foundation for the private Bekten Studio email
+magic-link flow implemented in V2 step S3. Follow `docs/progress.md` for cutover
+status. GTM/GA are loaded only after the visitor's consent decision. No legacy
+database or object-storage runtime is used.
 
 ## Local development
 
@@ -85,8 +84,7 @@ The authoritative key list is `.env.example`. Production requires:
 - canonical application and NextAuth URLs;
 - PostgreSQL connection URL;
 - GTM/GA identifiers;
-- during the pre-S3 V1 runtime only, the existing Google OAuth client; after the
-  verified S3 cutover, Studio email auth replaces this requirement;
+- NextAuth URL/secret for the upcoming private Studio email session flow;
 - a dedicated Garage bucket and scoped access key;
 - Resend API key, verified sender and working support reply-to address;
 - Resend webhook signing secret and an outbox scheduler secret;

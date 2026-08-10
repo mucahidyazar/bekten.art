@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -24,36 +20,16 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@/components": [
-        "./src/components/index.ts"
-      ],
-      "@/components/*": [
-        "./src/components/*"
-      ],
-      "@/templates": [
-        "./src/components/templates/index.ts"
-      ],
-      "@/configs": [
-        "./src/configs/index.ts"
-      ],
-      "@/constants": [
-        "./src/constants/index.ts"
-      ],
-      "@/hooks": [
-        "./src/hooks/index.ts"
-      ],
-      "@/server/*": [
-        "./src/server/*"
-      ],
-      "@/styles": [
-        "./src/styles/index.ts"
-      ],
-      "@/utils": [
-        "./src/utils/index.ts"
-      ]
+      "@/*": ["./src/*"],
+      "@/components": ["./src/components/index.ts"],
+      "@/components/*": ["./src/components/*"],
+      "@/templates": ["./src/components/templates/index.ts"],
+      "@/configs": ["./src/configs/index.ts"],
+      "@/constants": ["./src/constants/index.ts"],
+      "@/hooks": ["./src/hooks/index.ts"],
+      "@/server/*": ["./src/server/*"],
+      "@/styles": ["./src/styles/index.ts"],
+      "@/utils": ["./src/utils/index.ts"]
     }
   },
   "include": [
@@ -64,8 +40,5 @@
     "**/*.d.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "taxonomy"
-  ]
+  "exclude": ["node_modules", "taxonomy", "backup"]
 }

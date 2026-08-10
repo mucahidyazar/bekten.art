@@ -1,10 +1,26 @@
-import {existsSync, readFileSync} from 'node:fs'
+import {existsSync, readFileSync, readdirSync} from 'node:fs'
 import {join} from 'node:path'
+
+import {describe, expect, it} from 'vitest'
 
 const root = process.cwd()
 
 function source(relativePath: string) {
   return readFileSync(join(root, relativePath), 'utf8')
+}
+
+function* filesUnder(relativeDirectory: string): Generator<string> {
+  for (const entry of readdirSync(join(root, relativeDirectory), {
+    withFileTypes: true,
+  })) {
+    const relativePath = join(relativeDirectory, entry.name)
+
+    if (entry.isDirectory()) {
+      yield* filesUnder(relativePath)
+    } else if (entry.isFile()) {
+      yield relativePath
+    }
+  }
 }
 
 describe('V2 cleanup contract', () => {
@@ -20,6 +36,8 @@ describe('V2 cleanup contract', () => {
     'src/app/api/auth/register',
     'src/app/api/auth/reset-password',
     'src/app/api/auth/verify-email',
+    'src/app/api/admin',
+    'src/app/auth',
     'src/components/admin',
     'src/components/forms/password-reset-forms.tsx',
     'src/components/forms/sign-in-form.tsx',
@@ -60,6 +78,56 @@ describe('V2 cleanup contract', () => {
     expect(source('src/app/sitemap.ts')).not.toContain("path: '/store'")
   })
 
+  it('removes retired store backfill and social-card contracts', () => {
+    expect(source('src/app/api/og/route.tsx')).not.toMatch(/case ['"]store['"]/)
+    expect(source('package.json')).not.toContain('content:backfill')
+    expect(
+      existsSync(join(root, 'scripts/lib/legacy-content-backfill.mjs')),
+    ).toBe(false)
+    expect(
+      existsSync(join(root, 'src/server/content/legacy-backfill.test.ts')),
+    ).toBe(false)
+  })
+
+  it('does not require retired public Google OAuth configuration at startup', () => {
+    expect(source('scripts/lib/production-startup.mjs')).not.toMatch(
+      /AUTH_GOOGLE_(?:ID|SECRET)/,
+    )
+  })
+
+  it('never reuses an unknown local server for production E2E', () => {
+    expect(source('playwright.config.ts')).toContain(
+      'reuseExistingServer: false',
+    )
+  })
+
+  it.each(['en', 'tr', 'ru', 'kg'])(
+    'keeps only newsletter copy in the legacy forms namespace for %s',
+    locale => {
+      const catalog = JSON.parse(
+        source(`public/locales/${locale}/common.json`),
+      ) as {
+        forms: {
+          buttons: Record<string, string>
+          messages: Record<string, string>
+        }
+      }
+
+      expect(Object.keys(catalog.forms)).toEqual(['buttons', 'messages'])
+      expect(Object.keys(catalog.forms.buttons).sort()).toEqual([
+        'subscribe',
+        'subscribing',
+      ])
+      expect(Object.keys(catalog.forms.messages).sort()).toEqual([
+        'noSpam',
+        'subscribeDescription',
+        'subscribeSuccess',
+        'unsubscribeAnytime',
+        'weeklyUpdates',
+      ])
+    },
+  )
+
   it('records the temporary backup without allowing runtime imports', () => {
     const manifestPath = join(root, 'backup/manifest.md')
 
@@ -68,15 +136,14 @@ describe('V2 cleanup contract', () => {
     expect(source('eslint.config.mjs')).toMatch(/backup\/\*\*/)
     expect(source('vitest.config.mts')).toMatch(/backup\/\*\*/)
 
-    const runtimeFiles = [
-      'src/app/[locale]/layout.tsx',
-      'src/app/[locale]/(root)/layout.tsx',
-      'src/app/[locale]/(root)/page.tsx',
-      'src/components/navbar.tsx',
-    ]
+    const runtimeFiles = ['src', 'e2e', 'scripts', 'prisma']
+      .flatMap(directory => [...filesUnder(directory)])
+      .filter(path => path !== 'src/v2-cleanup.test.ts')
 
     for (const runtimeFile of runtimeFiles) {
-      expect(source(runtimeFile)).not.toMatch(/from ['"].*backup|import\(['"].*backup/)
+      expect(source(runtimeFile)).not.toMatch(
+        /from ['"].*backup|import\(['"].*backup/,
+      )
     }
   })
 })

@@ -11,7 +11,6 @@ vi.mock('next-intl/server', () => ({
   getTranslations: async () => (key: string) => key,
 }))
 vi.mock('@/utils/prepare-metadata', () => ({prepareMetadata: vi.fn()}))
-vi.mock('@/server/auth/ui-user', () => ({getUiUser: async () => null}))
 vi.mock('@/server/contact/public-contact', () => ({
   getPublicContactInfo: async () => ({
     address: 'Bishkek',
@@ -28,12 +27,9 @@ vi.mock('@/components/organisms/header', () => ({
   Header: () => <header>Header</header>,
 }))
 vi.mock('@/components/seo/breadcrumb', () => ({
-  Breadcrumb: () => <nav>Breadcrumb</nav>,
+  Breadcrumb: () => <nav aria-label="Breadcrumb">Breadcrumb</nav>,
 }))
 vi.mock('@/components/ui/progress-bar', () => ({default: () => null}))
-vi.mock('./admin/components/layout-wrapper', () => ({
-  default: ({children}: React.PropsWithChildren) => <>{children}</>,
-}))
 vi.mock('@/components/molecules/call-to-action', () => ({
   CallToAction: () => <section>Call to action</section>,
 }))
@@ -50,6 +46,9 @@ describe('public page landmarks', () => {
     ).toHaveAttribute('href', '#main-content')
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content')
     expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1')
+    expect(
+      screen.getByRole('navigation', {name: 'Breadcrumb'}),
+    ).toBeInTheDocument()
   })
 
   it('keeps one page heading and names the contact map frame', async () => {

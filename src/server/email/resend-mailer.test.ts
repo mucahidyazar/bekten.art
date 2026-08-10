@@ -1,11 +1,22 @@
 import {describe, expect, it, vi} from 'vitest'
 
-import {
-  createResendMailer,
-  getResendConfiguration,
-} from './resend-mailer'
+import {createResendMailer, getResendConfiguration} from './resend-mailer'
 
 describe('Resend mailer', () => {
+  it('exposes no retired public-account delivery methods', () => {
+    const mailer = createResendMailer(
+      {emails: {send: vi.fn()}},
+      {
+        apiKey: 're_bekten_key',
+        from: 'Bekten Art <noreply@mucahid.dev>',
+        replyTo: 'support@mucahid.dev',
+      },
+    )
+
+    expect(mailer).not.toHaveProperty('sendEmailVerification')
+    expect(mailer).not.toHaveProperty('sendPasswordReset')
+  })
+
   it('creates a branded, server-only sender configuration', () => {
     expect(
       getResendConfiguration({
@@ -22,7 +33,12 @@ describe('Resend mailer', () => {
 
   it.each([
     [{RESEND_API_KEY: '', RESEND_FROM_EMAIL: 'noreply@mucahid.dev'}],
-    [{RESEND_API_KEY: 'not-a-resend-key', RESEND_FROM_EMAIL: 'noreply@mucahid.dev'}],
+    [
+      {
+        RESEND_API_KEY: 'not-a-resend-key',
+        RESEND_FROM_EMAIL: 'noreply@mucahid.dev',
+      },
+    ],
     [{RESEND_API_KEY: 're_bekten_key', RESEND_FROM_EMAIL: 'not-an-email'}],
     [
       {
@@ -37,84 +53,9 @@ describe('Resend mailer', () => {
         RESEND_REPLY_TO: 'not-an-email',
       },
     ],
-  ])('rejects an invalid mail configuration', (environment) => {
+  ])('rejects an invalid mail configuration', environment => {
     expect(() => getResendConfiguration(environment)).toThrow(
       'EMAIL_CONFIGURATION_INVALID',
-    )
-  })
-
-  it('sends password reset mail with text, html and idempotency', async () => {
-    const send = vi.fn().mockResolvedValue({
-      data: {id: 'email-id'},
-      error: null,
-    })
-    const mailer = createResendMailer(
-      {emails: {send}},
-      {
-        apiKey: 're_bekten_key',
-        from: 'Bekten Art <noreply@mucahid.dev>',
-        replyTo: 'support@mucahid.dev',
-      },
-    )
-
-    await expect(
-      mailer.sendPasswordReset({
-        idempotencyKey: 'password-reset:user:token',
-        locale: 'en',
-        name: 'Ada',
-        resetUrl: 'https://bekten.art/en/reset-password?token=safe',
-        to: 'ada@example.com',
-      }),
-    ).resolves.toEqual({id: 'email-id'})
-
-    expect(send).toHaveBeenCalledWith(
-      expect.objectContaining({
-        from: 'Bekten Art <noreply@mucahid.dev>',
-        html: expect.stringContaining('https://bekten.art/en/reset-password'),
-        replyTo: 'support@mucahid.dev',
-        text: expect.stringContaining('https://bekten.art/en/reset-password'),
-        to: ['ada@example.com'],
-      }),
-      {idempotencyKey: 'password-reset:user:token'},
-    )
-  })
-
-  it('sends email verification without exposing the token outside the link', async () => {
-    const send = vi.fn().mockResolvedValue({
-      data: {id: 'verification-email-id'},
-      error: null,
-    })
-    const mailer = createResendMailer(
-      {emails: {send}},
-      {
-        apiKey: 're_bekten_key',
-        from: 'Bekten Art <noreply@mucahid.dev>',
-        replyTo: 'support@mucahid.dev',
-      },
-    )
-
-    await expect(
-      mailer.sendEmailVerification({
-        idempotencyKey: 'email-verification:user:token-hash',
-        locale: 'tr',
-        name: 'Ada',
-        to: 'ada@example.com',
-        verificationUrl:
-          'https://bekten.art/tr/verify-email?token=one-time-token',
-      }),
-    ).resolves.toEqual({id: 'verification-email-id'})
-
-    expect(send).toHaveBeenCalledWith(
-      expect.objectContaining({
-        html: expect.stringContaining(
-          'https://bekten.art/tr/verify-email?token=one-time-token',
-        ),
-        subject: expect.stringMatching(/e-posta/i),
-        text: expect.stringContaining(
-          'https://bekten.art/tr/verify-email?token=one-time-token',
-        ),
-      }),
-      {idempotencyKey: 'email-verification:user:token-hash'},
     )
   })
 
@@ -136,11 +77,9 @@ describe('Resend mailer', () => {
     )
 
     await expect(
-      mailer.sendPasswordReset({
-        idempotencyKey: 'password-reset:user:token',
-        locale: 'tr',
-        name: null,
-        resetUrl: 'https://bekten.art/tr/reset-password?token=safe',
+      mailer.sendFeedbackAcknowledgement({
+        idempotencyKey: 'feedback:user:acknowledgement',
+        name: 'Ada',
         to: 'user@example.com',
       }),
     ).rejects.toThrow('EMAIL_DELIVERY_FAILED')
@@ -161,18 +100,18 @@ describe('Resend mailer', () => {
     )
 
     await expect(
-      mailer.sendPasswordReset({
-        idempotencyKey: 'password-reset:user:token',
-        locale: 'ky',
+      mailer.sendFeedbackAcknowledgement({
+        idempotencyKey: 'feedback:user:acknowledgement',
         name: '<script>alert(1)</script>',
-        resetUrl: 'https://bekten.art/ky/reset-password?token=safe',
         to: 'user@example.com',
       }),
     ).rejects.toThrow('EMAIL_DELIVERY_FAILED')
   })
 
   it('escapes untrusted feedback in both support and acknowledgement messages', async () => {
-    const send = vi.fn().mockResolvedValue({data: {id: 'email-id'}, error: null})
+    const send = vi
+      .fn()
+      .mockResolvedValue({data: {id: 'email-id'}, error: null})
     const mailer = createResendMailer(
       {emails: {send}},
       {
@@ -216,7 +155,9 @@ describe('Resend mailer', () => {
   })
 
   it('sends localized newsletter confirmation and welcome links', async () => {
-    const send = vi.fn().mockResolvedValue({data: {id: 'email-id'}, error: null})
+    const send = vi
+      .fn()
+      .mockResolvedValue({data: {id: 'email-id'}, error: null})
     const mailer = createResendMailer(
       {emails: {send}},
       {

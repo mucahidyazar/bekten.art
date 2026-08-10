@@ -1,23 +1,18 @@
 import {createEnv} from '@t3-oss/env-nextjs'
 import {z} from 'zod'
 
-const optionalString = z.preprocess(
-  value => {
-    if (typeof value !== 'string') {
-      return value
-    }
+const optionalString = z.preprocess(value => {
+  if (typeof value !== 'string') {
+    return value
+  }
 
-    const trimmed = value.trim()
+  const trimmed = value.trim()
 
-    return trimmed.length === 0 ? undefined : trimmed
-  },
-  z.string().min(1).optional(),
-)
+  return trimmed.length === 0 ? undefined : trimmed
+}, z.string().min(1).optional())
 
 export const env = createEnv({
   server: {
-    AUTH_GOOGLE_ID: optionalString,
-    AUTH_GOOGLE_SECRET: optionalString,
     AUTH_TRUST_PROXY: z.enum(['true', 'false']).optional(),
     NEXTAUTH_SECRET: optionalString,
     NEXTAUTH_URL: z.string().url().optional(),
@@ -25,18 +20,15 @@ export const env = createEnv({
     DATABASE_URL: optionalString,
     MEDIA_S3_ACCESS_KEY_ID: optionalString,
     MEDIA_S3_BUCKET: optionalString,
-    MEDIA_S3_ENDPOINT: z.preprocess(
-      value => {
-        if (typeof value !== 'string') {
-          return value
-        }
+    MEDIA_S3_ENDPOINT: z.preprocess(value => {
+      if (typeof value !== 'string') {
+        return value
+      }
 
-        const trimmed = value.trim()
+      const trimmed = value.trim()
 
-        return trimmed.length === 0 ? undefined : trimmed
-      },
-      z.string().url().optional(),
-    ),
+      return trimmed.length === 0 ? undefined : trimmed
+    }, z.string().url().optional()),
     MEDIA_S3_FORCE_PATH_STYLE: z.enum(['true']).optional(),
     MEDIA_S3_REGION: optionalString,
     MEDIA_S3_SECRET_ACCESS_KEY: optionalString,
@@ -51,8 +43,6 @@ export const env = createEnv({
     NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID: z.string().min(1),
   },
   runtimeEnv: {
-    AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
-    AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
     AUTH_TRUST_PROXY: process.env.AUTH_TRUST_PROXY,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,

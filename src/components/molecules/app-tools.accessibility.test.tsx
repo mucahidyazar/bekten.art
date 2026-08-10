@@ -25,7 +25,7 @@ vi.mock('next/navigation', () => ({
 vi.mock('next-intl', () => ({
   useLocale: () => 'en',
   useTranslations: () => (key: string, values?: {locale?: string}) =>
-    values?.locale ?? (key === 'navigation.signIn' ? 'Sign in' : key),
+    values?.locale ?? key,
 }))
 
 vi.mock('next-themes', () => ({
@@ -43,13 +43,10 @@ describe('AppTools accessibility', () => {
     setTheme.mockClear()
   })
 
-  it('uses one interactive element for the sign-in link and names menu triggers', () => {
+  it('exposes display and locale controls without public account links', () => {
     const {container} = render(<AppTools />)
 
-    const signIn = screen.getByRole('link', {name: /sign in/i})
-
-    expect(signIn).toHaveAttribute('href', '/en/sign-in')
-    expect(signIn.querySelector('button')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
     expect(
       screen.getByRole('button', {name: /change language/i}),
     ).toBeInTheDocument()

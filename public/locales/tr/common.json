@@ -1,23 +1,4 @@
 {
-  "passwordReset": {
-    "backToSignIn": "Giriş sayfasına dön",
-    "confirmPassword": "Yeni parolayı doğrula",
-    "email": "E-posta adresi",
-    "genericError": "İsteğinizi işleyemedik. Lütfen tekrar deneyin.",
-    "invalidLink": "Bu sıfırlama bağlantısı geçersiz veya süresi dolmuş.",
-    "mismatch": "Parolalar eşleşmiyor.",
-    "newPassword": "Yeni parola",
-    "requestButton": "Sıfırlama bağlantısı gönder",
-    "requestSubtitle": "Hesap e-postanızı girin; güvenli ve süreli bir bağlantı gönderelim.",
-    "requestSuccess": "Hesap uygunsa sıfırlama bağlantısı için gelen kutunuzu kontrol edin.",
-    "requestTitle": "Parolanızı sıfırlayın",
-    "requesting": "Bağlantı gönderiliyor...",
-    "resetButton": "Parolayı sıfırla",
-    "resetSubtitle": "En az 12 karakterli yeni bir parola seçin.",
-    "resetSuccess": "Parolanız sıfırlandı.",
-    "resetTitle": "Yeni parola seçin",
-    "resetting": "Parola sıfırlanıyor..."
-  },
   "consent": {
     "title": "Gizlilik tercihleriniz",
     "description": "Sitenin nasıl kullanıldığını anlamak için isteğe bağlı analitik, yalnızca gerektiğinde pazarlama depolaması ve Google Haritalar gibi hizmetleri göstermek için harici medya kullanıyoruz. Zorunlu depolama her zaman etkindir.",
@@ -56,7 +37,6 @@
     "teaching": "Öğretim",
     "technique": "Teknik",
     "year": "Yıl",
-
     "artisticPhilosophy": "Sanat Felsefesi",
     "artworkDescription": "Bu eser yaşamın yolculuğunu temsil ediyor; her fırça darbesi hareket, büyüme ve anlam arayışının ebedi yolculuğunun hikayesini anlatıyor. Renklerin etkileşimi, hem fiziksel hem de duygusal manzaralarda dolaşmanın özünü yakalıyor.",
     "artworksCreated": "Yaratılan Sanat Eserleri",
@@ -76,7 +56,6 @@
     "teachingDescription": "Bilgiyi paylaşmak ve gelecek nesil sanatçılara ilham vermek",
     "techniqueDescription": "Geleneksel yöntemlerde ustalaşırken yeniliği kucaklamak",
     "viewGallery": "Galeriyi Görüntüle",
-
     "featuredWorkDescription": "İnsan duygusunun derinliğini renk ve form aracılığıyla sergileyen en çok takdir edilen eserlerimden biri",
     "getInTouch": "İletişime Geç",
     "yearsOfExperience": "Yıllık Deneyim"
@@ -89,32 +68,6 @@
     "defaultQuote": "Sanat ruhun dilidir, kelimelerin ifade edemediği gerçekleri söyler.",
     "defaultTitle": "Kırgız Ressam ve Sanat Eğitmeni"
   },
-  "auth": {
-    "signIn": {
-      "subtitle": "Devam etmek için hesabınıza giriş yapın",
-      "title": "Tekrar Hoş Geldiniz",
-
-      "googleButton": "Google ile Devam Et",
-      "forgotPassword": "Parolanızı mı unuttunuz?",
-      "noAccount": "Hesabınız yok mu?",
-      "orContinue": "Veya e-posta ile devam et",
-      "signUp": "Kaydol"
-    },
-    "signUp": {
-      "subtitle": "Bugün Bekten Art topluluğuna katılın",
-      "title": "Hesap Oluştur",
-
-      "hasAccount": "Zaten hesabınız var mı?",
-      "orContinue": "Veya e-posta ile hesap oluştur",
-      "signIn": "Giriş yap"
-    },
-    "status": {
-      "rateLimit": "Çok fazla deneme yapıldı. Lütfen bekleyip yeniden deneyin.",
-      "verificationInvalid": "Bu doğrulama bağlantısı geçersiz veya süresi dolmuş.",
-      "verificationPending": "Giriş yapmadan önce gelen kutunuzdaki e-postayı doğrulayın.",
-      "verificationSuccess": "E-posta adresiniz doğrulandı. Şimdi giriş yapabilirsiniz."
-    }
-  },
   "branding": {
     "locale": "{locale, select, en {İngilizce} tr {Türkçe} ru {Rusça} ky {Kırgızca} other {Bilinmeyen}}",
     "slogan": "ÇAĞDAŞ YAĞLI BOYA ODAKLI RESSAM"
@@ -125,17 +78,14 @@
       "like": "beğeni",
       "likes": "beğeni",
       "untitled": "Başlıksız",
-
       "defaultAlt": "Sanat Eseri",
       "noDescription": "Açıklama mevcut değil"
     },
     "eventCard": {
       "free": "Ücretsiz",
-
       "defaultAddress": "1015 Chestnut St. Philadelphia, PA 19107",
       "defaultTime": "19:00 - 21:00",
       "viewDetails": "Etkinlik Detaylarını Gör",
-
       "months": {
         "apr": "NİS",
         "aug": "AĞU",
@@ -182,7 +132,6 @@
     "success": "Başarılı",
     "upload": "Yükle",
     "view": "Görüntüle",
-
     "learnMore": "Daha Fazla Öğren",
     "showLess": "Daha Az Göster",
     "showMore": "Daha Fazla Göster"
@@ -195,7 +144,6 @@
     "phone": "Telefon",
     "subtitle": "Birlikte Güzel Bir Şey Yaratalım",
     "title": "İletişime Geçin",
-
     "callNow": "Şimdi Ara",
     "contactUnavailable": "İletişim Bilgileri",
     "findStudio": "Stüdyomu Bul",
@@ -207,14 +155,11 @@
     "studioInfo": "Stüdyo Bilgileri",
     "studioLocation": "Bişkek, Kırgızistan",
     "studioName": "Bekten'in Sanat Stüdyosu",
-
     "contactUnavailableDescription": "İletişim bilgileri şu anda mevcut değil. Lütfen daha sonra tekrar deneyin.",
     "readyToTalk": "Konuşmaya Başlamaya Hazır mısınız?",
-
     "defaultWorkingHours": {
       "Saturday": "10:00 - 16:00",
       "Sunday": "Randevu ile",
-
       "Monday - Friday": "09:00 - 18:00"
     }
   },
@@ -233,69 +178,15 @@
   },
   "forms": {
     "buttons": {
-      "create": "Oluştur",
       "subscribe": "Abone Ol",
-      "subscribing": "Abone oluyor...",
-
-      "createAccount": "Hesap Oluştur",
-      "creatingAccount": "Hesap oluşturuluyor...",
-      "signIn": "Giriş Yap",
-      "signingIn": "Giriş yapılıyor...",
-      "showPassword": "Parolayı göster",
-      "hidePassword": "Parolayı gizle"
-    },
-    "labels": {
-      "address": "Adres",
-      "description": "Açıklama",
-      "email": "E-posta Adresi",
-      "image": "Resim",
-      "link": "Bağlantı",
-      "message": "Mesaj",
-      "note": "Not",
-      "password": "Şifre",
-      "subtitle": "Alt Başlık",
-      "title": "Başlık",
-
-      "confirmPassword": "Şifreyi Onayla",
-      "fullName": "Ad Soyad"
+      "subscribing": "Abone oluyor..."
     },
     "messages": {
-      "forgotPassword": "Şifremi unuttum?",
       "noSpam": "Spam yok",
-      "rememberMe": "Beni hatırla",
       "subscribeDescription": "En son güncellemelerimizi yakında alacaksınız.",
       "subscribeSuccess": "Başarıyla abone oldunuz!",
-      "termsAgreement": "Hesap oluşturarak Hizmet Şartlarımızı ve Gizlilik Politikamızı kabul etmiş olursunuz",
       "unsubscribeAnytime": "İstediğiniz zaman abonelikten çıkın",
-      "weeklyUpdates": "Haftalık güncellemeler",
-
-      "signInSuccess": "Başarıyla giriş yapıldı",
-      "verificationSentDescription": "Giriş yapmadan önce gelen kutunuzdaki e-postayı doğrulayın.",
-      "verificationSentTitle": "Doğrulama e-postası gönderildi"
-    },
-    "placeholders": {
-      "confirmPassword": "Şifrenizi onaylayın",
-      "createPassword": "Bir şifre oluşturun",
-      "enterAddress": "Adres",
-      "enterDescription": "Açıklama",
-      "enterEmail": "E-postanızı girin",
-      "enterLink": "Bağlantı",
-      "enterLocation": "Konum: Bişkek, Kırgızistan veya Moskova, Rusya",
-      "enterName": "Ad soyadınızı girin",
-      "enterNote": "Not",
-      "enterPassword": "Şifrenizi girin",
-      "enterSubtitle": "Alt başlık",
-      "enterTitle": "Başlık",
-      "pickDate": "Bir tarih seçin",
-      "typeMessage": "Mesajınızı buraya yazın."
-    },
-    "validation": {
-      "emailInvalid": "Lütfen geçerli bir e-posta adresi girin",
-      "loginRequired": "Geri bildirim göndermek için giriş yapmalısınız.",
-      "nameRequired": "İsim en az 2 karakter olmalıdır",
-      "passwordConfirm": "Lütfen şifrenizi onaylayın",
-      "passwordLength": "Şifre en az 8 karakter olmalıdır",
-      "passwordsMatch": "Şifreler eşleşmiyor"
+      "weeklyUpdates": "Haftalık güncellemeler"
     }
   },
   "gallery": {
@@ -328,9 +219,6 @@
     "stat3Title": "100+ Mutlu Koleksiyoncu",
     "statsButton1": "Galeriyi Keşfet",
     "statsButton2": "Sanatçı Hakkında",
-    "storeBadge": "Sınırlı Koleksiyon",
-    "storeDescription": "Orijinal Bekten Usubaliev başyapıtına sahip olma özel fırsatı",
-    "storeTitle": "Satılık Sanat Eserleri",
     "workshopBadge": "Sanatın Arkasında",
     "workshopDescription": "Başyapıtların hayat bulduğu, geleneğin yenilikle buluştuğu yaratıcı sığınağa adım atın",
     "workshopTitle": "Yaratıcı Atölye"
@@ -338,36 +226,30 @@
   "legal": {
     "copyRight": "© {year} Bekten. Tüm hakları saklıdır. Tasarlayan:",
     "privacyPolicy": "Gizlilik Politikası",
-
     "termsOfService": "Hizmet Şartları",
-
     "privacyPolicyPage": {
       "introduction": "Giriş",
       "title": "Gizlilik Politikası",
       "website": "Web sitesi: bekten.art",
-
-      "additionalData": "Ek ilişkilerden veriler: Hesaplar, Oturumlar, Sanat Eserleri, Sanat Eseri Beğenileri, Sosyal Medya, Geri Bildirimler, Basın ve Haberler.",
+      "additionalData": "Operasyon verileri; yayınlanmış içerik, medya metadatası, talepler, bülten tercihleri, denetim kayıtları ve sınırlı Studio editör hesabı/oturum kayıtlarını içerir.",
       "changesNotification": "Gizlilik politikasındaki herhangi bir değişiklik e-posta yoluyla bildirilecektir.",
       "contactEmail": "İletişim E-postası: support@mucahid.dev",
       "dataSecurity": "Veri Güvenliği",
       "dataSharing": "Veri Paylaşımı ve İfşası",
       "informationCollected": "Toplanan Bilgiler",
       "policyChanges": "Politika Değişiklikleri",
-      "rightsDescription": "Kullanıcılar kişisel bilgilerine erişme, değiştirme ve silme hakkına sahiptir.",
+      "rightsDescription": "Ziyaretçiler, talep gönderenler ve aboneler yasal saklama yükümlülükleri saklı kalmak üzere kişisel verilerine erişim, düzeltme veya silme talep edebilir.",
       "securityDescription": "bekten.art şifreli bağlantılar, kısıtlı erişim, girdi doğrulama, hız sınırlama, özel nesne depolama, denetim kayıtları ve korumalı kimlik doğrulama belirteçleri kullanır. Hiçbir güvenlik önlemi tüm riskleri ortadan kaldıramaz.",
-      "servicesPurpose": "Sanatçılara geri bildirim sağlama ve sanatçıların eserlerini web sitesinde sergileme gibi hizmetleri kolaylaştırmak için.",
-      "userDetails": "Kullanıcı modelinden ayrıntılar: ID, İsim, E-posta, E-posta Doğrulandı, Resim, Meslek, Açıklama, Konum, Rol, Oluşturulma Tarihi, Güncellenme Tarihi, Veri Paylaşım Tercihleri ve E-posta Abonelik Tercihleri.",
+      "servicesPurpose": "Bekten’in eserlerini sunmak, uygunluk, özel sipariş ve özel gösterim taleplerini yanıtlamak, bülteni ve özel editoryal Studio’yu işletmek.",
+      "userDetails": "Talep ve bülten verileri ad, e-posta adresi, isteğe bağlı telefon, mesaj, dil, onay zamanı ve talep durumunu içerebilir.",
       "userRights": "Kullanıcı Hakları",
-
-      "noThirdParty": "Veriler yalnızca hizmeti işletmek için gerekli ölçüde altyapımız ve seçili veri işleyenler tarafından işlenir: Coolify üzerinde PostgreSQL ve Garage depolama, işlem e-postaları için Resend, giriş ve onaya bağlı analiz için Google, herkese açık Instagram içerikleri için Apify. Kişisel verileri satmayız.",
+      "noThirdParty": "Veriler yalnız hizmet için gereken seçili işleyiciler tarafından işlenir: Coolify üzerinde PostgreSQL ve Garage, işlemsel e-posta için Resend, onaya bağlı Google analizleri ve haritaları, herkese açık Instagram içeriği için Apify. Kişisel veri satmayız.",
       "purposeOfCollection": "Veri Toplama Amacı"
     },
-
     "termsOfServicePage": {
       "introduction": "Giriş",
       "title": "Hizmet Şartları",
       "website": "Web sitesi: bekten.art",
-
       "contactEmail": "İletişim E-postası: support@mucahid.dev",
       "disputeDescription": "Anlaşmazlıklar veya endişeler web sitesi yöneticisine veya sağlanan iletişim bilgileri aracılığıyla iletilmelidir.",
       "disputeResolution": "Anlaşmazlık Çözümü",
@@ -376,9 +258,9 @@
       "liabilityDescription": "bekten.art, sitedeki kullanıcı faaliyetlerinin doğrudan veya dolaylı sonuçlarından sorumlu değildir.",
       "liabilityLimitations": "Sorumluluk Sınırlamaları",
       "propertyDescription": "Sitede görüntülenen sanat eserleri ve içerik, ilgili sanatçıların mülkiyetindedir ve telif hakkı yasalarıyla korunmaktadır.",
-      "responsibilitiesDescription": "Kullanıcıların sitedeki davranış kurallarına uyması, sanatçıların fikri mülkiyet haklarına saygı göstermesi ve her türlü taciz veya kötü muameleden kaçınması beklenir.",
-      "siteDescription": "bekten.art, babanız da dahil olmak üzere çeşitli sanatçıların eserlerini sergileyen bir platformdur. Kullanıcıların sanatçı profillerine geri bildirim bırakmasına ve mağaza bölümünde sanat eserlerini görüntülemesine olanak tanır. Sanat eserlerinin satın alınması sanatçılarla doğrudan iletişim yoluyla kolaylaştırılır ve web sitesi üzerinden çevrimiçi işlem yapılmaz.",
-      "usageDescription": "Web sitesi sanat eserlerini sergilemek ve sanatçılara geri bildirim sağlamak için tasarlanmıştır. Kullanıcıların nefret söylemi, pornografi ve küfürlü dil dahil ancak bunlarla sınırlı olmayan saldırgan içerik yayınlaması yasaktır.",
+      "responsibilitiesDescription": "Ziyaretçiler sanatçının fikri mülkiyet haklarına saygı göstermeli; talep, bülten veya Studio erişim mekanizmalarını kötüye kullanmamalıdır.",
+      "siteDescription": "bekten.art, Bekten’in resmi editoryal portfolyosu ve arşividir. Eser uygunluğu, özel siparişler ve özel gösterimler doğrudan görüşülür; sitede sepet, ödeme adımı veya çevrimiçi ödeme yoktur.",
+      "usageDescription": "Site eserleri, sergileri ve editoryal içerikleri sunar ve özel talepleri kabul eder. Otomatik kötüye kullanım, izinsiz kopyalama ve hizmete müdahale yasaktır.",
       "usageTerms": "Kullanım Şartları",
       "userResponsibilities": "Kullanıcı Sorumlulukları"
     }
@@ -388,19 +270,13 @@
     "contact": "İletişim",
     "gallery": "Galeri",
     "home": "Ana Sayfa",
-    "news": "Haberler",
-    "store": "Mağaza",
-    "signIn": "Giriş yap",
-    "signUp": "Kayıt ol",
-    "forgotPassword": "Parolamı unuttum",
-    "resetPassword": "Parola sıfırlama"
+    "news": "Haberler"
   },
   "news": {
     "address": "Adres",
     "featured": "Öne Çıkan",
     "location": "Konum",
     "published": "Yayınlanan",
-
     "dateTime": "Tarih ve Saat",
     "extendedContent1": "Bu etkinlik, Kırgızistan'ın en tanınmış çağdaş sanatçılarından biri olan Bekten Usubaliev'in seçkin kariyerindeki bir başka kilometre taşını temsil ediyor. Sanat dünyasında 25 yılı aşkın deneyime sahip Usubaliev, kültürel mirasını onurlandırırken geleneksel resmin sınırlarını zorlamaya devam ediyor.",
     "extendedContent2": "Sanatçının eserleri Lüksemburg ve Macaristan'dan Türkiye'ye kadar çok sayıda uluslararası sergide yer aldı; burada resimleri TÜRKSOY plein air programının bir parçası olarak sergilendi. Yağlı boya resme benzersiz yaklaşımı, klasik teknikleri modern duyarlılıklarla birleştirerek hem yerel hem de küresel izleyicilere hitap eden eserler yaratıyor.",
@@ -415,7 +291,6 @@
     "readOriginal": "Orijinalini Oku",
     "relatedNews": "İlgili Haberler",
     "stayConnected": "Bağlantıda Kalın",
-
     "allNewsEvents": "Tüm Haberler ve Etkinlikler",
     "backToNews": "Haberlere Dön",
     "newsNotFound": "Haber Bulunamadı",
@@ -424,105 +299,11 @@
     "editNews": "Haberleri Düzenle",
     "subtitle": "Alt Başlık",
     "category": "Kategori",
-
     "newsNotFoundDescription": "İstenen haber makalesi bulunamadı."
-  },
-  "profile": {
-    "defaultBio": "Sanat tutkunu ve koleksiyoncu. Çağdaş ve dijital sanata tutkulu.",
-    "defaultInterests": [
-      "Çağdaş Sanat",
-      "Dijital Sanat",
-      "Resimler",
-      "Heykeller",
-      "Fotoğrafçılık"
-    ],
-    "defaultLocation": "Bişkek, Kırgızistan",
-    "defaultWebsite": "https://bekten.art",
-    "metaDescription": "Bekten Art profilinizi, sanat eserlerinizi ve koleksiyonlarınızı görüntüleyin ve yönetin.",
-    "metaTitle": "Kullanıcı Profili - Bekten Art",
-
-    "activities": {
-      "liked": "\"{title}\" sanat eserini beğendi",
-      "subscribed": "Bültene abone oldu",
-
-      "addedToCollection": "\"{collection}\" koleksiyonuna ekledi"
-    },
-    "labels": {
-      "bio": "Biyografi",
-      "email": "E-posta",
-      "location": "Konum",
-      "name": "İsim",
-      "role": "Rol",
-      "website": "Web sitesi",
-
-      "editProfile": "Profili Düzenle",
-      "memberSince": "Üyelik tarihi",
-      "signOut": "Çıkış Yap",
-
-      "lastSignIn": "Son giriş"
-    },
-    "messages": {
-      "anonymousUser": "Anonim Kullanıcı",
-      "noActivities": "Son aktivite yok",
-      "noInterests": "Henüz ilgi alanı eklenmemiş",
-
-      "profileNotFound": "Profil bulunamadı",
-
-      "profileNotFoundDescription": "İstenen profil bulunamadı."
-    },
-    "roles": {
-      "administrator": "Yönetici",
-      "artist": "Sanatçı",
-      "user": "Kullanıcı"
-    },
-    "sections": {
-      "interests": "İlgi Alanları",
-
-      "accountStats": "Hesap İstatistikleri",
-      "profileInfo": "Profil Bilgileri",
-      "recentActivity": "Son Aktiviteler"
-    },
-    "stats": {
-      "collections": "Koleksiyonlar",
-      "followers": "Takipçiler",
-      "following": "Takip Edilenler",
-
-      "artworksLiked": "Beğenilen Sanat Eserleri"
-    }
-  },
-  "store": {
-    "available": "Mevcut",
-    "inquire": "Sorgula",
-    "reserved": "Rezerve",
-    "sold": "Satıldı",
-    "unavailable": "Mevcut Değil",
-    "original": "Orijinal",
-    "reproduction": "Reproduksiyon",
-    "storeManagement": "Mağaza Yönetimi",
-    "storeBadge": "Mağaza",
-    "artStore": "Sanat Mağazası",
-    "mainImage": "Ana Resim",
-    "price": "Fiyat",
-    "viewDetails": "Detayları Görüntüle",
-    "category": "Kategori",
-
-    "adjustFilters": "Filtrelerinizi ayarlamayı deneyin veya tüm kategorilere göz atın.",
-    "featuredFirst": "Önce Öne Çıkanlar",
-    "newestFirst": "Önce En Yeniler",
-    "newsletterDescription": "Yeni sanat eserleri, özel koleksiyonlar ve özel sergiler hakkında ilk bilgi sahibi olun.",
-    "oldestFirst": "Önce En Eskiler",
-    "quickView": "Hızlı Görünüm",
-    "sortBy": "Sırala",
-
-    "filterByCategory": "Kategoriye Göre Filtrele",
-    "noArtworksFound": "Sanat eseri bulunamadı",
-    "priceHighLow": "Fiyat: Yüksekten Düşüğe",
-    "priceLowHigh": "Fiyat: Düşükten Yükseğe"
   },
   "testimonials": {
     "description": "Sanat dünyasından önemli şahsiyetlerin ve toplumun farklı kesimlerinin Bekten Usubaliev hakkındaki düşünceleri",
     "title": "Değerli Görüşler",
-
     "autoPlaying": "Otomatik Oynatma",
     "badgeText": "Sanatçı Hakkında",
     "categoryArtist": "Sanatçı",

@@ -34,7 +34,11 @@ describe('sitemap', () => {
     expect(urls).toContain('https://bekten.art/ky/news/news-1')
     expect(urls.some(url => url.includes('/kg'))).toBe(false)
     expect(
-      urls.some(url => /\/(?:api|auth|sign-in|sign-up)(?:\/|$)/.test(url)),
+      urls.some(url =>
+        /\/(?:admin|api|auth|forgot-password|profile|reset-password|sign-in|sign-up|store)(?:\/|$)/.test(
+          url,
+        ),
+      ),
     ).toBe(false)
 
     const about = entries.find(

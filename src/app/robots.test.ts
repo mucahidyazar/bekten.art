@@ -10,8 +10,22 @@ describe('robots metadata', () => {
 
     expect(generalRule?.allow).toEqual(expect.arrayContaining(['/', '/api/og']))
     expect(generalRule?.disallow).toEqual(
-      expect.arrayContaining(['/api/', '/admin/', '/*/admin/', '/auth/']),
+      expect.arrayContaining(['/api/', '/studio', '/*/studio']),
     )
+    const retiredPaths = [
+      '/admin/',
+      '/*/admin/',
+      '/auth/',
+      '/*/sign-in',
+      '/*/sign-up',
+      '/*/profile/',
+      '/store/',
+      '/*/store/',
+    ]
+
+    retiredPaths.forEach(path => {
+      expect(generalRule?.disallow).not.toContain(path)
+    })
     expect(result.sitemap).toBe('https://bekten.art/sitemap.xml')
     expect(result.host).toBe('https://bekten.art')
   })

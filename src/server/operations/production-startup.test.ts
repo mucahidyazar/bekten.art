@@ -8,8 +8,6 @@ import {
 } from '../../../scripts/lib/production-startup.mjs'
 
 const completeEnvironment = Object.freeze({
-  AUTH_GOOGLE_ID: '123456789-example.apps.googleusercontent.com',
-  AUTH_GOOGLE_SECRET: 'google-secret',
   AUTH_TRUST_PROXY: 'true',
   DATABASE_URL: 'postgresql://app:secret@database:5432/app',
   MEDIA_S3_ACCESS_KEY_ID: 'garage-key',
@@ -92,14 +90,11 @@ describe('production startup contract', () => {
     expect(() =>
       validateProductionStartupEnvironment({
         ...completeEnvironment,
-        AUTH_GOOGLE_ID: 'not-a-google-client-id',
         MEDIA_S3_ENDPOINT: 'http://garage.internal/path',
         RESEND_API_KEY: 'not-a-resend-key',
         RESEND_FROM_EMAIL: 'not-an-email',
       }),
-    ).toThrow(
-      /MEDIA_S3_ENDPOINT.*AUTH_GOOGLE_ID.*RESEND_API_KEY.*RESEND_FROM_EMAIL/,
-    )
+    ).toThrow(/MEDIA_S3_ENDPOINT.*RESEND_API_KEY.*RESEND_FROM_EMAIL/)
   })
 
   it('ships an isolated migration runtime instead of the full development dependency tree', () => {

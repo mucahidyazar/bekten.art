@@ -1,18 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import {usePathname, useRouter} from 'next/navigation'
 
-import {LaptopIcon, LogInIcon, MoonIcon, SunIcon, WavesIcon} from 'lucide-react'
+import {LaptopIcon, MoonIcon, SunIcon, WavesIcon} from 'lucide-react'
 import {useLocale, useTranslations} from 'next-intl'
 import {useTheme} from 'next-themes'
 import {useTransition} from 'react'
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,19 +15,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {LOCALE, LOCALES} from '@/constants'
 import {useHydrated} from '@/hooks/use-hydrated'
-import {localizedPath} from '@/lib/localized-path'
 import {cn} from '@/utils'
 
-import {buttonVariants} from '../ui/button'
-
 import type {AppLocale} from '@/lib/localized-path'
-import type {UiUser} from '@/types/ui-user'
 
 type AppToolsProps = {
   className?: string
-  user?: UiUser | null
 }
-export function AppTools({className, user}: AppToolsProps) {
+export function AppTools({className}: AppToolsProps) {
   const [isPending, startTransition] = useTransition()
   const mounted = useHydrated()
   const t = useTranslations()
@@ -91,7 +80,6 @@ export function AppTools({className, user}: AppToolsProps) {
       >
         <div className="border-border bg-card h-9 w-9 rounded border" />
         <div className="border-border bg-card h-9 w-9 rounded border" />
-        <div className="border-border bg-card h-9 w-9 rounded border" />
       </section>
     )
   }
@@ -99,43 +87,12 @@ export function AppTools({className, user}: AppToolsProps) {
   return (
     <section
       id="app-tools"
-      aria-label="Display and account tools"
+      aria-label="Display and language tools"
       className={cn(
         'fixed top-2 right-2 z-[60] mb-0 flex gap-1 rounded lg:right-4',
         className,
       )}
     >
-      {user ? (
-        <Link
-          href={localizedPath(locale, `/profile/${user.id}`)}
-          className="flex items-center space-x-2 transition-opacity hover:opacity-80"
-        >
-          <span className="text-muted-foreground hidden text-sm md:block">
-            {user.name || 'Profile'}
-          </span>
-          <Avatar className="border-border h-9 w-9 border">
-            {user.image ? (
-              <AvatarImage alt={user.name || 'User avatar'} src={user.image} />
-            ) : null}
-            <AvatarFallback aria-hidden="true">
-              {(user.name || user.email || 'P').trim().charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        </Link>
-      ) : (
-        <Link
-          href={localizedPath(locale, '/sign-in')}
-          aria-label={t('navigation.signIn')}
-          className={cn(
-            buttonVariants({variant: 'outline', size: 'sm'}),
-            'border-border bg-card text-foreground hover:bg-muted relative z-50 h-9 w-9 justify-center gap-2 rounded border text-xs uppercase transition-colors sm:w-fit',
-          )}
-        >
-          <LogInIcon aria-hidden="true" className="h-4 w-4" />
-          <span className="hidden md:block">{t('navigation.signIn')}</span>
-        </Link>
-      )}
-
       <DropdownMenu>
         <DropdownMenuTrigger
           aria-label={`Change language. Current language: ${t('branding.locale', {locale})}`}

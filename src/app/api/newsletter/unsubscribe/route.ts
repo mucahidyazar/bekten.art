@@ -26,7 +26,10 @@ function locale(value: string | null | undefined) {
 }
 
 function resultRedirect(path: string) {
-  const response = NextResponse.redirect(new URL(path, getPublicAppOrigin()), 303)
+  const response = NextResponse.redirect(
+    new URL(path, getPublicAppOrigin()),
+    303,
+  )
 
   response.headers.set('Cache-Control', 'private, no-store')
 
@@ -65,7 +68,7 @@ export async function GET(request: Request) {
   }
 
   const response = resultRedirect(
-    `/${targetLocale}/confirm-email-action?action=newsletter-unsubscribe`,
+    `/${targetLocale}/newsletter-preferences?action=newsletter-unsubscribe`,
   )
 
   stageCookie(response, COOKIE_NAME, token)
@@ -93,7 +96,10 @@ export async function POST(request: Request) {
       })
     }
 
-    if (body !== 'List-Unsubscribe=One-Click' || !TOKEN_PATTERN.test(oneClickToken)) {
+    if (
+      body !== 'List-Unsubscribe=One-Click' ||
+      !TOKEN_PATTERN.test(oneClickToken)
+    ) {
       return new NextResponse(null, {
         headers: {'Cache-Control': 'private, no-store'},
         status: 400,

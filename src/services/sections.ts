@@ -5,7 +5,6 @@ import {contentRepository} from '@/server/database/content'
 import type {AppLocale} from '@/lib/localized-path'
 import type {
   ArtistStat,
-  Artwork,
   Memory,
   NewsArticle,
   Testimonial,
@@ -14,7 +13,6 @@ import type {
 
 const HOMEPAGE_LIMITS = Object.freeze({
   artistStats: 10,
-  artworks: 6,
   memories: 6,
   testimonials: 10,
   workshopItems: 6,
@@ -22,7 +20,6 @@ const HOMEPAGE_LIMITS = Object.freeze({
 
 export type HomepageContent = Readonly<{
   artistStats: ArtistStat[]
-  artworks: Artwork[]
   memories: Memory[]
   testimonials: Testimonial[]
   workshopItems: WorkshopItem[]
@@ -33,7 +30,7 @@ export async function getHomepageContent(
 ): Promise<HomepageContent> {
   noStore()
 
-  const [workshopItems, artistStats, testimonials, memories, artworks] =
+  const [workshopItems, artistStats, testimonials, memories] =
     await Promise.all([
       contentRepository.workshopItems.listPublished({
         locale,
@@ -51,13 +48,9 @@ export async function getHomepageContent(
         locale,
         limit: HOMEPAGE_LIMITS.memories,
       }),
-      contentRepository.artworks.listPublished({
-        locale,
-        limit: HOMEPAGE_LIMITS.artworks,
-      }),
     ])
 
-  return {artistStats, artworks, memories, testimonials, workshopItems}
+  return {artistStats, memories, testimonials, workshopItems}
 }
 
 export async function getPublishedNewsArticle(
@@ -79,13 +72,4 @@ export async function getPublishedNewsArticles(
   noStore()
 
   return contentRepository.newsArticles.listPublished({locale, limit})
-}
-
-export async function getPublishedStoreArtworks(
-  locale: AppLocale,
-  limit = 50,
-): Promise<Artwork[]> {
-  noStore()
-
-  return contentRepository.artworks.listPublished({locale, limit})
 }

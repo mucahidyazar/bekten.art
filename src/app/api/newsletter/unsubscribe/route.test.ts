@@ -37,7 +37,7 @@ describe('/api/newsletter/unsubscribe', () => {
     expect(mocks.unsubscribe).not.toHaveBeenCalled()
     expect(response.status).toBe(303)
     expect(response.headers.get('location')).toBe(
-      'https://bekten.art/ru/confirm-email-action?action=newsletter-unsubscribe',
+      'https://bekten.art/ru/newsletter-preferences?action=newsletter-unsubscribe',
     )
     expect(response.headers.get('set-cookie')).toContain(
       `bekten_newsletter_unsubscribe=${token}`,

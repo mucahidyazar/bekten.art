@@ -5,7 +5,6 @@ import {scanForWcagAaViolations} from './helpers/accessibility'
 const publicRoutes = [
   {name: 'home', path: '/en'},
   {name: 'contact', path: '/en/contact'},
-  {name: 'store', path: '/en/store'},
   {name: 'news', path: '/en/news'},
 ] as const
 

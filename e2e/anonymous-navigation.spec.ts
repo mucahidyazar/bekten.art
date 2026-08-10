@@ -37,9 +37,7 @@ test.describe('anonymous locale and navigation smoke', () => {
   }) => {
     await startWithOptionalConsentDenied(page)
     await page.goto('/en')
-    await page
-      .getByRole('button', {name: /change language/i})
-      .click()
+    await page.getByRole('button', {name: /change language/i}).click()
     await page.getByRole('menuitem', {name: 'Turkish'}).click()
 
     await expect(page).toHaveURL(/\/tr\/?$/u)
@@ -61,5 +59,25 @@ test.describe('anonymous locale and navigation smoke', () => {
     await expect(skipLink).toBeFocused()
     await skipLink.press('Enter')
     await expect(page.locator('main#main-content')).toBeFocused()
+  })
+
+  test('keeps retired public account and store routes unavailable', async ({
+    page,
+  }) => {
+    const retiredRoutes = [
+      '/en/store',
+      '/en/sign-in',
+      '/en/sign-up',
+      '/en/forgot-password',
+      '/en/reset-password',
+      '/en/profile/visitor',
+    ]
+
+    for (const route of retiredRoutes) {
+      await page.goto(route)
+
+      await expect(page).toHaveURL(new RegExp(`${route}/?$`, 'u'))
+      await expect(page.getByRole('heading', {name: '404'})).toBeVisible()
+    }
   })
 })

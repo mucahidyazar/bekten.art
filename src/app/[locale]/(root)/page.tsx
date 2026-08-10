@@ -14,7 +14,6 @@ import {CallToAction} from '@/components/molecules/call-to-action'
 import {HeroVideo} from '@/components/molecules/hero-video'
 import {TestimonialsSection} from '@/components/molecules/testimonials-section'
 import {ArtistSection} from '@/components/sections/artist-section'
-import {HomeStoreSection} from '@/components/sections/home-store-section'
 import {MemoriesSection} from '@/components/sections/memories-section'
 import {WorkshopSection} from '@/components/sections/workshop-section'
 import {Badge} from '@/components/ui/badge'
@@ -195,9 +194,6 @@ export default async function Home({params}: PageProps) {
 
       {/* Memories in Paint Section */}
       <MemoriesSection items={content.memories} locale={locale} />
-
-      {/* Store Section - Featured Artworks */}
-      <HomeStoreSection items={content.artworks} locale={locale} />
     </div>
   )
 }

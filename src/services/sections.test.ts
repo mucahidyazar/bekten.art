@@ -1,22 +1,25 @@
 import {beforeEach, describe, expect, it, vi} from 'vitest'
 
 const mocks = vi.hoisted(() => ({
+  artistStatsListPublished: vi.fn(),
   findPublishedByIdentifier: vi.fn(),
-  listPublished: vi.fn(),
+  memoriesListPublished: vi.fn(),
+  newsArticlesListPublished: vi.fn(),
+  testimonialsListPublished: vi.fn(),
+  workshopItemsListPublished: vi.fn(),
 }))
 
 vi.mock('next/cache', () => ({unstable_noStore: vi.fn()}))
 vi.mock('@/server/database/content', () => ({
   contentRepository: {
-    artistStats: {listPublished: mocks.listPublished},
-    artworks: {listPublished: mocks.listPublished},
-    memories: {listPublished: mocks.listPublished},
+    artistStats: {listPublished: mocks.artistStatsListPublished},
+    memories: {listPublished: mocks.memoriesListPublished},
     newsArticles: {
       findPublishedByIdentifier: mocks.findPublishedByIdentifier,
-      listPublished: mocks.listPublished,
+      listPublished: mocks.newsArticlesListPublished,
     },
-    testimonials: {listPublished: mocks.listPublished},
-    workshopItems: {listPublished: mocks.listPublished},
+    testimonials: {listPublished: mocks.testimonialsListPublished},
+    workshopItems: {listPublished: mocks.workshopItemsListPublished},
   },
 }))
 
@@ -24,15 +27,17 @@ import {
   getHomepageContent,
   getPublishedNewsArticle,
   getPublishedNewsArticles,
-  getPublishedStoreArtworks,
 } from './sections'
 
 describe('typed public content queries', () => {
   beforeEach(() => {
-    mocks.listPublished.mockReset()
-    mocks.listPublished.mockResolvedValue([])
-    mocks.findPublishedByIdentifier.mockReset()
+    vi.clearAllMocks()
+    mocks.artistStatsListPublished.mockResolvedValue([])
     mocks.findPublishedByIdentifier.mockResolvedValue(null)
+    mocks.memoriesListPublished.mockResolvedValue([])
+    mocks.newsArticlesListPublished.mockResolvedValue([])
+    mocks.testimonialsListPublished.mockResolvedValue([])
+    mocks.workshopItemsListPublished.mockResolvedValue([])
   })
 
   it('loads every homepage collection from typed repositories in the requested locale', async () => {
@@ -40,25 +45,32 @@ describe('typed public content queries', () => {
 
     expect(result).toEqual({
       artistStats: [],
-      artworks: [],
       memories: [],
       testimonials: [],
       workshopItems: [],
     })
-    expect(mocks.listPublished).toHaveBeenCalledTimes(5)
-    expect(mocks.listPublished).toHaveBeenCalledWith({locale: 'tr', limit: 6})
-    expect(mocks.listPublished).toHaveBeenCalledWith({locale: 'tr', limit: 10})
+    expect(mocks.artistStatsListPublished).toHaveBeenCalledWith({
+      locale: 'tr',
+      limit: 10,
+    })
+    expect(mocks.memoriesListPublished).toHaveBeenCalledWith({
+      locale: 'tr',
+      limit: 6,
+    })
+    expect(mocks.testimonialsListPublished).toHaveBeenCalledWith({
+      locale: 'tr',
+      limit: 10,
+    })
+    expect(mocks.workshopItemsListPublished).toHaveBeenCalledWith({
+      locale: 'tr',
+      limit: 6,
+    })
   })
 
-  it('uses bounded typed queries for the store and news index', async () => {
-    await getPublishedStoreArtworks('ky', 24)
+  it('uses a bounded typed query for the news index', async () => {
     await getPublishedNewsArticles('ky', 12)
 
-    expect(mocks.listPublished).toHaveBeenNthCalledWith(1, {
-      locale: 'ky',
-      limit: 24,
-    })
-    expect(mocks.listPublished).toHaveBeenNthCalledWith(2, {
+    expect(mocks.newsArticlesListPublished).toHaveBeenCalledWith({
       locale: 'ky',
       limit: 12,
     })
@@ -71,9 +83,9 @@ describe('typed public content queries', () => {
       slug: 'published-story',
     })
 
-    await expect(getPublishedNewsArticle('ru', 'published-story')).resolves.toEqual(
-      expect.objectContaining({id: 'article-id'}),
-    )
+    await expect(
+      getPublishedNewsArticle('ru', 'published-story'),
+    ).resolves.toEqual(expect.objectContaining({id: 'article-id'}))
     expect(mocks.findPublishedByIdentifier).toHaveBeenCalledWith({
       identifier: 'published-story',
       locale: 'ru',

@@ -24,7 +24,8 @@ the same HTTPS origin. Behind Coolify, `AUTH_TRUST_PROXY` must be exactly
    and write access, never owner access.
 6. Confirm the Resend sender domain is verified and the reply-to mailbox accepts
    a real reply.
-7. Confirm Google OAuth redirect URIs match the canonical HTTPS origin.
+7. Confirm the private Studio magic-link callback origin matches canonical
+   HTTPS.
 
 ## Deploy
 

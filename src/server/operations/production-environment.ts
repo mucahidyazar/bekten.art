@@ -80,14 +80,6 @@ function resendWebhookSecretIssue(environment: Environment) {
     : 'RESEND_WEBHOOK_SECRET must be a valid Resend signing secret'
 }
 
-function googleClientIdIssue(environment: Environment) {
-  return /^[0-9]+-[A-Za-z0-9_-]+\.apps\.googleusercontent\.com$/u.test(
-    value(environment, 'AUTH_GOOGLE_ID'),
-  )
-    ? null
-    : 'AUTH_GOOGLE_ID must be a valid Google OAuth client ID'
-}
-
 function tagManagerIssue(environment: Environment) {
   return /^GTM-[A-Z0-9]+$/u.test(
     value(environment, 'NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID'),
@@ -132,8 +124,6 @@ export function validateProductionEnvironment(
     secretLength(environment, 'NEXTAUTH_SECRET'),
     secretLength(environment, 'OUTBOX_DISPATCH_SECRET'),
     trustedProxyIssue(environment),
-    googleClientIdIssue(environment),
-    required(environment, 'AUTH_GOOGLE_SECRET'),
     required(environment, 'MEDIA_S3_BUCKET'),
     required(environment, 'MEDIA_S3_REGION'),
     required(environment, 'MEDIA_S3_ENDPOINT'),

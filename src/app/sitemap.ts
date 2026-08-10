@@ -20,7 +20,6 @@ const STATIC_PAGES = [
   {path: '/gallery', changeFrequency: 'weekly', priority: 0.9},
   {path: '/news', changeFrequency: 'weekly', priority: 0.7},
   {path: '/contact', changeFrequency: 'monthly', priority: 0.6},
-  {path: '/store', changeFrequency: 'weekly', priority: 0.8},
 ] as const
 
 function isAppLocale(locale: string): locale is AppLocale {

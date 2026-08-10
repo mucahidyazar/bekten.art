@@ -44,7 +44,7 @@ test.describe('public operational endpoints', () => {
 })
 
 test.describe('anonymous authorization boundary', () => {
-  test('redirects an anonymous admin request to localized sign-in', async ({
+  test('keeps the retired admin and reserved studio routes unavailable', async ({
     context,
     page,
   }) => {
@@ -52,7 +52,12 @@ test.describe('anonymous authorization boundary', () => {
     await startWithOptionalConsentDenied(page)
     await page.goto('/tr/admin')
 
-    await expect(page).toHaveURL(/\/tr\/sign-in(?:\?.*)?$/u)
-    await expect(page.getByRole('heading', {name: /hoş geldiniz/i})).toBeVisible()
+    await expect(page).toHaveURL(/\/tr\/admin\/?$/u)
+    await expect(page.getByRole('heading', {name: '404'})).toBeVisible()
+
+    await page.goto('/en/studio')
+
+    await expect(page).toHaveURL(/\/en\/studio\/?$/u)
+    await expect(page.getByRole('heading', {name: '404'})).toBeVisible()
   })
 })
