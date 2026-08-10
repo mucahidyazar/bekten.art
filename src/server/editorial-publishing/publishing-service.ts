@@ -41,7 +41,10 @@ const revalidationPathSchema = z
   .string()
   .min(1)
   .max(512)
-  .regex(/^\/(?!\/)/, 'Revalidation path must be application-relative')
+  .regex(
+    /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/,
+    'Revalidation path must use lowercase kebab-case application segments',
+  )
   .refine(
     path => !/[?#\\]/.test(path),
     'Revalidation path cannot contain a query or hash',

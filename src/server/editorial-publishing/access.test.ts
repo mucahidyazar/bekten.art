@@ -5,8 +5,15 @@ import {
   selectPublicSnapshot,
   selectStudioPreviewSnapshot,
 } from './access'
+import {
+  signEditorialPreviewToken,
+  verifyEditorialPreviewToken,
+} from './preview-token'
+
+import type {VerifiedEditorialPreviewAuthorization} from './preview-token'
 
 const now = new Date('2026-08-10T12:00:00.000Z')
+const previewSecret = 'preview-secret-with-at-least-32-characters'
 
 function aggregate(overrides: Record<string, unknown> = {}) {
   return {
@@ -23,16 +30,25 @@ function aggregate(overrides: Record<string, unknown> = {}) {
   }
 }
 
-function preview(overrides: Record<string, unknown> = {}) {
-  return {
-    actorRole: 'EDITOR' as const,
-    actorUserId: '084df664-a286-4cfa-bc4c-5021aaeaeb31',
-    entityId: '9973ebcd-581d-427f-a23a-9e77fb008f52',
-    entityType: 'ARTWORK' as const,
-    expiresAt: new Date('2026-08-10T12:05:00.000Z'),
-    signatureVerified: true,
-    ...overrides,
-  }
+function preview(
+  overrides: Record<string, unknown> = {},
+): VerifiedEditorialPreviewAuthorization {
+  const token = signEditorialPreviewToken(
+    {
+      actorRole: 'EDITOR' as const,
+      actorUserId: '084df664-a286-4cfa-bc4c-5021aaeaeb31',
+      entityId: '9973ebcd-581d-427f-a23a-9e77fb008f52',
+      entityType: 'ARTWORK' as const,
+      ...overrides,
+    } as Parameters<typeof signEditorialPreviewToken>[0],
+    previewSecret,
+    {now, ttlSeconds: 300},
+  )
+  const authorization = verifyEditorialPreviewToken(token, previewSecret, now)
+
+  if (!authorization) throw new Error('Expected a verified preview token')
+
+  return authorization
 }
 
 describe('editorial public visibility', () => {
@@ -51,6 +67,7 @@ describe('editorial public visibility', () => {
     {status: 'DRAFT'},
     {status: 'ARCHIVED'},
     {publishedAt: null},
+    {publishedAt: new Date('invalid')},
     {publishedAt: new Date('2026-08-11T12:00:00.000Z')},
   ])('hides a non-public aggregate: %o', overrides => {
     expect(selectPublicSnapshot(aggregate(overrides), now)).toBeNull()
@@ -68,12 +85,6 @@ describe('editorial signed preview access', () => {
   )
 
   it.each([
-    {actorRole: 'USER'},
-    {actorUserId: 'not-a-user-id'},
-    {signatureVerified: false},
-    {expiresAt: new Date('invalid')},
-    {expiresAt: now},
-    {expiresAt: new Date('2026-08-10T11:59:59.999Z')},
     {entityId: 'a0a5845e-f8f8-4c93-b2ec-7ee76300fc41'},
     {entityType: 'COLLECTION'},
   ])('rejects an invalid preview grant: %o', overrides => {
@@ -92,12 +103,29 @@ describe('editorial signed preview access', () => {
   })
 
   it('fails closed instead of falling back to public content', () => {
-    expect(() =>
-      selectStudioPreviewSnapshot(
+    const verified = preview()
+    const forged = {
+      actorRole: verified.actorRole,
+      actorUserId: verified.actorUserId,
+      entityId: verified.entityId,
+      entityType: verified.entityType,
+      expiresAt: verified.expiresAt,
+    } as VerifiedEditorialPreviewAuthorization
+
+    expect(() => selectStudioPreviewSnapshot(aggregate(), forged, now)).toThrow(
+      'Preview access denied',
+    )
+  })
+
+  it('rechecks expiry when a verified grant is used later', () => {
+    const authorization = preview()
+
+    expect(
+      canAccessEditorialPreview(
+        authorization,
         aggregate(),
-        preview({signatureVerified: false}),
-        now,
+        new Date('2026-08-10T12:05:00.000Z'),
       ),
-    ).toThrow('Preview access denied')
+    ).toBe(false)
   })
 })

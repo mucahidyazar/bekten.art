@@ -33,7 +33,9 @@ function cloneJsonValue(
   const nextAncestors = new Set(ancestors).add(value)
 
   if (Array.isArray(value)) {
-    return Object.freeze(value.map(item => cloneJsonValue(item, nextAncestors)))
+    return Object.freeze(
+      Array.from(value, item => cloneJsonValue(item, nextAncestors)),
+    )
   }
 
   const prototype = Object.getPrototypeOf(value)

@@ -268,6 +268,9 @@ describe('editorial publish transaction', () => {
       paths: Array.from({length: 21}, (_, index) => `/en/path-${index}`),
     },
     {paths: ['/en/works?draft=true']},
+    {paths: ['/en/works draft']},
+    {paths: ['/en//works']},
+    {paths: ['/en/%2e%2e/studio']},
     {paths: ['https://bekten.art/en/works']},
     {paths: ['/en/works', '/en/works']},
   ])(

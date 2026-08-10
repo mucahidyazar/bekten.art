@@ -60,6 +60,16 @@ describe('immutable editorial snapshots', () => {
     )
   })
 
+  it('rejects sparse arrays instead of changing their JSON meaning', () => {
+    const sparse = Array(2) as unknown[]
+
+    sparse[1] = 'second item'
+
+    expect(() => toImmutableEditorialSnapshot({sparse})).toThrow(
+      'Editorial snapshots must contain only JSON values',
+    )
+  })
+
   it.each(['__proto__', 'constructor', 'prototype'])(
     'rejects the unsafe %s key',
     key => {

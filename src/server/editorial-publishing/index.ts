@@ -1,5 +1,6 @@
 export * from './access'
 export * from './contracts'
+export * from './preview-token'
 export * from './publishing-errors'
 export * from './publishing-service'
 export * from './snapshot'

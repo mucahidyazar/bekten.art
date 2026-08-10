@@ -138,14 +138,6 @@ export const MAX_CACHE_REVALIDATION_ATTEMPTS = 5
 export const MAX_CACHE_REVALIDATION_PATHS = 20
 export const MAX_EDITORIAL_VERSION = 2_147_483_647
 
-export type PreviewAuthorizationInput = EditorialEntityReference &
-  Readonly<{
-    actorRole: string
-    actorUserId: string
-    expiresAt: Date
-    signatureVerified: boolean
-  }>
-
 export type PublishEditorialCommand = EditorialEntityReference &
   Readonly<{
     actorUserId: string
