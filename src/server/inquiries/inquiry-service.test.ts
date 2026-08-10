@@ -46,11 +46,13 @@ function configuredService() {
   const outbox = {enqueue: vi.fn().mockResolvedValue(undefined)}
   const audit = {record: vi.fn().mockResolvedValue(undefined)}
   const abuseGuard = {check: vi.fn().mockResolvedValue({allowed: true})}
+  const execute = vi.fn(
+    async (work: (scope: InquiryTransaction) => Promise<unknown>) =>
+      work(transaction),
+  )
   const unitOfWork = {
-    execute: vi.fn(
-      async <T>(work: (scope: InquiryTransaction) => Promise<T>) =>
-        work(transaction),
-    ),
+    execute: async <T>(work: (scope: InquiryTransaction) => Promise<T>) =>
+      execute(work) as Promise<T>,
   }
   const service = createInquiryService({
     abuseGuard,
@@ -64,24 +66,32 @@ function configuredService() {
     unitOfWork,
   })
 
-  return {abuseGuard, audit, outbox, repository, service, unitOfWork}
+  return {
+    abuseGuard,
+    audit,
+    execute,
+    outbox,
+    repository,
+    service,
+    unitOfWork,
+  }
 }
 
 describe('inquiry service', () => {
   it('stores an artwork snapshot and queues notification plus audit atomically', async () => {
-    const {abuseGuard, audit, outbox, repository, service, unitOfWork} =
+    const {abuseGuard, audit, execute, outbox, repository, service} =
       configuredService()
 
-    await expect(service.submit(validInput, submissionContext)).resolves.toEqual(
-      {accepted: true},
-    )
+    await expect(
+      service.submit(validInput, submissionContext),
+    ).resolves.toEqual({accepted: true})
 
     expect(abuseGuard.check).toHaveBeenCalledWith({
       abuseKeyHash,
       at: now,
       submissionId,
     })
-    expect(unitOfWork.execute).toHaveBeenCalledOnce()
+    expect(execute).toHaveBeenCalledOnce()
     expect(repository.findRelatedArtworkSnapshot).toHaveBeenCalledWith(
       transaction,
       {id: artworkId, locale: 'en'},
@@ -130,11 +140,14 @@ describe('inquiry service', () => {
 
     await service.submit(
       {
-        ...validInput,
         brief:
           'I would like to discuss an original landscape for a quiet reading room.',
+        consent: true,
+        email: 'collector@example.com',
+        locale: 'en',
+        name: 'Ada Collector',
         preferredTimeline: 'Autumn 2027',
-        relatedArtworkId: undefined,
+        submissionId,
         type: 'COMMISSION',
       },
       submissionContext,
@@ -149,6 +162,61 @@ describe('inquiry service', () => {
         preferredTimeline: 'Autumn 2027',
         relatedArtworkSnapshot: null,
         type: 'COMMISSION',
+      }),
+    )
+  })
+
+  it('preserves private-viewing and general inquiry details as typed records', async () => {
+    const privateViewing = configuredService()
+    const general = configuredService()
+
+    await privateViewing.service.submit(
+      {
+        consent: true,
+        email: 'visitor@example.com',
+        locale: 'tr',
+        name: 'Studio Visitor',
+        preferredDates: ['2027-05-20'],
+        submissionId,
+        type: 'PRIVATE_VIEWING',
+      },
+      submissionContext,
+    )
+    await general.service.submit(
+      {
+        consent: true,
+        email: 'reader@example.com',
+        locale: 'ky',
+        message: 'I would like to learn more about the studio archive.',
+        name: 'Archive Reader',
+        phone: '+996 555 123 456',
+        subject: 'Studio archive',
+        submissionId,
+        type: 'GENERAL',
+      },
+      submissionContext,
+    )
+
+    expect(
+      privateViewing.repository.findRelatedArtworkSnapshot,
+    ).not.toHaveBeenCalled()
+    expect(privateViewing.repository.create).toHaveBeenCalledWith(
+      transaction,
+      expect.objectContaining({
+        attendees: null,
+        message: null,
+        preferredDates: ['2027-05-20'],
+        relatedArtworkSnapshot: null,
+        type: 'PRIVATE_VIEWING',
+      }),
+    )
+    expect(general.repository.create).toHaveBeenCalledWith(
+      transaction,
+      expect.objectContaining({
+        message: 'I would like to learn more about the studio archive.',
+        phone: '+996 555 123 456',
+        subject: 'Studio archive',
+        type: 'GENERAL',
       }),
     )
   })
@@ -173,14 +241,14 @@ describe('inquiry service', () => {
   })
 
   it('accepts abuse-blocked submissions without starting a transaction', async () => {
-    const {abuseGuard, service, unitOfWork} = configuredService()
+    const {abuseGuard, execute, service} = configuredService()
 
     abuseGuard.check.mockResolvedValueOnce({allowed: false})
 
-    await expect(service.submit(validInput, submissionContext)).resolves.toEqual(
-      {accepted: true},
-    )
-    expect(unitOfWork.execute).not.toHaveBeenCalled()
+    await expect(
+      service.submit(validInput, submissionContext),
+    ).resolves.toEqual({accepted: true})
+    expect(execute).not.toHaveBeenCalled()
   })
 
   it('rejects invalid public or trusted context without exposing validation details', async () => {
@@ -199,9 +267,9 @@ describe('inquiry service', () => {
   })
 
   it('wraps infrastructure failures in a stable non-secret error', async () => {
-    const {service, unitOfWork} = configuredService()
+    const {execute, service} = configuredService()
 
-    unitOfWork.execute.mockRejectedValueOnce(
+    execute.mockRejectedValueOnce(
       new Error('postgresql://private-user:private-password@database'),
     )
 

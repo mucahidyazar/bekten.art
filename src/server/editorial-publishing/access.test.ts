@@ -69,7 +69,9 @@ describe('editorial signed preview access', () => {
 
   it.each([
     {actorRole: 'USER'},
+    {actorUserId: 'not-a-user-id'},
     {signatureVerified: false},
+    {expiresAt: new Date('invalid')},
     {expiresAt: now},
     {expiresAt: new Date('2026-08-10T11:59:59.999Z')},
     {entityId: 'a0a5845e-f8f8-4c93-b2ec-7ee76300fc41'},

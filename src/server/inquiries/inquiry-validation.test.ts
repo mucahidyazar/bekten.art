@@ -59,14 +59,17 @@ describe('public inquiry validation', () => {
         type: 'GENERAL',
       },
     },
-  ])('accepts and normalizes $expectedType inquiries', ({expectedType, input}) => {
-    const parsed = publicInquiryInputSchema.parse(input)
+  ])(
+    'accepts and normalizes $expectedType inquiries',
+    ({expectedType, input}) => {
+      const parsed = publicInquiryInputSchema.parse(input)
 
-    expect(parsed.type).toBe(expectedType)
-    expect(parsed.email).toBe('collector@example.com')
-    expect(parsed.name).toBe('Ada Collector')
-    expect(parsed.phone).toBe('+44 20 7946 0958')
-  })
+      expect(parsed.type).toBe(expectedType)
+      expect(parsed.email).toBe('collector@example.com')
+      expect(parsed.name).toBe('Ada Collector')
+      expect(parsed.phone).toBe('+44 20 7946 0958')
+    },
+  )
 
   it('requires explicit privacy consent', () => {
     const result = publicInquiryInputSchema.safeParse({
@@ -80,20 +83,23 @@ describe('public inquiry validation', () => {
     expect(result.success).toBe(false)
   })
 
-  it.each(['status', 'labels', 'internalNotes', 'privacyNoticeVersion', 'retainUntil'])(
-    'does not let public callers set the internal %s field',
-    field => {
-      const result = publicInquiryInputSchema.safeParse({
-        ...sharedInput,
-        [field]: 'caller-controlled',
-        message: 'Please share more information about this work.',
-        relatedArtworkId: artworkId,
-        type: 'AVAILABILITY',
-      })
+  it.each([
+    'status',
+    'labels',
+    'internalNotes',
+    'privacyNoticeVersion',
+    'retainUntil',
+  ])('does not let public callers set the internal %s field', field => {
+    const result = publicInquiryInputSchema.safeParse({
+      ...sharedInput,
+      [field]: 'caller-controlled',
+      message: 'Please share more information about this work.',
+      relatedArtworkId: artworkId,
+      type: 'AVAILABILITY',
+    })
 
-      expect(result.success).toBe(false)
-    },
-  )
+    expect(result.success).toBe(false)
+  })
 
   it('enforces type-specific fields instead of accepting an ambiguous request', () => {
     expect(

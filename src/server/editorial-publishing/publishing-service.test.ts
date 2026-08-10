@@ -38,6 +38,7 @@ function revision(overrides: Record<string, unknown> = {}) {
     entityId,
     entityType: 'ARTWORK' as const,
     id: revisionId,
+    locale: 'en' as const,
     operation: 'PUBLISH' as const,
     snapshot: {title: 'Historical title'},
     sourceRevisionId: null,
@@ -46,11 +47,13 @@ function revision(overrides: Record<string, unknown> = {}) {
   }
 }
 
-function configuredRepository(options: {
-  content?: ReturnType<typeof aggregate> | null
-  historicalRevision?: ReturnType<typeof revision> | null
-  concurrentUpdate?: boolean
-} = {}) {
+function configuredRepository(
+  options: {
+    content?: ReturnType<typeof aggregate> | null
+    historicalRevision?: ReturnType<typeof revision> | null
+    concurrentUpdate?: boolean
+  } = {},
+) {
   const events: string[] = []
   const content = options.content === undefined ? aggregate() : options.content
   const historicalRevision =
@@ -70,6 +73,7 @@ function configuredRepository(options: {
         entityId: input.entityId,
         entityType: input.entityType,
         id: '827a061c-dbf6-4ae6-afcb-9f3666a5ff69',
+        locale: input.locale,
         operation: input.operation,
         snapshot: input.snapshot,
         sourceRevisionId: input.sourceRevisionId,
@@ -150,6 +154,7 @@ describe('editorial publish transaction', () => {
         createdAt: now,
         entityId,
         entityType: 'ARTWORK',
+        locale: 'en',
         operation: 'PUBLISH',
         sourceRevisionId: null,
         version: 4,
@@ -258,22 +263,39 @@ describe('editorial publish transaction', () => {
   })
 
   it.each([
-    [],
-    Array.from({length: 21}, (_, index) => `/en/path-${index}`),
-    ['/en/works?draft=true'],
-    ['https://bekten.art/en/works'],
-    ['/en/works', '/en/works'],
-  ])('rejects unsafe or unbounded revalidation paths: %o', async paths => {
-    const configured = configuredRepository()
+    {paths: []},
+    {
+      paths: Array.from({length: 21}, (_, index) => `/en/path-${index}`),
+    },
+    {paths: ['/en/works?draft=true']},
+    {paths: ['https://bekten.art/en/works']},
+    {paths: ['/en/works', '/en/works']},
+  ])(
+    'rejects unsafe or unbounded revalidation paths: $paths',
+    async ({paths}) => {
+      const configured = configuredRepository()
 
-    await expect(
-      configured.service.publish({
-        ...publicationCommand,
-        revalidationPaths: paths,
-      }),
-    ).rejects.toThrow()
-    expect(configured.repository.withTransaction).not.toHaveBeenCalled()
-  })
+      await expect(
+        configured.service.publish({
+          ...publicationCommand,
+          revalidationPaths: paths,
+        }),
+      ).rejects.toThrow()
+      expect(configured.repository.withTransaction).not.toHaveBeenCalled()
+    },
+  )
+
+  it.each([0, 2_147_483_647])(
+    'rejects an unsafe source version before opening a transaction: %i',
+    async expectedVersion => {
+      const configured = configuredRepository()
+
+      await expect(
+        configured.service.publish({...publicationCommand, expectedVersion}),
+      ).rejects.toThrow()
+      expect(configured.repository.withTransaction).not.toHaveBeenCalled()
+    },
+  )
 })
 
 describe('editorial restore transaction', () => {
@@ -330,8 +352,10 @@ describe('editorial restore transaction', () => {
 
   it.each([
     null,
+    revision({id: '4a7aa7c8-28d4-4fb2-8edf-55697f45a1fe'}),
     revision({entityId: 'a0a5845e-f8f8-4c93-b2ec-7ee76300fc41'}),
     revision({entityType: 'COLLECTION'}),
+    revision({version: 4}),
   ])('rejects a missing or unrelated source revision: %o', async historical => {
     const configured = configuredRepository({historicalRevision: historical})
 
