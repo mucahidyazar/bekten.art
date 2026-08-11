@@ -307,20 +307,12 @@ function compareCandidates<TType extends EditorialEntityType>(
   )
 }
 
-async function readEntities<TType extends EditorialEntityType>(
+async function hydrateEntities<TType extends EditorialEntityType>(
   transaction: PublicEditorialTransaction,
   entityType: TType,
   locale: EditorialLocale,
+  rows: readonly z.output<typeof publishedRowSchema>[],
 ): Promise<readonly PublicEntityMap[TType][]> {
-  const codec = editorialEntityCodecs[entityType]
-  const rows = publishedRows(
-    await entityDelegate(transaction, codec.delegate).findMany({
-      orderBy: [{displayOrder: 'asc'}, {id: 'asc'}],
-      where: {locale, publishedAt: {not: null}, status: 'PUBLISHED'},
-    }),
-    locale,
-  )
-
   if (rows.length === 0) return Object.freeze([])
 
   const rowsById = new Map(rows.map(row => [row.id, row]))
@@ -392,6 +384,132 @@ async function readEntities<TType extends EditorialEntityType>(
   return Object.freeze(complete.map(({publicValue}) => publicValue))
 }
 
+async function readEntities<TType extends EditorialEntityType>(
+  transaction: PublicEditorialTransaction,
+  entityType: TType,
+  locale: EditorialLocale,
+): Promise<readonly PublicEntityMap[TType][]> {
+  const codec = editorialEntityCodecs[entityType]
+  const rows = publishedRows(
+    await entityDelegate(transaction, codec.delegate).findMany({
+      orderBy: [{displayOrder: 'asc'}, {id: 'asc'}],
+      where: {locale, publishedAt: {not: null}, status: 'PUBLISHED'},
+    }),
+    locale,
+  )
+
+  return hydrateEntities(transaction, entityType, locale, rows)
+}
+
+async function readEntitiesByIds<TType extends EditorialEntityType>(
+  transaction: PublicEditorialTransaction,
+  entityType: TType,
+  locale: EditorialLocale,
+  entityIds: readonly string[],
+): Promise<readonly PublicEntityMap[TType][]> {
+  const ids = [...new Set(entityIds)]
+
+  if (ids.length === 0) return Object.freeze([])
+
+  const codec = editorialEntityCodecs[entityType]
+  const rows = publishedRows(
+    await entityDelegate(transaction, codec.delegate).findMany({
+      orderBy: [{displayOrder: 'asc'}, {id: 'asc'}],
+      where: {
+        id: {in: ids},
+        locale,
+        publishedAt: {not: null},
+        status: 'PUBLISHED',
+      },
+    }),
+    locale,
+  )
+
+  return hydrateEntities(transaction, entityType, locale, rows)
+}
+
+async function entityIdsMatchingSnapshot(
+  transaction: PublicEditorialTransaction,
+  entityType: EditorialEntityType,
+  locale: EditorialLocale,
+  path: string,
+  value: string,
+) {
+  const rows = await transaction.contentRevision.findMany({
+    orderBy: [{entityId: 'asc'}, {version: 'desc'}],
+    where: {
+      entityType,
+      locale,
+      snapshot: {equals: value, path: [path]},
+    },
+  })
+
+  return [
+    ...new Set(
+      rows.flatMap(row => {
+        const parsed = revisionRowSchema.safeParse(row)
+
+        if (
+          !parsed.success ||
+          parsed.data.entityType !== entityType ||
+          parsed.data.locale !== locale
+        ) {
+          return []
+        }
+
+        try {
+          const snapshot = toImmutableEditorialSnapshot(parsed.data.snapshot)
+
+          return snapshot[path] === value ? [parsed.data.entityId] : []
+        } catch {
+          return []
+        }
+      }),
+    ),
+  ]
+}
+
+async function readEntityBySlug<TType extends EditorialEntityType>(
+  transaction: PublicEditorialTransaction,
+  entityType: TType,
+  locale: EditorialLocale,
+  slug: string,
+) {
+  const entityIds = await entityIdsMatchingSnapshot(
+    transaction,
+    entityType,
+    locale,
+    'slug',
+    slug,
+  )
+  const entities = await readEntitiesByIds(
+    transaction,
+    entityType,
+    locale,
+    entityIds,
+  )
+
+  return entities.find(entity => entity.slug === slug) ?? null
+}
+
+async function readEntitiesBySnapshotValue<TType extends EditorialEntityType>(
+  transaction: PublicEditorialTransaction,
+  entityType: TType,
+  locale: EditorialLocale,
+  path: string,
+  value: string,
+) {
+  const entityIds = await entityIdsMatchingSnapshot(
+    transaction,
+    entityType,
+    locale,
+    path,
+    value,
+  )
+
+  return readEntitiesByIds(transaction, entityType, locale, entityIds)
+}
+
 function immutableDetail<T extends object>(value: T): Readonly<T> {
   return Object.freeze(value)
 }
@@ -421,16 +539,22 @@ export function createDatabasePublicEditorialReader(
       const validSlug = slug(slugInput)
 
       return await read(async transaction => {
-        const collections = await readEntities(
+        const collection = await readEntityBySlug(
           transaction,
           'COLLECTION',
           validLocale,
+          validSlug,
         )
-        const collection = collections.find(item => item.slug === validSlug)
 
         if (!collection) return null
 
-        const works = await readEntities(transaction, 'ARTWORK', validLocale)
+        const works = await readEntitiesBySnapshotValue(
+          transaction,
+          'ARTWORK',
+          validLocale,
+          'collectionId',
+          collection.id,
+        )
 
         return immutableDetail({
           collection,
@@ -445,12 +569,12 @@ export function createDatabasePublicEditorialReader(
       const validSlug = slug(slugInput)
 
       return await read(async transaction => {
-        const exhibitions = await readEntities(
+        const exhibition = await readEntityBySlug(
           transaction,
           'EXHIBITION',
           validLocale,
+          validSlug,
         )
-        const exhibition = exhibitions.find(item => item.slug === validSlug)
 
         if (!exhibition) return null
 
@@ -465,10 +589,14 @@ export function createDatabasePublicEditorialReader(
           return parsed.success ? [parsed.data] : []
         })
         const worksById = new Map(
-          (await readEntities(transaction, 'ARTWORK', validLocale)).map(work => [
-            work.id,
-            work,
-          ]),
+          (
+            await readEntitiesByIds(
+              transaction,
+              'ARTWORK',
+              validLocale,
+              joins.map(({artworkId}) => artworkId),
+            )
+          ).map(work => [work.id, work]),
         )
 
         return immutableDetail({
@@ -532,9 +660,12 @@ export function createDatabasePublicEditorialReader(
       const validSlug = slug(slugInput)
 
       return await read(async transaction =>
-        (await readEntities(transaction, 'JOURNAL_ENTRY', validLocale)).find(
-          item => item.slug === validSlug,
-        ) ?? null,
+        readEntityBySlug(
+          transaction,
+          'JOURNAL_ENTRY',
+          validLocale,
+          validSlug,
+        ),
       )
     },
     async getPage(localeInput, slugInput) {
@@ -542,9 +673,7 @@ export function createDatabasePublicEditorialReader(
       const validSlug = slug(slugInput)
 
       return await read(async transaction =>
-        (await readEntities(transaction, 'PAGE', validLocale)).find(
-          item => item.slug === validSlug,
-        ) ?? null,
+        readEntityBySlug(transaction, 'PAGE', validLocale, validSlug),
       )
     },
     async getPressEntry(localeInput, slugInput) {
@@ -552,9 +681,12 @@ export function createDatabasePublicEditorialReader(
       const validSlug = slug(slugInput)
 
       return await read(async transaction =>
-        (await readEntities(transaction, 'PRESS_ENTRY', validLocale)).find(
-          item => item.slug === validSlug,
-        ) ?? null,
+        readEntityBySlug(
+          transaction,
+          'PRESS_ENTRY',
+          validLocale,
+          validSlug,
+        ),
       )
     },
     async getWork(localeInput, slugInput) {
@@ -562,9 +694,7 @@ export function createDatabasePublicEditorialReader(
       const validSlug = slug(slugInput)
 
       return await read(async transaction =>
-        (await readEntities(transaction, 'ARTWORK', validLocale)).find(
-          item => item.slug === validSlug,
-        ) ?? null,
+        readEntityBySlug(transaction, 'ARTWORK', validLocale, validSlug),
       )
     },
     async listCollections(localeInput) {

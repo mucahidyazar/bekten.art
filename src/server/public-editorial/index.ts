@@ -15,4 +15,7 @@ export {
   type PublicEditorialDatabase,
   createDatabasePublicEditorialReader,
 } from './database-public-editorial-reader'
-export {publicEditorialReader} from './configured-public-editorial'
+export {
+  createPrismaPublicEditorialDatabase,
+  publicEditorialReader,
+} from './configured-public-editorial'
