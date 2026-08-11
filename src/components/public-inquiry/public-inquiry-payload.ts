@@ -83,3 +83,11 @@ export function buildPublicInquiryPayload(
     subject: String(form.get('subject') ?? '').trim(),
   }
 }
+
+export function fingerprintPublicInquiryPayload(payload: InquiryPayload) {
+  return JSON.stringify(
+    Object.fromEntries(
+      Object.entries(payload).filter(([key]) => key !== 'submissionId'),
+    ),
+  )
+}

@@ -1,13 +1,19 @@
 'use client'
 
-import {type FormEvent, useId, useRef, useState} from 'react'
+import {type FormEvent, useEffect, useId, useRef, useState} from 'react'
 
 import {cn} from '@/utils/cn'
 
 import {inquiryHeading, publicInquiryCopy} from './public-inquiry-copy'
-import {buildPublicInquiryPayload} from './public-inquiry-payload'
+import {
+  buildPublicInquiryPayload,
+  fingerprintPublicInquiryPayload,
+} from './public-inquiry-payload'
+import {responseRetryDelay} from './public-inquiry-retry'
+import {validatePublicInquiryForm} from './public-inquiry-validation'
 
 import type {PublicInquiryFormProps} from './public-inquiry-types'
+import type {PublicInquiryFieldErrors} from './public-inquiry-validation'
 
 export function PublicInquiryForm(props: PublicInquiryFormProps) {
   const copy = publicInquiryCopy[props.locale]
@@ -15,39 +21,103 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
   const generatedId = useId().replaceAll(':', '')
   const formId = `public-inquiry-${generatedId}`
   const submissionIdRef = useRef<string | null>(null)
+  const submissionFingerprintRef = useRef<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] =
+    useState<PublicInquiryFieldErrors>(EMPTY_FIELD_ERRORS)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [retryAfterSeconds, setRetryAfterSeconds] = useState<number | null>(
+    null,
+  )
   const artwork = 'artwork' in props ? props.artwork : undefined
   const privacyPolicyHref =
     props.privacyPolicyHref ?? `/${props.locale}/privacy-policy`
+  const validationMessages = {
+    invalid: copy.validationInvalid,
+    required: copy.validationRequired,
+  }
+
+  useEffect(() => {
+    if (retryAfterSeconds === null) return
+
+    const timeout = globalThis.setTimeout(() => {
+      setError(null)
+      setRetryAfterSeconds(null)
+    }, retryAfterSeconds * 1_000)
+
+    return () => globalThis.clearTimeout(timeout)
+  }, [retryAfterSeconds])
+
+  function handleInput(event: FormEvent<HTMLFormElement>) {
+    if (Object.keys(fieldErrors).length === 0) return
+
+    setFieldErrors(
+      validatePublicInquiryForm(event.currentTarget, validationMessages).errors,
+    )
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (retryAfterSeconds !== null) return
+
     setError(null)
-    setIsSubmitting(true)
 
     const formElement = event.currentTarget
+    const validation = validatePublicInquiryForm(
+      formElement,
+      validationMessages,
+    )
+
+    setFieldErrors(validation.errors)
+
+    if (validation.firstInvalid) {
+      validation.firstInvalid.focus()
+
+      return
+    }
+
+    setIsSubmitting(true)
+
     const form = new FormData(formElement)
 
     try {
-      const submissionId =
-        submissionIdRef.current ?? globalThis.crypto.randomUUID()
+      const draftPayload = buildPublicInquiryPayload(
+        form,
+        props,
+        FINGERPRINT_SUBMISSION_ID,
+      )
+      const fingerprint = fingerprintPublicInquiryPayload(draftPayload)
+      const isUnchangedRetry =
+        submissionIdRef.current !== null &&
+        submissionFingerprintRef.current === fingerprint
+      const submissionId = isUnchangedRetry
+        ? submissionIdRef.current
+        : globalThis.crypto.randomUUID()
+      const payload = Object.freeze({...draftPayload, submissionId})
 
       submissionIdRef.current = submissionId
+      submissionFingerprintRef.current = fingerprint
 
       const response = await fetch('/api/inquiries', {
-        body: JSON.stringify(
-          buildPublicInquiryPayload(form, props, submissionId),
-        ),
+        body: JSON.stringify(payload),
         headers: {'Content-Type': 'application/json'},
         method: 'POST',
       })
+      const retryDelay = responseRetryDelay(response)
+
+      if (retryDelay !== null) {
+        setError(copy.rateLimited.replace('{seconds}', String(retryDelay)))
+        setRetryAfterSeconds(retryDelay)
+
+        return
+      }
 
       if (!response.ok) throw new Error('INQUIRY_SUBMISSION_FAILED')
 
       formElement.reset()
       submissionIdRef.current = null
+      submissionFingerprintRef.current = null
       setIsSuccess(true)
     } catch {
       setError(copy.error)
@@ -106,9 +176,12 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
         </p>
       ) : (
         <form
+          aria-busy={isSubmitting}
           aria-describedby={`${formId}-description`}
           aria-labelledby={`${formId}-title`}
           className="mt-8 max-w-3xl"
+          noValidate
+          onInput={handleInput}
           onSubmit={handleSubmit}
         >
           <fieldset
@@ -117,8 +190,13 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
           >
             <legend className="sr-only">{heading.title}</legend>
 
-            <Field label={copy.name} labelFor={`${formId}-name`}>
+            <Field
+              error={fieldErrors[`${formId}-name`]}
+              label={copy.name}
+              labelFor={`${formId}-name`}
+            >
               <input
+                {...validationAttributes(fieldErrors, `${formId}-name`)}
                 autoComplete="name"
                 className={controlClassName}
                 id={`${formId}-name`}
@@ -130,8 +208,13 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
               />
             </Field>
 
-            <Field label={copy.email} labelFor={`${formId}-email`}>
+            <Field
+              error={fieldErrors[`${formId}-email`]}
+              label={copy.email}
+              labelFor={`${formId}-email`}
+            >
               <input
+                {...validationAttributes(fieldErrors, `${formId}-email`)}
                 autoComplete="email"
                 className={controlClassName}
                 id={`${formId}-email`}
@@ -142,8 +225,13 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
               />
             </Field>
 
-            <Field label={copy.phone} labelFor={`${formId}-phone`}>
+            <Field
+              error={fieldErrors[`${formId}-phone`]}
+              label={copy.phone}
+              labelFor={`${formId}-phone`}
+            >
               <input
+                {...validationAttributes(fieldErrors, `${formId}-phone`)}
                 autoComplete="tel"
                 className={controlClassName}
                 id={`${formId}-phone`}
@@ -156,8 +244,13 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
             </Field>
 
             {props.type === 'COMMISSION' ? (
-              <Field label={copy.timeline} labelFor={`${formId}-timeline`}>
+              <Field
+                error={fieldErrors[`${formId}-timeline`]}
+                label={copy.timeline}
+                labelFor={`${formId}-timeline`}
+              >
                 <input
+                  {...validationAttributes(fieldErrors, `${formId}-timeline`)}
                   className={controlClassName}
                   id={`${formId}-timeline`}
                   maxLength={160}
@@ -173,11 +266,16 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
                 <Field
                   description={copy.preferredDatesDescription}
                   descriptionId={`${formId}-dates-description`}
+                  error={fieldErrors[`${formId}-preferred-date`]}
                   label={copy.preferredDate}
                   labelFor={`${formId}-preferred-date`}
                 >
                   <input
-                    aria-describedby={`${formId}-dates-description`}
+                    {...validationAttributes(
+                      fieldErrors,
+                      `${formId}-preferred-date`,
+                      `${formId}-dates-description`,
+                    )}
                     className={controlClassName}
                     id={`${formId}-preferred-date`}
                     name="preferredDates"
@@ -185,8 +283,16 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
                     type="date"
                   />
                 </Field>
-                <Field label={copy.attendees} labelFor={`${formId}-attendees`}>
+                <Field
+                  error={fieldErrors[`${formId}-attendees`]}
+                  label={copy.attendees}
+                  labelFor={`${formId}-attendees`}
+                >
                   <input
+                    {...validationAttributes(
+                      fieldErrors,
+                      `${formId}-attendees`,
+                    )}
                     className={controlClassName}
                     id={`${formId}-attendees`}
                     inputMode="numeric"
@@ -197,20 +303,33 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
                   />
                 </Field>
                 <Field
+                  error={fieldErrors[`${formId}-second-date`]}
                   label={copy.secondDate}
                   labelFor={`${formId}-second-date`}
                 >
                   <input
-                    aria-describedby={`${formId}-dates-description`}
+                    {...validationAttributes(
+                      fieldErrors,
+                      `${formId}-second-date`,
+                      `${formId}-dates-description`,
+                    )}
                     className={controlClassName}
                     id={`${formId}-second-date`}
                     name="preferredDates"
                     type="date"
                   />
                 </Field>
-                <Field label={copy.thirdDate} labelFor={`${formId}-third-date`}>
+                <Field
+                  error={fieldErrors[`${formId}-third-date`]}
+                  label={copy.thirdDate}
+                  labelFor={`${formId}-third-date`}
+                >
                   <input
-                    aria-describedby={`${formId}-dates-description`}
+                    {...validationAttributes(
+                      fieldErrors,
+                      `${formId}-third-date`,
+                      `${formId}-dates-description`,
+                    )}
                     className={controlClassName}
                     id={`${formId}-third-date`}
                     name="preferredDates"
@@ -222,8 +341,13 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
 
             {props.type === 'GENERAL' ? (
               <div className="sm:col-span-2">
-                <Field label={copy.subject} labelFor={`${formId}-subject`}>
+                <Field
+                  error={fieldErrors[`${formId}-subject`]}
+                  label={copy.subject}
+                  labelFor={`${formId}-subject`}
+                >
                   <input
+                    {...validationAttributes(fieldErrors, `${formId}-subject`)}
                     className={controlClassName}
                     id={`${formId}-subject`}
                     maxLength={120}
@@ -241,11 +365,16 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
                 <Field
                   description={copy.commissionBriefDescription}
                   descriptionId={`${formId}-brief-description`}
+                  error={fieldErrors[`${formId}-brief`]}
                   label={copy.commissionBrief}
                   labelFor={`${formId}-brief`}
                 >
                   <textarea
-                    aria-describedby={`${formId}-brief-description`}
+                    {...validationAttributes(
+                      fieldErrors,
+                      `${formId}-brief`,
+                      `${formId}-brief-description`,
+                    )}
                     className={controlClassName}
                     id={`${formId}-brief`}
                     maxLength={4_000}
@@ -260,10 +389,12 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
 
             <div className="sm:col-span-2">
               <Field
+                error={fieldErrors[`${formId}-message`]}
                 label={props.type === 'GENERAL' ? copy.message : copy.note}
                 labelFor={`${formId}-message`}
               >
                 <textarea
+                  {...validationAttributes(fieldErrors, `${formId}-message`)}
                   className={controlClassName}
                   id={`${formId}-message`}
                   maxLength={4_000}
@@ -292,6 +423,7 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
             <div className="sm:col-span-2">
               <div className="flex items-start gap-3 border-t border-stone-400 pt-5">
                 <input
+                  {...validationAttributes(fieldErrors, `${formId}-consent`)}
                   className="mt-1 h-5 w-5 shrink-0 accent-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-900"
                   id={`${formId}-consent`}
                   name="consent"
@@ -311,8 +443,25 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
                   </a>
                 </label>
               </div>
+              {fieldErrors[`${formId}-consent`] ? (
+                <p
+                  className="mt-2 text-sm font-medium text-red-950"
+                  id={`${formId}-consent-error`}
+                >
+                  {fieldErrors[`${formId}-consent`]}
+                </p>
+              ) : null}
             </div>
           </fieldset>
+
+          {Object.keys(fieldErrors).length > 0 ? (
+            <p
+              className="mt-5 border-l-2 border-red-900 pl-3 text-sm font-medium text-red-950"
+              role="alert"
+            >
+              {copy.validationSummary}
+            </p>
+          ) : null}
 
           {error ? (
             <p
@@ -327,7 +476,7 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
           <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-stone-400 pt-6">
             <button
               className="inline-flex min-h-12 items-center justify-center border border-red-950 bg-red-950 px-6 py-3 text-sm font-semibold tracking-[0.08em] text-stone-50 uppercase transition-colors hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-950 disabled:cursor-wait disabled:opacity-60"
-              disabled={isSubmitting}
+              disabled={isSubmitting || retryAfterSeconds !== null}
               type="submit"
             >
               {isSubmitting ? copy.sending : copy.action}
@@ -346,17 +495,37 @@ const controlClassName =
   'min-h-12 w-full rounded-none border border-stone-500/70 bg-stone-50/60 px-3 py-2 text-base text-stone-950 shadow-sm transition-colors placeholder:text-stone-500 hover:border-stone-700 focus-visible:border-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-900 disabled:cursor-wait disabled:opacity-60'
 const labelClassName = 'block text-sm font-semibold text-stone-900'
 const descriptionClassName = 'mt-1 text-sm leading-6 text-stone-600'
+const EMPTY_FIELD_ERRORS = Object.freeze({})
+const FINGERPRINT_SUBMISSION_ID = '00000000-0000-4000-8000-000000000000'
+
+function validationAttributes(
+  errors: PublicInquiryFieldErrors,
+  fieldId: string,
+  descriptionId?: string,
+) {
+  const error = errors[fieldId]
+  const describedBy = [descriptionId, error ? `${fieldId}-error` : null]
+    .filter(Boolean)
+    .join(' ')
+
+  return {
+    'aria-describedby': describedBy || undefined,
+    'aria-invalid': error ? (true as const) : undefined,
+  }
+}
 
 function Field({
   children,
   description,
   descriptionId,
+  error,
   label,
   labelFor,
 }: Readonly<{
   children: React.ReactNode
   description?: string
   descriptionId?: string
+  error?: string
   label: string
   labelFor: string
 }>) {
@@ -371,6 +540,14 @@ function Field({
         </p>
       ) : null}
       <div className="mt-2">{children}</div>
+      {error ? (
+        <p
+          className="mt-2 text-sm font-medium text-red-950"
+          id={`${labelFor}-error`}
+        >
+          {error}
+        </p>
+      ) : null}
     </div>
   )
 }

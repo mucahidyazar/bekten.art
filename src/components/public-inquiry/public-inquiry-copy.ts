@@ -26,12 +26,16 @@ type InquiryCopy = Readonly<{
   privacyPolicy: string
   privateViewingDescription: string
   privateViewingTitle: string
+  rateLimited: string
   secondDate: string
   sending: string
   subject: string
   success: string
   thirdDate: string
   timeline: string
+  validationInvalid: string
+  validationRequired: string
+  validationSummary: string
 }>
 
 export function inquiryHeading(copy: InquiryCopy, type: PublicInquiryType) {
@@ -75,7 +79,7 @@ export const publicInquiryCopy: Readonly<
       'Begin a private conversation with the studio about a commissioned work.',
     commissionTitle: 'Commission inquiry',
     consent:
-      'I accept the Privacy Policy and consent to the studio contacting me about this request.',
+      'I consent to the studio contacting me about this request and accept the',
     email: 'Email address',
     error: 'We could not receive your request. Please try again.',
     generalDescription:
@@ -92,12 +96,16 @@ export const publicInquiryCopy: Readonly<
     privateViewingDescription:
       'Request a private viewing and the studio will reply with suitable arrangements.',
     privateViewingTitle: 'Private viewing',
+    rateLimited: 'Please wait before trying again. Retry in {seconds} s.',
     secondDate: 'Alternative date (optional)',
     sending: 'Sending request',
     subject: 'Subject',
     success: 'Your private request has been received.',
     thirdDate: 'Second alternative date (optional)',
     timeline: 'Preferred timeline (optional)',
+    validationInvalid: 'Please enter a valid value.',
+    validationRequired: 'This field is required.',
+    validationSummary: 'Please review the highlighted fields.',
   },
   ky: {
     action: 'Жеке өтүнүч жөнөтүү',
@@ -112,7 +120,7 @@ export const publicInquiryCopy: Readonly<
       'Жеке чыгарма тууралуу студия менен купуя сүйлөшүүнү баштаңыз.',
     commissionTitle: 'Жеке чыгармага өтүнүч',
     consent:
-      'Купуялык саясатын кабыл алам жана студиянын бул өтүнүч боюнча мага кайрылышына макулмун.',
+      'Студиянын бул өтүнүч боюнча мага кайрылышына макулмун жана төмөнкүсүн кабыл алам:',
     email: 'Электрондук почта',
     error: 'Өтүнүчүңүздү кабыл ала алган жокпуз. Кайра аракет кылыңыз.',
     generalDescription:
@@ -129,12 +137,17 @@ export const publicInquiryCopy: Readonly<
     privateViewingDescription:
       'Жеке көрүү үчүн өтүнүч калтырыңыз, студия ылайыктуу шарттар менен жооп берет.',
     privateViewingTitle: 'Жеке көрүү',
+    rateLimited:
+      'Кайра аракет кылуудан мурун күтө туруңуз. Калган убакыт: {seconds} сек.',
     secondDate: 'Башка күн (милдеттүү эмес)',
     sending: 'Өтүнүч жөнөтүлүүдө',
     subject: 'Тема',
     success: 'Жеке өтүнүчүңүз кабыл алынды.',
     thirdDate: 'Экинчи башка күн (милдеттүү эмес)',
     timeline: 'Каалаган мөөнөт (милдеттүү эмес)',
+    validationInvalid: 'Туура маанини киргизиңиз.',
+    validationRequired: 'Бул талаа милдеттүү.',
+    validationSummary: 'Белгиленген талааларды текшериңиз.',
   },
   ru: {
     action: 'Отправить частный запрос',
@@ -148,8 +161,7 @@ export const publicInquiryCopy: Readonly<
     commissionDescription:
       'Начните частный разговор со студией о создании работы на заказ.',
     commissionTitle: 'Индивидуальный заказ',
-    consent:
-      'Я принимаю Политику конфиденциальности и разрешаю студии связаться со мной по этому запросу.',
+    consent: 'Я разрешаю студии связаться со мной по этому запросу и принимаю',
     email: 'Электронная почта',
     error: 'Не удалось принять ваш запрос. Пожалуйста, попробуйте ещё раз.',
     generalDescription:
@@ -166,12 +178,16 @@ export const publicInquiryCopy: Readonly<
     privateViewingDescription:
       'Запросите частный просмотр, и студия предложит подходящие условия.',
     privateViewingTitle: 'Частный просмотр',
+    rateLimited: 'Подождите перед следующей попыткой. Осталось: {seconds} сек.',
     secondDate: 'Другая дата (необязательно)',
     sending: 'Запрос отправляется',
     subject: 'Тема',
     success: 'Ваш частный запрос получен.',
     thirdDate: 'Ещё одна дата (необязательно)',
     timeline: 'Желаемые сроки (необязательно)',
+    validationInvalid: 'Введите корректное значение.',
+    validationRequired: 'Это обязательное поле.',
+    validationSummary: 'Проверьте выделенные поля.',
   },
   tr: {
     action: 'Özel talep gönder',
@@ -186,7 +202,7 @@ export const publicInquiryCopy: Readonly<
       'Size özel bir eser için stüdyo ile gizli bir görüşme başlatın.',
     commissionTitle: 'Özel eser talebi',
     consent:
-      'Gizlilik Politikası’nı kabul ediyor ve stüdyonun bu taleple ilgili benimle iletişim kurmasına izin veriyorum.',
+      'Stüdyonun bu taleple ilgili benimle iletişim kurmasına izin veriyor ve şunu kabul ediyorum:',
     email: 'E-posta adresi',
     error: 'Talebinizi alamadık. Lütfen tekrar deneyin.',
     generalDescription:
@@ -203,11 +219,16 @@ export const publicInquiryCopy: Readonly<
     privateViewingDescription:
       'Özel gösterim talebinde bulunun; stüdyo uygun düzenlemelerle yanıt versin.',
     privateViewingTitle: 'Özel gösterim',
+    rateLimited:
+      'Tekrar denemeden önce lütfen bekleyin. Kalan süre: {seconds} sn.',
     secondDate: 'Alternatif tarih (isteğe bağlı)',
     sending: 'Talep gönderiliyor',
     subject: 'Konu',
     success: 'Özel talebiniz alındı.',
     thirdDate: 'İkinci alternatif tarih (isteğe bağlı)',
     timeline: 'Tercih edilen zamanlama (isteğe bağlı)',
+    validationInvalid: 'Lütfen geçerli bir değer girin.',
+    validationRequired: 'Bu alan zorunludur.',
+    validationSummary: 'Lütfen işaretli alanları kontrol edin.',
   },
 }

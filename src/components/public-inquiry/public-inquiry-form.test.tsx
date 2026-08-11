@@ -39,6 +39,7 @@ function submittedBody(fetchMock: ReturnType<typeof vi.fn>, call = 0) {
 }
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
 })
@@ -325,7 +326,7 @@ describe('PublicInquiryForm', () => {
   it('honors Retry-After and prevents immediate rate-limit resubmission', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(null, {
-        headers: {'Retry-After': '90'},
+        headers: {'Retry-After': '1'},
         status: 429,
       }),
     )
@@ -343,13 +344,16 @@ describe('PublicInquiryForm', () => {
     await user.click(screen.getByRole('button', {name: 'Send private request'}))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Please wait 90 seconds before trying again.',
+      'Please wait before trying again. Retry in 1 s.',
     )
     const submit = screen.getByRole('button', {name: 'Send private request'})
 
     expect(submit).toBeDisabled()
     await user.click(submit)
     expect(fetchMock).toHaveBeenCalledOnce()
+
+    await waitFor(() => expect(submit).toBeEnabled(), {timeout: 1_500})
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('disables every interactive field while the request is pending', async () => {
@@ -458,13 +462,17 @@ describe('PublicInquiryForm', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Lütfen işaretli alanları kontrol edin.',
     )
-    expect(screen.getByLabelText('Ad soyad')).toHaveAttribute(
-      'aria-invalid',
-      'true',
-    )
-    expect(screen.getByLabelText('Ad soyad')).toHaveFocus()
+    const name = screen.getByLabelText('Ad soyad')
+
+    expect(name).toHaveAttribute('aria-invalid', 'true')
+    expect(name.getAttribute('aria-describedby')).toContain(`${name.id}-error`)
+    expect(name).toHaveFocus()
     expect(screen.getAllByText('Bu alan zorunludur.').length).toBeGreaterThan(0)
     expect(fetchMock).not.toHaveBeenCalled()
+
+    await user.type(name, 'Ada')
+    expect(name).not.toHaveAttribute('aria-invalid')
+    expect(name).not.toHaveAttribute('aria-describedby')
   })
 
   it.each([
