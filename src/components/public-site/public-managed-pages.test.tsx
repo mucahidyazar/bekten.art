@@ -82,7 +82,11 @@ describe('reference-faithful managed public pages', () => {
   it('composes the Studio page with a studio note, process and materials sections', () => {
     render(<PublicStudioPage locale="en" page={page} />)
 
-    expect(screen.getByRole('heading', {name: 'Inside the studio'})).toBeVisible()
+    expect(screen.getByRole('heading', {name: page.title})).toBeVisible()
+    expect(screen.getByRole('link', {name: 'Creative process'})).toHaveAttribute(
+      'href',
+      '#creative-process',
+    )
     expect(screen.getByRole('heading', {name: 'Creative process'})).toBeVisible()
     expect(screen.getByRole('heading', {name: 'Materials & technique'})).toBeVisible()
     expect(screen.getByText('Studio note')).toBeVisible()
