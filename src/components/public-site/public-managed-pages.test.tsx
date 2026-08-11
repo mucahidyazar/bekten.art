@@ -62,6 +62,22 @@ const page = {
 } as PublicPage
 
 describe('reference-faithful managed public pages', () => {
+  it.each([
+    PublicArtistPage,
+    PublicStudioPage,
+  ] as const)('uses the shared framed hero for every managed image page', Page => {
+    const {container} = render(<Page locale="en" page={page} />)
+
+    expect(
+      container.querySelector('[data-public-editorial-hero]'),
+    ).toBeVisible()
+    expect(
+      container.querySelector(
+        '[data-public-editorial-hero] [data-testid="heritage-frame-overlay"]',
+      ),
+    ).toBeVisible()
+  })
+
   it('composes the Artist page as biography, statement and numbered practice notes', () => {
     render(<PublicArtistPage locale="en" page={page} />)
 

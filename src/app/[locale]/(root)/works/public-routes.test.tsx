@@ -333,12 +333,17 @@ describe('V2 public editorial list routes', () => {
     JournalPage,
     PressPage,
   ] as const)(
-    'uses the unframed heritage landscape for the reference hero',
+    'uses the shared framed editorial hero',
     async Page => {
       const view = render(await Page({params: params()}))
 
       expect(
-        view.container.querySelector('[data-catalog-hero="landscape"]'),
+        view.container.querySelector('[data-public-editorial-hero]'),
+      ).toBeVisible()
+      expect(
+        view.container.querySelector(
+          '[data-public-editorial-hero] [data-testid="heritage-frame-overlay"]',
+        ),
       ).toBeVisible()
       view.unmount()
     },

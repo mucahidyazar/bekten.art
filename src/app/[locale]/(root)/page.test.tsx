@@ -60,9 +60,14 @@ describe('V2 editorial homepage', () => {
       works: [work],
     })
 
-    render(await Home({params: Promise.resolve({locale: 'en'})}))
+    const {container} = render(
+      await Home({params: Promise.resolve({locale: 'en'})}),
+    )
 
     expect(screen.getAllByRole('heading', {level: 1})).toHaveLength(1)
+    expect(
+      container.querySelector('[data-public-editorial-hero]'),
+    ).toBeVisible()
     expect(screen.getByRole('heading', {level: 1})).toHaveTextContent(
       'Art that remembers',
     )
