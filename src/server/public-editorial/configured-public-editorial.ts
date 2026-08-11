@@ -2,7 +2,10 @@ import {prisma} from '@/lib/db'
 
 import {createDatabasePublicEditorialReader} from './database-public-editorial-reader'
 
-import type {PublicEditorialDatabase} from './database-public-editorial-reader'
+import type {
+  PublicEditorialDatabase,
+  PublicEditorialTransaction,
+} from './database-public-editorial-reader'
 import type {Prisma, PrismaClient} from '@prisma/client'
 
 type PrismaFindMany = Readonly<{
@@ -24,7 +27,9 @@ export function createPrismaPublicEditorialDatabase(
 ): PublicEditorialDatabase {
   return Object.freeze({
     $transaction<Result>(
-      callback: Parameters<PublicEditorialDatabase['$transaction']>[0],
+      callback: (
+        transaction: PublicEditorialTransaction,
+      ) => Promise<Result>,
     ) {
       return client.$transaction(async transaction =>
         callback({
@@ -63,7 +68,7 @@ export function createPrismaPublicEditorialDatabase(
               transaction.pressItem.findMany(arguments_),
           ),
         }),
-      ) as Promise<Result>
+      )
     },
   })
 }

@@ -31,17 +31,23 @@ type EntityDelegate = Readonly<{
   findMany: (arguments_: unknown) => Promise<readonly unknown[]>
 }>
 
-type PublicEditorialTransaction = Readonly<{
-  [delegate: string]: unknown
-  contentRevision: EntityDelegate
-  exhibitionArtwork: EntityDelegate
-  mediaObject: EntityDelegate
-}>
-
 export type PublicEditorialDatabase = Readonly<{
   $transaction: <Result>(
     callback: (transaction: PublicEditorialTransaction) => Promise<Result>,
   ) => Promise<Result>
+}>
+
+export type PublicEditorialTransaction = Readonly<{
+  [delegate: string]: unknown
+  artwork: EntityDelegate
+  collection: EntityDelegate
+  contentRevision: EntityDelegate
+  exhibition: EntityDelegate
+  exhibitionArtwork: EntityDelegate
+  journalEntry: EntityDelegate
+  mediaObject: EntityDelegate
+  page: EntityDelegate
+  pressItem: EntityDelegate
 }>
 
 type PublicEntityMap = Readonly<{
