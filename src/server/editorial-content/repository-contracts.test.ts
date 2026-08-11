@@ -11,6 +11,7 @@ import {
 
 import type {
   ArtworkEdit,
+  ArtworkPublic,
   ArtworkRecord,
   CollectionEdit,
   ExhibitionEdit,
@@ -22,7 +23,7 @@ import type {
 describe('editorial repository contracts', () => {
   it('exposes a repository for every Studio-managed editorial aggregate', () => {
     expectTypeOf<EditorialContentRepository['artworks']>().toMatchTypeOf<
-      EditorialEntityRepository<ArtworkEdit, ArtworkRecord>
+      EditorialEntityRepository<ArtworkEdit, ArtworkRecord, ArtworkPublic>
     >()
     expectTypeOf<EditorialContentRepository['collections']>().toMatchTypeOf<
       EditorialEntityRepository<CollectionEdit, unknown>

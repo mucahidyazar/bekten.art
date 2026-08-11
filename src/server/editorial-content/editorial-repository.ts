@@ -10,41 +10,55 @@ import {
 import type {DeepReadonly} from './common-contracts'
 import type {
   ArtworkEdit,
+  ArtworkPublic,
   ArtworkRecord,
   CollectionEdit,
+  CollectionPublic,
   CollectionRecord,
   ExhibitionEdit,
+  ExhibitionPublic,
   ExhibitionRecord,
   JournalEntryEdit,
+  JournalEntryPublic,
   JournalEntryRecord,
   PageEdit,
+  PagePublic,
   PageRecord,
   PressEntryEdit,
+  PressEntryPublic,
   PressEntryRecord,
 } from './editorial-contracts'
 
 interface EditorialContentRepository {
-  readonly artworks: EditorialEntityRepository<ArtworkEdit, ArtworkRecord>
+  readonly artworks: EditorialEntityRepository<
+    ArtworkEdit,
+    ArtworkRecord,
+    ArtworkPublic
+  >
   readonly collections: EditorialEntityRepository<
     CollectionEdit,
-    CollectionRecord
+    CollectionRecord,
+    CollectionPublic
   >
   readonly exhibitions: EditorialEntityRepository<
     ExhibitionEdit,
-    ExhibitionRecord
+    ExhibitionRecord,
+    ExhibitionPublic
   >
   readonly journalEntries: EditorialEntityRepository<
     JournalEntryEdit,
-    JournalEntryRecord
+    JournalEntryRecord,
+    JournalEntryPublic
   >
-  readonly pages: EditorialEntityRepository<PageEdit, PageRecord>
+  readonly pages: EditorialEntityRepository<PageEdit, PageRecord, PagePublic>
   readonly pressEntries: EditorialEntityRepository<
     PressEntryEdit,
-    PressEntryRecord
+    PressEntryRecord,
+    PressEntryPublic
   >
 }
 
-interface EditorialEntityRepository<TEdit, TRecord> {
+interface EditorialEntityRepository<TEdit, TRecord, TPublic = TRecord> {
   archive(
     id: string,
     expectedVersion: number,
@@ -54,7 +68,7 @@ interface EditorialEntityRepository<TEdit, TRecord> {
   findById(id: string): Promise<TRecord | null>
   findPublishedBySlug(
     query: EditorialIdentifierQuery,
-  ): Promise<TRecord | null>
+  ): Promise<TPublic | null>
   list(query: EditorialListQuery): Promise<readonly TRecord[]>
   reorder(
     input: readonly EditorialReorderItem[],
@@ -68,11 +82,11 @@ interface EditorialEntityRepository<TEdit, TRecord> {
 }
 
 type EditorialIdentifierQuery = DeepReadonly<
-  z.output<typeof editorialIdentifierQuerySchema>
+  z.input<typeof editorialIdentifierQuerySchema>
 >
 
 type EditorialListQuery = DeepReadonly<
-  z.output<typeof editorialListQuerySchema>
+  z.input<typeof editorialListQuerySchema>
 >
 
 type EditorialMutationContext = {

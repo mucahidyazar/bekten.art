@@ -19,6 +19,13 @@ const migration = readFileSync(
   ),
   'utf8',
 )
+const legacyMediaMigration = readFileSync(
+  join(
+    prismaRoot,
+    'migrations/20260811110000_make_legacy_artwork_media_optional/migration.sql',
+  ),
+  'utf8',
+)
 
 function model(name: string) {
   const match = schema.match(new RegExp(`model ${name} \\{([\\s\\S]*?)\\n\\}`))
@@ -96,6 +103,8 @@ describe('V2 editorial Prisma contract', () => {
     expect(artwork).toMatch(/collection\s+Collection\?\s+@relation/)
     expect(artwork).toMatch(/priceMinor\s+Int\?/)
     expect(artwork).toMatch(/currency\s+String\?/)
+    expect(artwork).toMatch(/imageUrl\s+String\?\s+@map\("image_url"\)/)
+    expect(artwork).toMatch(/imageAlt\s+String\?\s+@map\("image_alt"\)/)
 
     expect(pressItem).toMatch(/slug\s+String\s+@db\.VarChar\(160\)/)
     expect(pressItem).toMatch(/seoTitle\s+String\?\s+@map\("seo_title"\)/)
@@ -266,5 +275,12 @@ describe('V2 editorial Prisma contract', () => {
       'COALESCE("related_artwork_locale" IN (\'en\', \'tr\', \'ru\', \'ky\'), false)',
     )
     expect(migration).toContain('Rollback strategy')
+    expect(legacyMediaMigration).toContain(
+      'ALTER COLUMN "image_url" DROP NOT NULL',
+    )
+    expect(legacyMediaMigration).toContain(
+      'ALTER COLUMN "image_alt" DROP NOT NULL',
+    )
+    expect(legacyMediaMigration).toContain('Rollback strategy')
   })
 })
