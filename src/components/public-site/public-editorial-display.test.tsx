@@ -93,4 +93,19 @@ describe('public editorial display', () => {
     expect(screen.getByText('Reserved')).toBeVisible()
     expect(screen.queryByText(/price|buy|cart|checkout/iu)).toBeNull()
   })
+
+  it('offers a premium inquiry path without introducing commerce claims', () => {
+    render(
+      <PublicArtworkGrid
+        actionLabel="Availability inquiry"
+        locale="en"
+        works={[artwork]}
+      />,
+    )
+
+    expect(
+      screen.getByRole('link', {name: 'Availability inquiry'}),
+    ).toHaveAttribute('href', '/works/silent-steppe#availability-inquiry')
+    expect(screen.queryByText(/price|shipping|certificate/iu)).toBeNull()
+  })
 })

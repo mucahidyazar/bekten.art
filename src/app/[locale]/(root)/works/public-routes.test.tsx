@@ -274,9 +274,7 @@ it('formats editorial date-only values in UTC across deploy regions', () => {
   vi.stubEnv('TZ', 'America/Los_Angeles')
 
   try {
-    expect(publicDate('2026-08-01T00:00:00.000Z', 'en')).toBe(
-      'August 1, 2026',
-    )
+    expect(publicDate('2026-08-01T00:00:00.000Z', 'en')).toBe('August 1, 2026')
   } finally {
     vi.unstubAllEnvs()
   }
@@ -303,7 +301,7 @@ describe('V2 public editorial list routes', () => {
   })
 
   it('renders the full works archive without commerce language', async () => {
-    render(await WorksPage({params: params()}))
+    const view = render(await WorksPage({params: params()}))
 
     expect(screen.getByRole('heading', {level: 1, name: 'Works'})).toBeVisible()
     expect(screen.getByRole('link', {name: /silent steppe/iu})).toHaveAttribute(
@@ -312,6 +310,9 @@ describe('V2 public editorial list routes', () => {
     )
     expect(screen.queryByText(/add to cart|checkout|price/iu)).toBeNull()
     expect(screen.getByRole('region', {name: 'Work archive'})).toBeVisible()
+    expect(
+      view.container.querySelector('[data-catalog-hero="landscape"]'),
+    ).toBeVisible()
   })
 
   it('limits the available archive to works explicitly marked AVAILABLE', async () => {
@@ -327,7 +328,28 @@ describe('V2 public editorial list routes', () => {
   })
 
   it.each([
-    ['Collections', CollectionsPage, '/collections/remembered-landscapes'],
+    AvailableWorksPage,
+    ExhibitionsPage,
+    JournalPage,
+    PressPage,
+  ] as const)(
+    'uses the unframed heritage landscape for the reference hero',
+    async Page => {
+      const view = render(await Page({params: params()}))
+
+      expect(
+        view.container.querySelector('[data-catalog-hero="landscape"]'),
+      ).toBeVisible()
+      view.unmount()
+    },
+  )
+
+  it.each([
+    [
+      'Memory, land & belonging',
+      CollectionsPage,
+      '/collections/remembered-landscapes',
+    ],
     ['Exhibitions', ExhibitionsPage, '/exhibitions/echoes-of-the-steppe'],
     ['Journal', JournalPage, '/journal/the-living-archive'],
     ['Press', PressPage, '/press/a-conversation-across-generations'],
@@ -340,25 +362,43 @@ describe('V2 public editorial list routes', () => {
         screen.getByRole('heading', {level: 1, name: heading}),
       ).toBeVisible()
       expect(screen.getAllByRole('article')).toHaveLength(1)
-      expect(screen.getByRole('link', {name: /./u})).toHaveAttribute(
-        'href',
-        href,
-      )
+      expect(
+        screen
+          .getAllByRole('link')
+          .some(link => link.getAttribute('href') === href),
+      ).toBe(true)
     },
   )
 
   it('composes collections as a featured series followed by the archive', async () => {
     reader.listCollections.mockResolvedValueOnce([
       collection,
-      {...collection, id: 'collection-two', slug: 'another-series', title: 'Another Series'},
+      {
+        ...collection,
+        id: 'collection-two',
+        slug: 'another-series',
+        title: 'Another Series',
+      },
     ])
 
-    render(await CollectionsPage({params: params()}))
+    const view = render(await CollectionsPage({params: params()}))
 
     expect(
       screen.getByRole('region', {name: 'Featured collection'}),
     ).toBeVisible()
     expect(screen.getByRole('list', {name: 'Collection archive'})).toBeVisible()
+    expect(
+      view.container.querySelector('[data-catalog-hero="collection"]'),
+    ).toBeVisible()
+    expect(
+      screen.getByText(
+        'Explore each collection to see its published works and details.',
+      ),
+    ).toBeVisible()
+    expect(screen.getByRole('link', {name: 'View collection'})).toHaveAttribute(
+      'href',
+      '/collections/remembered-landscapes',
+    )
   })
 
   it('composes exhibitions as a featured record and chronological timeline', async () => {
@@ -378,7 +418,9 @@ describe('V2 public editorial list routes', () => {
     expect(
       screen.getByRole('region', {name: 'Featured exhibition'}),
     ).toBeVisible()
-    expect(screen.getByRole('list', {name: 'Exhibition timeline'})).toBeVisible()
+    expect(
+      screen.getByRole('list', {name: 'Exhibition timeline'}),
+    ).toBeVisible()
   })
 
   it('composes journal as one featured story followed by chronological rows', async () => {
@@ -415,8 +457,12 @@ describe('V2 public editorial list routes', () => {
 
     render(await PressPage({params: params()}))
 
-    expect(screen.getByRole('heading', {level: 2, name: 'Interviews'})).toBeVisible()
-    expect(screen.getByRole('heading', {level: 2, name: 'Reviews'})).toBeVisible()
+    expect(
+      screen.getByRole('heading', {level: 2, name: 'Interviews'}),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('heading', {level: 2, name: 'Reviews'}),
+    ).toBeVisible()
   })
 
   it('emits locale-specific canonical metadata for every list route', async () => {
@@ -487,9 +533,7 @@ describe('V2 public editorial list routes', () => {
 
 describe('V2 public editorial detail routes', () => {
   it('renders a work with an artwork-bound availability inquiry and no store UI', async () => {
-    const view = render(
-      await WorkDetailPage({params: detailParams(work.slug)}),
-    )
+    const view = render(await WorkDetailPage({params: detailParams(work.slug)}))
 
     expect(
       screen.getByRole('heading', {level: 1, name: 'Silent Steppe'}),
@@ -524,7 +568,9 @@ describe('V2 public editorial detail routes', () => {
 
     render(await WorkDetailPage({params: detailParams(work.slug)}))
 
-    expect(screen.getByRole('complementary', {name: 'Work facts'})).toBeVisible()
+    expect(
+      screen.getByRole('complementary', {name: 'Work facts'}),
+    ).toBeVisible()
     expect(
       screen.getByRole('heading', {level: 2, name: 'Details from this work'}),
     ).toBeVisible()

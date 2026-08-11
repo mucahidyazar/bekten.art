@@ -64,15 +64,15 @@ describe('V2 public archive', () => {
     expect(
       screen.getByRole('heading', {level: 1, name: 'Archive'}),
     ).toBeVisible()
-    expect(screen.getByRole('link', {name: /archive study/iu})).toHaveAttribute(
-      'href',
-      '/works/archive-study',
-    )
-    expect(screen.getByText('In archive')).toBeVisible()
+    expect(
+      screen.getByRole('link', {name: /^archive study$/iu}),
+    ).toHaveAttribute('href', '/works/archive-study')
+    expect(screen.getAllByText('In archive')).toHaveLength(2)
     expect(screen.getByRole('heading', {level: 2, name: '2004'})).toBeVisible()
     expect(screen.getByRole('heading', {level: 2, name: '1998'})).toBeVisible()
+    expect(screen.getByRole('region', {name: 'Works from 2004'})).toBeVisible()
     expect(
-      screen.getByRole('region', {name: 'Works from 2004'}),
+      document.querySelector('[data-catalog-hero="landscape"]'),
     ).toBeVisible()
     expect(screen.queryByText(/price|buy|cart|checkout/iu)).toBeNull()
   })

@@ -1,0 +1,94 @@
+import type {Metadata} from 'next'
+
+import styles from '@/components/public-site/catalog-layouts.module.css'
+import {PublicEditorialCard} from '@/components/public-site/public-editorial-card'
+import {localizedPath} from '@/lib/localized-path'
+import {publicEditorialReader} from '@/server/public-editorial'
+
+import {
+  heroMedia,
+  listMetadata,
+  parsePublicParams,
+  PublicArchiveSection,
+  PublicEditorialList,
+  PublicPageIntro,
+  publicDate,
+  publicRouteCopy,
+} from '../works/public-route-helpers'
+
+type ExhibitionsPageProps = Readonly<{params: Promise<{locale: string}>}>
+
+export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: ExhibitionsPageProps): Promise<Metadata> {
+  const {locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[locale].exhibitions
+
+  return listMetadata(locale, 'exhibitions', copy.title, copy.intro)
+}
+
+export default async function ExhibitionsPage({params}: ExhibitionsPageProps) {
+  const {locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[locale].exhibitions
+  const exhibitions = await publicEditorialReader.listExhibitions(locale)
+  const [featured, ...timeline] = exhibitions
+
+  const exhibitionItem = (exhibition: (typeof exhibitions)[number]) => ({
+    description: exhibition.subtitle ?? exhibition.body,
+    eyebrow: [exhibition.venue, publicDate(exhibition.startsAt, locale)]
+      .filter(Boolean)
+      .join(' · '),
+    href: localizedPath(locale, `/exhibitions/${exhibition.slug}`),
+    id: exhibition.id,
+    media: heroMedia(exhibition),
+    title: exhibition.title,
+  })
+
+  return (
+    <div className={styles.page}>
+      <PublicPageIntro {...copy} illustration="landscape" />
+      <PublicArchiveSection light>
+        {featured ? (
+          <>
+            <section
+              aria-label={publicRouteCopy[locale].featuredExhibition}
+              className={styles.featuredRegion}
+            >
+              <PublicEditorialCard
+                actionLabel={publicRouteCopy[locale].viewExhibition}
+                description={featured.subtitle ?? featured.body}
+                eyebrow={[featured.venue, publicDate(featured.startsAt, locale)]
+                  .filter(Boolean)
+                  .join(' · ')}
+                href={localizedPath(locale, `/exhibitions/${featured.slug}`)}
+                media={heroMedia(featured)}
+                title={featured.title}
+                variant="featured"
+              />
+            </section>
+            {timeline.length > 0 ? (
+              <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <h2 className={styles.sectionTitle}>
+                    {publicRouteCopy[locale].exhibitionTimeline}
+                  </h2>
+                </div>
+                <PublicEditorialList
+                  accessibleName={publicRouteCopy[locale].exhibitionTimeline}
+                  actionLabel={publicRouteCopy[locale].viewExhibition}
+                  empty={copy.empty}
+                  items={timeline.map(exhibitionItem)}
+                  variant="rows"
+                />
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <p role="status">{copy.empty}</p>
+        )}
+      </PublicArchiveSection>
+    </div>
+  )
+}
