@@ -214,4 +214,36 @@ describe('V2 demo seed runner', () => {
     expect(failure.message).toBe('V2_DEMO_GARAGE_WRITE_FAILED')
     expect(JSON.stringify(failure)).not.toContain('secret provider')
   })
+
+  it('distinguishes Garage missing-object 403 responses before writing', async () => {
+    const [asset] = createDemoSeedPlan().media
+    const client = {
+      send: vi
+        .fn()
+        .mockRejectedValueOnce(
+          Object.assign(new Error('Garage hides missing keys'), {
+            $metadata: {httpStatusCode: 403},
+          }),
+        )
+        .mockResolvedValueOnce({Contents: []})
+        .mockResolvedValueOnce({}),
+    }
+    const uploader = createAssetUploader({
+      bucket: 'bekten-art-media',
+      client,
+      rootDirectory: process.cwd(),
+    })
+
+    await uploader(asset)
+
+    expect(client.send).toHaveBeenCalledTimes(3)
+    expect(
+      client.send.mock.calls.map(([command]) => command.constructor.name),
+    ).toEqual(['HeadObjectCommand', 'ListObjectsV2Command', 'PutObjectCommand'])
+    expect(client.send.mock.calls[1][0].input).toEqual({
+      Bucket: 'bekten-art-media',
+      MaxKeys: 1,
+      Prefix: asset.objectKey,
+    })
+  })
 })
