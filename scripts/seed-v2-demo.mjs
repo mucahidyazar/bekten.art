@@ -4,6 +4,7 @@ import {dirname, resolve, sep} from 'node:path'
 import {fileURLToPath, pathToFileURL} from 'node:url'
 
 import {
+  GetObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
@@ -37,23 +38,11 @@ export function createAssetUploader({bucket, client, rootDirectory}) {
       )
     } catch (error) {
       if (isForbiddenObjectLookup(error)) {
-        let listing
-
-        try {
-          listing = await client.send(
-            new ListObjectsV2Command({
-              Bucket: bucket,
-              MaxKeys: 1,
-              Prefix: item.objectKey,
-            }),
-          )
-        } catch {
-          throw new Error('V2_DEMO_GARAGE_READ_FAILED')
-        }
-
-        if (listing.Contents?.some(object => object.Key === item.objectKey)) {
-          throw new Error('V2_DEMO_GARAGE_READ_FAILED')
-        }
+        current = await readCurrentObjectAfterForbiddenHead({
+          bucket,
+          client,
+          item,
+        })
       } else if (!isMissingObject(error)) {
         throw new Error('V2_DEMO_GARAGE_READ_FAILED')
       }
@@ -80,6 +69,36 @@ export function createAssetUploader({bucket, client, rootDirectory}) {
     } catch {
       throw new Error('V2_DEMO_GARAGE_WRITE_FAILED')
     }
+  }
+}
+
+async function readCurrentObjectAfterForbiddenHead({bucket, client, item}) {
+  try {
+    const listing = await client.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        MaxKeys: 1,
+        Prefix: item.objectKey,
+      }),
+    )
+    const exactObject = listing.Contents?.find(
+      object => object.Key === item.objectKey,
+    )
+
+    if (!exactObject) return null
+    if (exactObject.Size !== item.sizeBytes) {
+      return {ContentLength: exactObject.Size, Metadata: {}}
+    }
+
+    const object = await client.send(
+      new GetObjectCommand({Bucket: bucket, Key: item.objectKey}),
+    )
+
+    await object.Body?.transformToByteArray()
+
+    return object
+  } catch {
+    throw new Error('V2_DEMO_GARAGE_READ_FAILED')
   }
 }
 
