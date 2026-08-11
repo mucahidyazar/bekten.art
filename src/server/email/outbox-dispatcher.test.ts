@@ -34,6 +34,16 @@ function configuredDispatcher(overrides: Record<string, unknown> = {}) {
       name: 'Ada',
       subject: 'Artwork enquiry',
     }),
+    findInquiry: vi.fn().mockResolvedValue({
+      brief: null,
+      email: 'collector@example.com',
+      locale: 'en',
+      message: 'Please share the private viewing options.',
+      name: 'Ada Collector',
+      relatedArtworkTitle: 'Silent Steppe',
+      subject: null,
+      type: 'AVAILABILITY',
+    }),
     findSubscriber: vi.fn().mockResolvedValue({
       email: 'ada@example.com',
       locale: 'en',
@@ -44,6 +54,8 @@ function configuredDispatcher(overrides: Record<string, unknown> = {}) {
     sendEmailVerification: vi.fn().mockResolvedValue({id: 'verify-id'}),
     sendFeedbackAcknowledgement: vi.fn().mockResolvedValue({id: 'ack-id'}),
     sendFeedbackNotification: vi.fn().mockResolvedValue({id: 'support-id'}),
+    sendInquiryAcknowledgement: vi.fn().mockResolvedValue({id: 'inquiry-ack-id'}),
+    sendInquiryNotification: vi.fn().mockResolvedValue({id: 'inquiry-support-id'}),
     sendNewsletterConfirmation: vi.fn().mockResolvedValue({id: 'confirm-id'}),
     sendNewsletterWelcome: vi.fn().mockResolvedValue({id: 'welcome-id'}),
     sendPasswordReset: vi.fn().mockResolvedValue({id: 'reset-id'}),
@@ -106,6 +118,59 @@ describe('outbox dispatcher', () => {
         confirmationUrl:
           'https://bekten.art/api/newsletter/confirm?token=plain-token&locale=en',
         idempotencyKey: `newsletter.confirmation:${'a'.repeat(64)}`,
+      }),
+    )
+  })
+
+  it('delivers a premium inquiry to support and acknowledges the collector idempotently', async () => {
+    const inquiryId = 'f0cfe454-08e7-433c-95af-ddf49ee64a80'
+    const {dispatcher, mailer, store} = configuredDispatcher({
+      idempotencyKey: `inquiry.created:${inquiryId}`,
+      payload: {inquiryId, locale: 'en', type: 'AVAILABILITY'},
+      type: 'inquiry.created',
+    })
+
+    await expect(dispatcher.dispatchOne()).resolves.toEqual({
+      status: 'completed',
+    })
+    expect(store.findInquiry).toHaveBeenCalledWith(inquiryId)
+    expect(mailer.sendInquiryNotification).toHaveBeenCalledWith({
+      idempotencyKey: `inquiry.created:${inquiryId}:support`,
+      inquiry: expect.objectContaining({type: 'AVAILABILITY'}),
+      replyTo: 'collector@example.com',
+    })
+    expect(mailer.sendInquiryAcknowledgement).toHaveBeenCalledWith({
+      idempotencyKey: `inquiry.created:${inquiryId}:acknowledgement`,
+      locale: 'en',
+      name: 'Ada Collector',
+      to: 'collector@example.com',
+      type: 'AVAILABILITY',
+    })
+  })
+
+  it('terminally rejects a malformed persisted inquiry without calling Resend', async () => {
+    const inquiryId = 'f0cfe454-08e7-433c-95af-ddf49ee64a80'
+    const {dispatcher, mailer, store} = configuredDispatcher({
+      idempotencyKey: `inquiry.created:${inquiryId}`,
+      payload: {inquiryId, locale: 'en', type: 'AVAILABILITY'},
+      type: 'inquiry.created',
+    })
+
+    store.findInquiry.mockResolvedValueOnce({
+      email: 'not-an-email',
+      locale: 'en',
+      name: '',
+      type: 'AVAILABILITY',
+    })
+
+    await expect(dispatcher.dispatchOne()).resolves.toEqual({status: 'failed'})
+    expect(mailer.sendInquiryNotification).not.toHaveBeenCalled()
+    expect(store.retry).toHaveBeenCalledWith(
+      job().id,
+      'worker-1',
+      expect.objectContaining({
+        error: 'OUTBOX_PAYLOAD_INVALID',
+        terminal: true,
       }),
     )
   })

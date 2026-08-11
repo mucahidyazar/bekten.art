@@ -8,6 +8,9 @@ export type OutboxDatabase = Readonly<{
   feedback: Readonly<{
     findUnique: (args: unknown) => Promise<unknown | null>
   }>
+  inquiry: Readonly<{
+    findUnique: (args: unknown) => Promise<unknown | null>
+  }>
   newsletterSubscriber: Readonly<{
     findUnique: (args: unknown) => Promise<unknown | null>
   }>
@@ -93,6 +96,21 @@ export function createDatabaseOutboxStore(
         },
         where: {id},
       }) as ReturnType<OutboxStore['findFeedback']>
+    },
+    async findInquiry(id) {
+      return database.inquiry.findUnique({
+        select: {
+          brief: true,
+          email: true,
+          locale: true,
+          message: true,
+          name: true,
+          relatedArtworkTitle: true,
+          subject: true,
+          type: true,
+        },
+        where: {id},
+      }) as ReturnType<OutboxStore['findInquiry']>
     },
     async findSubscriber(id) {
       return database.newsletterSubscriber.findUnique({

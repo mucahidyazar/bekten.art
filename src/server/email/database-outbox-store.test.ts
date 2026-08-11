@@ -9,6 +9,7 @@ function database() {
   return {
     $queryRaw: vi.fn().mockResolvedValue([{id: jobId}]),
     feedback: {findUnique: vi.fn().mockResolvedValue(null)},
+    inquiry: {findUnique: vi.fn().mockResolvedValue(null)},
     newsletterSubscriber: {findUnique: vi.fn().mockResolvedValue(null)},
     outboxJob: {
       updateMany: vi.fn().mockResolvedValue({count: 1}),
@@ -73,11 +74,12 @@ describe('database outbox store', () => {
     })
   })
 
-  it('loads only the fields required for feedback and newsletter delivery', async () => {
+  it('loads only the fields required for feedback, inquiry and newsletter delivery', async () => {
     const client = database()
     const store = createDatabaseOutboxStore(client)
 
     await store.findFeedback(jobId)
+    await store.findInquiry(jobId)
     await store.findSubscriber(jobId)
 
     expect(client.feedback.findUnique).toHaveBeenCalledWith({
@@ -86,6 +88,19 @@ describe('database outbox store', () => {
     })
     expect(client.newsletterSubscriber.findUnique).toHaveBeenCalledWith({
       select: {email: true, locale: true},
+      where: {id: jobId},
+    })
+    expect(client.inquiry.findUnique).toHaveBeenCalledWith({
+      select: {
+        brief: true,
+        email: true,
+        locale: true,
+        message: true,
+        name: true,
+        relatedArtworkTitle: true,
+        subject: true,
+        type: true,
+      },
       where: {id: jobId},
     })
   })

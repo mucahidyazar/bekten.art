@@ -1,4 +1,14 @@
 type AppLocale = 'en' | 'tr' | 'ru' | 'ky'
+type InquiryEmail = Readonly<{
+  brief: string | null
+  email: string
+  locale: AppLocale
+  message: string | null
+  name: string
+  relatedArtworkTitle: string | null
+  subject: string | null
+  type: 'AVAILABILITY' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
+}>
 const emailPattern = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/u
 
 type ResendResult = Readonly<{
@@ -98,6 +108,34 @@ export function createResendMailer(
       }
 
       return deliver(feedbackNotificationContent(input), {
+        idempotencyKey: input.idempotencyKey,
+        replyTo: input.replyTo,
+        to: configuration.replyTo,
+      })
+    },
+    async sendInquiryAcknowledgement(
+      input: Readonly<{
+        idempotencyKey: string
+        locale: AppLocale
+        name: string
+        to: string
+        type: InquiryEmail['type']
+      }>,
+    ) {
+      return deliver(inquiryAcknowledgementContent(input), input)
+    },
+    async sendInquiryNotification(
+      input: Readonly<{
+        idempotencyKey: string
+        inquiry: InquiryEmail
+        replyTo: string
+      }>,
+    ) {
+      if (!configuration.replyTo) {
+        throw new Error('EMAIL_DELIVERY_FAILED')
+      }
+
+      return deliver(inquiryNotificationContent(input.inquiry), {
         idempotencyKey: input.idempotencyKey,
         replyTo: input.replyTo,
         to: configuration.replyTo,
@@ -226,6 +264,108 @@ function feedbackAcknowledgementContent(input: Readonly<{name: string}>) {
     }),
     subject: 'We received your Bekten Art message',
     text: `${greeting(input.name, 'en')}\n\n${message}`,
+  }
+}
+
+function inquiryTypeLabel(type: InquiryEmail['type']) {
+  if (type === 'AVAILABILITY') return 'Artwork availability'
+  if (type === 'COMMISSION') return 'Commission'
+  if (type === 'PRIVATE_VIEWING') return 'Private viewing'
+
+  return 'General inquiry'
+}
+
+function inquiryNotificationContent(inquiry: InquiryEmail) {
+  const details = [
+    ['Type', inquiryTypeLabel(inquiry.type)],
+    ['Name', inquiry.name],
+    ['Email', inquiry.email],
+    ['Artwork', inquiry.relatedArtworkTitle],
+    ['Subject', inquiry.subject],
+    ['Brief', inquiry.brief],
+    ['Message', inquiry.message],
+  ]
+    .filter((entry): entry is [string, string] => Boolean(entry[1]))
+    .map(
+      ([label, value]) =>
+        `<p><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value).replaceAll('\n', '<br>')}</p>`,
+    )
+    .join('')
+
+  return {
+    html: emailCard({
+      body: details,
+      locale: 'en',
+      title: 'New premium inquiry',
+    }),
+    subject: `New Bekten Art inquiry — ${inquiryTypeLabel(inquiry.type)}`,
+    text: [
+      `Type: ${inquiryTypeLabel(inquiry.type)}`,
+      `Name: ${inquiry.name}`,
+      `Email: ${inquiry.email}`,
+      inquiry.relatedArtworkTitle
+        ? `Artwork: ${inquiry.relatedArtworkTitle}`
+        : null,
+      inquiry.subject ? `Subject: ${inquiry.subject}` : null,
+      inquiry.brief ? `Brief: ${inquiry.brief}` : null,
+      inquiry.message ? `Message: ${inquiry.message}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n'),
+  }
+}
+
+function inquiryAcknowledgementCopy(locale: AppLocale) {
+  if (locale === 'tr') {
+    return {
+      body: 'Özel talebiniz alındı. Stüdyo ekibi ayrıntıları inceleyerek sizinle doğrudan iletişime geçecek.',
+      subject: 'Bekten Art talebiniz alındı',
+      title: 'Talebinizi aldık',
+    }
+  }
+
+  if (locale === 'ru') {
+    return {
+      body: 'Ваш частный запрос получен. Команда студии изучит детали и свяжется с вами напрямую.',
+      subject: 'Ваш запрос в Bekten Art получен',
+      title: 'Мы получили ваш запрос',
+    }
+  }
+
+  if (locale === 'ky') {
+    return {
+      body: 'Жеке суроо-талабыңыз кабыл алынды. Студиянын командасы маалыматты карап чыгып, сиз менен түз байланышат.',
+      subject: 'Bekten Art суроо-талабыңыз кабыл алынды',
+      title: 'Суроо-талабыңызды алдык',
+    }
+  }
+
+  return {
+    body: 'Your private request has been received. The studio team will review the details and contact you directly.',
+    subject: 'Your Bekten Art inquiry has been received',
+    title: 'We received your request',
+  }
+}
+
+function inquiryAcknowledgementContent(
+  input: Readonly<{
+    locale: AppLocale
+    name: string
+    type: InquiryEmail['type']
+  }>,
+) {
+  const copy = inquiryAcknowledgementCopy(input.locale)
+  const salutation = escapeHtml(greeting(input.name, input.locale))
+  const type = escapeHtml(inquiryTypeLabel(input.type))
+
+  return {
+    html: emailCard({
+      body: `<p>${salutation}</p><p>${escapeHtml(copy.body)}</p><p><small>${type}</small></p>`,
+      locale: input.locale,
+      title: copy.title,
+    }),
+    subject: copy.subject,
+    text: `${greeting(input.name, input.locale)}\n\n${copy.body}\n\n${inquiryTypeLabel(input.type)}`,
   }
 }
 

@@ -235,4 +235,59 @@ describe('Resend mailer', () => {
       {idempotencyKey: 'studio.magic-link:hash'},
     )
   })
+
+  it('sends escaped premium inquiry notification and localized acknowledgement', async () => {
+    const send = vi
+      .fn()
+      .mockResolvedValue({data: {id: 'inquiry-email-id'}, error: null})
+    const mailer = createResendMailer(
+      {emails: {send}},
+      {
+        apiKey: 're_bekten_key',
+        from: 'Bekten Art <noreply@mucahid.dev>',
+        replyTo: 'support@mucahid.dev',
+      },
+    )
+
+    await mailer.sendInquiryNotification({
+      idempotencyKey: 'inquiry.created:id:support',
+      inquiry: {
+        brief: null,
+        email: 'collector@example.com',
+        locale: 'tr',
+        message: '<script>Please call me</script>',
+        name: '<img src=x onerror=alert(1)>',
+        relatedArtworkTitle: 'Silent <Steppe>',
+        subject: null,
+        type: 'AVAILABILITY',
+      },
+      replyTo: 'collector@example.com',
+    })
+    await mailer.sendInquiryAcknowledgement({
+      idempotencyKey: 'inquiry.created:id:acknowledgement',
+      locale: 'tr',
+      name: 'Ada',
+      to: 'collector@example.com',
+      type: 'AVAILABILITY',
+    })
+
+    expect(send).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        html: expect.not.stringContaining('<script>'),
+        replyTo: 'collector@example.com',
+        subject: expect.stringMatching(/inquiry/i),
+        to: ['support@mucahid.dev'],
+      }),
+      {idempotencyKey: 'inquiry.created:id:support'},
+    )
+    expect(send).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        subject: expect.stringMatching(/talebiniz/i),
+        to: ['collector@example.com'],
+      }),
+      {idempotencyKey: 'inquiry.created:id:acknowledgement'},
+    )
+  })
 })

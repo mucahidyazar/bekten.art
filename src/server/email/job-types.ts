@@ -1,5 +1,6 @@
 export const TRANSACTIONAL_EMAIL_JOB_TYPES = Object.freeze([
   'feedback.created',
+  'inquiry.created',
   'newsletter.confirmation_requested',
   'newsletter.welcome',
   'studio.magic-link.requested',

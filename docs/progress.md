@@ -76,7 +76,7 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 
 ## 6. Kalite ve production
 
-- [ ] Inquiry ve Resend outbox akışını idempotent tamamla
+- [x] Inquiry ve Resend outbox akışını idempotent tamamla
 - [ ] Garage private/public medya güvenlik sınırlarını doğrula
 - [ ] Dört locale çeviri, canonical, hreflang, sitemap ve structured data'yı
       tamamla

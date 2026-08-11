@@ -3,6 +3,35 @@ import {z} from 'zod'
 import {outboxJobRowSchema, uuidSchema} from '@/server/content/domain'
 
 const feedbackPayloadSchema = z.object({feedbackId: uuidSchema}).strict()
+const inquiryPayloadSchema = z
+  .object({
+    inquiryId: uuidSchema,
+    locale: z.enum(['en', 'tr', 'ru', 'ky']),
+    type: z.enum([
+      'AVAILABILITY',
+      'COMMISSION',
+      'PRIVATE_VIEWING',
+      'GENERAL',
+    ]),
+  })
+  .strict()
+const inquiryMessageSchema = z
+  .object({
+    brief: z.string().max(4_000).nullable(),
+    email: z.email().max(320),
+    locale: z.enum(['en', 'tr', 'ru', 'ky']),
+    message: z.string().max(4_000).nullable(),
+    name: z.string().min(2).max(120),
+    relatedArtworkTitle: z.string().max(200).nullable(),
+    subject: z.string().max(200).nullable(),
+    type: z.enum([
+      'AVAILABILITY',
+      'COMMISSION',
+      'PRIVATE_VIEWING',
+      'GENERAL',
+    ]),
+  })
+  .strict()
 const newsletterConfirmationPayloadSchema = z
   .object({
     confirmationTokenEncrypted: z.string().min(20).max(2_048),
@@ -37,6 +66,8 @@ type Subscriber = Readonly<{
   locale: 'en' | 'tr' | 'ru' | 'ky'
 }>
 
+type InquiryMessage = Readonly<z.infer<typeof inquiryMessageSchema>>
+
 export type OutboxMailer = Readonly<{
   sendFeedbackAcknowledgement: (
     input: Readonly<{
@@ -52,6 +83,22 @@ export type OutboxMailer = Readonly<{
       name: string
       replyTo: string
       subject: string
+    }>,
+  ) => Promise<unknown>
+  sendInquiryAcknowledgement: (
+    input: Readonly<{
+      idempotencyKey: string
+      locale: Subscriber['locale']
+      name: string
+      to: string
+      type: InquiryMessage['type']
+    }>,
+  ) => Promise<unknown>
+  sendInquiryNotification: (
+    input: Readonly<{
+      idempotencyKey: string
+      inquiry: InquiryMessage
+      replyTo: string
     }>,
   ) => Promise<unknown>
   sendNewsletterConfirmation: (
@@ -94,6 +141,7 @@ export type OutboxStore = Readonly<{
     completedAt: Date,
   ) => Promise<boolean>
   findFeedback: (id: string) => Promise<FeedbackMessage | null>
+  findInquiry: (id: string) => Promise<InquiryMessage | null>
   findSubscriber: (id: string) => Promise<Subscriber | null>
   retry: (
     id: string,
@@ -174,6 +222,16 @@ export function createOutboxDispatcher(
     return subscriber
   }
 
+  async function requireInquiry(id: string) {
+    const inquiry = inquiryMessageSchema.safeParse(await store.findInquiry(id))
+
+    if (!inquiry.success) {
+      throw new Error(permanentError)
+    }
+
+    return inquiry.data
+  }
+
   async function deliver(job: ClaimedJob) {
     if (job.type === 'feedback.created') {
       const parsed = feedbackPayloadSchema.safeParse(job.payload)
@@ -195,6 +253,38 @@ export function createOutboxDispatcher(
         idempotencyKey: `${job.idempotencyKey}:acknowledgement`,
         name: feedback.name,
         to: feedback.email,
+      })
+
+      return
+    }
+
+    if (job.type === 'inquiry.created') {
+      const parsed = inquiryPayloadSchema.safeParse(job.payload)
+
+      if (!parsed.success) {
+        throw new Error(permanentError)
+      }
+
+      const inquiry = await requireInquiry(parsed.data.inquiryId)
+
+      if (
+        inquiry.locale !== parsed.data.locale ||
+        inquiry.type !== parsed.data.type
+      ) {
+        throw new Error(permanentError)
+      }
+
+      await mailer.sendInquiryNotification({
+        idempotencyKey: `${job.idempotencyKey}:support`,
+        inquiry,
+        replyTo: inquiry.email,
+      })
+      await mailer.sendInquiryAcknowledgement({
+        idempotencyKey: `${job.idempotencyKey}:acknowledgement`,
+        locale: inquiry.locale,
+        name: inquiry.name,
+        to: inquiry.email,
+        type: inquiry.type,
       })
 
       return
