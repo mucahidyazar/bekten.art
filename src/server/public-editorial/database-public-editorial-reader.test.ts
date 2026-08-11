@@ -283,7 +283,7 @@ describe('database public editorial reader', () => {
   })
 
   it('resolves details by the published snapshot slug instead of the editable row slug', async () => {
-    const {reader} = fixture({
+    const {reader, transaction} = fixture({
       artworks: [row(IDS.artworkA, {slug: 'unpublished-draft-slug'})],
       media: [publicMedia()],
       revisions: [revision('ARTWORK', IDS.artworkA, artworkSnapshot())],
@@ -293,6 +293,20 @@ describe('database public editorial reader', () => {
       expect.objectContaining({slug: 'sample-work', title: 'Sample Work'}),
     )
     await expect(reader.getWork('en', 'unpublished-draft-slug')).resolves.toBeNull()
+    expect(transaction.contentRevision.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          entityType: 'ARTWORK',
+          locale: 'en',
+          snapshot: {equals: 'sample-work', path: ['slug']},
+        }),
+      }),
+    )
+    expect(transaction.artwork.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({id: {in: [IDS.artworkA]}}),
+      }),
+    )
   })
 
   it('rejects invalid locale and slug boundaries before database access', async () => {
@@ -305,7 +319,7 @@ describe('database public editorial reader', () => {
 
   it('builds collection details with only published works assigned by snapshot', async () => {
     const assigned = artworkSnapshot({collectionId: IDS.collection})
-    const {reader} = fixture({
+    const {reader, transaction} = fixture({
       artworks: [row(IDS.artworkA), row(IDS.artworkB)],
       collections: [row(IDS.collection)],
       media: [publicMedia()],
@@ -321,6 +335,14 @@ describe('database public editorial reader', () => {
     expect(result?.collection.title).toBe('Sample Collection')
     expect(result?.works.map(work => work.title)).toEqual(['Sample Work'])
     expect(Object.isFrozen(result)).toBe(true)
+    expect(transaction.contentRevision.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          entityType: 'ARTWORK',
+          snapshot: {equals: IDS.collection, path: ['collectionId']},
+        }),
+      }),
+    )
   })
 
   it('builds exhibition details from deterministic join ordering and published works', async () => {
