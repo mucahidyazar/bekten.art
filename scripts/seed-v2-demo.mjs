@@ -3,7 +3,12 @@ import {readFile, realpath} from 'node:fs/promises'
 import {dirname, resolve, sep} from 'node:path'
 import {fileURLToPath, pathToFileURL} from 'node:url'
 
-import {HeadObjectCommand, PutObjectCommand, S3Client} from '@aws-sdk/client-s3'
+import {
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3'
 import {PrismaPg} from '@prisma/adapter-pg'
 import {PrismaClient} from '@prisma/client'
 
@@ -31,7 +36,25 @@ export function createAssetUploader({bucket, client, rootDirectory}) {
         new HeadObjectCommand({Bucket: bucket, Key: item.objectKey}),
       )
     } catch (error) {
-      if (!isMissingObject(error)) {
+      if (isForbiddenObjectLookup(error)) {
+        let listing
+
+        try {
+          listing = await client.send(
+            new ListObjectsV2Command({
+              Bucket: bucket,
+              MaxKeys: 1,
+              Prefix: item.objectKey,
+            }),
+          )
+        } catch {
+          throw new Error('V2_DEMO_GARAGE_READ_FAILED')
+        }
+
+        if (listing.Contents?.some(object => object.Key === item.objectKey)) {
+          throw new Error('V2_DEMO_GARAGE_READ_FAILED')
+        }
+      } else if (!isMissingObject(error)) {
         throw new Error('V2_DEMO_GARAGE_READ_FAILED')
       }
     }
@@ -146,6 +169,10 @@ function isMissingObject(error) {
       error.name === 'NoSuchKey' ||
       error.$metadata?.httpStatusCode === 404)
   )
+}
+
+function isForbiddenObjectLookup(error) {
+  return error instanceof Error && error.$metadata?.httpStatusCode === 403
 }
 
 export async function readValidatedDemoAsset(item, rootDirectory) {
