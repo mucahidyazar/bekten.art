@@ -33,4 +33,23 @@ describe('buildContentSecurityPolicy', () => {
       buildContentSecurityPolicy({nonce: 'local-nonce', production: false}),
     ).not.toContain('upgrade-insecure-requests')
   })
+
+  it('allows only the validated Garage origin for redirected public media', () => {
+    const policy = buildContentSecurityPolicy({
+      mediaOrigin: 'https://s3.mucahid.dev',
+      nonce: 'media-nonce',
+      production: true,
+    })
+
+    expect(policy).toMatch(
+      /img-src[^;]+https:\/\/s3\.mucahid\.dev(?:;|$)/u,
+    )
+    expect(() =>
+      buildContentSecurityPolicy({
+        mediaOrigin: "https://s3.example'; img-src *",
+        nonce: 'media-nonce',
+        production: true,
+      }),
+    ).toThrow('Invalid media origin')
+  })
 })
