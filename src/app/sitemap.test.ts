@@ -80,7 +80,11 @@ describe('V2 sitemap', () => {
         entityId: entity.entityId,
         entityType: entity.entityType,
         locale: entity.locale,
-        snapshot: {locale: entity.locale, slug: entity.slug},
+        snapshot: {
+          locale: entity.locale,
+          seo: {noIndex: false},
+          slug: entity.slug,
+        },
         version: 2,
       })),
     )
@@ -138,6 +142,7 @@ describe('V2 sitemap', () => {
   it('indexes only published entities backed by a matching immutable snapshot', async () => {
     const missingRevisionId = '10000000-0000-4000-8000-000000000002'
     const futureRevisionId = '10000000-0000-4000-8000-000000000003'
+    const noIndexId = '10000000-0000-4000-8000-000000000004'
 
     database.artwork.findMany.mockResolvedValue([
       {
@@ -161,6 +166,13 @@ describe('V2 sitemap', () => {
         updatedAt,
         version: 1,
       },
+      {
+        id: noIndexId,
+        locale: 'en',
+        publishedAt,
+        updatedAt,
+        version: 1,
+      },
     ])
     database.contentRevision.findMany.mockResolvedValue([
       ...entities.map(entity => ({
@@ -168,7 +180,11 @@ describe('V2 sitemap', () => {
         entityId: entity.entityId,
         entityType: entity.entityType,
         locale: entity.locale,
-        snapshot: {locale: entity.locale, slug: entity.slug},
+        snapshot: {
+          locale: entity.locale,
+          seo: {noIndex: false},
+          slug: entity.slug,
+        },
         version: 2,
       })),
       {
@@ -195,6 +211,18 @@ describe('V2 sitemap', () => {
         snapshot: {locale: 'en', slug: '../unsafe'},
         version: 2,
       },
+      {
+        createdAt: revisionAt,
+        entityId: noIndexId,
+        entityType: 'ARTWORK',
+        locale: 'en',
+        snapshot: {
+          locale: 'en',
+          seo: {noIndex: true},
+          slug: 'private-study',
+        },
+        version: 1,
+      },
     ])
 
     const {default: sitemap} = await import('./sitemap')
@@ -213,6 +241,7 @@ describe('V2 sitemap', () => {
     expect(entries.some(entry => entry.url.includes('future'))).toBe(false)
     expect(entries.some(entry => entry.url.includes('wrong-locale'))).toBe(false)
     expect(entries.some(entry => entry.url.includes('unsafe'))).toBe(false)
+    expect(entries.some(entry => entry.url.includes('private-study'))).toBe(false)
 
     for (const entity of entities) {
       expect(entity.delegate.findMany).toHaveBeenCalledWith({

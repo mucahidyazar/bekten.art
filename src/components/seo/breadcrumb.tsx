@@ -2,8 +2,12 @@ import {headers} from 'next/headers'
 import Link from 'next/link'
 
 import {ChevronRightIcon, HomeIcon} from 'lucide-react'
-import {getTranslations} from 'next-intl/server'
 
+import {
+  publicLocale,
+  publicShellCopy,
+  type PublicLocale,
+} from '@/components/public-site/public-copy'
 import {APP_LOCALES, type AppLocale, localizedPath} from '@/lib/localized-path'
 
 import {BreadcrumbStructuredData} from './structured-data'
@@ -18,58 +22,107 @@ interface BreadcrumbProps {
   className?: string
 }
 
-type BreadcrumbTranslator = (key: string) => string
+const EXTRA_LABELS: Readonly<
+  Record<PublicLocale, Readonly<Record<string, string>>>
+> = Object.freeze({
+  en: {
+    'available-works': 'Available works',
+    archive: 'Archive',
+    artist: 'Artist & studio',
+    collectors: 'Collectors',
+    'commission-a-work': 'Commission a work',
+    'privacy-policy': 'Privacy policy',
+    studio: 'Studio',
+    'terms-of-service': 'Terms of service',
+  },
+  ky: {
+    'available-works': 'Жеткиликтүү эмгектер',
+    archive: 'Архив',
+    artist: 'Сүрөтчү жана студия',
+    collectors: 'Коллекционерлер',
+    'commission-a-work': 'Эмгекке буйрутма берүү',
+    'privacy-policy': 'Купуялык саясаты',
+    studio: 'Студия',
+    'terms-of-service': 'Колдонуу шарттары',
+  },
+  ru: {
+    'available-works': 'Доступные работы',
+    archive: 'Архив',
+    artist: 'Художник и студия',
+    collectors: 'Коллекционерам',
+    'commission-a-work': 'Заказать работу',
+    'privacy-policy': 'Политика конфиденциальности',
+    studio: 'Студия',
+    'terms-of-service': 'Условия использования',
+  },
+  tr: {
+    'available-works': 'Uygun eserler',
+    archive: 'Arşiv',
+    artist: 'Sanatçı ve stüdyo',
+    collectors: 'Koleksiyonerler',
+    'commission-a-work': 'Özel eser talebi',
+    'privacy-policy': 'Gizlilik politikası',
+    studio: 'Stüdyo',
+    'terms-of-service': 'Kullanım koşulları',
+  },
+})
 
-function getBreadcrumbName(
-  segment: string,
-  parentSegment: string | undefined,
-  translate: BreadcrumbTranslator,
-) {
-  const translationKeys: Record<string, string> = {
-    about: 'about',
-    gallery: 'gallery',
-    news: 'news',
-    contact: 'contact',
+function staticLabels(locale: PublicLocale): Readonly<Record<string, string>> {
+  const copy = publicShellCopy[locale]
+
+  return Object.freeze({
+    ...EXTRA_LABELS[locale],
+    collections: copy.collections,
+    contact: copy.contact,
+    exhibitions: copy.exhibitions,
+    journal: copy.journal,
+    press: copy.press,
+    'private-viewings': copy.privateViewing,
+    works: copy.works,
+  })
+}
+
+function readableSegment(segment: string) {
+  let decoded = segment
+
+  try {
+    decoded = decodeURIComponent(segment)
+  } catch {
+    // Keep the original route segment when it contains malformed encoding.
   }
 
-  if (translationKeys[segment]) {
-    return translate(translationKeys[segment])
-  }
-
-  if (parentSegment === 'news') {
-    return translate('newsDetail')
-  }
-
-  return segment
+  return decoded
     .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .filter(Boolean)
+    .map(word => word.charAt(0).toLocaleUpperCase() + word.slice(1))
     .join(' ')
 }
 
-function buildBreadcrumbItems(
-  pathname: string,
-  translate: BreadcrumbTranslator,
-): BreadcrumbItem[] {
+function routeLocale(pathname: string) {
+  const segment = pathname.split('/').filter(Boolean)[0]
+
+  if (segment === 'kg') return 'ky' as const
+
+  return publicLocale(segment)
+}
+
+function buildBreadcrumbItems(pathname: string): BreadcrumbItem[] {
   const segments = pathname.split('/').filter(Boolean)
-  const routeLocale = segments[0]
-  const isSupportedLocale = APP_LOCALES.includes(routeLocale as AppLocale)
-  const isLegacyKyrgyzLocale = routeLocale === 'kg'
-  const locale = isSupportedLocale
-    ? (routeLocale as AppLocale)
-    : isLegacyKyrgyzLocale
-      ? 'ky'
-      : 'en'
-  const pathSegments =
-    isSupportedLocale || isLegacyKyrgyzLocale ? segments.slice(1) : segments
+  const locale = routeLocale(pathname)
+  const firstSegment = segments[0]
+  const hasLocale =
+    APP_LOCALES.includes(firstSegment as AppLocale) || firstSegment === 'kg'
+  const pathSegments = hasLocale ? segments.slice(1) : segments
+  const labels = staticLabels(locale)
   const items: BreadcrumbItem[] = [
-    {name: translate('home'), url: localizedPath(locale, '/')},
+    {name: publicShellCopy[locale].home, url: localizedPath(locale, '/')},
   ]
 
   pathSegments.forEach((segment, index) => {
     const publicPath = `/${pathSegments.slice(0, index + 1).join('/')}`
 
     items.push({
-      name: getBreadcrumbName(segment, pathSegments[index - 1], translate),
+      name: labels[segment] ?? readableSegment(segment),
       url: localizedPath(locale, publicPath),
     })
   })
@@ -79,13 +132,7 @@ function buildBreadcrumbItems(
 
 export async function Breadcrumb({items, className = ''}: BreadcrumbProps) {
   const pathname = (await headers()).get('x-pathname') ?? '/'
-  const routeLocale = pathname.split('/').filter(Boolean)[0]
-  const locale = APP_LOCALES.includes(routeLocale as AppLocale)
-    ? (routeLocale as AppLocale)
-    : 'en'
-  const t = await getTranslations({locale, namespace: 'navigation'})
-  const breadcrumbItems =
-    items || buildBreadcrumbItems(pathname, key => t(key as never))
+  const breadcrumbItems = items || buildBreadcrumbItems(pathname)
 
   if (breadcrumbItems.length <= 1) {
     return null

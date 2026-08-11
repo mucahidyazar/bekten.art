@@ -1,30 +1,13 @@
-import {Metadata} from 'next'
+import {permanentRedirect} from 'next/navigation'
 
-import {GalleryTemplate} from '@/components/templates/gallery-template'
-import {getGalleryImageArrays} from '@/lib/instagram-gallery'
-import {prepareMetadata} from '@/utils/prepare-metadata'
+import {localizedPath} from '@/lib/localized-path'
 
-export const dynamic = 'force-dynamic'
+import type {AppLocale} from '@/lib/localized-path'
 
-export async function generateMetadata(): Promise<Metadata> {
-  const {getTranslations} = await import('next-intl/server')
-  const t = await getTranslations('gallery')
+type PageProps = Readonly<{params: Promise<{locale: AppLocale}>}>
 
-  return prepareMetadata({
-    title: t('metaTitle'),
-    description: t('metaDescription'),
-    page: 'gallery',
-  })
-}
+export default async function LegacyGalleryPage({params}: PageProps) {
+  const {locale} = await params
 
-export default async function Home() {
-  const imagesArrays = await getGalleryImageArrays()
-
-  return (
-    <div className="app-container">
-      <div id="gallery" className="px-1 lg:px-4">
-        <GalleryTemplate imageArrays={imagesArrays} />
-      </div>
-    </div>
-  )
+  permanentRedirect(localizedPath(locale, '/works'))
 }
