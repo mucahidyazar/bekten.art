@@ -197,6 +197,11 @@ describe('V2 demo seed', () => {
         ),
       ),
     ).toBe(true)
+    expect(
+      plan.content
+        .flatMap(item => item.placements)
+        .every(placement => !Object.hasOwn(placement, 'focalPoint')),
+    ).toBe(true)
   })
 
   it('maps generated heritage assets to the intended editable Studio records', () => {
