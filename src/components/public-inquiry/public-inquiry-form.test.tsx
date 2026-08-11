@@ -24,7 +24,10 @@ function acceptedResponse() {
 async function fillContactFields(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText('Full name'), 'Ada Collector')
   await user.type(screen.getByLabelText('Email address'), 'ada@example.com')
-  await user.type(screen.getByLabelText('Phone (optional)'), '+90 555 123 45 67')
+  await user.type(
+    screen.getByLabelText('Phone (optional)'),
+    '+90 555 123 45 67',
+  )
   await user.click(screen.getByRole('checkbox', {name: /privacy policy/i}))
 }
 
@@ -59,7 +62,9 @@ describe('PublicInquiryForm', () => {
       />,
     )
 
-    expect(screen.getByRole('heading', {name: 'Availability inquiry'})).toBeVisible()
+    expect(
+      screen.getByRole('heading', {name: 'Availability inquiry'}),
+    ).toBeVisible()
     expect(screen.getByText('Mountain Memory')).toBeVisible()
     expect(screen.getByText(/2024 · Oil on canvas/)).toBeVisible()
     expect(container.firstElementChild).toHaveClass('inquiry-placement')
@@ -141,7 +146,10 @@ describe('PublicInquiryForm', () => {
     )
     await fillContactFields(user)
     await user.type(screen.getByLabelText('Preferred date'), '2027-04-12')
-    await user.type(screen.getByLabelText('Alternative date (optional)'), '2027-04-13')
+    await user.type(
+      screen.getByLabelText('Alternative date (optional)'),
+      '2027-04-13',
+    )
     await user.type(screen.getByLabelText('Attendees (optional)'), '3')
     await user.click(screen.getByRole('button', {name: 'Send private request'}))
 
@@ -171,7 +179,8 @@ describe('PublicInquiryForm', () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce())
     expect(submittedBody(fetchMock)).toMatchObject({
-      message: 'I would like to ask about the studio archive and artist materials.',
+      message:
+        'I would like to ask about the studio archive and artist materials.',
       subject: 'Archive research',
       type: 'GENERAL',
     })
@@ -249,9 +258,11 @@ describe('PublicInquiryForm', () => {
   it('never exposes an API or network error and retains the completed form', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockRejectedValue(
-        new Error('postgresql://private-user:secret@database'),
-      ),
+      vi
+        .fn()
+        .mockRejectedValue(
+          new Error('postgresql://private-user:secret@database'),
+        ),
     )
     const user = userEvent.setup()
 
@@ -270,8 +281,12 @@ describe('PublicInquiryForm', () => {
       'We could not receive your request. Please try again.',
     )
     expect(alert).not.toHaveTextContent('secret')
-    expect(screen.getByLabelText('Email address')).toHaveValue('ada@example.com')
-    expect(screen.getByRole('button', {name: 'Send private request'})).toBeEnabled()
+    expect(screen.getByLabelText('Email address')).toHaveValue(
+      'ada@example.com',
+    )
+    expect(
+      screen.getByRole('button', {name: 'Send private request'}),
+    ).toBeEnabled()
   })
 
   it.each([
