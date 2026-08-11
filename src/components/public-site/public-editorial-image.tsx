@@ -23,6 +23,7 @@ export function PublicEditorialImage({
       priority={priority}
       sizes={sizes}
       src={media.url}
+      unoptimized={media.url.startsWith('/api/media/')}
       width={width}
     />
   )

@@ -63,6 +63,7 @@ export const routing = routingConfig
 function createSecurityContext(request: NextRequest) {
   const nonce = crypto.randomUUID().replaceAll('-', '')
   const policy = buildContentSecurityPolicy({
+    mediaOrigin: process.env.MEDIA_S3_ENDPOINT,
     nonce,
     production: process.env.NODE_ENV === 'production',
   })

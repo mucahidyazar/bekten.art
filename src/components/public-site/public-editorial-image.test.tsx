@@ -3,6 +3,7 @@ import {describe, expect, it, vi} from 'vitest'
 
 vi.mock('next/image', () => ({
   default: ({
+    alt,
     priority,
     unoptimized,
     ...props
@@ -12,6 +13,7 @@ vi.mock('next/image', () => ({
   }) => (
     // eslint-disable-next-line @next/next/no-img-element -- semantic test double
     <img
+      alt={alt}
       data-priority={String(Boolean(priority))}
       data-unoptimized={String(Boolean(unoptimized))}
       {...props}
