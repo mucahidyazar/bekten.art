@@ -45,4 +45,18 @@ describe('prepareMetadata', () => {
     )
     expect(metadata).not.toHaveProperty('contentLocale')
   })
+
+  it('uses a neutral editorial identity instead of unverified legacy claims', () => {
+    const metadata = prepareMetadata({contentLocale: 'en'})
+
+    expect(metadata.description).toBe(
+      'The official editorial archive for Bekten Usubaliev’s works, exhibitions, journal and studio.',
+    )
+    expect(metadata.openGraph).toEqual(
+      expect.objectContaining({siteName: 'Bekten — Artist & Studio'}),
+    )
+    expect(JSON.stringify(metadata)).not.toMatch(
+      /master painter|gallery and workshop|artist portfolio/iu,
+    )
+  })
 })
