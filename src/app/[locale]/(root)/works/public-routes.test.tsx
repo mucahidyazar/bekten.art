@@ -1,7 +1,8 @@
 import {render, screen} from '@testing-library/react'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
 
-const {notFound, reader} = vi.hoisted(() => ({
+const {cacheResets, notFound, reader} = vi.hoisted(() => ({
+  cacheResets: [] as Array<() => void>,
   notFound: vi.fn(() => {
     throw new Error('NEXT_NOT_FOUND')
   }),
@@ -11,6 +12,7 @@ const {notFound, reader} = vi.hoisted(() => ({
     getJournalEntry: vi.fn(),
     getPressEntry: vi.fn(),
     getWork: vi.fn(),
+    listAvailableWorks: vi.fn(),
     listCollections: vi.fn(),
     listExhibitions: vi.fn(),
     listJournalEntries: vi.fn(),
@@ -21,6 +23,35 @@ const {notFound, reader} = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({notFound}))
 vi.mock('@/server/public-editorial', () => ({publicEditorialReader: reader}))
+vi.mock('react', async importOriginal => {
+  const actual = await importOriginal<typeof import('react')>()
+
+  return {
+    ...actual,
+    cache: <Arguments extends readonly unknown[], Result>(
+      operation: (...arguments_: Arguments) => Result,
+    ) => {
+      let values = new Map<string, Result>()
+
+      cacheResets.push(() => {
+        values = new Map<string, Result>()
+      })
+
+      return (...arguments_: Arguments) => {
+        const key = JSON.stringify(arguments_)
+        const existing = values.get(key)
+
+        if (existing !== undefined) return existing
+
+        const result = operation(...arguments_)
+
+        values.set(key, result)
+
+        return result
+      }
+    },
+  }
+})
 
 import AvailableWorksPage, {
   dynamic as availableWorksDynamic,
@@ -67,6 +98,7 @@ import WorksPage, {
   dynamic as worksDynamic,
   generateMetadata as generateWorksMetadata,
 } from './page'
+import {publicDate} from './public-route-helpers'
 
 import type {
   PublicArtwork,
@@ -89,6 +121,15 @@ const media = {
   role: 'HERO',
   url: '/api/media/50000000-0000-4000-8000-000000000001',
   width: 960,
+} as const
+
+const galleryMedia = {
+  ...media,
+  altText: 'A close detail from Silent Steppe',
+  displayOrder: 1,
+  mediaObjectId: '50000000-0000-4000-8000-000000000002',
+  role: 'GALLERY',
+  url: '/api/media/50000000-0000-4000-8000-000000000002',
 } as const
 
 const work = {
@@ -215,11 +256,13 @@ const detailParams = (slug: string, locale = 'en') =>
 
 beforeEach(() => {
   vi.clearAllMocks()
+  cacheResets.forEach(reset => reset())
   reader.getCollection.mockResolvedValue({collection, works: [work]})
   reader.getExhibition.mockResolvedValue({exhibition, works: [work]})
   reader.getJournalEntry.mockResolvedValue(journalEntry)
   reader.getPressEntry.mockResolvedValue(pressEntry)
   reader.getWork.mockResolvedValue(work)
+  reader.listAvailableWorks.mockResolvedValue([work])
   reader.listCollections.mockResolvedValue([collection])
   reader.listExhibitions.mockResolvedValue([exhibition])
   reader.listJournalEntries.mockResolvedValue([journalEntry])
@@ -227,21 +270,34 @@ beforeEach(() => {
   reader.listWorks.mockResolvedValue([work, archivedWork])
 })
 
+it('formats editorial date-only values in UTC across deploy regions', () => {
+  vi.stubEnv('TZ', 'America/Los_Angeles')
+
+  try {
+    expect(publicDate('2026-08-01T00:00:00.000Z', 'en')).toBe(
+      'August 1, 2026',
+    )
+  } finally {
+    vi.unstubAllEnvs()
+  }
+})
+
 describe('V2 public editorial list routes', () => {
-  it.each(['en', 'tr', 'ru', 'ky']) (
+  it.each(['en', 'tr', 'ru', 'ky'])(
     'accepts the supported %s locale and reads only the public work projection',
     async locale => {
       render(await WorksPage({params: params(locale)}))
 
       expect(reader.listWorks).toHaveBeenCalledWith(locale)
       expect(screen.getAllByRole('heading', {level: 1})).toHaveLength(1)
+      expect(screen.queryByRole('main')).toBeNull()
     },
   )
 
   it('rejects unsupported locales before querying editorial content', async () => {
-    await expect(
-      WorksPage({params: params('de')}),
-    ).rejects.toThrow('NEXT_NOT_FOUND')
+    await expect(WorksPage({params: params('de')})).rejects.toThrow(
+      'NEXT_NOT_FOUND',
+    )
 
     expect(reader.listWorks).not.toHaveBeenCalled()
   })
@@ -252,9 +308,10 @@ describe('V2 public editorial list routes', () => {
     expect(screen.getByRole('heading', {level: 1, name: 'Works'})).toBeVisible()
     expect(screen.getByRole('link', {name: /silent steppe/iu})).toHaveAttribute(
       'href',
-      '/en/works/silent-steppe',
+      '/works/silent-steppe',
     )
     expect(screen.queryByText(/add to cart|checkout|price/iu)).toBeNull()
+    expect(screen.getByRole('region', {name: 'Work archive'})).toBeVisible()
   })
 
   it('limits the available archive to works explicitly marked AVAILABLE', async () => {
@@ -265,23 +322,102 @@ describe('V2 public editorial list routes', () => {
     ).toBeVisible()
     expect(screen.getByText('Silent Steppe')).toBeVisible()
     expect(screen.queryByText('Archival Memory')).toBeNull()
+    expect(reader.listAvailableWorks).toHaveBeenCalledWith('en')
+    expect(reader.listWorks).not.toHaveBeenCalled()
   })
 
   it.each([
-    ['Collections', CollectionsPage, '/en/collections/remembered-landscapes'],
-    ['Exhibitions', ExhibitionsPage, '/en/exhibitions/echoes-of-the-steppe'],
-    ['Journal', JournalPage, '/en/journal/the-living-archive'],
-    ['Press', PressPage, '/en/press/a-conversation-across-generations'],
+    ['Collections', CollectionsPage, '/collections/remembered-landscapes'],
+    ['Exhibitions', ExhibitionsPage, '/exhibitions/echoes-of-the-steppe'],
+    ['Journal', JournalPage, '/journal/the-living-archive'],
+    ['Press', PressPage, '/press/a-conversation-across-generations'],
   ] as const)(
     'renders the %s editorial list as linked semantic articles',
     async (heading, Page, href) => {
       render(await Page({params: params()}))
 
-      expect(screen.getByRole('heading', {level: 1, name: heading})).toBeVisible()
+      expect(
+        screen.getByRole('heading', {level: 1, name: heading}),
+      ).toBeVisible()
       expect(screen.getAllByRole('article')).toHaveLength(1)
-      expect(screen.getByRole('link', {name: /./u})).toHaveAttribute('href', href)
+      expect(screen.getByRole('link', {name: /./u})).toHaveAttribute(
+        'href',
+        href,
+      )
     },
   )
+
+  it('composes collections as a featured series followed by the archive', async () => {
+    reader.listCollections.mockResolvedValueOnce([
+      collection,
+      {...collection, id: 'collection-two', slug: 'another-series', title: 'Another Series'},
+    ])
+
+    render(await CollectionsPage({params: params()}))
+
+    expect(
+      screen.getByRole('region', {name: 'Featured collection'}),
+    ).toBeVisible()
+    expect(screen.getByRole('list', {name: 'Collection archive'})).toBeVisible()
+  })
+
+  it('composes exhibitions as a featured record and chronological timeline', async () => {
+    reader.listExhibitions.mockResolvedValueOnce([
+      exhibition,
+      {
+        ...exhibition,
+        id: 'exhibition-two',
+        slug: 'earlier-exhibition',
+        startsAt: '2022-01-01T00:00:00.000Z',
+        title: 'Earlier Exhibition',
+      },
+    ])
+
+    render(await ExhibitionsPage({params: params()}))
+
+    expect(
+      screen.getByRole('region', {name: 'Featured exhibition'}),
+    ).toBeVisible()
+    expect(screen.getByRole('list', {name: 'Exhibition timeline'})).toBeVisible()
+  })
+
+  it('composes journal as one featured story followed by chronological rows', async () => {
+    reader.listJournalEntries.mockResolvedValueOnce([
+      journalEntry,
+      {
+        ...journalEntry,
+        id: 'journal-two',
+        publishedAt: '2024-02-01T00:00:00.000Z',
+        slug: 'winter-light',
+        title: 'Winter Light',
+      },
+    ])
+
+    render(await JournalPage({params: params()}))
+
+    expect(
+      screen.getByRole('region', {name: 'Featured journal entry'}),
+    ).toBeVisible()
+    expect(screen.getByRole('list', {name: 'Journal archive'})).toBeVisible()
+  })
+
+  it('groups press records by their real press category', async () => {
+    reader.listPressEntries.mockResolvedValueOnce([
+      pressEntry,
+      {
+        ...pressEntry,
+        id: 'press-two',
+        pressCategory: 'REVIEW',
+        slug: 'a-published-review',
+        title: 'A Published Review',
+      },
+    ])
+
+    render(await PressPage({params: params()}))
+
+    expect(screen.getByRole('heading', {level: 2, name: 'Interviews'})).toBeVisible()
+    expect(screen.getByRole('heading', {level: 2, name: 'Reviews'})).toBeVisible()
+  })
 
   it('emits locale-specific canonical metadata for every list route', async () => {
     const metadata = await Promise.all([
@@ -302,11 +438,58 @@ describe('V2 public editorial list routes', () => {
       '/tr/press',
     ])
   })
+
+  it('emits prefixless canonical metadata for English list routes', async () => {
+    const metadata = await Promise.all([
+      generateWorksMetadata({params: params('en')}),
+      generateAvailableWorksMetadata({params: params('en')}),
+      generateCollectionsMetadata({params: params('en')}),
+      generateExhibitionsMetadata({params: params('en')}),
+      generateJournalMetadata({params: params('en')}),
+      generatePressMetadata({params: params('en')}),
+    ])
+
+    expect(metadata.map(item => item.alternates?.canonical)).toEqual([
+      '/works',
+      '/available-works',
+      '/collections',
+      '/exhibitions',
+      '/journal',
+      '/press',
+    ])
+  })
+
+  it('renders a calm localized empty state for every editorial archive', async () => {
+    reader.listAvailableWorks.mockResolvedValue([])
+    reader.listWorks.mockResolvedValue([])
+    reader.listCollections.mockResolvedValue([])
+    reader.listExhibitions.mockResolvedValue([])
+    reader.listJournalEntries.mockResolvedValue([])
+    reader.listPressEntries.mockResolvedValue([])
+
+    const pages = [
+      WorksPage,
+      AvailableWorksPage,
+      CollectionsPage,
+      ExhibitionsPage,
+      JournalPage,
+      PressPage,
+    ] as const
+
+    for (const Page of pages) {
+      const view = render(await Page({params: params()}))
+
+      expect(screen.getByRole('status')).toBeVisible()
+      view.unmount()
+    }
+  })
 })
 
 describe('V2 public editorial detail routes', () => {
   it('renders a work with an artwork-bound availability inquiry and no store UI', async () => {
-    render(await WorkDetailPage({params: detailParams(work.slug)}))
+    const view = render(
+      await WorkDetailPage({params: detailParams(work.slug)}),
+    )
 
     expect(
       screen.getByRole('heading', {level: 1, name: 'Silent Steppe'}),
@@ -316,6 +499,36 @@ describe('V2 public editorial detail routes', () => {
     ).toBeVisible()
     expect(screen.getByText('Oil on canvas')).toBeVisible()
     expect(screen.queryByText(/add to cart|checkout|price/iu)).toBeNull()
+
+    const schema = JSON.parse(
+      view.container.querySelector('#artwork-structured-data')?.textContent ??
+        '{}',
+    ) as Record<string, unknown>
+
+    expect(schema).toMatchObject({
+      '@type': 'CreativeWork',
+      artMedium: 'Oil on canvas',
+      dateCreated: '2026',
+      description: work.description,
+      name: 'Silent Steppe',
+      url: 'https://bekten.art/works/silent-steppe',
+    })
+    expect(JSON.stringify(schema)).not.toMatch(/offer|price/iu)
+  })
+
+  it('uses real media placements for the work detail gallery and exposes a facts rail', async () => {
+    reader.getWork.mockResolvedValueOnce({
+      ...work,
+      mediaPlacements: [media, galleryMedia],
+    })
+
+    render(await WorkDetailPage({params: detailParams(work.slug)}))
+
+    expect(screen.getByRole('complementary', {name: 'Work facts'})).toBeVisible()
+    expect(
+      screen.getByRole('heading', {level: 2, name: 'Details from this work'}),
+    ).toBeVisible()
+    expect(screen.getAllByRole('img')).toHaveLength(2)
   })
 
   it('renders collection and exhibition details with their associated works', async () => {
@@ -328,8 +541,11 @@ describe('V2 public editorial detail routes', () => {
     expect(
       screen.getByRole('heading', {level: 1, name: collection.title}),
     ).toBeVisible()
-    expect(screen.getByRole('heading', {name: 'Works in this collection'})).toBeVisible()
+    expect(
+      screen.getByRole('heading', {name: 'Works in this collection'}),
+    ).toBeVisible()
     expect(screen.getByRole('link', {name: /silent steppe/iu})).toBeVisible()
+    expect(screen.getByRole('region', {name: 'Collection note'})).toBeVisible()
 
     document.body.innerHTML = ''
     render(
@@ -352,6 +568,9 @@ describe('V2 public editorial detail routes', () => {
 
     expect(journalView.container.querySelector('script')).toBeNull()
     expect(screen.getByText("<script>alert('unsafe')</script>")).toBeVisible()
+    expect(
+      screen.getByRole('complementary', {name: 'Article details'}),
+    ).toBeVisible()
 
     journalView.unmount()
     const pressView = render(
@@ -364,6 +583,104 @@ describe('V2 public editorial detail routes', () => {
       'rel',
       'noopener noreferrer',
     )
+    expect(
+      screen.getByRole('complementary', {name: 'Publication details'}),
+    ).toBeVisible()
+  })
+
+  it('keeps sparse published records semantic without inventing optional data', async () => {
+    const sparseWork = {
+      ...work,
+      dimensions: null,
+      mediaPlacements: [],
+      medium: null,
+      year: null,
+    } as PublicArtwork
+    const sparseCollection = {
+      ...collection,
+      mediaPlacements: [],
+    } as PublicCollection
+    const sparseExhibition = {
+      ...exhibition,
+      city: null,
+      country: null,
+      endsAt: null,
+      mediaPlacements: [],
+      subtitle: null,
+      venue: null,
+    } as PublicExhibition
+    const sparseJournal = {
+      ...journalEntry,
+      mediaPlacements: [],
+    } as PublicJournalEntry
+    const sparsePress = {
+      ...pressEntry,
+      body: null,
+      mediaPlacements: [],
+      publishedOn: null,
+      subtitle: null,
+    } as PublicPressEntry
+
+    reader.getWork.mockResolvedValueOnce(sparseWork)
+    let view = render(await WorkDetailPage({params: detailParams(work.slug)}))
+
+    expect(screen.getByRole('heading', {level: 1})).toBeVisible()
+    expect(screen.queryByRole('img')).toBeNull()
+    view.unmount()
+
+    reader.getCollection.mockResolvedValueOnce({
+      collection: sparseCollection,
+      works: [],
+    })
+    view = render(
+      await CollectionDetailPage({params: detailParams(collection.slug)}),
+    )
+    expect(screen.getByRole('status')).toBeVisible()
+    view.unmount()
+
+    reader.getExhibition.mockResolvedValueOnce({
+      exhibition: sparseExhibition,
+      works: [],
+    })
+    view = render(
+      await ExhibitionDetailPage({params: detailParams(exhibition.slug)}),
+    )
+    expect(screen.getByText(exhibition.body.split('\n\n')[0])).toBeVisible()
+    expect(screen.getByRole('status')).toBeVisible()
+    view.unmount()
+
+    reader.getJournalEntry.mockResolvedValueOnce(sparseJournal)
+    view = render(
+      await JournalDetailPage({params: detailParams(journalEntry.slug)}),
+    )
+    expect(screen.queryByRole('img')).toBeNull()
+    view.unmount()
+
+    reader.getPressEntry.mockResolvedValueOnce(sparsePress)
+    view = render(
+      await PressDetailPage({params: detailParams(pressEntry.slug)}),
+    )
+    expect(screen.getAllByText(pressEntry.excerpt)).toHaveLength(2)
+    expect(screen.queryByRole('img')).toBeNull()
+    view.unmount()
+  })
+
+  it('uses first media as a safe fallback and renders an editorial caption', async () => {
+    const fallbackMedia = {
+      ...media,
+      caption: 'From the Bekten Studio archive',
+      role: 'GALLERY',
+    }
+
+    reader.getJournalEntry.mockResolvedValueOnce({
+      ...journalEntry,
+      mediaPlacements: [fallbackMedia],
+    })
+
+    render(await JournalDetailPage({params: detailParams(journalEntry.slug)}))
+
+    expect(screen.getByText('From the Bekten Studio archive')).toBeVisible()
+    expect(screen.getByRole('img')).toBeVisible()
   })
 
   it.each([
@@ -372,13 +689,16 @@ describe('V2 public editorial detail routes', () => {
     ['exhibition', 'getExhibition', ExhibitionDetailPage, exhibition.slug],
     ['journal', 'getJournalEntry', JournalDetailPage, journalEntry.slug],
     ['press', 'getPressEntry', PressDetailPage, pressEntry.slug],
-  ] as const)('returns not found for a missing %s', async (_label, method, Page, slug) => {
-    reader[method].mockResolvedValueOnce(null)
+  ] as const)(
+    'returns not found for a missing %s',
+    async (_label, method, Page, slug) => {
+      reader[method].mockResolvedValueOnce(null)
 
-    await expect(Page({params: detailParams(slug)})).rejects.toThrow(
-      'NEXT_NOT_FOUND',
-    )
-  })
+      await expect(Page({params: detailParams(slug)})).rejects.toThrow(
+        'NEXT_NOT_FOUND',
+      )
+    },
+  )
 
   it('rejects a non-kebab detail slug before reading content', async () => {
     await expect(
@@ -402,21 +722,73 @@ describe('V2 public editorial detail routes', () => {
       exhibition.slug,
       exhibition.seo,
     ],
-    ['journal', generateJournalDetailMetadata, journalEntry.slug, journalEntry.seo],
+    [
+      'journal',
+      generateJournalDetailMetadata,
+      journalEntry.slug,
+      journalEntry.seo,
+    ],
     ['press', generatePressDetailMetadata, pressEntry.slug, pressEntry.seo],
   ] as const)(
     'uses the %s SEO record for title, canonical and noIndex metadata',
     async (_label, generateMetadata, slug, seo) => {
       const metadata = await generateMetadata({params: detailParams(slug)})
+      const canonicalPath =
+        seo.canonicalPath.replace(/^\/en(?=\/|$)/u, '') || '/'
 
       expect(metadata).toMatchObject({
-        alternates: {canonical: seo.canonicalPath},
+        alternates: {canonical: canonicalPath},
         description: seo.description,
+        openGraph: {
+          images: expect.any(Array),
+          locale: 'en_US',
+          siteName: expect.any(String),
+          type: expect.any(String),
+        },
         robots: {index: !seo.noIndex},
         title: seo.title,
       })
     },
   )
+
+  it('deduplicates metadata and render reads for every Prisma-backed detail', async () => {
+    const routes = [
+      ['getWork', generateWorkDetailMetadata, WorkDetailPage, work.slug],
+      [
+        'getCollection',
+        generateCollectionDetailMetadata,
+        CollectionDetailPage,
+        collection.slug,
+      ],
+      [
+        'getExhibition',
+        generateExhibitionDetailMetadata,
+        ExhibitionDetailPage,
+        exhibition.slug,
+      ],
+      [
+        'getJournalEntry',
+        generateJournalDetailMetadata,
+        JournalDetailPage,
+        journalEntry.slug,
+      ],
+      [
+        'getPressEntry',
+        generatePressDetailMetadata,
+        PressDetailPage,
+        pressEntry.slug,
+      ],
+    ] as const
+
+    for (const [method, generateMetadata, Page, slug] of routes) {
+      const routeParams = detailParams(slug)
+
+      await generateMetadata({params: routeParams})
+      await Page({params: routeParams})
+
+      expect(reader[method]).toHaveBeenCalledTimes(1)
+    }
+  })
 
   it('keeps every public editorial route request-time dynamic', () => {
     expect([
