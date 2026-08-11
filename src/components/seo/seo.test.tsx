@@ -1,7 +1,7 @@
 import {renderToStaticMarkup} from 'react-dom/server'
 import {describe, expect, it, vi} from 'vitest'
 
-const navigation = vi.hoisted(() => ({pathname: '/tr/news/42'}))
+const navigation = vi.hoisted(() => ({pathname: '/tr/journal/winter-light'}))
 
 vi.mock('next/headers', () => ({
   headers: () =>
@@ -53,21 +53,18 @@ describe('localized SEO components', () => {
     )
   })
 
-  it('keeps breadcrumb URLs within the active locale', () => {
-    const translate = (key: string) => key
-
-    expect(buildBreadcrumbItems('/ky/news/42', translate)).toEqual([
-      {name: 'home', url: '/ky'},
-      {name: 'news', url: '/ky/news'},
-      {name: 'newsDetail', url: '/ky/news/42'},
+  it('keeps V2 breadcrumb labels and URLs within the active locale', () => {
+    expect(buildBreadcrumbItems('/ky/works/silent-steppe')).toEqual([
+      {name: 'Башкы бет', url: '/ky'},
+      {name: 'Эмгектер', url: '/ky/works'},
+      {name: 'Silent Steppe', url: '/ky/works/silent-steppe'},
     ])
-    expect(buildBreadcrumbItems('/kg/gallery/artwork-id', translate)).toEqual([
-      {name: 'home', url: '/ky'},
-      {name: 'gallery', url: '/ky/gallery'},
-      {name: 'Artwork Id', url: '/ky/gallery/artwork-id'},
+    expect(buildBreadcrumbItems('/kg/private-viewings')).toEqual([
+      {name: 'Башкы бет', url: '/ky'},
+      {name: 'Жеке көрүү', url: '/ky/private-viewings'},
     ])
-    expect(buildBreadcrumbItems('/custom-page', translate)).toEqual([
-      {name: 'home', url: '/en'},
+    expect(buildBreadcrumbItems('/custom-page')).toEqual([
+      {name: 'Home', url: '/en'},
       {name: 'Custom Page', url: '/en/custom-page'},
     ])
   })
@@ -79,9 +76,9 @@ describe('localized SEO components', () => {
     )
 
     expect(breadcrumb).toContain('aria-current="page"')
-    expect(breadcrumb).toContain('href="/tr/news"')
+    expect(breadcrumb).toContain('href="/tr/journal"')
     expect(links).toContain(
-      'rel="canonical" href="https://bekten.art/tr/news/42"',
+      'rel="canonical" href="https://bekten.art/tr/journal/winter-light"',
     )
     expect(links).toContain('hrefLang="ky-KG"')
     expect(links).not.toContain('invalid')
@@ -92,7 +89,7 @@ describe('localized SEO components', () => {
 
     expect(renderToStaticMarkup(await Breadcrumb({}))).toBe('')
 
-    navigation.pathname = '/tr/news/42'
+    navigation.pathname = '/tr/journal/winter-light'
   })
 
   it('does not advertise a search endpoint that does not exist', () => {
