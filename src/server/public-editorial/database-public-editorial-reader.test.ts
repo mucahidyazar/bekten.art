@@ -26,7 +26,7 @@ const seo = {
 }
 
 function placement(
-  mediaObjectId = IDS.mediaHero,
+  mediaObjectId: string = IDS.mediaHero,
   role: 'HERO' | 'GALLERY' = 'HERO',
   displayOrder = 0,
 ) {
@@ -162,7 +162,7 @@ function revision(
 }
 
 function publicMedia(
-  id = IDS.mediaHero,
+  id: string = IDS.mediaHero,
   overrides: Readonly<Record<string, unknown>> = {},
 ) {
   return {
