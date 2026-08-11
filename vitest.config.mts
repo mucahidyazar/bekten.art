@@ -46,6 +46,8 @@ export default defineConfig({
         'src/server/studio-inquiries/**/*.ts',
         'src/server/studio-operations/**/*.ts',
         'src/utils/prepare-metadata.ts',
+        'scripts/lib/v2-demo-seed.mjs',
+        'scripts/seed-v2-demo.mjs',
       ],
       provider: 'v8',
       reporter: ['text', 'html'],
@@ -59,7 +61,12 @@ export default defineConfig({
     environment: 'jsdom',
     exclude: [...configDefaults.exclude, 'backup/**'],
     globals: true,
-    include: ['prisma/**/*.test.ts', 'src/**/*.test.ts', 'src/**/*.test.tsx'],
+    include: [
+      'prisma/**/*.test.ts',
+      'scripts/**/*.test.mjs',
+      'src/**/*.test.ts',
+      'src/**/*.test.tsx',
+    ],
     setupFiles: ['./src/test/setup.ts'],
   },
 })

@@ -24,6 +24,14 @@ COPY scripts/migration-runtime/package.json ./scripts/migration-runtime/package.
 RUN pnpm --filter @bekten/migration-runtime deploy --prod /migration-runtime
 COPY scripts/migration-runtime/prisma.config.ts /migration-runtime/prisma.config.ts
 
+FROM base AS seed-runtime
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY scripts/seed-runtime/package.json ./scripts/seed-runtime/package.json
+RUN pnpm --filter @bekten/seed-runtime deploy --prod /seed-runtime
+COPY prisma /seed-runtime/prisma
+RUN cd /seed-runtime && pnpm exec prisma generate --schema=prisma/schema.prisma
+
 FROM base AS builder
 
 ARG NEXT_PUBLIC_APP_URL=https://bekten.art
@@ -52,10 +60,12 @@ RUN addgroup --system --gid 1001 nodejs \
 
 COPY --from=migration-runtime --chown=nextjs:nodejs /migration-runtime ./scripts/migration-runtime
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=seed-runtime --chown=nextjs:nodejs /seed-runtime/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/start-production.mjs ./scripts/start-production.mjs
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/seed-v2-demo.mjs ./scripts/seed-v2-demo.mjs
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/media-safety.mjs ./scripts/media-safety.mjs
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/lib ./scripts/lib
 

@@ -1,5 +1,6 @@
 packages:
   - scripts/migration-runtime
+  - scripts/seed-runtime
 
 injectWorkspacePackages: true
 

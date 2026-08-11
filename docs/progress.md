@@ -38,7 +38,7 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 - [x] Artwork'i availability ve editorial metadata ile geliştir
 - [x] Locale, slug, sıralama ve draft/published/archived sözleşmesini tamamla
 - [x] Publish transaction ve cache invalidation akışını tamamla
-- [ ] Düzenlenebilir demo seed'i production gate ile ekle
+- [x] Düzenlenebilir demo seed'i production gate ile ekle
 
 ## 3. Bekten Studio erişimi ve temel deneyim
 

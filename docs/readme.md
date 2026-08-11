@@ -44,6 +44,13 @@ tamamlanan kararlar silinmez.
       dosyalarındaki tarihsel isimler checksum/audit bütünlüğü için
       değiştirilmeyecek; production doğrulaması Garage kayıt ve obje
       sayımlarıyla yapılacak.
+- [x] **2026-08-11 — Demo seed güvenliği:** Demo içerik container başlangıcında
+      otomatik çalışmayacak. Bağlandığı ortamdan bağımsız olarak yalnız
+      `ALLOW_V2_DEMO_SEED=true` ve
+      `V2_DEMO_SEED_CONFIRMATION=bekten-art-v2-demo` birlikte verilerek
+      `pnpm db:seed:demo` ayrı owner operasyonu olarak çalıştırılacak. Mevcut
+      Studio kaydı asla üzerine yazılmayacak; deterministic Garage varlıkları
+      doğrulanacak veya onarılacak ve işlem sonrası iki flag tekrar kapatılacak.
 
 ## Bekleyen kullanıcı kararları
 
