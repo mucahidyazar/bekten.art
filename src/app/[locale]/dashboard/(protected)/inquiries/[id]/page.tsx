@@ -45,7 +45,7 @@ const inquirySchema = z
 
 export default async function StudioInquiryDetailPage({
   params,
-}: PageProps<'/studio/inquiries/[id]'>) {
+}: PageProps<'/[locale]/dashboard/inquiries/[id]'>) {
   const {id} = await params
   const found = await configuredStudioInquiryService.findById(
     z.string().uuid().parse(id),

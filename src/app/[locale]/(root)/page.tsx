@@ -252,7 +252,7 @@ export default async function Home({params}: PageProps) {
             <p>{identity.artistDescription}</p>
             <Link
               className="heritage-button"
-              href={localizedPath(locale, '/artist')}
+              href={localizedPath(locale, '/about')}
             >
               {copy.discoverArtist}
               <span aria-hidden="true">→</span>
@@ -287,7 +287,7 @@ export default async function Home({params}: PageProps) {
           </blockquote>
           <Link
             className="heritage-text-link"
-            href={localizedPath(locale, '/artist')}
+            href={localizedPath(locale, '/about')}
           >
             Bekten
           </Link>

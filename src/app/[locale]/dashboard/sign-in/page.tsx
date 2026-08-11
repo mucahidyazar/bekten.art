@@ -13,7 +13,7 @@ export default function StudioSignInPage() {
     <main className="relative grid min-h-dvh place-items-center overflow-hidden bg-[#eee6d5] px-6 py-16 text-stone-950">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_20%_10%,rgba(120,53,15,.18),transparent_34%),radial-gradient(circle_at_80%_90%,rgba(68,64,60,.15),transparent_35%)]"
+        className="pointer-events-none absolute inset-0 [background-image:radial-gradient(circle_at_20%_10%,rgba(120,53,15,.18),transparent_34%),radial-gradient(circle_at_80%_90%,rgba(68,64,60,.15),transparent_35%)] opacity-25"
       />
       <section
         aria-labelledby="studio-sign-in-title"

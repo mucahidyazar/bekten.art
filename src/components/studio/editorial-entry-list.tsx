@@ -63,7 +63,7 @@ export function EditorialEntryList({
         </div>
         <Link
           className="inline-flex min-h-11 items-center bg-stone-950 px-5 py-3 font-semibold text-white"
-          href={`/studio/${routeSegment}/new`}
+          href={`/dashboard/${routeSegment}/new`}
         >
           Create {singularLabel}
         </Link>
@@ -121,7 +121,7 @@ export function EditorialEntryList({
               <div>
                 <Link
                   className="font-serif text-2xl underline decoration-stone-400 underline-offset-4 hover:decoration-red-900"
-                  href={`/studio/${routeSegment}/${entry.id}`}
+                  href={`/dashboard/${routeSegment}/${entry.id}`}
                 >
                   {entry.title}
                 </Link>

@@ -60,7 +60,7 @@ export default async function StudioOverviewPage() {
           </p>
           <Link
             className="mt-5 inline-flex min-h-11 items-center bg-stone-950 px-5 py-3 font-medium text-white"
-            href="/studio/artworks/new"
+            href="/dashboard/artworks/new"
           >
             Create an artwork
           </Link>
@@ -69,13 +69,13 @@ export default async function StudioOverviewPage() {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             className="inline-flex min-h-11 items-center bg-stone-950 px-5 py-3 font-medium text-white"
-            href="/studio/artworks?status=DRAFT"
+            href="/dashboard/artworks?status=DRAFT"
           >
             Review drafts
           </Link>
           <Link
             className="inline-flex min-h-11 items-center border border-stone-500 px-5 py-3 font-medium"
-            href="/studio/inquiries?status=NEW"
+            href="/dashboard/inquiries?status=NEW"
           >
             Open inquiry inbox
           </Link>

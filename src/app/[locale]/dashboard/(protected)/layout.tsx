@@ -7,15 +7,15 @@ import {isStudioOwnerRole} from '@/server/studio-auth/roles'
 import type {ReactNode} from 'react'
 
 const editorialNavigation = [
-  {href: '/studio', label: 'Overview'},
-  {href: '/studio/artworks', label: 'Artworks'},
-  {href: '/studio/collections', label: 'Collections'},
-  {href: '/studio/exhibitions', label: 'Exhibitions'},
-  {href: '/studio/journal', label: 'Journal'},
-  {href: '/studio/pages', label: 'Pages'},
-  {href: '/studio/press', label: 'Press'},
-  {href: '/studio/inquiries', label: 'Inquiries'},
-  {href: '/studio/media', label: 'Media'},
+  {href: '/dashboard', label: 'Overview'},
+  {href: '/dashboard/artworks', label: 'Artworks'},
+  {href: '/dashboard/collections', label: 'Collections'},
+  {href: '/dashboard/exhibitions', label: 'Exhibitions'},
+  {href: '/dashboard/journal', label: 'Journal'},
+  {href: '/dashboard/pages', label: 'Pages'},
+  {href: '/dashboard/press', label: 'Press'},
+  {href: '/dashboard/inquiries', label: 'Inquiries'},
+  {href: '/dashboard/media', label: 'Media'},
 ] as const
 
 export const dynamic = 'force-dynamic'
@@ -33,7 +33,7 @@ export default async function StudioProtectedLayout({
       'statusCode' in error &&
       (error.statusCode === 401 || error.statusCode === 403)
     ) {
-      redirect('/studio/sign-in')
+      redirect('/dashboard/sign-in')
     }
 
     throw error
@@ -49,7 +49,10 @@ export default async function StudioProtectedLayout({
       </a>
       <header className="border-b border-stone-400/60 bg-[#f8f2e6] px-6 py-5">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6">
-          <Link className="font-serif text-2xl tracking-tight" href="/studio">
+          <Link
+            className="font-serif text-2xl tracking-tight"
+            href="/dashboard"
+          >
             Bekten Studio
           </Link>
           <p className="text-xs font-semibold tracking-[0.2em] text-red-900 uppercase">
@@ -77,7 +80,7 @@ export default async function StudioProtectedLayout({
               <li className="mt-0 border-stone-400/60 md:mt-4 md:border-t md:pt-4">
                 <Link
                   className="block border-l-2 border-transparent px-4 py-3 font-medium transition hover:border-red-900 hover:bg-white/40 focus-visible:border-red-900 focus-visible:bg-white/40 focus-visible:outline-none"
-                  href="/studio/operations"
+                  href="/dashboard/operations"
                 >
                   Operations
                 </Link>

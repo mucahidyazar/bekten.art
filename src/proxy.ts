@@ -15,7 +15,7 @@ const routingConfig = {
 const intlMiddleware = createMiddleware(routingConfig)
 const PUBLIC_FILE_PATTERN = /\/[^/]+\.[^/]+$/
 const PREFIXLESS_LEGACY_ROUTES = Object.freeze({
-  '/about': '/artist',
+  '/artist': '/about',
   '/gallery': '/works',
   '/news': '/journal',
 })

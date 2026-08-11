@@ -2,25 +2,22 @@ import {notFound} from 'next/navigation'
 
 import {studioEditorialConfigurationForSegment} from '@/server/studio-content/editorial-route-config'
 
-import {StudioEditorialListPage} from '../editorial-pages'
+import {StudioEditorialPreviewPage} from '../../../editorial-pages'
 
-export default async function StudioContentListRoute({
+export default async function StudioContentPreviewRoute({
   params,
-  searchParams,
-}: PageProps<'/studio/[content-type]'>) {
-  const [routeParameters, searchParameters] = await Promise.all([
-    params,
-    searchParams,
-  ])
+}: PageProps<'/[locale]/dashboard/[content-type]/[id]/preview'>) {
+  const routeParameters = await params
   const contentType = routeParameters['content-type']
+  const {id} = routeParameters
   const configuration = studioEditorialConfigurationForSegment(contentType)
 
   if (!configuration) notFound()
 
   return (
-    <StudioEditorialListPage
+    <StudioEditorialPreviewPage
+      entityId={id}
       entityType={configuration.entityType}
-      searchParameters={searchParameters}
     />
   )
 }

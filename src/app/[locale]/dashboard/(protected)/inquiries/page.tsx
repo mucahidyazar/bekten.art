@@ -32,7 +32,7 @@ function first(value: string | readonly string[] | undefined) {
 
 export default async function StudioInquiriesPage({
   searchParams,
-}: PageProps<'/studio/inquiries'>) {
+}: PageProps<'/[locale]/dashboard/inquiries'>) {
   const parameters = await searchParams
   const status = inquiryStatusSchema
     .optional()
@@ -122,7 +122,7 @@ export default async function StudioInquiriesPage({
               <div>
                 <Link
                   className="font-serif text-2xl underline decoration-stone-400 underline-offset-4 hover:decoration-red-900"
-                  href={`/studio/inquiries/${inquiry.id}`}
+                  href={`/dashboard/inquiries/${inquiry.id}`}
                 >
                   {inquiry.name}
                 </Link>

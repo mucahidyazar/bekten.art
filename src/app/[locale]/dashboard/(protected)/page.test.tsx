@@ -31,11 +31,11 @@ describe('Studio overview', () => {
     ).not.toBeInTheDocument()
     expect(screen.getByRole('link', {name: 'Review drafts'})).toHaveAttribute(
       'href',
-      '/studio/artworks?status=DRAFT',
+      '/dashboard/artworks?status=DRAFT',
     )
     expect(
       screen.getByRole('link', {name: 'Open inquiry inbox'}),
-    ).toHaveAttribute('href', '/studio/inquiries?status=NEW')
+    ).toHaveAttribute('href', '/dashboard/inquiries?status=NEW')
   })
 
   it('provides a useful empty state when no Studio work is waiting', async () => {
@@ -48,6 +48,6 @@ describe('Studio overview', () => {
     expect(screen.getByText('The Studio queue is clear.')).toBeVisible()
     expect(
       screen.getByRole('link', {name: 'Create an artwork'}),
-    ).toHaveAttribute('href', '/studio/artworks/new')
+    ).toHaveAttribute('href', '/dashboard/artworks/new')
   })
 })

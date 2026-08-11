@@ -24,7 +24,7 @@ const NON_PARALLEL_DETAIL_ROOTS = new Set([
 ])
 const ROUTES_WITH_METADATA_CANONICAL = new Set([
   'archive',
-  'artist',
+  'about',
   'available-works',
   'collections',
   'collectors',

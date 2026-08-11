@@ -21,7 +21,7 @@ const STATIC_PAGES = [
   {path: '/exhibitions', changeFrequency: 'weekly', priority: 0.8},
   {path: '/journal', changeFrequency: 'weekly', priority: 0.7},
   {path: '/press', changeFrequency: 'monthly', priority: 0.7},
-  {path: '/artist', changeFrequency: 'monthly', priority: 0.8},
+  {path: '/about', changeFrequency: 'monthly', priority: 0.8},
   {path: '/studio', changeFrequency: 'monthly', priority: 0.7},
   {path: '/collectors', changeFrequency: 'monthly', priority: 0.7},
   {path: '/commission-a-work', changeFrequency: 'monthly', priority: 0.8},
@@ -65,11 +65,7 @@ type ValidPublishedEntityRow = PublishedEntityRow &
 
 type EntityGroup = Readonly<{
   entityType:
-    | 'ARTWORK'
-    | 'COLLECTION'
-    | 'EXHIBITION'
-    | 'JOURNAL_ENTRY'
-    | 'PRESS_ENTRY'
+    'ARTWORK' | 'COLLECTION' | 'EXHIBITION' | 'JOURNAL_ENTRY' | 'PRESS_ENTRY'
   path: string
   rows: readonly PublishedEntityRow[]
 }>
@@ -190,11 +186,7 @@ async function dynamicEntries(origin: string): Promise<MetadataRoute.Sitemap> {
   if (entityIds.length === 0) return []
 
   const revisions = await prisma.contentRevision.findMany({
-    orderBy: [
-      {entityId: 'asc'},
-      {version: 'desc'},
-      {createdAt: 'desc'},
-    ],
+    orderBy: [{entityId: 'asc'}, {version: 'desc'}, {createdAt: 'desc'}],
     select: {
       createdAt: true,
       entityId: true,

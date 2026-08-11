@@ -358,7 +358,7 @@ export function EditorialEntryForm({
           <>
             <Link
               className="inline-flex min-h-11 items-center px-4 py-3 font-semibold underline underline-offset-4"
-              href={`/studio/${routeSegments[entityType]}/${entityId}/preview`}
+              href={`/dashboard/${routeSegments[entityType]}/${entityId}/preview`}
             >
               Preview draft
             </Link>

@@ -60,6 +60,6 @@ describe('Studio operations', () => {
     )
 
     await expect(StudioOperationsPage()).rejects.toThrow('NEXT_REDIRECT')
-    expect(mocks.redirect).toHaveBeenCalledWith('/studio')
+    expect(mocks.redirect).toHaveBeenCalledWith('/dashboard')
   })
 })

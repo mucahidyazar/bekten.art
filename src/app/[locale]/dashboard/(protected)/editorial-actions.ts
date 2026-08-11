@@ -191,7 +191,7 @@ export async function moveStudioEditorialEntryAction(
 
   if (status) query.set('status', status)
 
-  redirect(`/studio/${routeSegments[entityType]}?${query.toString()}`)
+  redirect(`/dashboard/${routeSegments[entityType]}?${query.toString()}`)
 }
 
 export async function restoreStudioEditorialRevisionAction(
@@ -221,7 +221,7 @@ export async function restoreStudioEditorialRevisionAction(
     revisionId,
     revalidationPaths: revalidationPaths(entityType, locale, slug),
   })
-  redirect(`/studio/${routeSegments[entityType]}/${entityId}`)
+  redirect(`/dashboard/${routeSegments[entityType]}/${entityId}`)
 }
 
 export async function submitEditorialEntryAction(
@@ -256,7 +256,7 @@ export async function submitEditorialEntryAction(
       const expectedVersion = expectedVersionSchema.parse(expectedVersionInput)
 
       await repository.archive(entityId, expectedVersion, context)
-      redirectTarget = `/studio/${routeSegments[entityType]}`
+      redirectTarget = `/dashboard/${routeSegments[entityType]}`
     } else {
       const edit = parseEditorialFormData(entityType, formData)
       const saved = savedRecordSchema.parse(
@@ -293,7 +293,7 @@ export async function submitEditorialEntryAction(
         }
       }
 
-      redirectTarget = `/studio/${routeSegments[entityType]}/${saved.id}${publicationFailed ? '?notice=publish-failed' : ''}`
+      redirectTarget = `/dashboard/${routeSegments[entityType]}/${saved.id}${publicationFailed ? '?notice=publish-failed' : ''}`
     }
   } catch (error) {
     return failureState(error)

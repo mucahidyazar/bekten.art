@@ -161,7 +161,7 @@ export async function StudioEditorialEditorPage({
     <section aria-labelledby="studio-editor-title">
       <Link
         className="text-sm font-semibold underline underline-offset-4"
-        href={`/studio/${configuration.routeSegment}`}
+        href={`/dashboard/${configuration.routeSegment}`}
       >
         Back to {configuration.label.toLowerCase()}
       </Link>
@@ -276,7 +276,7 @@ export async function StudioEditorialPreviewPage({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Link
           className="text-sm font-semibold underline underline-offset-4"
-          href={`/studio/${configuration.routeSegment}/${record.id}`}
+          href={`/dashboard/${configuration.routeSegment}/${record.id}`}
         >
           Return to editor
         </Link>

@@ -1,13 +1,7 @@
-import {permanentRedirect} from 'next/navigation'
+import {createPublicManagedRoute} from '@/components/public-site/public-managed-route'
 
-import {localizedPath} from '@/lib/localized-path'
+const aboutRoute = createPublicManagedRoute({kind: 'artist', slug: 'about'})
 
-import type {AppLocale} from '@/lib/localized-path'
+export const generateMetadata = aboutRoute.generateMetadata
 
-type PageProps = Readonly<{params: Promise<{locale: AppLocale}>}>
-
-export default async function LegacyAboutPage({params}: PageProps) {
-  const {locale} = await params
-
-  permanentRedirect(localizedPath(locale, '/artist'))
-}
+export default aboutRoute.Page

@@ -4,19 +4,29 @@ import {studioEditorialConfigurationForSegment} from '@/server/studio-content/ed
 
 import {StudioEditorialEditorPage} from '../../editorial-pages'
 
-export default async function StudioContentCreateRoute({
+export default async function StudioContentEditRoute({
   params,
-}: PageProps<'/studio/[content-type]/new'>) {
-  const routeParameters = await params
+  searchParams,
+}: PageProps<'/[locale]/dashboard/[content-type]/[id]'>) {
+  const [routeParameters, searchParameters] = await Promise.all([
+    params,
+    searchParams,
+  ])
   const contentType = routeParameters['content-type']
+  const {id} = routeParameters
   const configuration = studioEditorialConfigurationForSegment(contentType)
 
   if (!configuration) notFound()
 
   return (
     <StudioEditorialEditorPage
-      entityId={null}
+      entityId={id}
       entityType={configuration.entityType}
+      notice={
+        typeof searchParameters.notice === 'string'
+          ? searchParameters.notice
+          : undefined
+      }
     />
   )
 }

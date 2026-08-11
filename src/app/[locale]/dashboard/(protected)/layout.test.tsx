@@ -54,7 +54,7 @@ describe('Studio protected layout', () => {
 
     expect(screen.getByRole('link', {name: 'Operations'})).toHaveAttribute(
       'href',
-      '/studio/operations',
+      '/dashboard/operations',
     )
   })
 
@@ -68,6 +68,6 @@ describe('Studio protected layout', () => {
     await expect(
       StudioProtectedLayout({children: <p>Private dashboard</p>}),
     ).rejects.toThrow('NEXT_REDIRECT')
-    expect(mocks.redirect).toHaveBeenCalledWith('/studio/sign-in')
+    expect(mocks.redirect).toHaveBeenCalledWith('/dashboard/sign-in')
   })
 })

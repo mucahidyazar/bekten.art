@@ -17,7 +17,7 @@ export function PublicHeader({locale}: PublicHeaderProps) {
   const navigation = [
     {href: '/', label: copy.home},
     {href: 'collections', label: copy.collections},
-    {href: 'artist', label: copy.studio},
+    {href: 'about', label: copy.studio},
     {href: 'works', label: copy.works},
     {href: 'collectors', label: copy.collectors},
     {href: 'contact', label: copy.contact},

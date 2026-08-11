@@ -36,7 +36,7 @@ describe('Studio inquiry inbox page', () => {
     expect(screen.getByRole('heading', {name: 'Inquiry inbox'})).toBeVisible()
     expect(screen.getByRole('link', {name: 'A Collector'})).toHaveAttribute(
       'href',
-      '/studio/inquiries/00000000-0000-4000-8000-000000000002',
+      '/dashboard/inquiries/00000000-0000-4000-8000-000000000002',
     )
     expect(screen.getByText('Winter Light')).toBeVisible()
     expect(mocks.list).toHaveBeenCalledWith(

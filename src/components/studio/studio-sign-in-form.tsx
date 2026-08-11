@@ -20,7 +20,7 @@ export function StudioSignInForm() {
 
     try {
       const result = await signIn('email', {
-        callbackUrl: '/studio',
+        callbackUrl: '/dashboard',
         email,
         redirect: false,
       })

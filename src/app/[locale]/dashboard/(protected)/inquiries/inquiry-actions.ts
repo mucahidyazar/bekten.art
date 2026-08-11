@@ -62,7 +62,7 @@ export async function updateStudioInquiryAction(
       requestId: randomUUID(),
       status: parsed.status,
     })
-    redirectTarget = `/studio/inquiries/${inquiryId}`
+    redirectTarget = `/dashboard/inquiries/${inquiryId}`
   } catch {
     return Object.freeze({
       fieldErrors: Object.freeze({}),

@@ -19,7 +19,7 @@ export default async function StudioOperationsPage() {
       'statusCode' in error &&
       (error.statusCode === 401 || error.statusCode === 403)
     ) {
-      redirect('/studio')
+      redirect('/dashboard')
     }
 
     throw error

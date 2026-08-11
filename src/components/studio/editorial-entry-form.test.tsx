@@ -46,7 +46,7 @@ describe('EditorialEntryForm', () => {
     expect(screen.getByRole('button', {name: 'Archive'})).toBeVisible()
     expect(screen.getByRole('link', {name: 'Preview draft'})).toHaveAttribute(
       'href',
-      '/studio/artworks/00000000-0000-4000-8000-000000000002/preview',
+      '/dashboard/artworks/00000000-0000-4000-8000-000000000002/preview',
     )
   })
 

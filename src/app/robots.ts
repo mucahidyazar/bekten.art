@@ -9,7 +9,13 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: ['/', '/api/og'],
-        disallow: ['/api/', '/studio', '/*/studio', '/_next/', '/private/'],
+        disallow: [
+          '/api/',
+          '/dashboard',
+          '/*/dashboard',
+          '/_next/',
+          '/private/',
+        ],
       },
       {
         userAgent: ['facebookexternalhit', 'Twitterbot', 'WhatsApp'],

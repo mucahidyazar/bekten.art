@@ -26,7 +26,7 @@ describe('EditorialEntryList', () => {
     expect(screen.getByRole('heading', {name: 'Artworks'})).toBeVisible()
     expect(screen.getByRole('link', {name: 'Winter Light'})).toHaveAttribute(
       'href',
-      '/studio/artworks/00000000-0000-4000-8000-000000000002',
+      '/dashboard/artworks/00000000-0000-4000-8000-000000000002',
     )
     expect(screen.getAllByText('Draft')).toHaveLength(2)
     expect(screen.getByText('Version 3')).toBeVisible()
@@ -44,7 +44,7 @@ describe('EditorialEntryList', () => {
     expect(screen.getByText('No collections yet.')).toBeVisible()
     expect(
       screen.getByRole('link', {name: 'Create collection'}),
-    ).toHaveAttribute('href', '/studio/collections/new')
+    ).toHaveAttribute('href', '/dashboard/collections/new')
   })
 
   it('exposes bounded ordering controls and preserves active filters', () => {

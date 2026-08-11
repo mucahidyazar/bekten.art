@@ -100,7 +100,7 @@ describe('Studio editorial actions', () => {
       }),
     )
     expect(mocks.redirect).toHaveBeenCalledWith(
-      '/studio/artworks/00000000-0000-4000-8000-000000000002',
+      '/dashboard/artworks/00000000-0000-4000-8000-000000000002',
     )
   })
 
@@ -250,7 +250,7 @@ describe('Studio editorial actions', () => {
       ),
     ).rejects.toThrow('NEXT_REDIRECT')
     expect(mocks.redirect).toHaveBeenCalledWith(
-      '/studio/artworks/00000000-0000-4000-8000-000000000002?notice=publish-failed',
+      '/dashboard/artworks/00000000-0000-4000-8000-000000000002?notice=publish-failed',
     )
     expect(mocks.redirect.mock.calls.at(-1)?.[0]).not.toContain('secret')
   })

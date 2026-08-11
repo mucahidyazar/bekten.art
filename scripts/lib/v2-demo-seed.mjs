@@ -198,7 +198,7 @@ const copy = deepFreeze({
       'A demonstration journal entry for testing long-form editorial rhythm. Every sentence can be replaced in Bekten Studio.',
     ],
     pages: {
-      artist: [
+      about: [
         'The artist',
         'Practice',
         'Bekten Usubaliev was born in 1958 in Kurmenty, Issyk-Kul. He studied at the Semyon Chuikov art school and later completed his training at the Repin Institute in Saint Petersburg.\n\nAfter returning to Kyrgyzstan in 1989, he began teaching at the national art school. His practice moves between portrait, landscape, memory, and everyday life.\n\nThis source-grounded Studio biography remains fully editable and should be reviewed with the artist before production publication.',
@@ -266,7 +266,7 @@ const copy = deepFreeze({
       'Узак форматтагы редакциялык ритмди сыноо үчүн демо журнал жазмасы. Ар бир сүйлөмдү Bekten Studio аркылуу алмаштырууга болот.',
     ],
     pages: {
-      artist: [
+      about: [
         'Сүрөтчү',
         'Практика',
         'Бектен Усубалиев 1958-жылы Ысык-Көлдүн Күрмөнтү айылында төрөлгөн. С. Чуйков атындагы көркөм окуу жайында жана Санкт-Петербургдагы Репин институтунда билим алган.\n\n1989-жылы Кыргызстанга кайтып келип, көркөм окуу жайында сабак бере баштаган. Бул Studio тексти сүрөтчү менен такталып, толугу менен өзгөртүлө алат.',
@@ -334,7 +334,7 @@ const copy = deepFreeze({
       'Демонстрационная журнальная запись для проверки длинного редакционного формата. Весь текст можно заменить в Bekten Studio.',
     ],
     pages: {
-      artist: [
+      about: [
         'Художник',
         'Практика',
         'Бектен Усубалиев родился в 1958 году в Курменты Иссык-Кульской области. Учился в художественном училище имени С. Чуйкова и в Институте имени Репина в Санкт-Петербурге.\n\nВернувшись в Кыргызстан в 1989 году, он начал преподавать. Этот текст Studio полностью редактируется и должен быть согласован с художником.',
@@ -402,7 +402,7 @@ const copy = deepFreeze({
       'Uzun biçimli editorial ritmi sınamak için hazırlanmış demo yazı. Her cümle Bekten Studio üzerinden değiştirilebilir.',
     ],
     pages: {
-      artist: [
+      about: [
         'Sanatçı',
         'Pratik',
         'Bekten Usubaliev 1958’de Issık Göl bölgesindeki Kurmenty’de doğdu. Semyon Chuikov sanat okulunda ve Saint Petersburg’daki Repin Enstitüsü’nde eğitim gördü.\n\n1989’da Kırgızistan’a dönerek sanat okulunda ders vermeye başladı. Bu Studio metni tamamen düzenlenebilir ve yayın öncesinde sanatçıyla doğrulanmalıdır.',
