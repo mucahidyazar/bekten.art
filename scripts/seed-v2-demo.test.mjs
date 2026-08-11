@@ -246,4 +246,37 @@ describe('V2 demo seed runner', () => {
       Prefix: asset.objectKey,
     })
   })
+
+  it('verifies an existing Garage object when the proxy rejects HEAD', async () => {
+    const [asset] = createDemoSeedPlan().media
+    const consumeBody = vi.fn().mockResolvedValue(new Uint8Array())
+    const client = {
+      send: vi
+        .fn()
+        .mockRejectedValueOnce(
+          Object.assign(new Error('HEAD not exposed'), {
+            $metadata: {httpStatusCode: 403},
+          }),
+        )
+        .mockResolvedValueOnce({
+          Contents: [{Key: asset.objectKey, Size: asset.sizeBytes}],
+        })
+        .mockResolvedValueOnce({
+          Body: {transformToByteArray: consumeBody},
+          ContentLength: asset.sizeBytes,
+          Metadata: {sha256: asset.checksumSha256},
+        }),
+    }
+
+    await createAssetUploader({
+      bucket: 'bekten-art-media',
+      client,
+      rootDirectory: process.cwd(),
+    })(asset)
+
+    expect(
+      client.send.mock.calls.map(([command]) => command.constructor.name),
+    ).toEqual(['HeadObjectCommand', 'ListObjectsV2Command', 'GetObjectCommand'])
+    expect(consumeBody).toHaveBeenCalledOnce()
+  })
 })
