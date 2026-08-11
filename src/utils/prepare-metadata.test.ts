@@ -30,4 +30,19 @@ describe('prepareMetadata', () => {
       }),
     )
   })
+
+  it('uses the content locale for Open Graph without leaking custom options', () => {
+    const metadata = prepareMetadata({
+      contentLocale: 'tr',
+      title: 'Eserler',
+    })
+
+    expect(metadata.openGraph).toEqual(
+      expect.objectContaining({
+        alternateLocale: ['en_US', 'ru_RU', 'ky_KG'],
+        locale: 'tr_TR',
+      }),
+    )
+    expect(metadata).not.toHaveProperty('contentLocale')
+  })
 })

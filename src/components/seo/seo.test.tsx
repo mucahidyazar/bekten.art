@@ -33,15 +33,15 @@ import {
 } from './structured-data'
 
 describe('localized SEO components', () => {
-  it('builds canonical and hreflang URLs from the shared localized path helper', () => {
-    expect(buildLocalizedLinks('/tr/news/42', 'https://bekten.art')).toEqual({
-      canonical: 'https://bekten.art/tr/news/42',
+  it('builds canonical and hreflang URLs for equivalent localized routes', () => {
+    expect(buildLocalizedLinks('/tr/journal', 'https://bekten.art')).toEqual({
+      canonical: 'https://bekten.art/tr/journal',
       alternates: [
-        {hrefLang: 'en-US', href: 'https://bekten.art/en/news/42'},
-        {hrefLang: 'tr-TR', href: 'https://bekten.art/tr/news/42'},
-        {hrefLang: 'ru-RU', href: 'https://bekten.art/ru/news/42'},
-        {hrefLang: 'ky-KG', href: 'https://bekten.art/ky/news/42'},
-        {hrefLang: 'x-default', href: 'https://bekten.art/en/news/42'},
+        {hrefLang: 'en-US', href: 'https://bekten.art/en/journal'},
+        {hrefLang: 'tr-TR', href: 'https://bekten.art/tr/journal'},
+        {hrefLang: 'ru-RU', href: 'https://bekten.art/ru/journal'},
+        {hrefLang: 'ky-KG', href: 'https://bekten.art/ky/journal'},
+        {hrefLang: 'x-default', href: 'https://bekten.art/en/journal'},
       ],
     })
 
@@ -51,6 +51,18 @@ describe('localized SEO components', () => {
     expect(buildLocalizedLinks('/about', 'https://bekten.art').canonical).toBe(
       'https://bekten.art/en/about',
     )
+  })
+
+  it('omits unverified alternates for editorial detail slugs', () => {
+    expect(
+      buildLocalizedLinks(
+        '/tr/journal/winter-light',
+        'https://bekten.art',
+      ),
+    ).toEqual({
+      alternates: [],
+      canonical: 'https://bekten.art/tr/journal/winter-light',
+    })
   })
 
   it('keeps V2 breadcrumb labels and URLs within the active locale', () => {
@@ -80,7 +92,7 @@ describe('localized SEO components', () => {
     expect(links).toContain(
       'rel="canonical" href="https://bekten.art/tr/journal/winter-light"',
     )
-    expect(links).toContain('hrefLang="ky-KG"')
+    expect(links).not.toContain('rel="alternate"')
     expect(links).not.toContain('invalid')
   })
 
