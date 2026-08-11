@@ -13,7 +13,8 @@ export function StudioSignInForm() {
     event.preventDefault()
     const form = event.currentTarget
     const emailField = new FormData(form).get('email')
-    const email = typeof emailField === 'string' ? emailField.trim().toLowerCase() : ''
+    const email =
+      typeof emailField === 'string' ? emailField.trim().toLowerCase() : ''
 
     setState('submitting')
 
@@ -39,7 +40,7 @@ export function StudioSignInForm() {
         <input
           aria-describedby={helpId}
           autoComplete="email"
-          className="min-h-12 rounded-sm border border-stone-400 bg-white/70 px-4 text-base text-stone-950 outline-none transition focus-visible:border-red-900 focus-visible:ring-2 focus-visible:ring-red-900/30"
+          className="min-h-12 rounded-sm border border-stone-400 bg-white/70 px-4 text-base text-stone-950 transition outline-none focus-visible:border-red-900 focus-visible:ring-2 focus-visible:ring-red-900/30"
           disabled={state === 'submitting'}
           id="studio-email"
           maxLength={254}
@@ -53,7 +54,7 @@ export function StudioSignInForm() {
       </div>
 
       <button
-        className="min-h-12 rounded-sm bg-stone-950 px-5 py-3 font-medium text-stone-50 transition hover:bg-red-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-900 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60"
+        className="min-h-12 rounded-sm bg-stone-950 px-5 py-3 font-medium text-stone-50 transition hover:bg-red-950 focus-visible:ring-2 focus-visible:ring-red-900 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-wait disabled:opacity-60"
         disabled={state === 'submitting'}
         type="submit"
       >

@@ -18,6 +18,8 @@ const editorialNavigation = [
   {href: '/studio/media', label: 'Media'},
 ] as const
 
+export const dynamic = 'force-dynamic'
+
 export default async function StudioProtectedLayout({
   children,
 }: Readonly<{children: ReactNode}>) {

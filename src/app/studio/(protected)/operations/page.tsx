@@ -6,7 +6,7 @@ import {getStudioOperationalCounts} from '@/server/studio-operations/operational
 const operationalCards = [
   {key: 'pendingDeliveries', label: 'Pending deliveries'},
   {key: 'failedDeliveries', label: 'Failed deliveries'},
-  {key: 'quarantinedMedia', label: 'Quarantined media'},
+  {key: 'problemMedia', label: 'Failed or quarantined media'},
   {key: 'recentAuditEvents', label: 'Audit events, last 24 hours'},
 ] as const
 

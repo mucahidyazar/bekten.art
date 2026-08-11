@@ -8,8 +8,8 @@ const mocks = vi.hoisted(() => ({
   mediaFindUnique: vi.fn(),
   mediaUpdate: vi.fn(),
   prepareImageUpload: vi.fn(),
-  requireAdminUser: vi.fn(),
-  requireRecentAdminUser: vi.fn(),
+  requireStudioEditor: vi.fn(),
+  requireStudioOwner: vi.fn(),
   storageDelete: vi.fn(),
   storageWrite: vi.fn(),
   transaction: vi.fn(),
@@ -29,27 +29,29 @@ vi.mock('@/lib/db', () => ({
   },
 }))
 
-vi.mock('@/server/auth/access', () => {
-  class AdminAccessRequiredError extends Error {
-    readonly statusCode = 403
-  }
-
-  class AuthenticationRequiredError extends Error {
+vi.mock('@/server/studio-auth/roles', () => {
+  class StudioAuthenticationRequiredError extends Error {
     readonly statusCode = 401
   }
 
-  class RecentAuthenticationRequiredError extends Error {
+  class StudioEditorRequiredError extends Error {
+    readonly statusCode = 403
+  }
+
+  class StudioOwnerRequiredError extends Error {
     readonly statusCode = 403
   }
 
   return {
-    AdminAccessRequiredError,
-    AuthenticationRequiredError,
-    RecentAuthenticationRequiredError,
-    requireAdminUser: mocks.requireAdminUser,
-    requireRecentAdminUser: mocks.requireRecentAdminUser,
+    StudioAuthenticationRequiredError,
+    StudioEditorRequiredError,
+    StudioOwnerRequiredError,
   }
 })
+vi.mock('@/server/studio-auth/configured-access', () => ({
+  requireStudioEditor: mocks.requireStudioEditor,
+  requireStudioOwner: mocks.requireStudioOwner,
+}))
 
 vi.mock('@/server/storage/object-storage', () => ({
   createConfiguredS3Client: vi.fn(() => ({})),
@@ -67,22 +69,18 @@ vi.mock('@/server/storage/object-storage', () => ({
   })),
 }))
 
-vi.mock(
-  '@/server/storage/upload-validation',
-  async importOriginal => {
-    const actual = await importOriginal<
-      typeof import('@/server/storage/upload-validation')
-    >()
+vi.mock('@/server/storage/upload-validation', async importOriginal => {
+  const actual =
+    await importOriginal<typeof import('@/server/storage/upload-validation')>()
 
-    return {...actual, prepareImageUpload: mocks.prepareImageUpload}
-  },
-)
+  return {...actual, prepareImageUpload: mocks.prepareImageUpload}
+})
 
 import {
-  AdminAccessRequiredError,
-  AuthenticationRequiredError,
-  RecentAuthenticationRequiredError,
-} from '@/server/auth/access'
+  StudioAuthenticationRequiredError,
+  StudioEditorRequiredError,
+  StudioOwnerRequiredError,
+} from '@/server/studio-auth/roles'
 
 import {DELETE, GET, POST} from './route'
 
@@ -134,13 +132,13 @@ describe('/api/uploads', () => {
     vi.clearAllMocks()
     vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://bekten.art')
     vi.stubEnv('NEXTAUTH_URL', 'https://bekten.art')
-    mocks.requireAdminUser.mockResolvedValue({
+    mocks.requireStudioEditor.mockResolvedValue({
       id: '0e46c4d1-5d63-4915-abfe-42b63558a568',
-      role: 'ADMIN',
+      role: 'EDITOR',
     })
-    mocks.requireRecentAdminUser.mockResolvedValue({
+    mocks.requireStudioOwner.mockResolvedValue({
       id: '0e46c4d1-5d63-4915-abfe-42b63558a568',
-      role: 'ADMIN',
+      role: 'OWNER',
     })
     mocks.mediaFindUnique.mockResolvedValue(null)
     mocks.mediaFindMany.mockResolvedValue([])
@@ -194,20 +192,21 @@ describe('/api/uploads', () => {
 
       request.headers.delete('origin')
 
-      const response = method === 'POST' ? await POST(request) : await DELETE(request)
+      const response =
+        method === 'POST' ? await POST(request) : await DELETE(request)
 
       expect(response.status).toBe(403)
-      expect(mocks.requireAdminUser).not.toHaveBeenCalled()
-      expect(mocks.requireRecentAdminUser).not.toHaveBeenCalled()
+      expect(mocks.requireStudioEditor).not.toHaveBeenCalled()
+      expect(mocks.requireStudioOwner).not.toHaveBeenCalled()
       expect(mocks.storageWrite).not.toHaveBeenCalled()
       expect(mocks.storageDelete).not.toHaveBeenCalled()
     },
   )
 
-  it('maps missing authentication and forbidden admin access without leaking errors', async () => {
-    mocks.requireAdminUser
-      .mockRejectedValueOnce(new AuthenticationRequiredError())
-      .mockRejectedValueOnce(new AdminAccessRequiredError())
+  it('maps missing authentication and forbidden Studio access without leaking errors', async () => {
+    mocks.requireStudioEditor
+      .mockRejectedValueOnce(new StudioAuthenticationRequiredError())
+      .mockRejectedValueOnce(new StudioEditorRequiredError())
 
     const unauthenticated = await GET(
       new Request('https://bekten.art/api/uploads'),
@@ -220,22 +219,22 @@ describe('/api/uploads', () => {
     })
     expect(forbidden.status).toBe(403)
     await expect(forbidden.json()).resolves.toEqual({
-      error: 'Admin access required',
+      error: 'Studio editor access required',
     })
   })
 
-  it('requires recent authentication for privileged media mutations', async () => {
-    mocks.requireRecentAdminUser.mockRejectedValueOnce(
-      new RecentAuthenticationRequiredError(),
+  it('requires owner access for destructive media mutations', async () => {
+    mocks.requireStudioOwner.mockRejectedValueOnce(
+      new StudioOwnerRequiredError(),
     )
 
-    const response = await POST(mutationRequest('POST'))
+    const response = await DELETE(mutationRequest('DELETE'))
 
     expect(response.status).toBe(403)
     await expect(response.json()).resolves.toEqual({
-      error: 'Recent authentication required',
+      error: 'Studio owner access required',
     })
-    expect(mocks.prepareImageUpload).not.toHaveBeenCalled()
+    expect(mocks.mediaFindUnique).not.toHaveBeenCalled()
   })
 
   it('rejects an invalid delete identifier before querying the database', async () => {

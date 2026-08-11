@@ -81,7 +81,9 @@ const publicSnapshot = {
 function fixture() {
   const transaction = {
     artwork: {
-      create: vi.fn().mockResolvedValue({...row, publishedAt: null, status: 'DRAFT'}),
+      create: vi
+        .fn()
+        .mockResolvedValue({...row, publishedAt: null, status: 'DRAFT'}),
       findFirst: vi.fn().mockResolvedValue(row),
       findMany: vi.fn().mockResolvedValue([row]),
       findUnique: vi.fn().mockResolvedValue(row),
@@ -95,6 +97,9 @@ function fixture() {
     },
     contentRevision: {
       findFirst: vi.fn().mockResolvedValue({snapshot: publicSnapshot}),
+    },
+    mediaObject: {
+      findMany: vi.fn().mockResolvedValue([{id: mediaObjectId}]),
     },
   }
   const database = {
@@ -166,6 +171,35 @@ describe('database editorial content repository', () => {
     expect(
       configured.transaction.contentMediaPlacement.deleteMany,
     ).toHaveBeenCalledWith({where: {entityId, entityType: 'ARTWORK'}})
+  })
+
+  it('rejects media that is not a ready public Garage object before replacing placements', async () => {
+    const configured = fixture()
+
+    configured.transaction.mediaObject.findMany.mockResolvedValueOnce([])
+
+    await expect(
+      configured.repository.artworks.update(
+        entityId,
+        {expectedVersion: 3, value: {...edit, title: 'Unsafe media update'}},
+        context,
+      ),
+    ).rejects.toThrow('EDITORIAL_MEDIA_UNAVAILABLE')
+    expect(configured.transaction.mediaObject.findMany).toHaveBeenCalledWith({
+      select: {id: true},
+      where: {
+        id: {in: [mediaObjectId]},
+        provider: 'garage',
+        status: 'READY',
+        visibility: 'PUBLIC',
+      },
+    })
+    expect(
+      configured.transaction.contentMediaPlacement.deleteMany,
+    ).not.toHaveBeenCalled()
+    expect(
+      configured.transaction.contentMediaPlacement.createMany,
+    ).not.toHaveBeenCalled()
   })
 
   it('throws a version conflict and leaves media untouched when CAS loses', async () => {
@@ -240,14 +274,20 @@ describe('database editorial content repository', () => {
       context,
     )
 
-    expect(configured.transaction.artwork.updateMany).toHaveBeenNthCalledWith(1, {
-      data: {publishedAt: null, status: 'ARCHIVED', version: 4},
-      where: {id: entityId, version: 3},
-    })
-    expect(configured.transaction.artwork.updateMany).toHaveBeenNthCalledWith(2, {
-      data: {displayOrder: 9, version: 4},
-      where: {id: entityId, version: 3},
-    })
+    expect(configured.transaction.artwork.updateMany).toHaveBeenNthCalledWith(
+      1,
+      {
+        data: {publishedAt: null, status: 'ARCHIVED', version: 4},
+        where: {id: entityId, version: 3},
+      },
+    )
+    expect(configured.transaction.artwork.updateMany).toHaveBeenNthCalledWith(
+      2,
+      {
+        data: {displayOrder: 9, version: 4},
+        where: {id: entityId, version: 3},
+      },
+    )
     expect(configured.transaction.auditEvent.create).toHaveBeenCalledWith({
       data: expect.objectContaining({action: 'editorial.archived'}),
     })

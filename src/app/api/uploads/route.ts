@@ -3,13 +3,6 @@ import {randomUUID} from 'crypto'
 import {NextResponse} from 'next/server'
 
 import {prisma} from '@/lib/db'
-import {
-  AdminAccessRequiredError,
-  AuthenticationRequiredError,
-  RecentAuthenticationRequiredError,
-  requireAdminUser,
-  requireRecentAdminUser,
-} from '@/server/auth/access'
 import {isSameOriginMutation} from '@/server/auth/mutation-origin'
 import {
   createConfiguredS3Client,
@@ -23,6 +16,15 @@ import {
   validateStorageObjectKey,
   validateStoragePathSegment,
 } from '@/server/storage/upload-validation'
+import {
+  requireStudioEditor,
+  requireStudioOwner,
+} from '@/server/studio-auth/configured-access'
+import {
+  StudioAuthenticationRequiredError,
+  StudioEditorRequiredError,
+  StudioOwnerRequiredError,
+} from '@/server/studio-auth/roles'
 
 const MAX_MULTIPART_BYTES = MAX_UPLOAD_BYTES + 1024 * 1024
 const MAX_LIST_LIMIT = 100
@@ -102,16 +104,16 @@ function optionalExternalUrl(candidate: string) {
 }
 
 function requestError(error: unknown) {
-  if (error instanceof AuthenticationRequiredError) {
+  if (error instanceof StudioAuthenticationRequiredError) {
     return {message: 'Authentication required', status: 401}
   }
 
-  if (error instanceof AdminAccessRequiredError) {
-    return {message: 'Admin access required', status: 403}
+  if (error instanceof StudioEditorRequiredError) {
+    return {message: 'Studio editor access required', status: 403}
   }
 
-  if (error instanceof RecentAuthenticationRequiredError) {
-    return {message: 'Recent authentication required', status: 403}
+  if (error instanceof StudioOwnerRequiredError) {
+    return {message: 'Studio owner access required', status: 403}
   }
 
   if (error instanceof StorageUnavailableError) {
@@ -192,7 +194,7 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const admin = await requireRecentAdminUser()
+    const owner = await requireStudioOwner()
 
     const {searchParams} = new URL(request.url)
     const fileId = validateMediaId(searchParams.get('id') || '')
@@ -228,7 +230,7 @@ export async function DELETE(request: Request) {
       await transaction.auditEvent.create({
         data: {
           action: 'media.deleted',
-          actorUserId: admin.id,
+          actorUserId: owner.id,
           entityId: fileId,
           entityType: 'MediaObject',
           metadata: {objectKey: safeObjectKey},
@@ -244,7 +246,7 @@ export async function DELETE(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    await requireAdminUser()
+    await requireStudioEditor()
 
     const {searchParams} = new URL(request.url)
     const bucket = validateStoragePathSegment(
@@ -309,7 +311,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const admin = await requireRecentAdminUser()
+    const editor = await requireStudioEditor()
 
     if (!validMultipartMetadata(request)) {
       return NextResponse.json({error: 'Invalid upload request'}, {status: 400})
@@ -347,7 +349,7 @@ export async function POST(request: Request) {
         provider: 'garage',
         sizeBytes: prepared.bytes.byteLength,
         status: 'UPLOADING',
-        uploadedByUserId: admin.id,
+        uploadedByUserId: editor.id,
         visibility: 'PUBLIC',
         width: prepared.width,
       },
@@ -372,7 +374,7 @@ export async function POST(request: Request) {
         await transaction.auditEvent.create({
           data: {
             action: 'media.uploaded',
-            actorUserId: admin.id,
+            actorUserId: editor.id,
             entityId: id,
             entityType: 'MediaObject',
             metadata: {

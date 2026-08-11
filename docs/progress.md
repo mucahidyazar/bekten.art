@@ -52,13 +52,13 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 
 ## 4. Bekten Studio içerik yönetimi
 
-- [ ] Eser CRUD, sıralama, preview ve publish akışını geliştir
-- [ ] Koleksiyon CRUD, sıralama, preview ve publish akışını geliştir
-- [ ] Sergi CRUD, preview ve publish akışını geliştir
-- [ ] Journal, press ve sayfa CRUD akışlarını geliştir
-- [ ] Garage medya yükleme, seçme, sıralama ve alt-text akışını geliştir
-- [ ] Inquiry inbox, filtre, durum ve not akışını geliştir
-- [ ] Revision geçmişi, karşılaştırma ve geri alma deneyimini geliştir
+- [x] Eser CRUD, sıralama, preview ve publish akışını geliştir
+- [x] Koleksiyon CRUD, sıralama, preview ve publish akışını geliştir
+- [x] Sergi CRUD, preview ve publish akışını geliştir
+- [x] Journal, press ve sayfa CRUD akışlarını geliştir
+- [x] Garage medya yükleme, seçme, sıralama ve alt-text akışını geliştir
+- [x] Inquiry inbox, filtre, durum ve not akışını geliştir
+- [x] Revision geçmişi, karşılaştırma ve geri alma deneyimini geliştir
 
 ## 5. Public editorial heritage deneyimi
 
@@ -77,7 +77,7 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 ## 6. Kalite ve production
 
 - [x] Inquiry ve Resend outbox akışını idempotent tamamla
-- [ ] Garage private/public medya güvenlik sınırlarını doğrula
+- [x] Garage private/public medya güvenlik sınırlarını doğrula
 - [ ] Dört locale çeviri, canonical, hreflang, sitemap ve structured data'yı
       tamamla
 - [ ] WCAG 2.1 AA, keyboard, focus, contrast ve reduced-motion testlerini geçir

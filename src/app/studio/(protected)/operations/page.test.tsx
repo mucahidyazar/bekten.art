@@ -41,12 +41,15 @@ describe('Studio operations', () => {
     expect(screen.getByRole('heading', {name: 'Operations'})).toBeVisible()
     expect(screen.getByText('Pending deliveries')).toBeVisible()
     expect(screen.getByText('Failed deliveries')).toBeVisible()
-    expect(screen.getByText('Quarantined media')).toBeVisible()
+    expect(screen.getByText('Failed or quarantined media')).toBeVisible()
     expect(screen.getByText('Audit events, last 24 hours')).toBeVisible()
     expect(screen.getByText('3')).toBeVisible()
     expect(screen.getByText('1')).toBeVisible()
     expect(screen.getByText('2')).toBeVisible()
     expect(screen.getByText('8')).toBeVisible()
+    expect(mocks.mediaObject.count).toHaveBeenCalledWith({
+      where: {status: {in: ['FAILED', 'QUARANTINED']}},
+    })
   })
 
   it('returns an editor to the Studio overview', async () => {

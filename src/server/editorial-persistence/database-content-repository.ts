@@ -38,6 +38,9 @@ type ContentTransaction = Readonly<{
   contentRevision: Readonly<{
     findFirst: (args: unknown) => Promise<unknown | null>
   }>
+  mediaObject: Readonly<{
+    findMany: (args: unknown) => Promise<readonly unknown[]>
+  }>
 }>
 
 export type EditorialContentDatabase = Readonly<{
@@ -110,9 +113,9 @@ function placementData(
   entityType: EditorialEntityType,
   edit: Readonly<Record<string, unknown>>,
 ) {
-  const placements = z.array(z.record(z.string(), z.unknown())).parse(
-    edit.mediaPlacements,
-  )
+  const placements = z
+    .array(z.record(z.string(), z.unknown()))
+    .parse(edit.mediaPlacements)
 
   return placements.map(placement => ({
     altText: placement.altText,
@@ -158,21 +161,17 @@ export function createDatabaseEditorialContentRepository(
   function repository(entityType: EditorialEntityType) {
     const codec = codecs[entityType]
 
-    async function record(
-      transaction: ContentTransaction,
-      row: unknown,
-    ) {
+    async function record(transaction: ContentTransaction, row: unknown) {
       const lifecycle = lifecycleRowSchema.safeParse(row)
 
       if (!lifecycle.success) {
         throw new Error('EDITORIAL_PERSISTENCE_ROW_INVALID')
       }
 
-      const placements =
-        await transaction.contentMediaPlacement.findMany({
-          orderBy: {displayOrder: 'asc'},
-          where: {entityId: lifecycle.data.id, entityType},
-        })
+      const placements = await transaction.contentMediaPlacement.findMany({
+        orderBy: {displayOrder: 'asc'},
+        where: {entityId: lifecycle.data.id, entityType},
+      })
 
       return codec.record(row, placements)
     }
@@ -200,13 +199,37 @@ export function createDatabaseEditorialContentRepository(
       edit: Readonly<Record<string, unknown>>,
       removeExisting: boolean,
     ) {
+      const data = placementData(entityId, entityType, edit)
+      const mediaObjectIds = [
+        ...new Set(
+          data.map(({mediaObjectId}) => uuidSchema.parse(mediaObjectId)),
+        ),
+      ]
+
+      if (mediaObjectIds.length > 0) {
+        const availableMedia = z.array(z.object({id: uuidSchema})).parse(
+          await transaction.mediaObject.findMany({
+            select: {id: true},
+            where: {
+              id: {in: mediaObjectIds},
+              provider: 'garage',
+              status: 'READY',
+              visibility: 'PUBLIC',
+            },
+          }),
+        )
+        const availableIds = new Set(availableMedia.map(({id}) => id))
+
+        if (mediaObjectIds.some(id => !availableIds.has(id))) {
+          throw new Error('EDITORIAL_MEDIA_UNAVAILABLE')
+        }
+      }
+
       if (removeExisting) {
         await transaction.contentMediaPlacement.deleteMany({
           where: {entityId, entityType},
         })
       }
-
-      const data = placementData(entityId, entityType, edit)
 
       if (data.length > 0) {
         await transaction.contentMediaPlacement.createMany({data})
@@ -242,10 +265,17 @@ export function createDatabaseEditorialContentRepository(
             return versionConflict(delegate, id, expectedVersion)
           }
 
-          await audit(transaction, 'editorial.archived', entityType, id, context, {
-            fromVersion: expectedVersion,
-            toVersion: expectedVersion + 1,
-          })
+          await audit(
+            transaction,
+            'editorial.archived',
+            entityType,
+            id,
+            context,
+            {
+              fromVersion: expectedVersion,
+              toVersion: expectedVersion + 1,
+            },
+          )
           const updated = await delegate.findUnique({where: {id}})
 
           return record(transaction, updated)
@@ -351,23 +381,21 @@ export function createDatabaseEditorialContentRepository(
 
           if (lifecycles.length === 0) return []
 
-          const placements =
-            await transaction.contentMediaPlacement.findMany({
-              orderBy: {displayOrder: 'asc'},
-              where: {
-                entityId: {in: lifecycles.map(({id}) => id)},
-                entityType,
-              },
-            })
+          const placements = await transaction.contentMediaPlacement.findMany({
+            orderBy: {displayOrder: 'asc'},
+            where: {
+              entityId: {in: lifecycles.map(({id}) => id)},
+              entityType,
+            },
+          })
 
           return rows.map((row, index) =>
             codec.record(
               row,
               placements.filter(
                 placement =>
-                  z
-                    .object({entityId: uuidSchema})
-                    .parse(placement).entityId === lifecycles[index].id,
+                  z.object({entityId: uuidSchema}).parse(placement).entityId ===
+                  lifecycles[index].id,
               ),
             ),
           )
@@ -435,10 +463,17 @@ export function createDatabaseEditorialContentRepository(
           }
 
           await replacePlacements(transaction, id, edit, true)
-          await audit(transaction, 'editorial.updated', entityType, id, context, {
-            fromVersion: input.expectedVersion,
-            toVersion: input.expectedVersion + 1,
-          })
+          await audit(
+            transaction,
+            'editorial.updated',
+            entityType,
+            id,
+            context,
+            {
+              fromVersion: input.expectedVersion,
+              toVersion: input.expectedVersion + 1,
+            },
+          )
           const updated = await delegate.findUnique({where: {id}})
 
           return record(transaction, updated)
