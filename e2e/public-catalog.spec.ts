@@ -47,4 +47,19 @@ test.describe('V2 public catalogue list routes', () => {
       ).toHaveCount(0)
     })
   }
+
+  test('renders seeded editorial content instead of empty-state shells', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await expect(page.locator('main a[href^="/works/"]')).not.toHaveCount(0)
+
+    await page.goto('/works')
+    await expect(page.locator('main a[href^="/works/"]')).not.toHaveCount(0)
+
+    await page.goto('/collections')
+    await expect(page.locator('main a[href^="/collections/"]')).not.toHaveCount(
+      0,
+    )
+  })
 })

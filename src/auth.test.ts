@@ -33,8 +33,8 @@ describe('auth options', () => {
     const authOptions = (await import('./auth')).getAuthOptions()
 
     expect(authOptions.pages).toEqual({
-      error: '/studio/sign-in',
-      signIn: '/studio/sign-in',
+      error: '/dashboard/sign-in',
+      signIn: '/dashboard/sign-in',
     })
   })
 
@@ -121,7 +121,7 @@ describe('auth options', () => {
         baseUrl: 'https://bekten.art',
         url: 'https://attacker.example/steal',
       }),
-    ).resolves.toBe('https://bekten.art/studio')
+    ).resolves.toBe('https://bekten.art/dashboard')
   })
 
   it('normalizes exactly one Studio email address', async () => {

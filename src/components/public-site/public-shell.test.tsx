@@ -36,6 +36,11 @@ describe('editorial public shell', () => {
         locale === 'en' ? '/collections' : `/${locale}/collections`,
       )
       expect(
+        within(navigation).getByRole('link', {
+          name: /about|hakkında|о художнике|сүрөтчү/iu,
+        }),
+      ).toHaveAttribute('href', locale === 'en' ? '/about' : `/${locale}/about`)
+      expect(
         within(navigation).getByRole('link', {name: inquire}),
       ).toHaveAttribute(
         'href',

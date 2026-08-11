@@ -102,7 +102,7 @@ describe('V2 sitemap', () => {
       '/exhibitions',
       '/journal',
       '/press',
-      '/artist',
+      '/about',
       '/studio',
       '/collectors',
       '/commission-a-work',
@@ -127,7 +127,7 @@ describe('V2 sitemap', () => {
     }
 
     expect(
-      [...urls].some(url => /\/(?:gallery|news|about)(?:\/|$)/u.test(url)),
+      [...urls].some(url => /\/(?:gallery|news|artist)(?:\/|$)/u.test(url)),
     ).toBe(false)
     expect([...urls].some(url => url.includes('/kg'))).toBe(false)
 

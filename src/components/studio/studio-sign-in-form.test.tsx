@@ -26,7 +26,7 @@ describe('StudioSignInForm', () => {
     await user.click(screen.getByRole('button', {name: 'Send sign-in link'}))
 
     expect(signIn).toHaveBeenCalledWith('email', {
-      callbackUrl: '/studio',
+      callbackUrl: '/dashboard',
       email: 'owner@example.com',
       redirect: false,
     })

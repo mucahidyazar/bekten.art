@@ -65,7 +65,10 @@ describe('internationalization proxy', () => {
   })
 
   it('collapses prefixed English legacy routes directly to their V2 canonical route', () => {
-    expect(normalizePrefixedEnglishPathname('/en/about')).toBe('/artist')
+    expect(normalizePrefixedEnglishPathname('/en/about')).toBe('/about')
+    expect(normalizePrefixedEnglishPathname('/en/dashboard/sign-in')).toBe(
+      '/dashboard/sign-in',
+    )
     expect(normalizePrefixedEnglishPathname('/en/gallery')).toBe('/works')
     expect(normalizePrefixedEnglishPathname('/en/news')).toBe('/journal')
     expect(normalizePrefixedEnglishPathname('/en/news/studio-visit')).toBe(

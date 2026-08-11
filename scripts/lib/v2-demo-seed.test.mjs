@@ -240,7 +240,7 @@ describe('V2 demo seed', () => {
   it('uses source-grounded public context without private legacy contact data', () => {
     const serialized = JSON.stringify(createDemoSeedPlan())
     const artist = createDemoSeedPlan().content.find(
-      item => item.identity === 'PAGE:en:artist',
+      item => item.identity === 'PAGE:en:about',
     )
     const exhibition = createDemoSeedPlan().content.find(
       item => item.identity === 'EXHIBITION:en:earth-memory',
@@ -248,6 +248,7 @@ describe('V2 demo seed', () => {
 
     expect(artist?.row.body).toMatch(/1958/u)
     expect(artist?.row.body).toMatch(/Repin/u)
+    expect(artist?.revision.snapshot.seo.canonicalPath).toBe('/about')
     expect(exhibition?.row.body).toMatch(/36 paintings/u)
     expect(exhibition?.row.venue).toBe('Al Hayat Gallery')
     expect(serialized).not.toMatch(/gmail\.com|Tynystanov|Тыныстанов/iu)

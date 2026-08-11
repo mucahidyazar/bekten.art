@@ -49,7 +49,8 @@ test.describe('V2 editorial shell and navigation', () => {
     {from: '/en/news', to: '/journal'},
     {from: '/en/news/studio-note', to: '/journal/studio-note'},
     {from: '/ru/gallery', to: '/ru/works'},
-    {from: '/ky/about', to: '/ky/artist'},
+    {from: '/artist', to: '/about'},
+    {from: '/ky/artist', to: '/ky/about'},
   ] as const) {
     test(`permanently redirects ${redirect.from} to ${redirect.to}`, async ({
       request,
@@ -60,6 +61,32 @@ test.describe('V2 editorial shell and navigation', () => {
       expect(response.headers().location).toBe(redirect.to)
     })
   }
+
+  test('renders every managed public route while keeping the CMS on dashboard', async ({
+    page,
+  }) => {
+    for (const route of [
+      {heading: 'The artist', path: '/about'},
+      {heading: 'For collectors', path: '/collectors'},
+      {heading: 'The studio', path: '/studio'},
+    ] as const) {
+      const response = await page.goto(route.path)
+
+      expect(response?.ok()).toBe(true)
+      await expect(
+        page.getByRole('heading', {level: 1, name: route.heading}),
+      ).toBeVisible()
+      await expect(page.getByTestId('heritage-header')).toBeVisible()
+    }
+
+    const response = await page.goto('/dashboard/sign-in')
+
+    expect(response?.ok()).toBe(true)
+    await expect(
+      page.getByRole('heading', {level: 1, name: 'Private editorial access'}),
+    ).toBeVisible()
+    await expect(page.getByTestId('heritage-header')).toHaveCount(0)
+  })
 
   for (const {locale, path} of supportedLocales) {
     test(`renders the ${locale} home route with the matching document language`, async ({

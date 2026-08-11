@@ -10,8 +10,9 @@ describe('robots metadata', () => {
 
     expect(generalRule?.allow).toEqual(expect.arrayContaining(['/', '/api/og']))
     expect(generalRule?.disallow).toEqual(
-      expect.arrayContaining(['/api/', '/studio', '/*/studio']),
+      expect.arrayContaining(['/api/', '/dashboard', '/*/dashboard']),
     )
+    expect(generalRule?.disallow).not.toContain('/studio')
     const retiredPaths = [
       '/admin/',
       '/*/admin/',

@@ -80,11 +80,12 @@ describe('V2 editorial homepage', () => {
       'href',
       '/works/silent-steppe',
     )
-    expect(screen.getByRole('heading', {name: 'About the artist'})).toBeVisible()
-    expect(screen.getByRole('link', {name: 'Discover the artist'})).toHaveAttribute(
-      'href',
-      '/artist',
-    )
+    expect(
+      screen.getByRole('heading', {name: 'About the artist'}),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('link', {name: 'Discover the artist'}),
+    ).toHaveAttribute('href', '/about')
     expect(screen.queryByText(/buy|price|cart|checkout/iu)).toBeNull()
   })
 
