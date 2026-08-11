@@ -11,11 +11,64 @@ enum UserRole {
   USER
   ARTIST
   ADMIN
+  EDITOR
+  OWNER
 }
 
 enum ContentStatus {
   DRAFT
   PUBLISHED
+  ARCHIVED
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  ON_REQUEST
+  RESERVED
+  NOT_AVAILABLE
+}
+
+enum EditorialEntityType {
+  ARTWORK
+  COLLECTION
+  EXHIBITION
+  JOURNAL_ENTRY
+  PAGE
+  PRESS_ENTRY
+}
+
+enum ContentRevisionOperation {
+  PUBLISH
+  RESTORE
+}
+
+enum MediaPlacementRole {
+  HERO
+  THUMBNAIL
+  GALLERY
+  INLINE
+  SEO
+}
+
+enum MediaPlacementCrop {
+  ORIGINAL
+  LANDSCAPE
+  PORTRAIT
+  SQUARE
+}
+
+enum InquiryType {
+  AVAILABILITY
+  COMMISSION
+  PRIVATE_VIEWING
+  GENERAL
+}
+
+enum InquiryStatus {
+  NEW
+  IN_REVIEW
+  RESPONDED
+  CLOSED
   ARCHIVED
 }
 
@@ -78,15 +131,15 @@ enum OutboxStatus {
 }
 
 model User {
-  id                    String               @id @default(uuid()) @db.Uuid
+  id                    String                @id @default(uuid()) @db.Uuid
   name                  String?
-  email                 String?              @unique
-  emailVerified         DateTime?            @map("email_verified")
+  email                 String?               @unique
+  emailVerified         DateTime?             @map("email_verified")
   image                 String?
-  role                  UserRole             @default(USER)
-  passwordHash          String?              @map("password_hash")
-  passwordResetRequired Boolean              @default(false) @map("password_reset_required")
-  sessionVersion        Int                  @default(0) @map("session_version")
+  role                  UserRole              @default(USER)
+  passwordHash          String?               @map("password_hash")
+  passwordResetRequired Boolean               @default(false) @map("password_reset_required")
+  sessionVersion        Int                   @default(0) @map("session_version")
   phone                 String?
   address               String?
   bio                   String?
@@ -97,16 +150,18 @@ model User {
   github                String?
   working_hours         String?
   map_embed_url         String?
-  years_experience      Int                  @default(0)
-  artworks_count        Int                  @default(0)
-  exhibitions_count     Int                  @default(0)
+  years_experience      Int                   @default(0)
+  artworks_count        Int                   @default(0)
+  exhibitions_count     Int                   @default(0)
   last_sign_in_at       DateTime?
-  created_at            DateTime             @default(now())
-  updated_at            DateTime             @updatedAt
+  created_at            DateTime              @default(now())
+  updated_at            DateTime              @updatedAt
   accounts              Account[]
-  audit_events          AuditEvent[]         @relation("AuditEventActor")
-  feedback_resolutions  Feedback[]           @relation("FeedbackResolver")
-  media_objects         MediaObject[]        @relation("MediaObjectUploader")
+  audit_events          AuditEvent[]          @relation("AuditEventActor")
+  contentRevisions      ContentRevision[]     @relation("ContentRevisionActor")
+  feedback_resolutions  Feedback[]            @relation("FeedbackResolver")
+  inquiryInternalNotes  InquiryInternalNote[] @relation("InquiryInternalNoteAuthor")
+  media_objects         MediaObject[]         @relation("MediaObjectUploader")
   password_reset_tokens PasswordResetToken[]
   sessions              Session[]
   socials               Social[]
@@ -128,30 +183,158 @@ model Social {
 }
 
 model Artwork {
-  id           String        @id @default(uuid()) @db.Uuid
-  locale       String        @db.VarChar(5)
-  slug         String        @db.VarChar(160)
-  title        String        @db.VarChar(200)
-  description  String        @db.Text
-  imageUrl     String        @map("image_url") @db.Text
-  imageAlt     String        @map("image_alt") @db.VarChar(300)
-  objectKey    String?       @map("object_key") @db.VarChar(1024)
-  medium       String?       @db.VarChar(160)
-  dimensions   String?       @db.VarChar(120)
-  year         Int?
-  priceMinor   Int?          @map("price_minor")
-  currency     String?       @db.Char(3)
-  isAvailable  Boolean       @default(true) @map("is_available")
-  displayOrder Int           @default(0) @map("display_order")
-  status       ContentStatus @default(DRAFT)
-  publishedAt  DateTime?     @map("published_at")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
+  id                 String              @id @default(uuid()) @db.Uuid
+  collectionId       String?             @map("collection_id") @db.Uuid
+  locale             String              @db.VarChar(5)
+  slug               String              @db.VarChar(160)
+  title              String              @db.VarChar(200)
+  description        String              @db.Text
+  imageUrl           String              @map("image_url") @db.Text
+  imageAlt           String              @map("image_alt") @db.VarChar(300)
+  objectKey          String?             @map("object_key") @db.VarChar(1024)
+  medium             String?             @db.VarChar(160)
+  dimensions         String?             @db.VarChar(120)
+  year               Int?
+  priceMinor         Int?                @map("price_minor")
+  currency           String?             @db.Char(3)
+  isAvailable        Boolean             @default(true) @map("is_available")
+  availability       AvailabilityStatus  @default(ON_REQUEST) @map("availability_status")
+  seoTitle           String?             @map("seo_title") @db.VarChar(70)
+  seoDescription     String?             @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath   String?             @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex         Boolean             @default(false) @map("seo_no_index")
+  displayOrder       Int                 @default(0) @map("display_order")
+  version            Int                 @default(1)
+  status             ContentStatus       @default(DRAFT)
+  publishedAt        DateTime?           @map("published_at")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  collection         Collection?         @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  exhibitionArtworks ExhibitionArtwork[]
+  inquiries          Inquiry[]
 
   @@unique([locale, slug])
   @@index([locale, status, displayOrder])
   @@index([status, publishedAt])
+  @@index([collectionId, locale, status, displayOrder])
   @@map("artworks")
+}
+
+model Collection {
+  id               String        @id @default(uuid()) @db.Uuid
+  locale           String        @db.VarChar(5)
+  slug             String        @db.VarChar(160)
+  title            String        @db.VarChar(200)
+  description      String        @db.Text
+  seoTitle         String        @map("seo_title") @db.VarChar(70)
+  seoDescription   String        @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath String        @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex       Boolean       @default(false) @map("seo_no_index")
+  displayOrder     Int           @default(0) @map("display_order")
+  version          Int           @default(1)
+  status           ContentStatus @default(DRAFT)
+  publishedAt      DateTime?     @map("published_at")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+  artworks         Artwork[]
+
+  @@unique([locale, slug])
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@map("collections")
+}
+
+model Exhibition {
+  id               String              @id @default(uuid()) @db.Uuid
+  locale           String              @db.VarChar(5)
+  slug             String              @db.VarChar(160)
+  title            String              @db.VarChar(200)
+  subtitle         String?             @db.VarChar(300)
+  body             String              @db.Text
+  venue            String?             @db.VarChar(240)
+  city             String?             @db.VarChar(160)
+  country          String?             @db.VarChar(160)
+  startsAt         DateTime            @map("starts_at")
+  endsAt           DateTime?           @map("ends_at")
+  seoTitle         String              @map("seo_title") @db.VarChar(70)
+  seoDescription   String              @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath String              @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex       Boolean             @default(false) @map("seo_no_index")
+  displayOrder     Int                 @default(0) @map("display_order")
+  version          Int                 @default(1)
+  status           ContentStatus       @default(DRAFT)
+  publishedAt      DateTime?           @map("published_at")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+  exhibitionWorks  ExhibitionArtwork[]
+
+  @@unique([locale, slug])
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@index([startsAt, endsAt])
+  @@map("exhibitions")
+}
+
+model ExhibitionArtwork {
+  exhibitionId String     @map("exhibition_id") @db.Uuid
+  artworkId    String     @map("artwork_id") @db.Uuid
+  displayOrder Int        @default(0) @map("display_order")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  exhibition   Exhibition @relation(fields: [exhibitionId], references: [id], onDelete: Cascade)
+  artwork      Artwork    @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  @@id([exhibitionId, artworkId])
+  @@index([exhibitionId, displayOrder])
+  @@index([artworkId])
+  @@map("exhibition_artworks")
+}
+
+model JournalEntry {
+  id               String        @id @default(uuid()) @db.Uuid
+  locale           String        @db.VarChar(5)
+  slug             String        @db.VarChar(160)
+  title            String        @db.VarChar(200)
+  excerpt          String        @db.Text
+  body             String        @db.Text
+  seoTitle         String        @map("seo_title") @db.VarChar(70)
+  seoDescription   String        @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath String        @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex       Boolean       @default(false) @map("seo_no_index")
+  displayOrder     Int           @default(0) @map("display_order")
+  version          Int           @default(1)
+  status           ContentStatus @default(DRAFT)
+  publishedAt      DateTime?     @map("published_at")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  @@unique([locale, slug])
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@map("journal_entries")
+}
+
+model Page {
+  id               String        @id @default(uuid()) @db.Uuid
+  locale           String        @db.VarChar(5)
+  slug             String        @db.VarChar(160)
+  title            String        @db.VarChar(200)
+  eyebrow          String?       @db.VarChar(120)
+  body             String        @db.Text
+  seoTitle         String        @map("seo_title") @db.VarChar(70)
+  seoDescription   String        @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath String        @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex       Boolean       @default(false) @map("seo_no_index")
+  displayOrder     Int           @default(0) @map("display_order")
+  version          Int           @default(1)
+  status           ContentStatus @default(DRAFT)
+  publishedAt      DateTime?     @map("published_at")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  @@unique([locale, slug])
+  @@index([locale, status, displayOrder])
+  @@index([status, publishedAt])
+  @@map("pages")
 }
 
 model NewsArticle {
@@ -185,25 +368,32 @@ model NewsArticle {
 }
 
 model PressItem {
-  id           String        @id @default(uuid()) @db.Uuid
-  locale       String        @db.VarChar(5)
-  title        String        @db.VarChar(200)
-  subtitle     String?       @db.VarChar(300)
-  description  String        @db.Text
-  content      String?       @db.Text
-  imageUrl     String?       @map("image_url") @db.Text
-  imageAlt     String?       @map("image_alt") @db.VarChar(300)
-  objectKey    String?       @map("object_key") @db.VarChar(1024)
-  outlet       String        @db.VarChar(200)
-  sourceUrl    String        @map("source_url") @db.Text
-  publishedOn  DateTime?     @map("published_on") @db.Date
-  category     PressCategory
-  displayOrder Int           @default(0) @map("display_order")
-  status       ContentStatus @default(DRAFT)
-  publishedAt  DateTime?     @map("published_at")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
+  id               String        @id @default(uuid()) @db.Uuid
+  locale           String        @db.VarChar(5)
+  slug             String        @db.VarChar(160)
+  title            String        @db.VarChar(200)
+  subtitle         String?       @db.VarChar(300)
+  description      String        @db.Text
+  content          String?       @db.Text
+  imageUrl         String?       @map("image_url") @db.Text
+  imageAlt         String?       @map("image_alt") @db.VarChar(300)
+  objectKey        String?       @map("object_key") @db.VarChar(1024)
+  outlet           String        @db.VarChar(200)
+  sourceUrl        String        @map("source_url") @db.Text
+  publishedOn      DateTime?     @map("published_on") @db.Date
+  category         PressCategory
+  seoTitle         String?       @map("seo_title") @db.VarChar(70)
+  seoDescription   String?       @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath String?       @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex       Boolean       @default(false) @map("seo_no_index")
+  displayOrder     Int           @default(0) @map("display_order")
+  version          Int           @default(1)
+  status           ContentStatus @default(DRAFT)
+  publishedAt      DateTime?     @map("published_at")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
 
+  @@unique([locale, slug])
   @@index([locale, status, displayOrder])
   @@index([status, publishedAt])
   @@map("press_items")
@@ -357,28 +547,128 @@ model NewsletterSubscriber {
 }
 
 model MediaObject {
-  id               String          @id @default(uuid()) @db.Uuid
-  provider         String          @default("garage") @db.VarChar(32)
-  objectKey        String          @unique @map("object_key") @db.VarChar(1024)
-  filename         String          @db.VarChar(255)
-  originalFilename String          @map("original_filename") @db.VarChar(255)
-  mimeType         String          @map("mime_type") @db.VarChar(127)
-  sizeBytes        Int             @map("size_bytes")
-  checksumSha256   String          @map("checksum_sha256") @db.Char(64)
-  width            Int?
-  height           Int?
-  visibility       MediaVisibility @default(PRIVATE)
-  status           MediaStatus     @default(UPLOADING)
-  uploadedByUserId String?         @map("uploaded_by_user_id") @db.Uuid
-  createdAt        DateTime        @default(now()) @map("created_at")
-  updatedAt        DateTime        @updatedAt @map("updated_at")
-  uploadedByUser   User?           @relation("MediaObjectUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
-  instagramPosts   InstagramPost[]
+  id                String                  @id @default(uuid()) @db.Uuid
+  provider          String                  @default("garage") @db.VarChar(32)
+  objectKey         String                  @unique @map("object_key") @db.VarChar(1024)
+  filename          String                  @db.VarChar(255)
+  originalFilename  String                  @map("original_filename") @db.VarChar(255)
+  mimeType          String                  @map("mime_type") @db.VarChar(127)
+  sizeBytes         Int                     @map("size_bytes")
+  checksumSha256    String                  @map("checksum_sha256") @db.Char(64)
+  width             Int?
+  height            Int?
+  visibility        MediaVisibility         @default(PRIVATE)
+  status            MediaStatus             @default(UPLOADING)
+  uploadedByUserId  String?                 @map("uploaded_by_user_id") @db.Uuid
+  createdAt         DateTime                @default(now()) @map("created_at")
+  updatedAt         DateTime                @updatedAt @map("updated_at")
+  uploadedByUser    User?                   @relation("MediaObjectUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  instagramPosts    InstagramPost[]
+  contentPlacements ContentMediaPlacement[]
 
   @@index([status, createdAt])
   @@index([visibility, status])
   @@index([checksumSha256])
   @@map("media_objects")
+}
+
+model ContentMediaPlacement {
+  id            String              @id @default(uuid()) @db.Uuid
+  entityType    EditorialEntityType @map("entity_type")
+  entityId      String              @map("entity_id") @db.Uuid
+  mediaObjectId String              @map("media_object_id") @db.Uuid
+  role          MediaPlacementRole
+  crop          MediaPlacementCrop  @default(ORIGINAL)
+  altText       String              @map("alt_text") @db.VarChar(300)
+  caption       String?             @db.VarChar(1000)
+  credit        String?             @db.VarChar(300)
+  focalPoint    Json?               @map("focal_point")
+  displayOrder  Int                 @default(0) @map("display_order")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+  mediaObject   MediaObject         @relation(fields: [mediaObjectId], references: [id], onDelete: Restrict)
+
+  @@unique([entityType, entityId, displayOrder])
+  @@index([entityType, entityId, role])
+  @@index([mediaObjectId])
+  @@map("content_media_placements")
+}
+
+model ContentRevision {
+  id               String                   @id @default(uuid()) @db.Uuid
+  entityType       EditorialEntityType      @map("entity_type")
+  entityId         String                   @map("entity_id") @db.Uuid
+  locale           String                   @db.VarChar(5)
+  version          Int
+  operation        ContentRevisionOperation
+  snapshot         Json
+  sourceRevisionId String?                  @map("source_revision_id") @db.Uuid
+  actorUserId      String?                  @map("actor_user_id") @db.Uuid
+  createdAt        DateTime                 @default(now()) @map("created_at")
+  sourceRevision   ContentRevision?         @relation("ContentRevisionLineage", fields: [sourceRevisionId], references: [id], onDelete: Restrict)
+  derivedRevisions ContentRevision[]        @relation("ContentRevisionLineage")
+  actorUser        User?                    @relation("ContentRevisionActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@unique([entityType, entityId, version])
+  @@index([entityType, entityId, createdAt])
+  @@index([sourceRevisionId])
+  @@index([actorUserId, createdAt])
+  @@map("content_revisions")
+}
+
+model Inquiry {
+  id                   String                @id @default(uuid()) @db.Uuid
+  submissionId         String                @unique @map("submission_id") @db.Uuid
+  type                 InquiryType
+  status               InquiryStatus         @default(NEW)
+  locale               String                @db.VarChar(5)
+  name                 String                @db.VarChar(120)
+  email                String                @db.VarChar(320)
+  phone                String?               @db.VarChar(40)
+  source               String                @db.VarChar(80)
+  abuseKeyHash         String                @map("abuse_key_hash") @db.Char(64)
+  consentedAt          DateTime              @map("consented_at")
+  privacyNoticeVersion String                @map("privacy_notice_version") @db.VarChar(40)
+  subject              String?               @db.VarChar(200)
+  message              String?               @db.Text
+  brief                String?               @db.Text
+  preferredTimeline    String?               @map("preferred_timeline") @db.VarChar(300)
+  preferredDates       DateTime[]            @default([]) @map("preferred_dates") @db.Date
+  attendees            Int?
+  relatedArtworkId     String?               @map("related_artwork_id") @db.Uuid
+  relatedArtworkTitle  String?               @map("related_artwork_title") @db.VarChar(200)
+  relatedArtworkSlug   String?               @map("related_artwork_slug") @db.VarChar(160)
+  relatedArtworkYear   Int?                  @map("related_artwork_year")
+  relatedArtworkLocale String?               @map("related_artwork_locale") @db.VarChar(5)
+  labels               String[]              @default([])
+  purgeAfter           DateTime?             @map("erase_personal_data_after")
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
+  relatedArtwork       Artwork?              @relation(fields: [relatedArtworkId], references: [id], onDelete: SetNull)
+  internalNotes        InquiryInternalNote[]
+
+  @@index([status, createdAt])
+  @@index([type, status, createdAt])
+  @@index([email, createdAt])
+  @@index([abuseKeyHash, createdAt])
+  @@index([relatedArtworkId, createdAt])
+  @@index([labels], type: Gin)
+  @@index([purgeAfter])
+  @@map("inquiries")
+}
+
+model InquiryInternalNote {
+  id           String   @id @default(uuid()) @db.Uuid
+  inquiryId    String   @map("inquiry_id") @db.Uuid
+  body         String   @db.Text
+  authorUserId String?  @map("author_user_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at")
+  inquiry      Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  authorUser   User?    @relation("InquiryInternalNoteAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
+
+  @@index([inquiryId, createdAt])
+  @@index([authorUserId, createdAt])
+  @@map("inquiry_internal_notes")
 }
 
 model AuditEvent {

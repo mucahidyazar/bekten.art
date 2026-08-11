@@ -48,6 +48,7 @@ describe('V2 cleanup contract', () => {
     'src/components/providers/user-provider.tsx',
     'src/components/sections/home-store-section.tsx',
     'src/components/sections/store-section.tsx',
+    'src/common.ts',
     'src/server/admin',
   ] as const
 

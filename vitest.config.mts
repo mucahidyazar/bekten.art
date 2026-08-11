@@ -47,7 +47,11 @@ export default defineConfig({
     environment: 'jsdom',
     exclude: [...configDefaults.exclude, 'backup/**'],
     globals: true,
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    include: [
+      'prisma/**/*.test.ts',
+      'src/**/*.test.ts',
+      'src/**/*.test.tsx',
+    ],
     setupFiles: ['./src/test/setup.ts'],
   },
 })
