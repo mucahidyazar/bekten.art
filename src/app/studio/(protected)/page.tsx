@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import {prisma} from '@/lib/db'
 
 const cards = [
@@ -48,6 +50,37 @@ export default async function StudioOverviewPage() {
           </div>
         ))}
       </dl>
+
+      {draftArtworks + publishedArtworks + collections + newInquiries === 0 ? (
+        <div className="mt-8 border border-dashed border-stone-500/60 bg-white/30 p-8">
+          <h2 className="font-serif text-2xl">The Studio queue is clear.</h2>
+          <p className="mt-2 max-w-xl leading-7 text-stone-700">
+            Begin the editorial archive with a real artwork record. Everything
+            can be revised before publication.
+          </p>
+          <Link
+            className="mt-5 inline-flex min-h-11 items-center bg-stone-950 px-5 py-3 font-medium text-white"
+            href="/studio/artworks/new"
+          >
+            Create an artwork
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            className="inline-flex min-h-11 items-center bg-stone-950 px-5 py-3 font-medium text-white"
+            href="/studio/artworks?status=DRAFT"
+          >
+            Review drafts
+          </Link>
+          <Link
+            className="inline-flex min-h-11 items-center border border-stone-500 px-5 py-3 font-medium"
+            href="/studio/inquiries?status=NEW"
+          >
+            Open inquiry inbox
+          </Link>
+        </div>
+      )}
     </section>
   )
 }

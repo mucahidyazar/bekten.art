@@ -18,7 +18,10 @@ import StudioProtectedLayout from './layout'
 describe('Studio protected layout', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireStudioEditor.mockResolvedValue({id: 'editor-1', role: 'EDITOR'})
+    mocks.requireStudioEditor.mockResolvedValue({
+      id: 'editor-1',
+      role: 'EDITOR',
+    })
   })
 
   it('renders the private Studio shell for a current editor', async () => {
@@ -30,9 +33,28 @@ describe('Studio protected layout', () => {
 
     expect(screen.getByRole('banner')).toHaveTextContent('Bekten Studio')
     expect(screen.getByRole('main')).toHaveTextContent('Private dashboard')
-    expect(screen.getByRole('link', {name: 'Skip to Studio content'})).toHaveAttribute(
+    expect(
+      screen.getByRole('link', {name: 'Skip to Studio content'}),
+    ).toHaveAttribute('href', '#studio-content')
+    expect(screen.getByRole('navigation', {name: 'Studio'})).toHaveTextContent(
+      'Artworks',
+    )
+    expect(
+      screen.queryByRole('link', {name: 'Operations'}),
+    ).not.toBeInTheDocument()
+  })
+
+  it('shows technical operations only to an owner', async () => {
+    mocks.requireStudioEditor.mockResolvedValueOnce({
+      id: 'owner-1',
+      role: 'OWNER',
+    })
+
+    render(await StudioProtectedLayout({children: <p>Private dashboard</p>}))
+
+    expect(screen.getByRole('link', {name: 'Operations'})).toHaveAttribute(
       'href',
-      '#studio-content',
+      '/studio/operations',
     )
   })
 

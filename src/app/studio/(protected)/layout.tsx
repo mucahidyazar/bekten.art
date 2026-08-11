@@ -2,12 +2,29 @@ import Link from 'next/link'
 import {redirect} from 'next/navigation'
 
 import {requireStudioEditor} from '@/server/studio-auth/configured-access'
+import {isStudioOwnerRole} from '@/server/studio-auth/roles'
+
+import type {ReactNode} from 'react'
+
+const editorialNavigation = [
+  {href: '/studio', label: 'Overview'},
+  {href: '/studio/artworks', label: 'Artworks'},
+  {href: '/studio/collections', label: 'Collections'},
+  {href: '/studio/exhibitions', label: 'Exhibitions'},
+  {href: '/studio/journal', label: 'Journal'},
+  {href: '/studio/pages', label: 'Pages'},
+  {href: '/studio/press', label: 'Press'},
+  {href: '/studio/inquiries', label: 'Inquiries'},
+  {href: '/studio/media', label: 'Media'},
+] as const
 
 export default async function StudioProtectedLayout({
   children,
-}: Readonly<{children: React.ReactNode}>) {
+}: Readonly<{children: ReactNode}>) {
+  let user: Awaited<ReturnType<typeof requireStudioEditor>>
+
   try {
-    await requireStudioEditor()
+    user = await requireStudioEditor()
   } catch (error) {
     if (
       error instanceof Error &&
@@ -39,14 +56,32 @@ export default async function StudioProtectedLayout({
         </div>
       </header>
       <div className="mx-auto grid max-w-7xl gap-8 px-6 py-8 md:grid-cols-[13rem_1fr]">
-        <nav aria-label="Studio" className="md:sticky md:top-8 md:self-start">
-          <Link
-            aria-current="page"
-            className="block border-l-2 border-red-900 bg-white/40 px-4 py-3 font-medium"
-            href="/studio"
-          >
-            Overview
-          </Link>
+        <nav
+          aria-label="Studio"
+          className="overflow-x-auto md:sticky md:top-8 md:self-start"
+        >
+          <ul className="flex min-w-max gap-1 md:grid md:min-w-0">
+            {editorialNavigation.map(item => (
+              <li key={item.href}>
+                <Link
+                  className="block border-l-2 border-transparent px-4 py-3 font-medium transition hover:border-red-900 hover:bg-white/40 focus-visible:border-red-900 focus-visible:bg-white/40 focus-visible:outline-none"
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+            {isStudioOwnerRole(user.role) ? (
+              <li className="mt-0 border-stone-400/60 md:mt-4 md:border-t md:pt-4">
+                <Link
+                  className="block border-l-2 border-transparent px-4 py-3 font-medium transition hover:border-red-900 hover:bg-white/40 focus-visible:border-red-900 focus-visible:bg-white/40 focus-visible:outline-none"
+                  href="/studio/operations"
+                >
+                  Operations
+                </Link>
+              </li>
+            ) : null}
+          </ul>
         </nav>
         <main id="studio-content" tabIndex={-1}>
           {children}

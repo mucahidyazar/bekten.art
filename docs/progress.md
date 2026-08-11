@@ -46,9 +46,9 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 - [x] EDITOR ve OWNER authorization sınırlarını tamamla
 - [x] Public auth route ve bağımlılıklarının kalmadığını doğrula
 - [x] Bekten Studio responsive shell'ini geliştir
-- [ ] Owner-only operasyon alanını editörden ayır
-- [ ] Studio genel bakış ve görev odaklı boş durumları geliştir
-- [ ] Studio error, loading ve accessibility durumlarını tamamla
+- [x] Owner-only operasyon alanını editörden ayır
+- [x] Studio genel bakış ve görev odaklı boş durumları geliştir
+- [x] Studio error, loading ve accessibility durumlarını tamamla
 
 ## 4. Bekten Studio içerik yönetimi
 
