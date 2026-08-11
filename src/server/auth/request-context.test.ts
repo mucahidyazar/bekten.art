@@ -13,7 +13,20 @@ describe('auth request context', () => {
     }
 
     expect(getClientAddress(request, false)).toBe('unavailable')
-    expect(getClientAddress(request, true)).toBe('203.0.113.8')
+    expect(getClientAddress(request, true)).toBe('10.0.0.2')
+  })
+
+  it('uses the proxy-appended rightmost valid hop instead of a spoofable first value', () => {
+    expect(
+      getClientAddress(
+        {
+          headers: {
+            'x-forwarded-for': '198.51.100.99, unknown, 203.0.113.12',
+          },
+        },
+        true,
+      ),
+    ).toBe('203.0.113.12')
   })
 
   it('rejects attacker-controlled non-IP forwarding values', () => {

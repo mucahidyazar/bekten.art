@@ -1,11 +1,13 @@
 import {describe, expect, it, vi} from 'vitest'
 
 const prisma = vi.hoisted(() => ({
+  $transaction: vi.fn(),
   auditEvent: {
     create: vi.fn(),
   },
   user: {
     findUnique: vi.fn(),
+    updateMany: vi.fn(),
   },
 }))
 const getServerSession = vi.hoisted(() => vi.fn())
@@ -83,10 +85,25 @@ describe('auth options', () => {
         user: {
           email: 'editor@example.com',
           id: 'editor',
-          role: 'EDITOR' as never,
-        },
+          role: 'EDITOR',
+          studioStatus: 'ACTIVE',
+        } as never,
       }),
     ).resolves.toBe(true)
+    await expect(
+      signIn?.({
+        account: null,
+        credentials: undefined,
+        email: undefined,
+        profile: undefined,
+        user: {
+          email: 'blocked@example.com',
+          id: 'blocked',
+          role: 'EDITOR',
+          studioStatus: 'SUSPENDED',
+        } as never,
+      }),
+    ).resolves.toBe(false)
   })
 
   it('maps the current adapter user into the database session', async () => {
@@ -136,6 +153,9 @@ describe('auth options', () => {
   })
 
   it('audits successful sign-in and sign-out lifecycle events', async () => {
+    prisma.$transaction.mockImplementation(async callback =>
+      callback({auditEvent: prisma.auditEvent, user: prisma.user}),
+    )
     const authOptions = (await import('./auth')).getAuthOptions()
 
     await authOptions.events?.signIn?.({
@@ -157,6 +177,26 @@ describe('auth options', () => {
         action: 'studio.sign-in.completed',
         actorUserId: 'owner-1',
       }),
+    })
+    expect(prisma.user.updateMany).toHaveBeenNthCalledWith(1, {
+      data: {
+        acceptedAt: expect.any(Date),
+        studioStatus: 'ACTIVE',
+        suspendedAt: null,
+      },
+      where: {
+        id: 'owner-1',
+        role: {in: ['EDITOR', 'OWNER', 'ADMIN']},
+        studioStatus: 'INVITED',
+      },
+    })
+    expect(prisma.user.updateMany).toHaveBeenNthCalledWith(2, {
+      data: {last_sign_in_at: expect.any(Date)},
+      where: {
+        id: 'owner-1',
+        role: {in: ['EDITOR', 'OWNER', 'ADMIN']},
+        studioStatus: 'ACTIVE',
+      },
     })
     expect(prisma.auditEvent.create).toHaveBeenNthCalledWith(2, {
       data: expect.objectContaining({

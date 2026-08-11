@@ -65,6 +65,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/start-production.mjs ./scripts/start-production.mjs
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/preflight-v2-cutover.mjs ./scripts/preflight-v2-cutover.mjs
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/seed-v2-demo.mjs ./scripts/seed-v2-demo.mjs
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/media-safety.mjs ./scripts/media-safety.mjs
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/lib ./scripts/lib

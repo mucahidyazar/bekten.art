@@ -1,5 +1,5 @@
 import {render, screen} from '@testing-library/react'
-import {describe, expect, it, vi} from 'vitest'
+import {beforeEach, describe, expect, it, vi} from 'vitest'
 
 import {createPublicManagedRoute} from './public-managed-route'
 
@@ -36,6 +36,10 @@ const managedPage = {
 }
 
 describe('createPublicManagedRoute', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('loads the exact locale and Studio slug and composes its inquiry', async () => {
     getPage.mockResolvedValueOnce(managedPage)
     const route = createPublicManagedRoute({
@@ -112,9 +116,6 @@ describe('createPublicManagedRoute', () => {
     await expect(
       route.Page({params: Promise.resolve({locale: 'tr'})}),
     ).rejects.toThrow('NOT_FOUND')
-    await expect(
-      route.Page({params: Promise.resolve({locale: 'de'})}),
-    ).rejects.toThrow('NOT_FOUND')
   })
 
   it('normalizes stored prefixed English canonical paths', async () => {
@@ -129,5 +130,29 @@ describe('createPublicManagedRoute', () => {
     await expect(
       route.generateMetadata({params: Promise.resolve({locale: 'en'})}),
     ).resolves.toMatchObject({alternates: {canonical: '/artist'}})
+  })
+
+  it('renders a marked English fallback for an active dynamic locale without indexing it as translated content', async () => {
+    const route = createPublicManagedRoute({kind: 'artist', slug: 'artist'})
+    const englishPage = {
+      ...managedPage,
+      locale: 'en',
+      seo: {...managedPage.seo, canonicalPath: '/artist'},
+    }
+
+    getPage.mockResolvedValueOnce(englishPage).mockResolvedValueOnce(englishPage)
+
+    const {container} = render(
+      await route.Page({params: Promise.resolve({locale: 'de'})}),
+    )
+
+    expect(getPage).toHaveBeenNthCalledWith(1, 'en', 'artist')
+    expect(container.firstElementChild).toHaveAttribute('lang', 'en')
+    await expect(
+      route.generateMetadata({params: Promise.resolve({locale: 'de'})}),
+    ).resolves.toMatchObject({
+      alternates: {canonical: '/artist'},
+      robots: {follow: true, index: false},
+    })
   })
 })

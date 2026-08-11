@@ -1,6 +1,6 @@
 import {z} from 'zod'
 
-import {isStudioEditorRole} from './roles'
+import {isStudioAccountSigninAllowed, isStudioEditorRole} from './roles'
 
 import type {StudioMagicLinkQueueInput} from './magic-link-coordinator'
 
@@ -22,6 +22,7 @@ export type StudioAuthDatabase = Readonly<{
 const studioUserSchema = z.object({
   id: z.string().uuid(),
   role: z.string(),
+  studioStatus: z.string(),
 })
 
 export function createDatabaseStudioMagicLinkStore(
@@ -32,13 +33,17 @@ export function createDatabaseStudioMagicLinkStore(
       return database.$transaction(async transaction => {
         const parsedUser = studioUserSchema.safeParse(
           await transaction.user.findUnique({
-            select: {id: true, role: true},
+            select: {id: true, role: true, studioStatus: true},
             where: {email: input.identifier},
           }),
         )
         const user = parsedUser.success ? parsedUser.data : null
 
-        if (!user || !isStudioEditorRole(user.role)) {
+        if (
+          !user ||
+          !isStudioEditorRole(user.role) ||
+          !isStudioAccountSigninAllowed(user.studioStatus)
+        ) {
           await transaction.auditEvent.create({
             data: {
               action: 'studio.magic-link.rejected',

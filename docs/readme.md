@@ -13,9 +13,10 @@ tamamlanan kararlar silinmez.
       availability inquiry, commission request ve private viewing kullanılacak.
 - [x] **2026-08-10 — İçerik yönetimi:** Harici CMS kurulmayacak; PostgreSQL,
       Prisma, Garage ve Resend üzerinde Bekten Studio geliştirilecek.
-- [x] **2026-08-10 — Studio erişimi:** Public auth olmayacak; editörler
-      `/studio` alanına Resend magic-link ile girecek. Teknik ekranlar yalnız
-      owner'a açık olacak.
+- [x] **2026-08-10 — Studio erişimi (2026-08-11'de güncellendi):** Public auth
+      olmayacak; editör magic-link alanı başlangıçta `/studio` olarak planlandı,
+      daha sonra public Studio hikâyesiyle çakışmaması için `/dashboard` olarak
+      kesinleştirildi. Teknik ekranlar yalnız owner'a açık olacak.
 - [x] **2026-08-10 — Studio auth altyapısı:** Yeni ve özel bir session sistemi
       yazılmayacak. Stabil NextAuth + Prisma adapter yalnız Studio email
       provider için korunacak; Credentials, Google, public kayıt ve
@@ -77,8 +78,9 @@ tamamlanan kararlar silinmez.
 - [x] **2026-08-11 — Gerçek hero çerçevesi:** Çerçeveli hero eserlerinde CSS ile
       taklit edilen border/shadow çerçevesi kullanılmayacak.
       `public/img/frame.png` transparan overlay olarak, eser de ölçülmüş iç
-      açıklığın altında render edilecek. Referansta çerçevesiz olan çizim ve
-      panoramik Studio yüzeyleri route-specific olarak çerçevesiz kalacak.
+      açıklığın altında render edilecek. Son kullanıcı kararıyla About ve
+      panoramik Studio dahil bütün public hero görselleri Collector sayfasıyla
+      aynı ortak framed hero primitive'ini kullanacak.
 - [x] **2026-08-11 — Geçici üretim görselleri:** GPT Image 2 ile üretilen
       `heritage-*` JPG varlıkları yalnız düzeni dolduran, fiyat ve satış iddiası
       taşımayan değiştirilebilir demo içeriktir. Deterministik Garage obje
@@ -95,6 +97,79 @@ tamamlanan kararlar silinmez.
       üzerinden gelen özel konuşmalar genel iletişimden ayrı `COLLECTOR` türüyle
       kaydedilecek; aynı subject/message güvenlik sınırlarını kullanıp Studio
       inbox filtrelerinde ayrı görünecek.
+- [x] **2026-08-11 — Public Studio ve CMS route ayrımı:** `/studio`
+      referanslardaki public Studio hikâyesi olarak kalacak. İçerik yönetimi,
+      editör magic-link girişi ve owner operasyonları `/dashboard` altında
+      yaşayacak. Public `/about` gerçek About yüzeyi olacak; eski `/artist`
+      adresi `/about`'a kalıcı yönlendirilecek.
+- [x] **2026-08-11 — Native View Transitions:** Public ve Dashboard route
+      geçişleri üçüncü taraf layout wrapper'ı yerine Next.js 16.3'ün App Router
+      ile config gerektirmeyen entegrasyonu ve React `ViewTransition`
+      primitive'iyle kurulacak. Persistent shell sabit kalacak; yalnız anlamlı
+      list→detail geçişleri yönlü/shared-element, sibling geçişleri hafif fade
+      kullanacak ve `prefers-reduced-motion` altında animasyon kapanacak.
+      Özellik Next.js tarafından hâlâ experimental olarak işaretlendiği için
+      production öncesi regression ve tarayıcı fallback kontrolü zorunlu
+      kalacak.
+- [x] **2026-08-11 — Dashboard görsel sistemi:** `/dashboard`, Heremio'nun sade
+      workspace/sidebar bilgi mimarisini örnek alacak; bileşenler yerel shadcn
+      primitive'leriyle kurulacak ve tüm renk, tipografi, logo, border ve
+      yüzeyler Bekten'in editorial heritage tasarım tokenlarını kullanacak.
+- [x] **2026-08-11 — Dil yönetimi UX'i (netleştirildi):** Dashboard chrome'u
+      sade İngilizce kalacak. `Languages` ekranı editorial kayıt kapsamını değil
+      `public/locales/{en,tr,ru,kg}/common.json` arayüz çevirilerini yönetecek.
+      JSON dosyaları güvenli ve immutable varsayılan kaynak olarak kalacak;
+      editörün EN/TR/RU/KY değişiklikleri PostgreSQL'de audit'li override olarak
+      saklanıp runtime'da katalogla birleşecek. Production filesystem'ine yazma,
+      otomatik çeviri veya yeni harici servis eklenmeyecek. Editör anahtarları
+      arayıp filtreleyebilecek, dört dili birlikte düzenleyebilecek ve locale
+      bazında dosya varsayılanına dönebilecek.
+- [x] **2026-08-11 — Dashboard gizlilik sınırı:** Public consent banner ve GTM
+      `/dashboard/**` altında render edilmeyecek; özel editör route ve içerik
+      yolları analytics'e gönderilmeyecek.
+- [x] **2026-08-11 — Public transition anahtarı:** Shared-element View
+      Transition adları internal veritabanı UUID'si taşımayacak; yalnız zaten
+      public olan kebab-case içerik slug'ı kullanılacak ve UUID/unsafe anahtar
+      fail-closed reddedilecek.
+- [x] **2026-08-11 — Dinamik tam CMS dili:** Dashboard'dan eklenen yeni dil UI
+      çevirileri, public selector/URL, SEO ve editoryal içerik kapsamına birlikte
+      girecek. Eksik UI veya editoryal değer İngilizceye düşecek; İngilizce
+      prefixsiz kalacak. Yeni dil önce taslak/preview olacak, owner tarafından
+      etkinleştirilecek ve içeriği varsa silinmek yerine devre dışı bırakılacak.
+- [x] **2026-08-11 — Editoryal dil kimliği:** Aynı eserin veya sayfanın dil
+      varyantları stable translation group ile bağlanacak. İngilizce fallback
+      gösterilen URL duplicate SEO üretmeyecek; canonical İngilizce kayda
+      dönecek ve hreflang yalnız gerçek yayımlanmış varyantları listeleyecek.
+- [x] **2026-08-11 — Media workspace:** Medya klasörleri PostgreSQL'de sanal
+      olacak; rename/move Garage object key'ini değiştirmeyecek. EDITOR yükleme,
+      klasör, rename ve move; OWNER/ADMIN ayrıca kalıcı silme yapabilecek.
+      Kullanılan medya ve dolu klasör silinemeyecek. Grid, liste ve desktop/icon
+      görünümü aynı erişilebilir action ve drag/drop sözleşmesini kullanacak.
+- [x] **2026-08-11 — Media upload yüzeyi:** Ayrı upload kartı kaldırılacak;
+      yükleme alanı Media Library header'ının sağında düzensiz, yarı saydam
+      quatrefoil formunda olacak. Tıklama, klavye ve drag/drop aynı doğrulanmış
+      Garage upload akışını kullanacak; hover/focus/drag-over durumları görünür
+      kontrastla belirtilecek.
+- [x] **2026-08-11 — Dashboard kullanıcı yönetimi:** `/dashboard/users` yalnız
+      OWNER/ADMIN'e açık olacak. Erişim Resend üzerinden tek kullanımlık süreli
+      magic-link davetiyle verilecek; rol, askıya alma ve erişim kaldırma audit
+      edilecek. Son aktif OWNER hiçbir eşzamanlı akışta kaldırılamayacak,
+      askıya alınamayacak veya yetkisi düşürülemeyecek.
+- [x] **2026-08-11 — Local owner:** `mucahidyazar@gmail.com` local ortamda
+      OWNER rolüne yükseltilecek; production yetkileri Coolify/deploy fazında
+      ayrıca doğrulanacak.
+- [x] **2026-08-11 — Dashboard activity log:** İçerik, yayınlama, translation,
+      locale, media, inquiry, kullanıcı ve operasyon mutasyonları ortak
+      `AuditEvent` akışında tutulacak. `/dashboard/activity` yalnız OWNER/ADMIN'e
+      açık, filtrelenebilir ve sayfalı olacak; token, tam e-posta, çeviri değeri,
+      private object key veya form PII audit metadata'sına yazılmayacak.
+- [x] **2026-08-11 — Instagram gerçek içerik cutover'ı:** Mevcut Apify
+      entegrasyonu yalnız `bekten_usubaliev` hesabından gelen, caption'ı
+      incelenmiş ve READY/PUBLIC Garage medyası bulunan kayıtları kaynak kabul
+      edecek. Başlığı olmayan, ölçüsü şüpheli veya caption'ı manifestten sapmış
+      gönderi otomatik eser olmayacak. Seed fiyat üretmeyecek, source URL'yi
+      yalnız hassas veri içermeyen audit metadata'sında tutacak ve mevcut Studio
+      düzenlemesini asla ezmeyecek.
 
 ## Bekleyen kullanıcı kararları
 

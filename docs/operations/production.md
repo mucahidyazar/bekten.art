@@ -10,7 +10,11 @@ Required public build variables are the canonical application URL and Google
 measurement/container identifiers. Database, auth, Garage and Resend credentials
 are runtime-only variables. `NEXT_PUBLIC_APP_URL` and `NEXTAUTH_URL` must have
 the same HTTPS origin. Behind Coolify, `AUTH_TRUST_PROXY` must be exactly
-`true`.
+`true`. Coolify's proxy must overwrite (or append its own address to) forwarded
+client-IP headers; the application intentionally consumes only the rightmost
+valid `X-Forwarded-For` hop. Configure the proxy to reject request bodies larger
+than 16 KiB on the Dashboard magic-link endpoint as an outer resource limit;
+the application enforces the same limit before parsing the form body.
 
 ## Pre-deploy checklist
 
@@ -20,20 +24,22 @@ the same HTTPS origin. Behind Coolify, `AUTH_TRUST_PROXY` must be exactly
 3. Create a PostgreSQL custom-format backup and record its SHA-256 checksum.
 4. Restore that backup into an isolated PostgreSQL 17 instance and verify
    critical table counts.
-5. Confirm the Garage bucket is private and the application key has only read
+5. Run `node scripts/preflight-v2-cutover.mjs` against the restored database;
+   any `V2_CUTOVER_*` failure blocks the release.
+6. Confirm the Garage bucket is private and the application key has only read
    and write access, never owner access.
-6. Confirm the Resend sender domain is verified and the reply-to mailbox accepts
+7. Confirm the Resend sender domain is verified and the reply-to mailbox accepts
    a real reply.
-7. Confirm the private Studio magic-link callback origin matches canonical
-   HTTPS.
+8. Confirm the Dashboard magic-link callback origin matches canonical HTTPS and
+   the configured editor email has an `EDITOR`, `OWNER` or `ADMIN` role.
 
 ## Deploy
 
-The container entrypoint validates the production contract, performs
-`prisma migrate deploy` and starts the standalone server only if those gates
-succeed. The application has no legacy object-storage startup mode or fallback;
-all media reads and writes use the private Garage bucket through the typed media
-catalog.
+The container entrypoint validates the production contract, proves legacy V1
+media/content has a typed V2 target, performs `prisma migrate deploy` and starts
+the standalone server only if every gate succeeds. The application has no legacy
+object-storage startup mode or fallback; all media reads and writes use the
+private Garage bucket through the typed media catalog.
 
 Configure Coolify's health check to `/api/ready`. `/api/health` remains the
 dependency-free liveness endpoint for diagnostics, but it must not be used as a
@@ -43,11 +49,14 @@ After deployment:
 
 1. Require `200` from `/api/health` and `/api/ready`.
 2. Verify locale redirects, one public content page and one media response.
-3. Verify credentials login, Google login and email verification using a test
-   account.
-4. Verify admin authorization with both an admin and a normal user.
-5. Submit feedback and newsletter forms and confirm outbox delivery.
-6. Verify consent deny, grant and revoke paths; no GTM/GA request may occur
+3. Request and consume a Dashboard magic link for an allowed editor; verify an
+   unapproved email cannot obtain Dashboard access.
+4. Verify the language coverage matrix and one draft/publish edit in a
+   non-English locale.
+5. Submit an inquiry and newsletter subscription and confirm outbox delivery.
+6. Upload one image to Garage, publish it through the Dashboard and verify its
+   public media response.
+7. Verify consent deny, grant and revoke paths; no GTM/GA request may occur
    before consent.
 
 ## Scheduled operations
@@ -85,12 +94,13 @@ validating a storage restore.
 
 ## Rollback
 
-Application rollback uses Coolify's previous known-good image. Database
-migrations in this project are forward/additive; do not run destructive down
-migrations during an incident. If a data cutover must be reversed, stop writes,
-restore the verified pre-cutover database into a new instance, point Coolify to
-that instance, deploy the previous application image and re-run readiness and
-smoke checks.
+An application-only rollback may use Coolify's previous image only when no
+database migration was applied. The V2 removal migrations are one-way and the
+previous image is not compatible with the migrated database. If the cutover must
+be reversed, stop writes, restore the verified pre-cutover backup into a new
+database, point Coolify to that database, deploy the matching previous image and
+re-run readiness and smoke checks. Never run ad-hoc destructive down migrations
+during an incident.
 
 Do not delete a Garage backup until database metadata, public media responses
 and the restore path have all been verified.

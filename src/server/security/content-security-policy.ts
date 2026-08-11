@@ -6,14 +6,18 @@ interface ContentSecurityPolicyOptions {
   production: boolean
 }
 
-function validatedMediaOrigin(value: string | undefined) {
+function validatedMediaOrigin(value: string | undefined, production: boolean) {
   if (!value) return ''
 
   try {
     const url = new URL(value)
+    const localhostOrigin =
+      url.hostname === 'localhost' &&
+      (url.protocol === 'http:' || url.protocol === 'https:')
 
     if (
-      url.protocol !== 'https:' ||
+      (production && url.protocol !== 'https:') ||
+      (!production && !localhostOrigin && url.protocol !== 'https:') ||
       url.username ||
       url.password ||
       url.pathname !== '/' ||
@@ -38,7 +42,7 @@ export function buildContentSecurityPolicy({
     throw new Error('Invalid CSP nonce')
   }
 
-  const allowedMediaOrigin = validatedMediaOrigin(mediaOrigin)
+  const allowedMediaOrigin = validatedMediaOrigin(mediaOrigin, production)
 
   const directives = [
     "default-src 'self'",

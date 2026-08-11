@@ -4,6 +4,11 @@ import Link from 'next/link'
 
 import {useActionState} from 'react'
 
+import {NAV_FORWARD_TRANSITION} from '@/components/public-site/public-view-transition'
+import {Button, buttonVariants} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+import {Textarea} from '@/components/ui/textarea'
+
 import {INITIAL_STUDIO_ACTION_STATE} from './editorial-action-state'
 import {EditorialMediaPlacements} from './editorial-media-placements'
 
@@ -109,7 +114,7 @@ const entityFields = Object.freeze({
 }) satisfies Readonly<Record<EditorialEntityType, readonly FieldDefinition[]>>
 
 const fieldClassName =
-  'mt-2 min-h-11 w-full border border-stone-500/70 bg-[#fffaf0] px-3 py-2 text-stone-950 outline-none focus-visible:border-red-900 focus-visible:ring-2 focus-visible:ring-red-900/20'
+  'mt-2 min-h-11 w-full border-stone-500/45 bg-[#fffaf0] px-3 py-2 text-stone-950 focus-visible:border-[#6f2a1a] focus-visible:ring-2 focus-visible:ring-[#6f2a1a]/25'
 
 function camelCase(name: string) {
   return name.replace(/-([a-z])/g, (_match, letter: string) =>
@@ -181,7 +186,7 @@ function FormField({
           ))}
         </select>
       ) : definition.rows ? (
-        <textarea
+        <Textarea
           className={fieldClassName}
           defaultValue={value}
           name={definition.name}
@@ -189,7 +194,7 @@ function FormField({
           rows={definition.rows}
         />
       ) : (
-        <input
+        <Input
           className={fieldClassName}
           defaultValue={value}
           name={definition.name}
@@ -244,7 +249,7 @@ export function EditorialEntryForm({
         </label>
         <label>
           <span className="text-sm font-semibold text-stone-800">Slug</span>
-          <input
+          <Input
             className={fieldClassName}
             defaultValue={inputValue(initialValue, 'slug')}
             name="slug"
@@ -256,7 +261,7 @@ export function EditorialEntryForm({
           <span className="text-sm font-semibold text-stone-800">
             Display order
           </span>
-          <input
+          <Input
             className={fieldClassName}
             defaultValue={inputValue(initialValue, 'display-order') || '0'}
             min="0"
@@ -290,7 +295,7 @@ export function EditorialEntryForm({
           <span className="text-sm font-semibold text-stone-800">
             SEO title
           </span>
-          <input
+          <Input
             className={fieldClassName}
             defaultValue={inputValue(seo, 'title')}
             maxLength={70}
@@ -302,7 +307,7 @@ export function EditorialEntryForm({
           <span className="text-sm font-semibold text-stone-800">
             Canonical path
           </span>
-          <input
+          <Input
             className={fieldClassName}
             defaultValue={inputValue(seo, 'canonical-path')}
             name="canonical-path"
@@ -313,7 +318,7 @@ export function EditorialEntryForm({
           <span className="text-sm font-semibold text-stone-800">
             SEO description
           </span>
-          <textarea
+          <Textarea
             className={fieldClassName}
             defaultValue={inputValue(seo, 'description')}
             maxLength={170}
@@ -334,44 +339,51 @@ export function EditorialEntryForm({
       </fieldset>
 
       <div className="sticky bottom-0 flex flex-wrap items-center gap-3 border-t border-stone-400/70 bg-[#eee6d5]/95 py-5 backdrop-blur">
-        <button
-          className="min-h-11 bg-stone-950 px-5 py-3 font-semibold text-white disabled:opacity-50"
+        <Button
+          className="min-h-11 bg-[#6f2a1a] px-5 text-[#fffaf0] hover:bg-[#542014]"
           disabled={pending}
+          isLoading={pending}
           name="intent"
+          size="lg"
           type="submit"
           value="save"
         >
           {pending ? 'Saving…' : 'Save draft'}
-        </button>
+        </Button>
         {entityId ? (
-          <button
-            className="min-h-11 border border-red-900 px-5 py-3 font-semibold text-red-950 disabled:opacity-50"
+          <Button
+            className="border-[#6f2a1a]/60 bg-[#f7f1e6] text-[#6f2a1a]"
             disabled={pending}
             name="intent"
+            size="lg"
             type="submit"
             value="publish"
+            variant="outline"
           >
             Publish
-          </button>
+          </Button>
         ) : null}
         {entityId ? (
           <>
             <Link
-              className="inline-flex min-h-11 items-center px-4 py-3 font-semibold underline underline-offset-4"
+              className={buttonVariants({size: 'lg', variant: 'ghost'})}
               href={`/dashboard/${routeSegments[entityType]}/${entityId}/preview`}
+              transitionTypes={[...NAV_FORWARD_TRANSITION]}
             >
               Preview draft
             </Link>
             {status !== 'ARCHIVED' ? (
-              <button
-                className="ml-auto min-h-11 px-4 py-3 font-semibold text-red-900 underline underline-offset-4 disabled:opacity-50"
+              <Button
+                className="ml-auto text-[#6f2a1a] hover:bg-red-50 hover:text-[#542014]"
                 disabled={pending}
                 name="intent"
+                size="lg"
                 type="submit"
                 value="archive"
+                variant="ghost"
               >
                 Archive
-              </button>
+              </Button>
             ) : null}
           </>
         ) : null}

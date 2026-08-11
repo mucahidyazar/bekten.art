@@ -34,5 +34,16 @@ describe('PublicArtworkFrame', () => {
       'aria-hidden',
       'true',
     )
+    expect(screen.getByTestId('heritage-frame-overlay')).toHaveAttribute(
+      'loading',
+      'eager',
+    )
+    expect(screen.getByTestId('heritage-frame-overlay')).not.toHaveAttribute(
+      'fetchpriority',
+      'high',
+    )
+    expect(
+      document.querySelectorAll('link[rel="preload"][as="image"]'),
+    ).toHaveLength(1)
   })
 })

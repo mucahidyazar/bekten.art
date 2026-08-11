@@ -65,6 +65,39 @@ describe('localized SEO components', () => {
     })
   })
 
+  it('does not advertise English editorial fallback as a dynamic-locale translation', () => {
+    expect(
+      buildLocalizedLinks(
+        '/de/about',
+        'https://bekten.art',
+        ['en', 'de'],
+        'en',
+      ),
+    ).toEqual({
+      canonical: 'https://bekten.art/about',
+      alternates: [
+        {hrefLang: 'en-US', href: 'https://bekten.art/about'},
+        {hrefLang: 'x-default', href: 'https://bekten.art/about'},
+      ],
+    })
+  })
+
+  it('keeps a complete dynamic interface translation on legal hreflang routes', () => {
+    expect(
+      buildLocalizedLinks(
+        '/de/privacy-policy',
+        'https://bekten.art',
+        ['en', 'de'],
+        'en',
+      ),
+    ).toMatchObject({
+      canonical: 'https://bekten.art/de/privacy-policy',
+      alternates: expect.arrayContaining([
+        {href: 'https://bekten.art/de/privacy-policy', hrefLang: 'de'},
+      ]),
+    })
+  })
+
   it('keeps V2 breadcrumb labels and URLs within the active locale', () => {
     expect(buildBreadcrumbItems('/ky/works/silent-steppe')).toEqual([
       {name: 'Башкы бет', url: '/ky'},

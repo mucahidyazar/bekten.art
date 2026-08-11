@@ -4,11 +4,12 @@ import Link from 'next/link'
 import {ChevronRightIcon, HomeIcon} from 'lucide-react'
 
 import {
+  publicCopyLocale,
   publicLocale,
-  publicShellCopy,
-  type PublicLocale,
+  publicShellCopyFor,
+  type BuiltInPublicLocale,
 } from '@/components/public-site/public-copy'
-import {APP_LOCALES, type AppLocale, localizedPath} from '@/lib/localized-path'
+import {isSafeLocaleCode, localizedPath} from '@/lib/localized-path'
 
 import {BreadcrumbStructuredData} from './structured-data'
 
@@ -24,7 +25,7 @@ interface BreadcrumbProps {
 }
 
 const EXTRA_LABELS: Readonly<
-  Record<PublicLocale, Readonly<Record<string, string>>>
+  Record<BuiltInPublicLocale, Readonly<Record<string, string>>>
 > = Object.freeze({
   en: {
     'available-works': 'Available works',
@@ -68,11 +69,12 @@ const EXTRA_LABELS: Readonly<
   },
 })
 
-function staticLabels(locale: PublicLocale): Readonly<Record<string, string>> {
-  const copy = publicShellCopy[locale]
+function staticLabels(locale: string): Readonly<Record<string, string>> {
+  const copyLocale = publicCopyLocale(locale)
+  const copy = publicShellCopyFor(locale)
 
   return Object.freeze({
-    ...EXTRA_LABELS[locale],
+    ...EXTRA_LABELS[copyLocale],
     collections: copy.collections,
     contact: copy.contact,
     exhibitions: copy.exhibitions,
@@ -112,11 +114,12 @@ function buildBreadcrumbItems(pathname: string): BreadcrumbItem[] {
   const locale = routeLocale(pathname)
   const firstSegment = segments[0]
   const hasLocale =
-    APP_LOCALES.includes(firstSegment as AppLocale) || firstSegment === 'kg'
+    firstSegment === 'kg' ||
+    (typeof firstSegment === 'string' && isSafeLocaleCode(firstSegment))
   const pathSegments = hasLocale ? segments.slice(1) : segments
   const labels = staticLabels(locale)
   const items: BreadcrumbItem[] = [
-    {name: publicShellCopy[locale].home, url: localizedPath(locale, '/')},
+    {name: publicShellCopyFor(locale).home, url: localizedPath(locale, '/')},
   ]
 
   pathSegments.forEach((segment, index) => {

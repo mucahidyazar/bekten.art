@@ -1,8 +1,9 @@
 import {notFound} from 'next/navigation'
 
+import {publicCopyLocale, publicLocale} from '@/components/public-site/public-copy'
 import {Button} from '@/components/ui/button'
 
-import type {AppLocale} from '@/lib/localized-path'
+import type {BuiltInPublicLocale} from '@/components/public-site/public-copy'
 
 export const metadata = {
   robots: {follow: false, index: false},
@@ -39,7 +40,7 @@ const copy = Object.freeze({
     title: 'Bülten tercihini onaylayın',
   },
 }) satisfies Record<
-  AppLocale,
+  BuiltInPublicLocale,
   Record<'description' | 'submit' | 'title', string>
 >
 
@@ -55,9 +56,9 @@ export default async function NewsletterPreferencesPage({
   const [{locale}, query] = await Promise.all([params, searchParams])
   const action = query.action
 
-  if (!action || !(action in actions) || !(locale in copy)) return notFound()
+  if (!action || !(action in actions)) return notFound()
 
-  const text = copy[locale as AppLocale]
+  const text = copy[publicCopyLocale(publicLocale(locale))]
   const endpoint = actions[action as keyof typeof actions]
 
   return (

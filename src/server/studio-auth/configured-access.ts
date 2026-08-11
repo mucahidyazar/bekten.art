@@ -6,7 +6,7 @@ import {createStudioAccess} from './roles'
 const configuredStudioAccess = createStudioAccess({
   async findUserById(userId: string) {
     return prisma.user.findUnique({
-      select: {id: true, role: true},
+      select: {id: true, role: true, studioStatus: true},
       where: {id: userId},
     })
   },

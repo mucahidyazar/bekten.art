@@ -7,7 +7,10 @@ import {safeAuthRedirect} from '@/server/auth/safe-redirect'
 import {createStudioAdapter} from '@/server/studio-auth/adapter'
 import {getConfiguredStudioMagicLink} from '@/server/studio-auth/configured-magic-link'
 import {createStudioEmailProvider} from '@/server/studio-auth/email-provider'
-import {isStudioEditorRole} from '@/server/studio-auth/roles'
+import {
+  isStudioAccountSigninAllowed,
+  isStudioEditorRole,
+} from '@/server/studio-auth/roles'
 
 let cachedAuthOptions: NextAuthOptions | undefined
 
@@ -51,7 +54,15 @@ export function getAuthOptions(): NextAuthOptions {
       async signIn({email, user}) {
         if (email?.verificationRequest) return true
 
-        return isStudioEditorRole((user as {role?: unknown}).role)
+        const studioUser = user as {
+          role?: unknown
+          studioStatus?: unknown
+        }
+
+        return (
+          isStudioEditorRole(studioUser.role) &&
+          isStudioAccountSigninAllowed(studioUser.studioStatus)
+        )
       },
     },
     cookies: {
@@ -69,13 +80,37 @@ export function getAuthOptions(): NextAuthOptions {
     },
     events: {
       async signIn({isNewUser, user}) {
-        await prisma.auditEvent.create({
-          data: {
-            action: 'studio.sign-in.completed',
-            actorUserId: user.id,
-            entityType: 'StudioSession',
-            metadata: {isNewUser: Boolean(isNewUser)},
-          },
+        const signedInAt = new Date()
+
+        await prisma.$transaction(async transaction => {
+          await transaction.user.updateMany({
+            data: {
+              acceptedAt: signedInAt,
+              studioStatus: 'ACTIVE',
+              suspendedAt: null,
+            },
+            where: {
+              id: user.id,
+              role: {in: ['EDITOR', 'OWNER', 'ADMIN']},
+              studioStatus: 'INVITED',
+            },
+          })
+          await transaction.user.updateMany({
+            data: {last_sign_in_at: signedInAt},
+            where: {
+              id: user.id,
+              role: {in: ['EDITOR', 'OWNER', 'ADMIN']},
+              studioStatus: 'ACTIVE',
+            },
+          })
+          await transaction.auditEvent.create({
+            data: {
+              action: 'studio.sign-in.completed',
+              actorUserId: user.id,
+              entityType: 'StudioSession',
+              metadata: {isNewUser: Boolean(isNewUser)},
+            },
+          })
         })
       },
       async signOut({session}) {

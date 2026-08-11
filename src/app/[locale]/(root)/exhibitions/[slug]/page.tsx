@@ -31,26 +31,28 @@ const readPublishedExhibition = cache(
 )
 
 async function readExhibition(params: ExhibitionDetailPageProps['params']) {
-  const {locale, slug} = await parsePublicParams(params, {slug: true})
-  const detail = await readPublishedExhibition(locale, slug)
+  const {contentLocale, locale, slug} = await parsePublicParams(params, {
+    slug: true,
+  })
+  const detail = await readPublishedExhibition(contentLocale, slug)
 
   if (!detail) return notFound()
 
-  return {detail, locale}
+  return {contentLocale, detail, locale}
 }
 
 export async function generateMetadata({
   params,
 }: ExhibitionDetailPageProps): Promise<Metadata> {
-  const {detail, locale} = await readExhibition(params)
+  const {contentLocale, detail, locale} = await readExhibition(params)
 
-  return editorialMetadata(detail.exhibition.seo, locale)
+  return editorialMetadata(detail.exhibition.seo, locale, contentLocale)
 }
 
 export default async function ExhibitionDetailPage({
   params,
 }: ExhibitionDetailPageProps) {
-  const {detail, locale} = await readExhibition(params)
+  const {contentLocale, detail, locale} = await readExhibition(params)
   const {exhibition, works} = detail
   const media = heroMedia(exhibition)
   const place = [exhibition.venue, exhibition.city, exhibition.country]
@@ -69,18 +71,19 @@ export default async function ExhibitionDetailPage({
       <article>
         <PublicPageIntro
           intro={exhibition.subtitle ?? exhibition.body}
-          kicker={publicRouteCopy[locale].exhibitions.kicker}
+          kicker={publicRouteCopy[contentLocale].exhibitions.kicker}
           media={media}
           title={exhibition.title}
+          transitionKey={exhibition.slug}
         />
         <PublicArchiveSection>
           <div className={styles.articleLayout}>
             <PlainTextBody body={exhibition.body} />
             <aside
-              aria-label={publicRouteCopy[locale].exhibitions.kicker}
+              aria-label={publicRouteCopy[contentLocale].exhibitions.kicker}
               className={styles.articleRail}
             >
-              <h2>{publicRouteCopy[locale].exhibitions.kicker}</h2>
+              <h2>{publicRouteCopy[contentLocale].exhibitions.kicker}</h2>
               {place ? <p>{place}</p> : null}
               <p>{dates}</p>
             </aside>
@@ -89,7 +92,7 @@ export default async function ExhibitionDetailPage({
         <PublicArchiveSection labelledBy={headingId} light>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle} id={headingId}>
-              {publicRouteCopy[locale].exhibitedWorks}
+              {publicRouteCopy[contentLocale].exhibitedWorks}
             </h2>
             <p className={styles.sectionCount}>
               {String(works.length).padStart(2, '0')}
@@ -98,7 +101,7 @@ export default async function ExhibitionDetailPage({
           {works.length > 0 ? (
             <PublicArtworkGrid locale={locale} works={works} />
           ) : (
-            <p role="status">{publicRouteCopy[locale].works.empty}</p>
+            <p role="status">{publicRouteCopy[contentLocale].works.empty}</p>
           )}
         </PublicArchiveSection>
       </article>

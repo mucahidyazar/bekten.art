@@ -40,6 +40,12 @@ const migrationStep = Object.freeze({
   label: 'database migrations',
 })
 
+const preflightStep = Object.freeze({
+  arguments: ['scripts/preflight-v2-cutover.mjs'],
+  command: process.execPath,
+  label: 'v2 cutover preflight',
+})
+
 describe('production startup contract', () => {
   it('fails fast with secret-free field names when required configuration is missing', () => {
     expect(() => validateProductionStartupEnvironment({})).toThrow(
@@ -55,6 +61,7 @@ describe('production startup contract', () => {
       validateProductionStartupEnvironment(completeEnvironment),
     ).toBeUndefined()
     expect(createProductionStartupPlan(completeEnvironment)).toEqual([
+      preflightStep,
       migrationStep,
       {
         arguments: ['server.js'],
@@ -77,6 +84,7 @@ describe('production startup contract', () => {
     expect(
       createProductionStartupPlan(environmentWithStaleLegacyFlags),
     ).toEqual([
+      preflightStep,
       migrationStep,
       {
         arguments: ['server.js'],
@@ -97,10 +105,22 @@ describe('production startup contract', () => {
     ).toThrow(/MEDIA_S3_ENDPOINT.*RESEND_API_KEY.*RESEND_FROM_EMAIL/)
   })
 
+  it('accepts URL-safe base64 Svix webhook signing secrets at startup', () => {
+    expect(() =>
+      validateProductionStartupEnvironment({
+        ...completeEnvironment,
+        RESEND_WEBHOOK_SECRET: 'whsec_base64url-secret_value',
+      }),
+    ).not.toThrow()
+  })
+
   it('ships an isolated migration runtime instead of the full development dependency tree', () => {
     expect(productionDockerfile).toContain('FROM base AS migration-runtime')
     expect(productionDockerfile).toContain(
       'COPY --from=migration-runtime --chown=nextjs:nodejs /migration-runtime ./scripts/migration-runtime',
+    )
+    expect(productionDockerfile).toContain(
+      'COPY --from=builder --chown=nextjs:nodejs /app/scripts/preflight-v2-cutover.mjs ./scripts/preflight-v2-cutover.mjs',
     )
     expect(productionDockerfile).not.toContain(
       'COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules ./node_modules',

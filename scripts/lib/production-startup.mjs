@@ -48,6 +48,13 @@ function validatedHttpsOrigin(environment, name, errors) {
 }
 
 export function createProductionStartupPlan(_environment) {
+  const preflightPlan = [
+    Object.freeze({
+      arguments: ['scripts/preflight-v2-cutover.mjs'],
+      command: process.execPath,
+      label: 'v2 cutover preflight',
+    }),
+  ]
   const migrationPlan = [
     Object.freeze({
       arguments: [
@@ -68,7 +75,7 @@ export function createProductionStartupPlan(_environment) {
     }),
   ]
 
-  return Object.freeze([...migrationPlan, ...serverPlan])
+  return Object.freeze([...preflightPlan, ...migrationPlan, ...serverPlan])
 }
 
 export function validateProductionStartupEnvironment(environment) {
@@ -126,7 +133,7 @@ export function validateProductionStartupEnvironment(environment) {
   }
 
   if (
-    !/^whsec_[A-Za-z0-9+/]{8,}={0,2}$/u.test(
+    !/^whsec_[A-Za-z0-9+/_-]{8,}={0,2}$/u.test(
       value(environment, 'RESEND_WEBHOOK_SECRET'),
     )
   ) {

@@ -70,6 +70,7 @@ describe('public editorial display', () => {
         eyebrow="Exhibition · 2026"
         href="/en/exhibitions/echoes"
         media={artwork.mediaPlacements[0]}
+        publicKey="echoes"
         title="Echoes of the Steppe"
       />,
     )

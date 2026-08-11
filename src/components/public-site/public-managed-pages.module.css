@@ -6,8 +6,8 @@
 
 .shell {
   margin-inline: auto;
-  max-width: 92rem;
-  padding-inline: clamp(1.25rem, 5vw, 5rem);
+  max-width: var(--heritage-container-max);
+  padding-inline: var(--heritage-container-padding);
   width: 100%;
 }
 

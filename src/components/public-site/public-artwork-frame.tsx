@@ -51,7 +51,7 @@ export function PublicArtworkFrame({
         className="heritage-artwork-frame__overlay"
         data-testid="heritage-frame-overlay"
         fill
-        priority={priority}
+        loading={priority ? 'eager' : 'lazy'}
         sizes={sizes}
         src="/img/frame.png"
       />

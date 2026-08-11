@@ -26,7 +26,6 @@ describe('shared public editorial layout primitives', () => {
         eyebrow="Bekten Studio"
         fallbackAlt="Framed steppe artwork"
         fallbackSrc="/img/heritage-landscape-hero.jpg"
-        locale="en"
         paragraphs={['Landscape, memory and presence in quiet conversation.']}
         title="The artist"
       />,
@@ -43,6 +42,36 @@ describe('shared public editorial layout primitives', () => {
     expect(screen.getByRole('link', {name: 'Explore works'})).toHaveAttribute(
       'href',
       '/works',
+    )
+  })
+
+  it('compacts long localized titles into the stable two-line hero rhythm', () => {
+    const {rerender} = render(
+      <PublicEditorialHero
+        fallbackAlt="Framed collection artwork"
+        fallbackSrc="/img/heritage-collection-hero.jpg"
+        paragraphs={['Collection introduction.']}
+        title="Memory, land & belonging"
+      />,
+    )
+
+    expect(screen.getByRole('heading', {level: 1})).toHaveAttribute(
+      'data-title-density',
+      'compact',
+    )
+
+    rerender(
+      <PublicEditorialHero
+        fallbackAlt="Framed artwork"
+        fallbackSrc="/img/heritage-landscape-hero.jpg"
+        paragraphs={['Archive introduction.']}
+        title="Works"
+      />,
+    )
+
+    expect(screen.getByRole('heading', {level: 1})).toHaveAttribute(
+      'data-title-density',
+      'standard',
     )
   })
 })

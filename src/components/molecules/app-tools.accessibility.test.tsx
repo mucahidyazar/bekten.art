@@ -67,6 +67,8 @@ describe('AppTools accessibility', () => {
     await user.keyboard('{ArrowDown}')
     await user.click(turkish)
 
-    expect(push).toHaveBeenCalledWith('/tr/gallery')
+    expect(push).toHaveBeenCalledWith('/tr/gallery', {
+      transitionTypes: ['nav-lateral'],
+    })
   })
 })

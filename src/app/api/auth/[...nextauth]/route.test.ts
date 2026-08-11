@@ -15,6 +15,10 @@ vi.mock('@/server/studio-auth/configured-request-boundary', () => ({
 }))
 
 describe('NextAuth Studio route', () => {
+  const routeContext = {
+    params: Promise.resolve({nextauth: ['signin', 'email']}),
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.nextAuth.mockReturnValue(mocks.authHandler)
@@ -33,10 +37,10 @@ describe('NextAuth Studio route', () => {
       {method: 'POST'},
     )
 
-    await POST(request)
+    await POST(request, routeContext)
 
     expect(mocks.guard).toHaveBeenCalledWith(request)
-    expect(mocks.authHandler).toHaveBeenCalledWith(request)
+    expect(mocks.authHandler).toHaveBeenCalledWith(request, routeContext)
   })
 
   it('returns the boundary rejection without invoking NextAuth', async () => {
@@ -50,7 +54,7 @@ describe('NextAuth Studio route', () => {
       {method: 'POST'},
     )
 
-    await expect(POST(request)).resolves.toBe(response)
+    await expect(POST(request, routeContext)).resolves.toBe(response)
     expect(mocks.authHandler).not.toHaveBeenCalled()
   })
 
@@ -61,9 +65,23 @@ describe('NextAuth Studio route', () => {
       {method: 'POST'},
     )
 
-    await POST(request)
+    const signOutContext = {
+      params: Promise.resolve({nextauth: ['signout']}),
+    }
+
+    await POST(request, signOutContext)
 
     expect(mocks.guard).not.toHaveBeenCalled()
-    expect(mocks.authHandler).toHaveBeenCalledWith(request)
+    expect(mocks.authHandler).toHaveBeenCalledWith(request, signOutContext)
+  })
+
+  it('forwards the App Router context on GET protocol requests', async () => {
+    const {GET} = await import('./route')
+    const request = new Request('https://bekten.art/api/auth/providers')
+    const context = {params: Promise.resolve({nextauth: ['providers']})}
+
+    await GET(request, context)
+
+    expect(mocks.authHandler).toHaveBeenCalledWith(request, context)
   })
 })

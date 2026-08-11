@@ -23,16 +23,16 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata({
   params,
 }: ExhibitionsPageProps): Promise<Metadata> {
-  const {locale} = await parsePublicParams(params)
-  const copy = publicRouteCopy[locale].exhibitions
+  const {contentLocale, locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[contentLocale].exhibitions
 
   return listMetadata(locale, 'exhibitions', copy.title, copy.intro)
 }
 
 export default async function ExhibitionsPage({params}: ExhibitionsPageProps) {
-  const {locale} = await parsePublicParams(params)
-  const copy = publicRouteCopy[locale].exhibitions
-  const exhibitions = await publicEditorialReader.listExhibitions(locale)
+  const {contentLocale, locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[contentLocale].exhibitions
+  const exhibitions = await publicEditorialReader.listExhibitions(contentLocale)
   const [featured, ...timeline] = exhibitions
 
   const exhibitionItem = (exhibition: (typeof exhibitions)[number]) => ({
@@ -43,6 +43,7 @@ export default async function ExhibitionsPage({params}: ExhibitionsPageProps) {
     href: localizedPath(locale, `/exhibitions/${exhibition.slug}`),
     id: exhibition.id,
     media: heroMedia(exhibition),
+    publicKey: exhibition.slug,
     title: exhibition.title,
   })
 
@@ -53,17 +54,18 @@ export default async function ExhibitionsPage({params}: ExhibitionsPageProps) {
         {featured ? (
           <>
             <section
-              aria-label={publicRouteCopy[locale].featuredExhibition}
+              aria-label={publicRouteCopy[contentLocale].featuredExhibition}
               className={styles.featuredRegion}
             >
               <PublicEditorialCard
-                actionLabel={publicRouteCopy[locale].viewExhibition}
+                actionLabel={publicRouteCopy[contentLocale].viewExhibition}
                 description={featured.subtitle ?? featured.body}
                 eyebrow={[featured.venue, publicDate(featured.startsAt, locale)]
                   .filter(Boolean)
                   .join(' · ')}
                 href={localizedPath(locale, `/exhibitions/${featured.slug}`)}
                 media={heroMedia(featured)}
+                publicKey={featured.slug}
                 title={featured.title}
                 variant="featured"
               />
@@ -72,12 +74,12 @@ export default async function ExhibitionsPage({params}: ExhibitionsPageProps) {
               <div className={styles.section}>
                 <div className={styles.sectionHeader}>
                   <h2 className={styles.sectionTitle}>
-                    {publicRouteCopy[locale].exhibitionTimeline}
+                    {publicRouteCopy[contentLocale].exhibitionTimeline}
                   </h2>
                 </div>
                 <PublicEditorialList
-                  accessibleName={publicRouteCopy[locale].exhibitionTimeline}
-                  actionLabel={publicRouteCopy[locale].viewExhibition}
+                  accessibleName={publicRouteCopy[contentLocale].exhibitionTimeline}
+                  actionLabel={publicRouteCopy[contentLocale].viewExhibition}
                   empty={copy.empty}
                   items={timeline.map(exhibitionItem)}
                   variant="rows"

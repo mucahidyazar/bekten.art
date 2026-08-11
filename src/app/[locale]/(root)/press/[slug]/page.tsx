@@ -30,24 +30,26 @@ const readPublishedPressEntry = cache(
 )
 
 async function readPressEntry(params: PressDetailPageProps['params']) {
-  const {locale, slug} = await parsePublicParams(params, {slug: true})
-  const entry = await readPublishedPressEntry(locale, slug)
+  const {contentLocale, locale, slug} = await parsePublicParams(params, {
+    slug: true,
+  })
+  const entry = await readPublishedPressEntry(contentLocale, slug)
 
   if (!entry) return notFound()
 
-  return {entry, locale}
+  return {contentLocale, entry, locale}
 }
 
 export async function generateMetadata({
   params,
 }: PressDetailPageProps): Promise<Metadata> {
-  const {entry, locale} = await readPressEntry(params)
+  const {contentLocale, entry, locale} = await readPressEntry(params)
 
-  return editorialMetadata(entry.seo, locale)
+  return editorialMetadata(entry.seo, locale, contentLocale)
 }
 
 export default async function PressDetailPage({params}: PressDetailPageProps) {
-  const {entry, locale} = await readPressEntry(params)
+  const {contentLocale, entry, locale} = await readPressEntry(params)
   const media = heroMedia(entry)
   const publication = [
     entry.outlet,
@@ -64,15 +66,16 @@ export default async function PressDetailPage({params}: PressDetailPageProps) {
           kicker={publication}
           media={media}
           title={entry.title}
+          transitionKey={entry.slug}
         />
         <PublicArchiveSection>
           <div className={styles.articleLayout}>
             <PlainTextBody body={entry.body ?? entry.excerpt} />
             <aside
-              aria-label={publicRouteCopy[locale].publicationDetails}
+              aria-label={publicRouteCopy[contentLocale].publicationDetails}
               className={styles.articleRail}
             >
-              <h2>{publicRouteCopy[locale].publicationDetails}</h2>
+              <h2>{publicRouteCopy[contentLocale].publicationDetails}</h2>
               <p>{entry.outlet}</p>
               {entry.publishedOn ? (
                 <p>{publicDate(entry.publishedOn, locale)}</p>
@@ -83,7 +86,7 @@ export default async function PressDetailPage({params}: PressDetailPageProps) {
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                {publicRouteCopy[locale].readAtSource}
+                {publicRouteCopy[contentLocale].readAtSource}
               </a>
             </aside>
           </div>

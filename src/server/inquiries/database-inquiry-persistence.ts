@@ -53,7 +53,7 @@ const recordBaseShape = {
   email: z.email().max(320),
   erasePersonalDataAfter: z.date(),
   id: uuidSchema,
-  labels: z.array(inquiryLabelSchema).max(30),
+  labels: z.array(inquiryLabelSchema).max(20),
   locale: localeSchema,
   name: z.string().min(2).max(120),
   phone: z.string().max(40).nullable(),
@@ -346,7 +346,7 @@ export function createDatabaseInquiryPersistence(
       const parsed = z
         .object({
           inquiryId: uuidSchema,
-          labels: z.array(inquiryLabelSchema).max(30),
+          labels: z.array(inquiryLabelSchema).max(20),
         })
         .strict()
         .parse(input)

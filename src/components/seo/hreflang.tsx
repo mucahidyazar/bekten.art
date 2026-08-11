@@ -5,6 +5,7 @@ import {usePathname} from 'next/navigation'
 import {
   APP_LOCALES,
   type AppLocale,
+  isSafeLocaleCode,
   localizedAlternates,
 } from '@/lib/localized-path'
 
@@ -37,19 +38,30 @@ const ROUTES_WITH_METADATA_CANONICAL = new Set([
   'studio',
   'works',
 ])
+const ROUTES_WITH_COMPLETE_DYNAMIC_TRANSLATIONS = new Set([
+  'privacy-policy',
+  'terms-of-service',
+])
 
 interface HrefLangProps {
   locales?: readonly string[]
-  defaultLocale?: AppLocale
+  defaultLocale?: string
 }
 
-function getLocalizedRoute(pathname: string) {
+function getLocalizedRoute(
+  pathname: string,
+  locales: readonly string[] = APP_LOCALES,
+) {
   const segments = pathname.split('/').filter(Boolean)
   const routeLocale = segments[0]
-  const isSupportedLocale = APP_LOCALES.includes(routeLocale as AppLocale)
+  const isSupportedLocale = Boolean(
+    routeLocale &&
+      isSafeLocaleCode(routeLocale) &&
+      locales.includes(routeLocale),
+  )
   const isLegacyKyrgyzLocale = routeLocale === 'kg'
   const locale = isSupportedLocale
-    ? (routeLocale as AppLocale)
+    ? routeLocale!
     : isLegacyKyrgyzLocale
       ? 'ky'
       : 'en'
@@ -65,23 +77,31 @@ function getLocalizedRoute(pathname: string) {
 function buildLocalizedLinks(
   pathname: string,
   baseUrl: string,
-  locales: readonly AppLocale[] = APP_LOCALES,
-  defaultLocale: AppLocale = 'en',
+  locales: readonly string[] = APP_LOCALES,
+  defaultLocale = 'en',
 ) {
-  const {locale, publicPath} = getLocalizedRoute(pathname)
-  const urls = localizedAlternates(baseUrl, publicPath)
+  const {locale, publicPath} = getLocalizedRoute(pathname, locales)
   const publicSegments = publicPath.split('/').filter(Boolean)
+  const routeRoot = publicSegments[0]
+  const alternateLocales =
+    routeRoot && ROUTES_WITH_COMPLETE_DYNAMIC_TRANSLATIONS.has(routeRoot)
+      ? locales
+      : locales.filter(currentLocale =>
+          APP_LOCALES.some(builtInLocale => builtInLocale === currentLocale),
+        )
+  const urls = localizedAlternates(baseUrl, publicPath, alternateLocales)
   const hasUnverifiedLocalizedSlug =
     publicSegments.length > 1 &&
     NON_PARALLEL_DETAIL_ROOTS.has(publicSegments[0] ?? '')
 
   return {
-    canonical: urls[locale],
+    canonical: urls[locale] ?? urls[defaultLocale] ?? baseUrl,
     alternates: hasUnverifiedLocalizedSlug
       ? []
       : [
-          ...locales.map(currentLocale => ({
-            hrefLang: HREFLANG_BY_LOCALE[currentLocale],
+          ...alternateLocales.map(currentLocale => ({
+            hrefLang:
+              HREFLANG_BY_LOCALE[currentLocale as AppLocale] ?? currentLocale,
             href: urls[currentLocale],
           })),
           {hrefLang: 'x-default', href: urls[defaultLocale]},
@@ -94,9 +114,7 @@ export function HrefLang({
   defaultLocale = 'en',
 }: HrefLangProps) {
   const pathname = usePathname()
-  const supportedLocales = locales.filter(locale =>
-    APP_LOCALES.includes(locale as AppLocale),
-  ) as AppLocale[]
+  const supportedLocales = locales.filter(isSafeLocaleCode)
   const domain = process.env.NEXT_PUBLIC_APP_URL || 'https://bekten.art'
   const links = buildLocalizedLinks(
     pathname,
@@ -104,7 +122,7 @@ export function HrefLang({
     supportedLocales,
     defaultLocale,
   )
-  const {publicPath} = getLocalizedRoute(pathname)
+  const {publicPath} = getLocalizedRoute(pathname, supportedLocales)
   const routeRoot = publicPath.split('/').filter(Boolean)[0]
   const hasMetadataCanonical =
     routeRoot !== undefined && ROUTES_WITH_METADATA_CANONICAL.has(routeRoot)

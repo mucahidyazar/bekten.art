@@ -1,4 +1,6 @@
-import type {AppLocale} from '@/lib/localized-path'
+import {APP_LOCALES} from '@/lib/localized-path'
+
+import type {BuiltInAppLocale} from '@/lib/localized-path'
 
 type SiteIdentity = Readonly<{
   artistDescription: string
@@ -9,7 +11,8 @@ type SiteIdentity = Readonly<{
 
 const SITE_NAME = 'Bekten — Artist & Studio'
 
-const SITE_IDENTITY: Readonly<Record<AppLocale, SiteIdentity>> = Object.freeze({
+const SITE_IDENTITY: Readonly<Record<BuiltInAppLocale, SiteIdentity>> =
+  Object.freeze({
   en: {
     artistDescription:
       'Bekten Usubaliev is an artist based in Bishkek, Kyrgyzstan.',
@@ -46,10 +49,14 @@ const SITE_IDENTITY: Readonly<Record<AppLocale, SiteIdentity>> = Object.freeze({
     siteDescription:
       'Bekten Usubaliev’in eserleri, sergileri, journal yazıları ve stüdyosu için resmi editoryal arşiv.',
   },
-})
+  })
 
-function getSiteIdentity(locale: AppLocale): SiteIdentity {
-  return SITE_IDENTITY[locale]
+function getSiteIdentity(locale: string): SiteIdentity {
+  const identityLocale = APP_LOCALES.includes(locale as BuiltInAppLocale)
+    ? (locale as BuiltInAppLocale)
+    : 'en'
+
+  return SITE_IDENTITY[identityLocale]
 }
 
 export {SITE_NAME}

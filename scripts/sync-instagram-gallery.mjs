@@ -439,6 +439,7 @@ async function ensureMediaObject({post, prisma, storage}) {
   const media = await prisma.mediaObject.upsert({
     create: {
       checksumSha256: download.checksumHex,
+      displayName: download.fileName,
       filename: download.fileName,
       height: download.height,
       id: provisionalId,
@@ -453,6 +454,7 @@ async function ensureMediaObject({post, prisma, storage}) {
     },
     update: {
       checksumSha256: download.checksumHex,
+      displayName: download.fileName,
       filename: download.fileName,
       height: download.height,
       mimeType: download.contentType,

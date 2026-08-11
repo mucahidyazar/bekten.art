@@ -2,7 +2,8 @@
 
 Bekten Art is a multilingual portfolio and content platform built with Next.js,
 React, PostgreSQL/Prisma, Garage object storage, NextAuth and Resend. Public
-URLs always use an explicit locale prefix: `en`, `tr`, `ru` or `ky`.
+English URLs are prefixless; Turkish, Russian and Kyrgyz use `tr`, `ru` and `ky`
+prefixes.
 
 ## Architecture
 
@@ -21,10 +22,10 @@ Browser -> Next.js pages/API -> domain service -> repository -> PostgreSQL
 ```
 
 The V2 cleanup removes public accounts, Credentials and Google OAuth. NextAuth
-is retained only as the session foundation for the private Bekten Studio email
-magic-link flow implemented in V2 step S3. Follow `docs/progress.md` for cutover
-status. GTM/GA are loaded only after the visitor's consent decision. No legacy
-database or object-storage runtime is used.
+is retained only for the role-gated `/dashboard` email magic-link flow. The
+public `/studio` route remains the artist's Studio story. GTM/GA are loaded only
+after the visitor's consent decision. No legacy database or object-storage
+runtime is used.
 
 ## Local development
 
@@ -62,10 +63,11 @@ and container-build gates in GitHub Actions.
 
 ## Database and production
 
-Prisma migrations are additive and live in `prisma/migrations`. The production
-container runs `prisma migrate deploy` before starting the standalone Next.js
-server. Take and restore-test a PostgreSQL backup before every data or schema
-cutover.
+Prisma migrations live in `prisma/migrations`; the V2 cutover contains explicit
+one-way removal migrations. The production container validates legacy media and
+content coverage before running `prisma migrate deploy`, then starts the
+standalone Next.js server. Take and restore-test a PostgreSQL backup before
+every data or schema cutover.
 
 - `GET /api/health` is the dependency-free liveness probe.
 - `GET /api/ready` verifies the production contract, PostgreSQL and Garage
@@ -84,7 +86,7 @@ The authoritative key list is `.env.example`. Production requires:
 - canonical application and NextAuth URLs;
 - PostgreSQL connection URL;
 - GTM/GA identifiers;
-- NextAuth URL/secret for the upcoming private Studio email session flow;
+- NextAuth URL/secret for the role-gated Dashboard email session flow;
 - a dedicated Garage bucket and scoped access key;
 - Resend API key, verified sender and working support reply-to address;
 - Resend webhook signing secret and an outbox scheduler secret;

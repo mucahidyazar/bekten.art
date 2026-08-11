@@ -1,5 +1,7 @@
 'use client'
 
+import {usePathname} from 'next/navigation'
+
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {Settings2Icon, XIcon} from 'lucide-react'
 import {useTranslations} from 'next-intl'
@@ -13,6 +15,7 @@ import {
 } from 'react'
 
 import {Button} from '@/components/ui/button'
+import {isPrivateDashboardPath} from '@/lib/private-dashboard-path'
 import {cn} from '@/utils'
 
 import {
@@ -165,6 +168,7 @@ function useConsent() {
 
 function ConsentManager() {
   const t = useTranslations('consent')
+  const pathname = usePathname()
   const {
     decision,
     draftDecision,
@@ -183,7 +187,7 @@ function ConsentManager() {
     setSavedAnnouncement(t('preferencesSaved'))
   }
 
-  if (!hydrated) return null
+  if (!hydrated || isPrivateDashboardPath(pathname)) return null
 
   return (
     <>
@@ -207,7 +211,9 @@ function ConsentManager() {
                 className="w-full"
                 type="button"
                 variant="outline"
-                onClick={() => persist(createConsentDecision(false, false, false))}
+                onClick={() =>
+                  persist(createConsentDecision(false, false, false))
+                }
               >
                 {t('rejectAll')}
               </Button>
@@ -384,7 +390,9 @@ function ConsentOption({
         <label className="font-medium" htmlFor={id}>
           {title}
         </label>
-        <p className="text-muted-foreground mt-1 text-sm leading-5">{description}</p>
+        <p className="text-muted-foreground mt-1 text-sm leading-5">
+          {description}
+        </p>
       </div>
       {trailingText ? (
         <span className="text-muted-foreground self-center text-xs font-medium">
@@ -394,7 +402,7 @@ function ConsentOption({
       <input
         checked={checked}
         className={cn(
-          'border-input accent-primary h-5 w-5 self-center rounded focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          'border-input accent-primary focus-visible:ring-ring h-5 w-5 self-center rounded focus-visible:ring-2 focus-visible:ring-offset-2',
           disabled && 'cursor-not-allowed opacity-60',
         )}
         disabled={disabled}

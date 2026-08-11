@@ -53,8 +53,8 @@ const nextConfig = {
     dangerouslyAllowSVG: false,
   },
   experimental: {
-    webpackBuildWorker: true,
     optimizePackageImports: ['lucide-react'],
+    webpackBuildWorker: true,
   },
   poweredByHeader: false,
   compress: true,

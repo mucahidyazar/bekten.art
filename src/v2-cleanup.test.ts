@@ -37,6 +37,7 @@ describe('V2 cleanup contract', () => {
     'src/app/api/auth/reset-password',
     'src/app/api/auth/verify-email',
     'src/app/api/admin',
+    'src/app/api/cms/contact-info',
     'src/app/auth',
     'src/components/admin',
     'src/components/forms/password-reset-forms.tsx',
@@ -97,9 +98,10 @@ describe('V2 cleanup contract', () => {
   })
 
   it('never reuses an unknown local server for production E2E', () => {
-    expect(source('playwright.config.ts')).toContain(
-      'reuseExistingServer: false',
-    )
+    const playwrightConfig = source('playwright.config.ts')
+
+    expect(playwrightConfig).toContain('reuseExistingServer: false')
+    expect(playwrightConfig).toContain('PLAYWRIGHT_START_LOCAL_SERVER')
   })
 
   it.each(['en', 'tr', 'ru', 'kg'])(

@@ -50,6 +50,8 @@ vi.mock('react', async importOriginal => {
         return result
       }
     },
+    ViewTransition: ({children}: {children?: React.ReactNode}) =>
+      actual.createElement(actual.Fragment, null, children),
   }
 })
 
@@ -292,12 +294,14 @@ describe('V2 public editorial list routes', () => {
     },
   )
 
-  it('rejects unsupported locales before querying editorial content', async () => {
-    await expect(WorksPage({params: params('de')})).rejects.toThrow(
-      'NEXT_NOT_FOUND',
-    )
+  it('keeps a registered dynamic locale in links while using English editorial fallback content', async () => {
+    render(await WorksPage({params: params('de')}))
 
-    expect(reader.listWorks).not.toHaveBeenCalled()
+    expect(reader.listWorks).toHaveBeenCalledWith('en')
+    expect(screen.getByRole('link', {name: /silent steppe/iu})).toHaveAttribute(
+      'href',
+      '/de/works/silent-steppe',
+    )
   })
 
   it('renders the full works archive without commerce language', async () => {
@@ -311,8 +315,9 @@ describe('V2 public editorial list routes', () => {
     expect(screen.queryByText(/add to cart|checkout|price/iu)).toBeNull()
     expect(screen.getByRole('region', {name: 'Work archive'})).toBeVisible()
     expect(
-      view.container.querySelector('[data-catalog-hero="landscape"]'),
+      view.container.querySelector('[data-public-editorial-hero]'),
     ).toBeVisible()
+    expect(screen.getByTestId('heritage-frame-overlay')).toBeVisible()
   })
 
   it('limits the available archive to works explicitly marked AVAILABLE', async () => {
@@ -351,7 +356,7 @@ describe('V2 public editorial list routes', () => {
 
   it.each([
     [
-      'Memory, land & belonging',
+      'Memory, land & home',
       CollectionsPage,
       '/collections/remembered-landscapes',
     ],
@@ -380,7 +385,7 @@ describe('V2 public editorial list routes', () => {
       collection,
       {
         ...collection,
-        id: 'collection-two',
+        id: '20000000-0000-4000-8000-000000000002',
         slug: 'another-series',
         title: 'Another Series',
       },
@@ -393,8 +398,9 @@ describe('V2 public editorial list routes', () => {
     ).toBeVisible()
     expect(screen.getByRole('list', {name: 'Collection archive'})).toBeVisible()
     expect(
-      view.container.querySelector('[data-catalog-hero="collection"]'),
+      view.container.querySelector('[data-public-editorial-hero]'),
     ).toBeVisible()
+    expect(screen.getByTestId('heritage-frame-overlay')).toBeVisible()
     expect(
       screen.getByText(
         'Explore each collection to see its published works and details.',
@@ -411,7 +417,7 @@ describe('V2 public editorial list routes', () => {
       exhibition,
       {
         ...exhibition,
-        id: 'exhibition-two',
+        id: '30000000-0000-4000-8000-000000000002',
         slug: 'earlier-exhibition',
         startsAt: '2022-01-01T00:00:00.000Z',
         title: 'Earlier Exhibition',
@@ -433,7 +439,7 @@ describe('V2 public editorial list routes', () => {
       journalEntry,
       {
         ...journalEntry,
-        id: 'journal-two',
+        id: '40000000-0000-4000-8000-000000000002',
         publishedAt: '2024-02-01T00:00:00.000Z',
         slug: 'winter-light',
         title: 'Winter Light',
@@ -453,7 +459,7 @@ describe('V2 public editorial list routes', () => {
       pressEntry,
       {
         ...pressEntry,
-        id: 'press-two',
+        id: '60000000-0000-4000-8000-000000000002',
         pressCategory: 'REVIEW',
         slug: 'a-published-review',
         title: 'A Published Review',
@@ -510,6 +516,19 @@ describe('V2 public editorial list routes', () => {
     ])
   })
 
+  it('canonicalizes English editorial fallback instead of indexing duplicate dynamic-locale content', async () => {
+    await expect(
+      generateWorksMetadata({params: params('de')}),
+    ).resolves.toMatchObject({alternates: {canonical: '/works'}})
+    await expect(
+      generateWorkDetailMetadata({
+        params: detailParams(work.slug, 'de'),
+      }),
+    ).resolves.toMatchObject({
+      alternates: {canonical: '/works/silent-steppe'},
+    })
+  })
+
   it('renders a calm localized empty state for every editorial archive', async () => {
     reader.listAvailableWorks.mockResolvedValue([])
     reader.listWorks.mockResolvedValue([])
@@ -546,6 +565,11 @@ describe('V2 public editorial detail routes', () => {
     expect(
       screen.getByRole('heading', {name: 'Availability inquiry'}),
     ).toBeVisible()
+    expect(
+      screen
+        .getByRole('form', {name: 'Availability inquiry'})
+        .closest('[data-public-container]'),
+    ).not.toBeNull()
     expect(screen.getByText('Oil on canvas')).toBeVisible()
     expect(screen.queryByText(/add to cart|checkout|price/iu)).toBeNull()
 
@@ -704,7 +728,10 @@ describe('V2 public editorial detail routes', () => {
     view = render(
       await JournalDetailPage({params: detailParams(journalEntry.slug)}),
     )
-    expect(screen.queryByRole('img')).toBeNull()
+    expect(
+      view.container.querySelector('[data-public-editorial-hero]'),
+    ).toBeVisible()
+    expect(screen.getByTestId('heritage-frame-overlay')).toBeVisible()
     view.unmount()
 
     reader.getPressEntry.mockResolvedValueOnce(sparsePress)
@@ -712,7 +739,8 @@ describe('V2 public editorial detail routes', () => {
       await PressDetailPage({params: detailParams(pressEntry.slug)}),
     )
     expect(screen.getAllByText(pressEntry.excerpt)).toHaveLength(2)
-    expect(screen.queryByRole('img')).toBeNull()
+    expect(screen.getByRole('img', {name: pressEntry.title})).toBeVisible()
+    expect(screen.getByTestId('heritage-frame-overlay')).toBeVisible()
     view.unmount()
   })
 
@@ -730,7 +758,9 @@ describe('V2 public editorial detail routes', () => {
 
     render(await JournalDetailPage({params: detailParams(journalEntry.slug)}))
 
-    expect(screen.getByText('From the Bekten Studio archive')).toBeVisible()
+    expect(
+      screen.getAllByText('From the Bekten Studio archive').length,
+    ).toBeGreaterThanOrEqual(1)
     expect(screen.getByRole('img')).toBeVisible()
   })
 

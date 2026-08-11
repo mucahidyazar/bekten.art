@@ -2,23 +2,23 @@ import type {Metadata} from 'next'
 
 import Link from 'next/link'
 
-import {getLocale} from 'next-intl/server'
-
 import {ConsentGoogleMap} from '@/components/consent/google-map'
 import {PublicInquiryForm} from '@/components/public-inquiry'
-import {PublicArtworkFrame} from '@/components/public-site/public-artwork-frame'
 import {
+  publicCopyLocale,
   publicLocale,
-  publicShellCopy,
-  type PublicLocale,
+  publicShellCopyFor,
+  type BuiltInPublicLocale,
 } from '@/components/public-site/public-copy'
+import {PublicEditorialHero} from '@/components/public-site/public-editorial-hero'
+import {NAV_FORWARD_TRANSITION} from '@/components/public-site/public-view-transition'
 import {localizedPath} from '@/lib/localized-path'
 import {getPublicContactInfo} from '@/server/contact/public-contact'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
 const contactCopy: Readonly<
   Record<
-    PublicLocale,
+    BuiltInPublicLocale,
     Readonly<{
       address: string
       contactDetails: string
@@ -121,9 +121,15 @@ const contactCopy: Readonly<
   },
 })
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = publicLocale(await getLocale())
-  const copy = contactCopy[locale]
+type ContactPageProps = Readonly<{
+  params: Promise<{locale: string}>
+}>
+
+export async function generateMetadata({
+  params,
+}: ContactPageProps): Promise<Metadata> {
+  const locale = publicLocale((await params).locale)
+  const copy = contactCopy[publicCopyLocale(locale)]
 
   return prepareMetadata({
     alternates: {canonical: localizedPath(locale, '/contact')},
@@ -133,11 +139,12 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-export default async function ContactPage() {
-  const locale = publicLocale(await getLocale())
-  const copy = contactCopy[locale]
-  const contact = await getPublicContactInfo(locale)
-  const shellCopy = publicShellCopy[locale]
+export default async function ContactPage({params}: ContactPageProps) {
+  const locale = publicLocale((await params).locale)
+  const contentLocale = publicCopyLocale(locale)
+  const copy = contactCopy[contentLocale]
+  const contact = await getPublicContactInfo(contentLocale)
+  const shellCopy = publicShellCopyFor(locale)
   const inquiryOptions = [
     {
       description: copy.serviceDescriptions.availability,
@@ -167,24 +174,13 @@ export default async function ContactPage() {
 
   return (
     <div className="heritage-contact">
-      <header className="heritage-contact__hero">
-        <div className="heritage-shell heritage-contact__hero-grid">
-          <div className="heritage-contact__hero-copy">
-            <p className="heritage-kicker">Bekten Studio</p>
-            <h1 className="heritage-display">{copy.title}</h1>
-            <span aria-hidden="true" className="heritage-ornament" />
-            <p>{copy.description}</p>
-          </div>
-          <figure className="heritage-contact__portrait">
-            <PublicArtworkFrame
-              fallbackAlt="Bekten Usubaliev"
-              fallbackSrc="/me.jpg"
-              priority
-              sizes="(max-width: 760px) 100vw, 52vw"
-            />
-          </figure>
-        </div>
-      </header>
+      <PublicEditorialHero
+        eyebrow="Bekten Studio"
+        fallbackAlt="Bekten Usubaliev"
+        fallbackSrc="/me.jpg"
+        paragraphs={[copy.description]}
+        title={copy.title}
+      />
 
       <section
         aria-labelledby="contact-inquiry-title"
@@ -193,7 +189,7 @@ export default async function ContactPage() {
         <div className="heritage-shell heritage-contact__conversation-grid">
           <PublicInquiryForm
             className="heritage-contact__form"
-            locale={locale}
+            locale={contentLocale}
             type="GENERAL"
           />
 
@@ -208,6 +204,7 @@ export default async function ContactPage() {
                   className="heritage-contact__service-card"
                   href={localizedPath(locale, option.href)}
                   key={option.href}
+                  transitionTypes={[...NAV_FORWARD_TRANSITION]}
                 >
                   <span aria-hidden="true">{option.index}</span>
                   <span>

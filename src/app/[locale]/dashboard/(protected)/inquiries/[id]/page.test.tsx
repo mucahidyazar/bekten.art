@@ -1,10 +1,16 @@
 import {render, screen} from '@testing-library/react'
-import {describe, expect, it, vi} from 'vitest'
+import {beforeEach, describe, expect, it, vi} from 'vitest'
 
-const mocks = vi.hoisted(() => ({findById: vi.fn()}))
+const mocks = vi.hoisted(() => ({
+  findById: vi.fn(),
+  requireStudioEditor: vi.fn(),
+}))
 
 vi.mock('@/server/studio-inquiries/configured-studio-inquiry-service', () => ({
   configuredStudioInquiryService: {findById: mocks.findById},
+}))
+vi.mock('@/server/studio-auth/configured-access', () => ({
+  requireStudioEditor: mocks.requireStudioEditor,
 }))
 vi.mock('../inquiry-actions', () => ({
   updateStudioInquiryAction: vi.fn(async (_id, state) => state),
@@ -13,7 +19,15 @@ vi.mock('../inquiry-actions', () => ({
 import StudioInquiryDetailPage from './page'
 
 describe('Studio inquiry detail page', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('maps the private database record into the inbox detail experience', async () => {
+    mocks.requireStudioEditor.mockResolvedValue({
+      id: 'editor-1',
+      role: 'EDITOR',
+    })
     mocks.findById.mockResolvedValue({
       brief: null,
       createdAt: new Date('2026-08-11T08:00:00.000Z'),
@@ -49,5 +63,18 @@ describe('Studio inquiry detail page', () => {
 
     expect(screen.getByRole('heading', {name: 'A Collector'})).toBeVisible()
     expect(screen.getByText('Initial follow-up prepared.')).toBeVisible()
+  })
+
+  it('does not load inquiry detail PII after editor access is revoked', async () => {
+    mocks.requireStudioEditor.mockRejectedValueOnce(new Error('FORBIDDEN'))
+
+    await expect(
+      StudioInquiryDetailPage({
+        params: Promise.resolve({
+          id: '00000000-0000-4000-8000-000000000002',
+        }),
+      } as never),
+    ).rejects.toThrow('FORBIDDEN')
+    expect(mocks.findById).not.toHaveBeenCalled()
   })
 })

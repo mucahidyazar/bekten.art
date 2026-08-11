@@ -3,6 +3,10 @@
 import {signIn} from 'next-auth/react'
 import {type FormEvent, useId, useState} from 'react'
 
+import {Button} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+import {Label} from '@/components/ui/label'
+
 type SubmissionState = 'idle' | 'submitting' | 'sent' | 'error'
 
 export function StudioSignInForm() {
@@ -34,13 +38,13 @@ export function StudioSignInForm() {
   return (
     <form className="grid gap-6" onSubmit={submit}>
       <div className="grid gap-2">
-        <label className="text-sm font-medium" htmlFor="studio-email">
+        <Label htmlFor="studio-email">
           Studio email
-        </label>
-        <input
+        </Label>
+        <Input
           aria-describedby={helpId}
           autoComplete="email"
-          className="min-h-12 rounded-sm border border-stone-400 bg-white/70 px-4 text-base text-stone-950 transition outline-none focus-visible:border-red-900 focus-visible:ring-2 focus-visible:ring-red-900/30"
+          className="min-h-12 border-stone-500/45 bg-[#fffaf0] px-4 text-base focus-visible:border-[#6f2a1a] focus-visible:ring-2 focus-visible:ring-[#6f2a1a]/30"
           disabled={state === 'submitting'}
           id="studio-email"
           maxLength={254}
@@ -53,13 +57,15 @@ export function StudioSignInForm() {
         </p>
       </div>
 
-      <button
-        className="min-h-12 rounded-sm bg-stone-950 px-5 py-3 font-medium text-stone-50 transition hover:bg-red-950 focus-visible:ring-2 focus-visible:ring-red-900 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-wait disabled:opacity-60"
+      <Button
+        className="min-h-12 bg-[#6f2a1a] px-5 text-[#fffaf0] hover:bg-[#542014]"
         disabled={state === 'submitting'}
+        isLoading={state === 'submitting'}
+        size="lg"
         type="submit"
       >
         {state === 'submitting' ? 'Sending…' : 'Send sign-in link'}
-      </button>
+      </Button>
 
       {state === 'sent' ? (
         <p className="text-sm leading-6 text-stone-700" role="status">

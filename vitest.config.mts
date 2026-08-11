@@ -19,8 +19,8 @@ export default defineConfig({
       include: [
         'i18n.ts',
         'src/app/api/**/route.ts',
-        'src/app/studio/(protected)/editorial-actions.ts',
-        'src/app/studio/(protected)/inquiries/inquiry-actions.ts',
+        'src/app/[locale]/dashboard/(protected)/editorial-actions.ts',
+        'src/app/[locale]/dashboard/(protected)/inquiries/inquiry-actions.ts',
         'src/components/admin/*.tsx',
         'src/components/consent/**/*.{ts,tsx}',
         'src/components/editorial/*.tsx',

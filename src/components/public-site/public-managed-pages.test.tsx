@@ -125,7 +125,7 @@ describe('reference-faithful managed public pages', () => {
     )
 
     const decorativeHero = container.querySelector(
-      'header img[aria-hidden="true"]',
+      'header img[src*="heritage-studio-hero.jpg"]',
     )
 
     expect(decorativeHero).toHaveAttribute(
@@ -214,7 +214,7 @@ describe('reference-faithful managed public pages', () => {
     ).toBeNull()
   })
 
-  it('falls back to decorative project imagery without inventing published media', () => {
+  it('uses the shared framed project fallback without inventing published copy', () => {
     const {container} = render(
       <PublicArtistPage
         locale="en"
@@ -228,7 +228,8 @@ describe('reference-faithful managed public pages', () => {
     )
 
     expect(screen.getByRole('heading', {name: page.title})).toBeVisible()
-    expect(screen.queryByRole('img')).toBeNull()
+    expect(screen.getByRole('img', {name: page.title})).toBeVisible()
+    expect(screen.getByTestId('heritage-frame-overlay')).toBeVisible()
     expect(
       screen.queryByRole('heading', {name: 'Biography & statement'}),
     ).toBeNull()

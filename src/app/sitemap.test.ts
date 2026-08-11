@@ -8,8 +8,14 @@ const database = vi.hoisted(() => ({
   journalEntry: {findMany: vi.fn()},
   pressItem: {findMany: vi.fn()},
 }))
+const localeRegistry = vi.hoisted(() => ({
+  list: vi.fn(),
+}))
 
 vi.mock('@/lib/db', () => ({prisma: database}))
+vi.mock('@/server/site-locales/public-site-locales', () => ({
+  publicSiteLocaleRegistry: localeRegistry,
+}))
 
 const publishedAt = new Date('2026-08-08T10:00:00.000Z')
 const updatedAt = new Date('2026-08-09T10:00:00.000Z')
@@ -61,6 +67,16 @@ const entities = [
 describe('V2 sitemap', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localeRegistry.list.mockResolvedValue(
+      ['en', 'tr', 'ru', 'ky'].map((code, sortOrder) => ({
+        code,
+        direction: 'LTR',
+        englishName: code,
+        nativeName: code,
+        sortOrder,
+        status: 'ACTIVE',
+      })),
+    )
 
     for (const entity of entities) {
       entity.delegate.findMany.mockResolvedValue([
@@ -140,6 +156,44 @@ describe('V2 sitemap', () => {
       tr: 'https://bekten.art/tr/works',
       ru: 'https://bekten.art/ru/works',
       ky: 'https://bekten.art/ky/works',
+      'x-default': 'https://bekten.art/works',
+    })
+  })
+
+  it('advertises a dynamic locale only on fully translatable static routes', async () => {
+    localeRegistry.list.mockResolvedValue([
+      {
+        code: 'en',
+        direction: 'LTR',
+        englishName: 'English',
+        nativeName: 'English',
+        sortOrder: 0,
+        status: 'ACTIVE',
+      },
+      {
+        code: 'de',
+        direction: 'LTR',
+        englishName: 'German',
+        nativeName: 'Deutsch',
+        sortOrder: 1,
+        status: 'ACTIVE',
+      },
+    ])
+
+    const {default: sitemap} = await import('./sitemap')
+    const entries = await sitemap()
+
+    expect(entries).not.toContainEqual(
+      expect.objectContaining({url: 'https://bekten.art/de/works'}),
+    )
+    expect(entries).toContainEqual(
+      expect.objectContaining({url: 'https://bekten.art/de/privacy-policy'}),
+    )
+    expect(
+      entries.find(entry => entry.url === 'https://bekten.art/works')
+        ?.alternates?.languages,
+    ).toEqual({
+      en: 'https://bekten.art/works',
       'x-default': 'https://bekten.art/works',
     })
   })

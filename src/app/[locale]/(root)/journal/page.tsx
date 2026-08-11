@@ -23,16 +23,16 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata({
   params,
 }: JournalPageProps): Promise<Metadata> {
-  const {locale} = await parsePublicParams(params)
-  const copy = publicRouteCopy[locale].journal
+  const {contentLocale, locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[contentLocale].journal
 
   return listMetadata(locale, 'journal', copy.title, copy.intro)
 }
 
 export default async function JournalPage({params}: JournalPageProps) {
-  const {locale} = await parsePublicParams(params)
-  const copy = publicRouteCopy[locale].journal
-  const entries = await publicEditorialReader.listJournalEntries(locale)
+  const {contentLocale, locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[contentLocale].journal
+  const entries = await publicEditorialReader.listJournalEntries(contentLocale)
   const [featured, ...archive] = entries
 
   const journalItem = (entry: (typeof entries)[number]) => ({
@@ -41,6 +41,7 @@ export default async function JournalPage({params}: JournalPageProps) {
     href: localizedPath(locale, `/journal/${entry.slug}`),
     id: entry.id,
     media: heroMedia(entry),
+    publicKey: entry.slug,
     title: entry.title,
   })
 
@@ -51,15 +52,16 @@ export default async function JournalPage({params}: JournalPageProps) {
         {featured ? (
           <>
             <section
-              aria-label={publicRouteCopy[locale].featuredJournalEntry}
+              aria-label={publicRouteCopy[contentLocale].featuredJournalEntry}
               className={styles.featuredRegion}
             >
               <PublicEditorialCard
-                actionLabel={publicRouteCopy[locale].readJournal}
+                actionLabel={publicRouteCopy[contentLocale].readJournal}
                 description={featured.excerpt}
                 eyebrow={publicDate(featured.publishedAt, locale)}
                 href={localizedPath(locale, `/journal/${featured.slug}`)}
                 media={heroMedia(featured)}
+                publicKey={featured.slug}
                 title={featured.title}
                 variant="featured"
               />
@@ -68,12 +70,12 @@ export default async function JournalPage({params}: JournalPageProps) {
               <div className={styles.section}>
                 <div className={styles.sectionHeader}>
                   <h2 className={styles.sectionTitle}>
-                    {publicRouteCopy[locale].journalArchive}
+                    {publicRouteCopy[contentLocale].journalArchive}
                   </h2>
                 </div>
                 <PublicEditorialList
-                  accessibleName={publicRouteCopy[locale].journalArchive}
-                  actionLabel={publicRouteCopy[locale].readJournal}
+                  accessibleName={publicRouteCopy[contentLocale].journalArchive}
+                  actionLabel={publicRouteCopy[contentLocale].readJournal}
                   empty={copy.empty}
                   items={archive.map(journalItem)}
                   variant="rows"

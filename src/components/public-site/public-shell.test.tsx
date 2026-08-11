@@ -72,6 +72,61 @@ describe('editorial public shell', () => {
     ).toHaveAttribute('aria-current', 'page')
   })
 
+  it('renders a newly registered locale with English shell fallback and its own prefix', () => {
+    navigation.pathname = '/de/works'
+    render(
+      <PublicHeader
+        locale="de"
+        locales={[
+          {code: 'en', nativeName: 'English'},
+          {code: 'de', nativeName: 'Deutsch'},
+        ]}
+      />,
+    )
+
+    const primaryNavigation = screen.getByRole('navigation', {
+      name: 'Primary navigation',
+    })
+    const works = within(primaryNavigation).getByRole('link', {name: 'Works'})
+
+    expect(works).toHaveAttribute(
+      'href',
+      '/de/works',
+    )
+    expect(works).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', {name: 'Deutsch'})).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+
+    navigation.pathname = '/works'
+  })
+
+  it.each([
+    ['en', '/collections', 'Collections'],
+    ['tr', '/tr/collections', 'Koleksiyonlar'],
+    ['ru', '/ru/collections', 'Коллекции'],
+    ['ky', '/ky/collections', 'Жыйнактар'],
+  ] as const)(
+    'marks only the current non-home route for %s',
+    (locale, pathname, currentLabel) => {
+      navigation.pathname = pathname
+      render(<PublicHeader locale={locale} />)
+
+      const primaryNavigation = screen.getByRole('navigation', {
+        name: /primary|ana|основная|негизги/iu,
+      })
+      const currentLinks = within(primaryNavigation).getAllByRole('link', {
+        current: 'page',
+      })
+
+      expect(currentLinks).toHaveLength(1)
+      expect(currentLinks[0]).toHaveAccessibleName(currentLabel)
+
+      navigation.pathname = '/works'
+    },
+  )
+
   it('provides a restrained contact footer and all premium inquiry paths', () => {
     render(<PublicFooter locale="en" />)
 
@@ -83,9 +138,11 @@ describe('editorial public shell', () => {
     expect(
       within(footer).getByRole('link', {name: 'Availability inquiry'}),
     ).toHaveAttribute('href', '/available-works')
-    expect(
-      within(footer).getByRole('link', {name: 'Commission'}),
-    ).toHaveAttribute('href', '/commission-a-work')
+    for (const commissionLink of within(footer).getAllByRole('link', {
+      name: 'Commission',
+    })) {
+      expect(commissionLink).toHaveAttribute('href', '/commission-a-work')
+    }
     expect(
       within(footer).getByRole('link', {name: 'Private viewing'}),
     ).toHaveAttribute('href', '/private-viewings')
@@ -95,9 +152,61 @@ describe('editorial public shell', () => {
     expect(within(footer).queryByText(/buy|shop|price|cart/iu)).toBeNull()
   })
 
+  it('renders the editorial footer navigation and creator attribution without copyright text', () => {
+    render(<PublicFooter locale="en" />)
+
+    const footer = screen.getByRole('contentinfo')
+
+    expect(
+      within(footer).queryAllByText(/©|all works and images/iu),
+    ).toHaveLength(0)
+    expect(
+      within(footer).getByRole('link', {name: 'Bekten — Home'}),
+    ).toHaveAttribute('href', '/')
+    expect(
+      within(footer).getByRole('link', {name: 'All works'}),
+    ).toHaveAttribute('href', '/works')
+    expect(
+      within(footer).getByRole('link', {name: 'Available works'}),
+    ).toHaveAttribute('href', '/available-works')
+    const workNavigation = within(footer).getByRole('navigation', {
+      name: 'Footer work navigation',
+    })
+
+    expect(
+      within(workNavigation).getByRole('link', {name: 'Commission'}),
+    ).toHaveAttribute('href', '/commission-a-work')
+    expect(within(footer).getByRole('link', {name: 'Press'})).toHaveAttribute(
+      'href',
+      '/press',
+    )
+    expect(within(footer).getByRole('link', {name: 'Privacy'})).toHaveAttribute(
+      'href',
+      '/privacy-policy',
+    )
+
+    const attribution = footer.lastElementChild as HTMLElement
+    const creator = within(attribution).getByRole('link', {name: 'mucahid.dev'})
+
+    expect(attribution).toHaveTextContent(
+      'Made with 💜 by mucahid.dev for bekten.art',
+    )
+    expect(creator).toHaveAttribute('href', 'https://mucahid.dev/')
+    expect(creator).toHaveAttribute('target', '_blank')
+    expect(creator).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
   it('localizes footer navigation instead of leaking the default language', () => {
     render(<PublicFooter locale="tr" />)
 
+    expect(screen.getByRole('link', {name: 'Tüm eserler'})).toHaveAttribute(
+      'href',
+      '/tr/works',
+    )
+    expect(screen.getByRole('link', {name: 'Mevcut eserler'})).toHaveAttribute(
+      'href',
+      '/tr/available-works',
+    )
     expect(screen.getByRole('link', {name: 'Gizlilik'})).toHaveAttribute(
       'href',
       '/tr/privacy-policy',

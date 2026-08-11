@@ -199,7 +199,10 @@ export async function DELETE(request: Request) {
     const {searchParams} = new URL(request.url)
     const fileId = validateMediaId(searchParams.get('id') || '')
 
-    const media = await prisma.mediaObject.findUnique({where: {id: fileId}})
+    const media = await prisma.mediaObject.findUnique({
+      include: {_count: {select: {contentPlacements: true}}},
+      where: {id: fileId},
+    })
 
     if (!media) {
       return NextResponse.json({error: 'File not found'}, {status: 404})
@@ -210,6 +213,13 @@ export async function DELETE(request: Request) {
 
     if (!managedByGarage || !objectKey) {
       return NextResponse.json({error: 'File not found'}, {status: 404})
+    }
+
+    if ((media._count?.contentPlacements ?? 0) > 0) {
+      return NextResponse.json(
+        {error: 'Remove this image from content before deleting it'},
+        {status: 409},
+      )
     }
 
     const safeObjectKey = validateStorageObjectKey(objectKey)
@@ -324,6 +334,10 @@ export async function POST(request: Request) {
     const folder = validateStoragePathSegment(
       String(formData.get('folder') || 'gallery'),
     )
+    const folderIdCandidate = String(formData.get('folderId') || '')
+    const folderId = folderIdCandidate
+      ? validateMediaId(folderIdCandidate)
+      : null
     const sourceUrl = optionalExternalUrl(
       String(formData.get('sourceUrl') || ''),
     )
@@ -333,6 +347,17 @@ export async function POST(request: Request) {
       return NextResponse.json({error: 'File is required'}, {status: 400})
     }
 
+    if (folderId) {
+      const mediaFolder = await prisma.mediaFolder.findUnique({
+        select: {id: true},
+        where: {id: folderId},
+      })
+
+      if (!mediaFolder) {
+        return NextResponse.json({error: 'Media folder not found'}, {status: 404})
+      }
+    }
+
     const prepared = await prepareImageUpload({file, folder})
     const {storage} = getObjectStorage()
     const id = randomUUID()
@@ -340,7 +365,9 @@ export async function POST(request: Request) {
     await prisma.mediaObject.create({
       data: {
         checksumSha256: prepared.checksumSha256Hex,
+        displayName: prepared.originalFileName,
         filename: prepared.objectKey.split('/').at(-1) || `${id}.webp`,
+        folderId,
         height: prepared.height,
         id,
         mimeType: prepared.contentType,
@@ -380,6 +407,7 @@ export async function POST(request: Request) {
             metadata: {
               bucket,
               contentType: prepared.contentType,
+              folderId,
               sizeBytes: prepared.bytes.byteLength,
               sourceUrl,
             },

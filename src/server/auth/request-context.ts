@@ -6,7 +6,7 @@ type AuthRequest = Readonly<{
     | Readonly<Record<string, string | readonly string[] | undefined>>
 }>
 
-function readHeader(request: AuthRequest, name: string) {
+function readHeader(request: AuthRequest, name: string): string | undefined {
   const headers = request.headers
 
   if (!headers) {
@@ -19,7 +19,9 @@ function readHeader(request: AuthRequest, name: string) {
 
   const value = headers[name]
 
-  return Array.isArray(value) ? value[0] : value
+  if (Array.isArray(value)) return value[0]
+
+  return typeof value === 'string' ? value : undefined
 }
 
 export function getClientAddress(request: AuthRequest, trustProxy: boolean) {
@@ -28,8 +30,10 @@ export function getClientAddress(request: AuthRequest, trustProxy: boolean) {
   }
 
   const forwardedAddress = readHeader(request, 'x-forwarded-for')
-    ?.split(',')[0]
-    ?.trim()
+    ?.split(',')
+    .map(address => address.trim())
+    .filter(address => isIP(address))
+    .at(-1)
   const realAddress = readHeader(request, 'x-real-ip')?.trim()
   const candidate = forwardedAddress || realAddress
 

@@ -1,7 +1,7 @@
 import {notFound} from 'next/navigation'
 
 import {PublicInquiryForm} from '@/components/public-inquiry'
-import {localizedPath} from '@/lib/localized-path'
+import {isSafeLocaleCode, localizedPath} from '@/lib/localized-path'
 import {publicEditorialReader} from '@/server/public-editorial'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
@@ -67,39 +67,54 @@ export function createPublicManagedRoute({
   slug,
 }: ManagedPageRouteOptions) {
   async function findPage(locale: string) {
-    if (!isPublicLocale(locale)) return null
+    if (!isSafeLocaleCode(locale)) return null
 
-    return publicEditorialReader.getPage(locale, slug)
+    const contentLocale = isPublicLocale(locale) ? locale : 'en'
+    const page = await publicEditorialReader.getPage(contentLocale, slug)
+
+    return page ? Object.freeze({contentLocale, page}) : null
   }
 
   async function generateMetadata({params}: ManagedPageRouteProps) {
     const {locale} = await params
-    const page = await findPage(locale)
+    const resolved = await findPage(locale)
 
-    if (!page || !isPublicLocale(locale)) notFound()
+    if (!resolved) notFound()
+
+    const {contentLocale, page} = resolved
+    const usesFallback = contentLocale !== locale
 
     return prepareMetadata({
       alternates: {
-        canonical: localizedPath(locale, page.seo.canonicalPath),
+        canonical: localizedPath(contentLocale, page.seo.canonicalPath),
       },
-      contentLocale: locale,
+      contentLocale,
       description: page.seo.description,
-      robots: {follow: !page.seo.noIndex, index: !page.seo.noIndex},
+      robots: {
+        follow: !page.seo.noIndex,
+        index: !page.seo.noIndex && !usesFallback,
+      },
       title: page.seo.title,
     })
   }
 
   async function Page({params}: ManagedPageRouteProps) {
     const {locale} = await params
-    const page = await findPage(locale)
+    const resolved = await findPage(locale)
 
-    if (!page || !isPublicLocale(locale)) notFound()
+    if (!resolved) notFound()
+
+    const {contentLocale, page} = resolved
 
     const inquiry = inquiryType ? (
-      <PublicInquiryForm locale={locale} type={inquiryType} />
+      <PublicInquiryForm locale={contentLocale} type={inquiryType} />
     ) : null
 
-    return managedPageComposition(kind, locale, page, inquiry)
+    return (
+      <div lang={contentLocale}>
+        {managedPageComposition(kind, contentLocale, page, inquiry)}
+      </div>
+    )
   }
 
   return Object.freeze({generateMetadata, Page})

@@ -22,16 +22,16 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata({
   params,
 }: PressPageProps): Promise<Metadata> {
-  const {locale} = await parsePublicParams(params)
-  const copy = publicRouteCopy[locale].press
+  const {contentLocale, locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[contentLocale].press
 
   return listMetadata(locale, 'press', copy.title, copy.intro)
 }
 
 export default async function PressPage({params}: PressPageProps) {
-  const {locale} = await parsePublicParams(params)
-  const copy = publicRouteCopy[locale].press
-  const entries = await publicEditorialReader.listPressEntries(locale)
+  const {contentLocale, locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[contentLocale].press
+  const entries = await publicEditorialReader.listPressEntries(contentLocale)
   const categories = ['FEATURE', 'INTERVIEW', 'REVIEW', 'NEWS'] as const
   const groups = categories
     .map(category => ({
@@ -48,7 +48,7 @@ export default async function PressPage({params}: PressPageProps) {
           groups.map(group => {
             const headingId = `press-${group.category.toLowerCase()}`
             const categoryLabel =
-              publicRouteCopy[locale].pressCategories[group.category]
+              publicRouteCopy[contentLocale].pressCategories[group.category]
 
             return (
               <section
@@ -59,7 +59,7 @@ export default async function PressPage({params}: PressPageProps) {
                 <h2 id={headingId}>{categoryLabel}</h2>
                 <PublicEditorialList
                   accessibleName={categoryLabel}
-                  actionLabel={publicRouteCopy[locale].readPress}
+                  actionLabel={publicRouteCopy[contentLocale].readPress}
                   empty={copy.empty}
                   items={group.entries.map(entry => ({
                     description: entry.excerpt,
@@ -74,6 +74,7 @@ export default async function PressPage({params}: PressPageProps) {
                     href: localizedPath(locale, `/press/${entry.slug}`),
                     id: entry.id,
                     media: heroMedia(entry),
+                    publicKey: entry.slug,
                     title: entry.title,
                   }))}
                 />

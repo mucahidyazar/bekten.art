@@ -1,7 +1,11 @@
 import type {Metadata} from 'next'
 
 import {getSiteIdentity, SITE_NAME} from '@/components/seo/site-identity'
-import {APP_LOCALES, type AppLocale} from '@/lib/localized-path'
+import {
+  APP_LOCALES,
+  type AppLocale,
+  type BuiltInAppLocale,
+} from '@/lib/localized-path'
 
 type TPrepareMetadata = Metadata & {
   contentLocale?: AppLocale
@@ -28,12 +32,17 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
     ...rest
   } = metadata
   const identity = getSiteIdentity(contentLocale)
-  const OPEN_GRAPH_LOCALE: Readonly<Record<AppLocale, string>> = {
+  const OPEN_GRAPH_LOCALE: Readonly<Record<BuiltInAppLocale, string>> = {
     en: 'en_US',
     ky: 'ky_KG',
     ru: 'ru_RU',
     tr: 'tr_TR',
   }
+  const identityLocale = APP_LOCALES.includes(
+    contentLocale as BuiltInAppLocale,
+  )
+    ? (contentLocale as BuiltInAppLocale)
+    : 'en'
   const DEFAULT_TITLE = {
     default: SITE_NAME,
     template: `%s | Bekten Usubaliev`,
@@ -89,9 +98,9 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
       description,
       type: 'website',
       alternateLocale: APP_LOCALES.filter(
-        locale => locale !== contentLocale,
+        locale => locale !== identityLocale,
       ).map(locale => OPEN_GRAPH_LOCALE[locale]),
-      locale: OPEN_GRAPH_LOCALE[contentLocale],
+      locale: OPEN_GRAPH_LOCALE[identityLocale],
       siteName: SITE_NAME,
       images: [
         {

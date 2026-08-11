@@ -7,6 +7,7 @@ import {
   localizedPath,
 } from '@/lib/localized-path'
 import {kebabSlugSchema} from '@/server/editorial-content'
+import {publicSiteLocaleRegistry} from '@/server/site-locales/public-site-locales'
 
 import type {AppLocale} from '@/lib/localized-path'
 
@@ -31,6 +32,10 @@ const STATIC_PAGES = [
   {path: '/privacy-policy', changeFrequency: 'yearly', priority: 0.2},
   {path: '/terms-of-service', changeFrequency: 'yearly', priority: 0.2},
 ] as const
+const FULLY_TRANSLATABLE_DYNAMIC_PATHS = new Set([
+  '/privacy-policy',
+  '/terms-of-service',
+])
 const PUBLISHED_ENTITY_QUERY = Object.freeze({
   orderBy: [{updatedAt: 'desc' as const}, {id: 'asc' as const}],
   select: {
@@ -82,15 +87,26 @@ function domain() {
   }
 }
 
-function isAppLocale(locale: string): locale is AppLocale {
-  return APP_LOCALES.some(candidate => candidate === locale)
+function isAppLocale(
+  locale: string,
+  activeLocales: readonly string[] = APP_LOCALES,
+): locale is AppLocale {
+  return activeLocales.some(candidate => candidate === locale)
 }
 
-function staticEntries(origin: string): MetadataRoute.Sitemap {
+function staticEntries(
+  origin: string,
+  activeLocales: readonly string[],
+): MetadataRoute.Sitemap {
   return STATIC_PAGES.flatMap(page => {
-    const languages = localizedAlternates(origin, page.path)
+    const pageLocales = FULLY_TRANSLATABLE_DYNAMIC_PATHS.has(page.path)
+      ? activeLocales
+      : activeLocales.filter(locale =>
+          APP_LOCALES.some(builtInLocale => builtInLocale === locale),
+        )
+    const languages = localizedAlternates(origin, page.path, pageLocales)
 
-    return APP_LOCALES.map(locale => ({
+    return pageLocales.map(locale => ({
       url: `${origin}${localizedPath(locale, page.path)}`,
       changeFrequency: page.changeFrequency,
       priority: page.priority,
@@ -101,10 +117,11 @@ function staticEntries(origin: string): MetadataRoute.Sitemap {
 
 function validPublishedRow(
   row: PublishedEntityRow,
+  activeLocales: readonly string[] = APP_LOCALES,
 ): row is ValidPublishedEntityRow {
   return (
     typeof row.id === 'string' &&
-    isAppLocale(row.locale) &&
+    isAppLocale(row.locale, activeLocales) &&
     row.publishedAt instanceof Date &&
     !Number.isNaN(row.publishedAt.valueOf()) &&
     row.updatedAt instanceof Date &&
@@ -163,7 +180,10 @@ function mostRecentDate(...dates: readonly Date[]) {
   return new Date(Math.max(...dates.map(date => date.valueOf())))
 }
 
-async function dynamicEntries(origin: string): Promise<MetadataRoute.Sitemap> {
+async function dynamicEntries(
+  origin: string,
+  activeLocales: readonly string[],
+): Promise<MetadataRoute.Sitemap> {
   const [artworks, collections, exhibitions, journalEntries, pressEntries] =
     await Promise.all([
       prisma.artwork.findMany(PUBLISHED_ENTITY_QUERY),
@@ -180,7 +200,9 @@ async function dynamicEntries(origin: string): Promise<MetadataRoute.Sitemap> {
     {entityType: 'PRESS_ENTRY', path: '/press', rows: pressEntries},
   ]
   const entityIds = groups.flatMap(group =>
-    group.rows.filter(validPublishedRow).map(row => row.id),
+    group.rows
+      .filter(row => validPublishedRow(row, activeLocales))
+      .map(row => row.id),
   )
 
   if (entityIds.length === 0) return []
@@ -203,7 +225,7 @@ async function dynamicEntries(origin: string): Promise<MetadataRoute.Sitemap> {
 
   return groups.flatMap(group =>
     group.rows.flatMap(row => {
-      if (!validPublishedRow(row)) return []
+      if (!validPublishedRow(row, activeLocales)) return []
 
       const revision = latestPublishedRevision(revisions, group, row)
 
@@ -233,10 +255,16 @@ async function dynamicEntries(origin: string): Promise<MetadataRoute.Sitemap> {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const origin = domain()
-  const indexableStaticEntries = staticEntries(origin)
+  const activeLocales = (await publicSiteLocaleRegistry.list()).map(
+    locale => locale.code,
+  )
+  const indexableStaticEntries = staticEntries(origin, activeLocales)
 
   try {
-    return [...indexableStaticEntries, ...(await dynamicEntries(origin))]
+    return [
+      ...indexableStaticEntries,
+      ...(await dynamicEntries(origin, activeLocales)),
+    ]
   } catch {
     return indexableStaticEntries
   }

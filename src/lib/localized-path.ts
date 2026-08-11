@@ -1,6 +1,19 @@
-export const APP_LOCALES = ['en', 'tr', 'ru', 'ky'] as const
+export const APP_LOCALES = [
+  'en',
+  'tr',
+  'ru',
+  'ky',
+] as const satisfies readonly BuiltInAppLocale[]
+export type AppLocale = string
 
-export type AppLocale = (typeof APP_LOCALES)[number]
+export type BuiltInAppLocale = 'en' | 'ky' | 'ru' | 'tr'
+
+const LOCALE_CODE_PATTERN =
+  /^[a-z]{2,3}(?:-[A-Z][a-z]{3})?(?:-(?:[A-Z]{2}|\d{3}))?$/u
+
+export function isSafeLocaleCode(locale: string) {
+  return locale !== 'kg' && LOCALE_CODE_PATTERN.test(locale)
+}
 
 function normalizePathname(pathname: string) {
   if (/^[a-z][a-z\d+.-]*:/iu.test(pathname) || pathname.includes('\\')) {
@@ -14,30 +27,47 @@ function normalizePathname(pathname: string) {
   return normalized === '' ? '/' : normalized
 }
 
-export function localizedAlternates(baseUrl: string, pathname: string) {
+export function localizedAlternates(
+  baseUrl: string,
+  pathname: string,
+  locales: readonly string[] = APP_LOCALES,
+): Readonly<Record<string, string>> {
   const origin = new URL(baseUrl).origin
+  const validLocales = [...new Set(locales)]
+
+  if (
+    !validLocales.includes('en') ||
+    validLocales.some(locale => !isSafeLocaleCode(locale))
+  ) {
+    throw new Error('Unsupported locale registry')
+  }
+
   const alternates = Object.fromEntries(
-    APP_LOCALES.map(locale => [
+    validLocales.map(locale => [
       locale,
       `${origin}${localizedPath(locale, pathname)}`,
     ]),
-  ) as Record<AppLocale, string>
+  ) as Record<string, string>
 
-  return {
+  const english = alternates.en
+
+  if (!english) throw new Error('English locale is required')
+
+  return Object.freeze({
     ...alternates,
-    'x-default': alternates.en,
-  }
+    'x-default': english,
+  })
 }
 
-export function localizedPath(locale: AppLocale, pathname: string) {
-  if (!APP_LOCALES.includes(locale as AppLocale)) {
+export function localizedPath(locale: string, pathname: string) {
+  if (!isSafeLocaleCode(locale)) {
     throw new Error(`Unsupported locale: ${locale}`)
   }
 
   const normalizedPathname = normalizePathname(pathname)
   const segments = normalizedPathname.split('/')
 
-  if (APP_LOCALES.includes(segments[1] as AppLocale)) {
+  if (segments[1] && (segments[1] === 'kg' || isSafeLocaleCode(segments[1]))) {
     segments.splice(1, 1)
   }
 

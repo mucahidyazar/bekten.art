@@ -5,7 +5,7 @@ import {startWithOptionalConsentDenied} from './helpers/consent'
 const publicCatalogRoutes = [
   {heading: 'Works', path: '/works'},
   {heading: 'Available works', path: '/available-works'},
-  {heading: 'Memory, land & belonging', path: '/collections'},
+  {heading: 'Memory, land & home', path: '/collections'},
   {heading: 'Exhibitions', path: '/exhibitions'},
   {heading: 'Journal', path: '/journal'},
   {heading: 'Press', path: '/press'},

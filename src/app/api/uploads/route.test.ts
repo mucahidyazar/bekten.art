@@ -2,6 +2,7 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   auditCreate: vi.fn(),
+  folderFindUnique: vi.fn(),
   mediaCreate: vi.fn(),
   mediaDeleteMany: vi.fn(),
   mediaFindMany: vi.fn(),
@@ -19,6 +20,7 @@ vi.mock('@/lib/db', () => ({
   prisma: {
     $transaction: mocks.transaction,
     auditEvent: {create: mocks.auditCreate},
+    mediaFolder: {findUnique: mocks.folderFindUnique},
     mediaObject: {
       create: mocks.mediaCreate,
       deleteMany: mocks.mediaDeleteMany,
@@ -141,6 +143,7 @@ describe('/api/uploads', () => {
       role: 'OWNER',
     })
     mocks.mediaFindUnique.mockResolvedValue(null)
+    mocks.folderFindUnique.mockResolvedValue(null)
     mocks.mediaFindMany.mockResolvedValue([])
     mocks.mediaCreate.mockResolvedValue({id: FILE_ID})
     mocks.mediaUpdate.mockResolvedValue({id: FILE_ID})
@@ -277,6 +280,24 @@ describe('/api/uploads', () => {
       data: {status: 'FAILED'},
       where: {id: FILE_ID},
     })
+  })
+
+  it('refuses to delete media that is attached to published or draft content', async () => {
+    mocks.mediaFindUnique.mockResolvedValue({
+      _count: {contentPlacements: 2},
+      id: FILE_ID,
+      objectKey: 'gallery/generated.webp',
+      provider: 'garage',
+    })
+
+    const response = await DELETE(mutationRequest('DELETE'))
+
+    expect(response.status).toBe(409)
+    await expect(response.json()).resolves.toEqual({
+      error: 'Remove this image from content before deleting it',
+    })
+    expect(mocks.mediaUpdate).not.toHaveBeenCalled()
+    expect(mocks.storageDelete).not.toHaveBeenCalled()
   })
 
   it('marks an upload failed and compensates Garage when final database work fails', async () => {
@@ -446,6 +467,42 @@ describe('/api/uploads', () => {
     expect(mocks.auditCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({action: 'media.uploaded'}),
+      }),
+    )
+  })
+
+  it('attaches an upload to an existing virtual media folder', async () => {
+    const folderId = 'c474c384-1f14-4f53-bded-75f3a3ded279'
+    const request = mutationRequest('POST')
+
+    mocks.folderFindUnique.mockResolvedValue({id: folderId})
+    vi.spyOn(request, 'formData').mockResolvedValue({
+      get(name: string) {
+        return {
+          bucket: 'images',
+          file: {
+            arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer,
+            name: 'portrait.png',
+            size: 3,
+            type: 'image/png',
+          },
+          folder: 'editorial',
+          folderId,
+          sourceUrl: null,
+        }[name] as FormDataEntryValue | null
+      },
+    } as FormData)
+
+    const response = await POST(request)
+
+    expect(response.status).toBe(200)
+    expect(mocks.folderFindUnique).toHaveBeenCalledWith({
+      select: {id: true},
+      where: {id: folderId},
+    })
+    expect(mocks.mediaCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({folderId}),
       }),
     )
   })

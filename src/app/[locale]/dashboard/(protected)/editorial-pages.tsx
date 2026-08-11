@@ -4,6 +4,7 @@ import {notFound} from 'next/navigation'
 import {z} from 'zod'
 
 import {EditorialDetail} from '@/components/editorial/editorial-detail'
+import {NAV_BACK_TRANSITION} from '@/components/public-site/public-view-transition'
 import {EditorialEntryForm} from '@/components/studio/editorial-entry-form'
 import {
   EditorialEntryList,
@@ -17,6 +18,7 @@ import {
 } from '@/server/editorial-content'
 import {uuidSchema} from '@/server/editorial-content'
 import {editorialContentRepository} from '@/server/editorial-persistence/configured-content'
+import {requireStudioEditor} from '@/server/studio-auth/configured-access'
 import {studioEditorialConfigurationForType} from '@/server/studio-content/editorial-route-config'
 
 import {
@@ -102,12 +104,16 @@ function changedSnapshotFields(
 export async function StudioEditorialEditorPage({
   entityId,
   entityType,
+  initialLocale,
   notice,
 }: Readonly<{
   entityId: string | null
   entityType: EditorialEntityType
+  initialLocale?: string
   notice?: string
 }>) {
+  await requireStudioEditor()
+
   const configuration = studioEditorialConfigurationForType(entityType)
   const [found, availableMedia, revisionRows] = await Promise.all([
     entityId
@@ -138,6 +144,7 @@ export async function StudioEditorialEditorPage({
   if (entityId && !found) notFound()
 
   const record = found ? studioRecordSchema.parse(found) : null
+  const newEntryLocale = editorialLocaleSchema.catch('en').parse(initialLocale)
 
   const action = submitEditorialEntryAction.bind(
     null,
@@ -162,6 +169,7 @@ export async function StudioEditorialEditorPage({
       <Link
         className="text-sm font-semibold underline underline-offset-4"
         href={`/dashboard/${configuration.routeSegment}`}
+        transitionTypes={[...NAV_BACK_TRANSITION]}
       >
         Back to {configuration.label.toLowerCase()}
       </Link>
@@ -190,7 +198,7 @@ export async function StudioEditorialEditorPage({
         availableMedia={availableMedia}
         entityId={record?.id ?? null}
         entityType={entityType}
-        initialValue={record ?? {}}
+        initialValue={record ?? {locale: newEntryLocale}}
         status={record?.status ?? null}
       />
       {record && restoreAction ? (
@@ -220,6 +228,8 @@ export async function StudioEditorialListPage({
   entityType: EditorialEntityType
   searchParameters: SearchParameters
 }>) {
+  await requireStudioEditor()
+
   const configuration = studioEditorialConfigurationForType(entityType)
   const locale = editorialLocaleSchema
     .catch('en')
@@ -262,6 +272,8 @@ export async function StudioEditorialPreviewPage({
   entityId: string
   entityType: EditorialEntityType
 }>) {
+  await requireStudioEditor()
+
   const configuration = studioEditorialConfigurationForType(entityType)
   const found = await repositoryFor(entityType).findById(
     uuidSchema.parse(entityId),
@@ -277,6 +289,7 @@ export async function StudioEditorialPreviewPage({
         <Link
           className="text-sm font-semibold underline underline-offset-4"
           href={`/dashboard/${configuration.routeSegment}/${record.id}`}
+          transitionTypes={[...NAV_BACK_TRANSITION]}
         >
           Return to editor
         </Link>

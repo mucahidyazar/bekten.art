@@ -52,4 +52,24 @@ describe('buildContentSecurityPolicy', () => {
       }),
     ).toThrow('Invalid media origin')
   })
+
+  it('allows a localhost Garage origin during development', () => {
+    const policy = buildContentSecurityPolicy({
+      mediaOrigin: 'http://localhost:9000',
+      nonce: 'local-media-nonce',
+      production: false,
+    })
+
+    expect(policy).toMatch(/img-src[^;]+http:\/\/localhost:9000(?:;|$)/u)
+  })
+
+  it('rejects an insecure localhost Garage origin in production', () => {
+    expect(() =>
+      buildContentSecurityPolicy({
+        mediaOrigin: 'http://localhost:9000',
+        nonce: 'production-media-nonce',
+        production: true,
+      }),
+    ).toThrow('Invalid media origin')
+  })
 })

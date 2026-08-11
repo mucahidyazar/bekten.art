@@ -3,8 +3,9 @@ import type {Metadata} from 'next'
 import styles from '@/components/public-site/catalog-layouts.module.css'
 import {PublicArtworkGrid} from '@/components/public-site/public-artwork-grid'
 import {
+  publicCopyLocale,
   publicLocale,
-  type PublicLocale,
+  type BuiltInPublicLocale,
 } from '@/components/public-site/public-copy'
 import {localizedPath} from '@/lib/localized-path'
 import {publicEditorialReader} from '@/server/public-editorial'
@@ -19,7 +20,7 @@ type ArchivePageProps = Readonly<{params: Promise<{locale: string}>}>
 
 const archiveCopy: Readonly<
   Record<
-    PublicLocale,
+    BuiltInPublicLocale,
     Readonly<{
       description: string
       empty: string
@@ -77,7 +78,7 @@ export async function generateMetadata({
   params,
 }: ArchivePageProps): Promise<Metadata> {
   const locale = publicLocale((await params).locale)
-  const copy = archiveCopy[locale]
+  const copy = archiveCopy[publicCopyLocale(locale)]
 
   return prepareMetadata({
     alternates: {canonical: localizedPath(locale, '/archive')},
@@ -89,8 +90,9 @@ export async function generateMetadata({
 
 export default async function ArchivePage({params}: ArchivePageProps) {
   const locale = publicLocale((await params).locale)
-  const copy = archiveCopy[locale]
-  const works = await publicEditorialReader.listWorks(locale)
+  const contentLocale = publicCopyLocale(locale)
+  const copy = archiveCopy[contentLocale]
+  const works = await publicEditorialReader.listWorks(contentLocale)
   const yearGroups = [...new Set(works.map(work => work.year ?? null))]
     .sort((left, right) => {
       if (left === null) return 1

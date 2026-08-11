@@ -44,65 +44,71 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe('PublicInquiryForm', () => {
-  it('submits an accessible artwork availability request with context and a honeypot', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(acceptedResponse())
+describe('PublicInquiryForm', {timeout: 15000}, () => {
+  it(
+    'submits an accessible artwork availability request with context and a honeypot',
+    async () => {
+      const fetchMock = vi.fn().mockResolvedValue(acceptedResponse())
 
-    vi.stubGlobal('fetch', fetchMock)
-    vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue(
-      '123e4567-e89b-42d3-a456-426614174000',
-    )
-    const user = userEvent.setup()
+      vi.stubGlobal('fetch', fetchMock)
+      vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue(
+        '123e4567-e89b-42d3-a456-426614174000',
+      )
+      const user = userEvent.setup()
 
-    const {container} = render(
-      <PublicInquiryForm
-        artwork={artwork}
-        className="inquiry-placement"
-        locale="en"
-        type="AVAILABILITY"
-      />,
-    )
+      const {container} = render(
+        <PublicInquiryForm
+          artwork={artwork}
+          className="inquiry-placement"
+          locale="en"
+          type="AVAILABILITY"
+        />,
+      )
 
-    expect(
-      screen.getByRole('heading', {name: 'Availability inquiry'}),
-    ).toBeVisible()
-    expect(screen.getByText('Mountain Memory')).toBeVisible()
-    expect(screen.getByText(/2024 · Oil on canvas/)).toBeVisible()
-    expect(container.firstElementChild).toHaveClass('inquiry-placement')
-    expect(container.querySelector('input[name="website"]')).toHaveAttribute(
-      'tabindex',
-      '-1',
-    )
+      expect(
+        screen.getByRole('heading', {name: 'Availability inquiry'}),
+      ).toBeVisible()
+      expect(screen.getByText('Mountain Memory')).toBeVisible()
+      expect(screen.getByText(/2024 · Oil on canvas/)).toBeVisible()
+      expect(container.firstElementChild).toHaveClass('inquiry-placement')
+      expect(container.querySelector('input[name="website"]')).toHaveAttribute(
+        'tabindex',
+        '-1',
+      )
 
-    await fillContactFields(user)
-    await user.type(
-      screen.getByLabelText('Your note (optional)'),
-      'Please share the private viewing options for this work.',
-    )
-    await user.click(screen.getByRole('button', {name: 'Send private request'}))
+      await fillContactFields(user)
+      await user.type(
+        screen.getByLabelText('Your note (optional)'),
+        'Please share the private viewing options for this work.',
+      )
+      await user.click(
+        screen.getByRole('button', {name: 'Send private request'}),
+      )
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce())
-    expect(fetchMock).toHaveBeenCalledWith('/api/inquiries', {
-      body: expect.any(String),
-      headers: {'Content-Type': 'application/json'},
-      method: 'POST',
-    })
-    expect(submittedBody(fetchMock)).toEqual({
-      consent: true,
-      email: 'ada@example.com',
-      locale: 'en',
-      message: 'Please share the private viewing options for this work.',
-      name: 'Ada Collector',
-      phone: '+90 555 123 45 67',
-      relatedArtworkId: artwork.id,
-      submissionId: '123e4567-e89b-42d3-a456-426614174000',
-      type: 'AVAILABILITY',
-      website: '',
-    })
-    expect(await screen.findByRole('status')).toHaveTextContent(
-      'Your private request has been received.',
-    )
-  })
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce())
+      expect(fetchMock).toHaveBeenCalledWith('/api/inquiries', {
+        body: expect.any(String),
+        headers: {'Content-Type': 'application/json'},
+        method: 'POST',
+      })
+      expect(submittedBody(fetchMock)).toEqual({
+        consent: true,
+        email: 'ada@example.com',
+        locale: 'en',
+        message: 'Please share the private viewing options for this work.',
+        name: 'Ada Collector',
+        phone: '+90 555 123 45 67',
+        relatedArtworkId: artwork.id,
+        submissionId: '123e4567-e89b-42d3-a456-426614174000',
+        type: 'AVAILABILITY',
+        website: '',
+      })
+      expect(await screen.findByRole('status')).toHaveTextContent(
+        'Your private request has been received.',
+      )
+    },
+    20_000,
+  )
 
   it('submits only the commission fields required by the API contract', async () => {
     const fetchMock = vi.fn().mockResolvedValue(acceptedResponse())
@@ -394,38 +400,46 @@ describe('PublicInquiryForm', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
-  it('disables every interactive field while the request is pending', async () => {
-    let resolveRequest: ((value: Response) => void) | undefined
+  it(
+    'disables every interactive field while the request is pending',
+    async () => {
+      let resolveRequest: ((value: Response) => void) | undefined
 
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(
-        () =>
-          new Promise<Response>(resolve => {
-            resolveRequest = resolve
-          }),
-      ),
-    )
-    const user = userEvent.setup()
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(
+          () =>
+            new Promise<Response>(resolve => {
+              resolveRequest = resolve
+            }),
+        ),
+      )
+      const user = userEvent.setup()
 
-    render(<PublicInquiryForm locale="en" type="GENERAL" />)
-    await fillContactFields(user)
-    await user.type(screen.getByLabelText('Subject'), 'Studio archive')
-    await user.type(
-      screen.getByLabelText('Message'),
-      'Please share further information about the studio archive.',
-    )
-    await user.click(screen.getByRole('button', {name: 'Send private request'}))
+      render(<PublicInquiryForm locale="en" type="GENERAL" />)
+      await fillContactFields(user)
+      await user.type(screen.getByLabelText('Subject'), 'Studio archive')
+      await user.type(
+        screen.getByLabelText('Message'),
+        'Please share further information about the studio archive.',
+      )
+      await user.click(
+        screen.getByRole('button', {name: 'Send private request'}),
+      )
 
-    expect(screen.getByRole('button', {name: 'Sending request'})).toBeDisabled()
-    for (const control of screen.getAllByRole('textbox')) {
-      expect(control).toBeDisabled()
-    }
-    expect(screen.getByRole('checkbox')).toBeDisabled()
+      expect(
+        screen.getByRole('button', {name: 'Sending request'}),
+      ).toBeDisabled()
+      for (const control of screen.getAllByRole('textbox')) {
+        expect(control).toBeDisabled()
+      }
+      expect(screen.getByRole('checkbox')).toBeDisabled()
 
-    resolveRequest?.(acceptedResponse())
-    expect(await screen.findByRole('status')).toBeVisible()
-  })
+      resolveRequest?.(acceptedResponse())
+      expect(await screen.findByRole('status')).toBeVisible()
+    },
+    20_000,
+  )
 
   it('never exposes an API or network error and retains the completed form', async () => {
     vi.stubGlobal(

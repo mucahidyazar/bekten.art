@@ -30,26 +30,28 @@ const readPublishedJournalEntry = cache(
 )
 
 async function readJournalEntry(params: JournalDetailPageProps['params']) {
-  const {locale, slug} = await parsePublicParams(params, {slug: true})
-  const entry = await readPublishedJournalEntry(locale, slug)
+  const {contentLocale, locale, slug} = await parsePublicParams(params, {
+    slug: true,
+  })
+  const entry = await readPublishedJournalEntry(contentLocale, slug)
 
   if (!entry) return notFound()
 
-  return {entry, locale}
+  return {contentLocale, entry, locale}
 }
 
 export async function generateMetadata({
   params,
 }: JournalDetailPageProps): Promise<Metadata> {
-  const {entry, locale} = await readJournalEntry(params)
+  const {contentLocale, entry, locale} = await readJournalEntry(params)
 
-  return editorialMetadata(entry.seo, locale)
+  return editorialMetadata(entry.seo, locale, contentLocale)
 }
 
 export default async function JournalDetailPage({
   params,
 }: JournalDetailPageProps) {
-  const {entry, locale} = await readJournalEntry(params)
+  const {contentLocale, entry, locale} = await readJournalEntry(params)
   const media = heroMedia(entry)
 
   return (
@@ -57,18 +59,19 @@ export default async function JournalDetailPage({
       <article>
         <PublicPageIntro
           intro={entry.excerpt}
-          kicker={`${publicRouteCopy[locale].journal.kicker} · ${publicDate(entry.publishedAt, locale)}`}
+          kicker={`${publicRouteCopy[contentLocale].journal.kicker} · ${publicDate(entry.publishedAt, locale)}`}
           media={media}
           title={entry.title}
+          transitionKey={entry.slug}
         />
         <PublicArchiveSection>
           <div className={styles.articleLayout}>
             <PlainTextBody body={entry.body} />
             <aside
-              aria-label={publicRouteCopy[locale].articleDetails}
+              aria-label={publicRouteCopy[contentLocale].articleDetails}
               className={styles.articleRail}
             >
-              <h2>{publicRouteCopy[locale].articleDetails}</h2>
+              <h2>{publicRouteCopy[contentLocale].articleDetails}</h2>
               <p>{publicDate(entry.publishedAt, locale)}</p>
               <p>{entry.excerpt}</p>
               {media?.caption ? <p>{media.caption}</p> : null}

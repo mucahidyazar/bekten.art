@@ -55,4 +55,26 @@ describe('public locale switcher', () => {
 
     expect(screen.getByRole('navigation', {name: 'Diller'})).toBeVisible()
   })
+
+  it('shows an active registered language with English shell fallback', () => {
+    render(
+      <LocaleSwitcher
+        locale="de"
+        locales={[
+          {code: 'en', nativeName: 'English'},
+          {code: 'de', nativeName: 'Deutsch'},
+        ]}
+      />,
+    )
+
+    expect(screen.getByRole('navigation', {name: 'Languages'})).toBeVisible()
+    expect(screen.getByRole('link', {name: 'Deutsch'})).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+    expect(screen.getByRole('link', {name: 'Deutsch'})).toHaveAttribute(
+      'href',
+      '/de/works',
+    )
+  })
 })

@@ -26,15 +26,14 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d bekten"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+          --health-cmd "pg_isready -U postgres -d bekten" --health-interval 5s
+          --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/bekten
       NEXT_PUBLIC_APP_URL: https://bekten.art
       NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: G-TEST0000
       NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID: GTM-TEST0000
+      NEXTAUTH_SECRET: ci-only-nextauth-secret-00000000000000000000000000000000
     steps:
       - uses: actions/checkout@v4
 
@@ -49,6 +48,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:migrate:deploy
+      - name: Seed isolated browser fixtures
+        env:
+          E2E_FIXTURES_CONFIRMATION: bekten-art-e2e-fixtures
+          NODE_ENV: test
+        run: pnpm db:seed:e2e
       - run: pnpm lint
       - run: pnpm type-check
       - run: pnpm test:coverage
@@ -60,43 +64,92 @@ jobs:
 
       - name: Run critical browser flows
         env:
-          PLAYWRIGHT_WEB_SERVER_COMMAND: pnpm start --hostname 127.0.0.1
+          PLAYWRIGHT_WEB_SERVER_COMMAND: node scripts/start-e2e-production.mjs
         run: pnpm e2e
 
       - name: Build production image
         run: >-
-          docker build
-          --build-arg NEXT_PUBLIC_APP_URL=https://bekten.art
-          --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-TEST0000
-          --build-arg NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-TEST0000
-          -f Dockerfile.prod
-          -t bekten-art:ci .
+          docker build --build-arg NEXT_PUBLIC_APP_URL=https://bekten.art
+          --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-TEST0000 --build-arg
+          NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-TEST0000 -f Dockerfile.prod -t
+          bekten-art:ci .
 
-      - name: Smoke production container
+      - name: Start S3-compatible readiness fixture
+        run: |
+          docker run --detach --name bekten-minio --network host \
+            --env MINIO_ROOT_USER="smoke-access" \
+            --env MINIO_ROOT_PASSWORD="smoke-secret-value" \
+            quay.io/minio/minio:RELEASE.2025-09-06T17-38-46Z \
+            server /data --address :9000
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:9000/minio/health/live >/dev/null; then
+              break
+            fi
+            if [ "$attempt" = "30" ]; then
+              docker logs bekten-minio
+              exit 1
+            fi
+            sleep 2
+          done
+          node --input-type=module <<'NODE'
+          import {CreateBucketCommand, S3Client} from '@aws-sdk/client-s3'
+          const client = new S3Client({
+            credentials: {
+              accessKeyId: 'smoke-access',
+              secretAccessKey: 'smoke-secret-value',
+            },
+            endpoint: 'http://127.0.0.1:9000',
+            forcePathStyle: true,
+            region: 'garage',
+          })
+          await client.send(new CreateBucketCommand({Bucket: 'bekten-art-smoke'}))
+          client.destroy()
+          NODE
+          mkdir -p "$RUNNER_TEMP/bekten-ci-tls"
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+            -keyout "$RUNNER_TEMP/bekten-ci-tls/ca.key" \
+            -out "$RUNNER_TEMP/bekten-ci-tls/ca.crt" \
+            -subj "/CN=127.0.0.1" \
+            -addext "subjectAltName=IP:127.0.0.1"
+          printf '%s\n' \
+            'events {}' \
+            'http {' \
+            '  server {' \
+            '    listen 9443 ssl;' \
+            '    ssl_certificate /tls/ca.crt;' \
+            '    ssl_certificate_key /tls/ca.key;' \
+            '    location / { proxy_pass http://127.0.0.1:9000; }' \
+            '  }' \
+            '}' > "$RUNNER_TEMP/bekten-ci-tls/nginx.conf"
+          docker run --detach --name bekten-s3-tls --network host \
+            --volume "$RUNNER_TEMP/bekten-ci-tls:/tls:ro" \
+            nginx:1.29.4-alpine nginx -c /tls/nginx.conf -g 'daemon off;'
+
+      - name: Smoke production container readiness
         run: |
           docker run --detach --name bekten-art-smoke --network host \
-            --env AUTH_GOOGLE_ID="123456789-test.apps.googleusercontent.com" \
-            --env AUTH_GOOGLE_SECRET="google-smoke-secret" \
             --env AUTH_TRUST_PROXY="true" \
             --env DATABASE_URL="$DATABASE_URL" \
             --env MEDIA_S3_ACCESS_KEY_ID="smoke-access" \
             --env MEDIA_S3_BUCKET="bekten-art-smoke" \
-            --env MEDIA_S3_ENDPOINT="https://s3.invalid" \
+            --env MEDIA_S3_ENDPOINT="https://127.0.0.1:9443" \
             --env MEDIA_S3_FORCE_PATH_STYLE="true" \
             --env MEDIA_S3_REGION="garage" \
-            --env MEDIA_S3_SECRET_ACCESS_KEY="smoke-secret" \
+            --env MEDIA_S3_SECRET_ACCESS_KEY="smoke-secret-value" \
             --env NEXT_PUBLIC_APP_URL="https://bekten.art" \
             --env NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID="GTM-TEST0000" \
             --env NEXTAUTH_SECRET="000000000000000000000000000000000000000000000000" \
             --env NEXTAUTH_URL="https://bekten.art" \
+            --env NODE_EXTRA_CA_CERTS="/ci-ca.crt" \
             --env OUTBOX_DISPATCH_SECRET="111111111111111111111111111111111111111111111111" \
             --env RESEND_API_KEY="re_smoke_test" \
             --env RESEND_FROM_EMAIL="noreply@example.com" \
             --env RESEND_REPLY_TO="support@example.com" \
-            --env RESEND_WEBHOOK_SECRET="whsec_smoke_test" \
+            --env RESEND_WEBHOOK_SECRET="whsec_c21va2V0ZXN0" \
+            --volume "$RUNNER_TEMP/bekten-ci-tls/ca.crt:/ci-ca.crt:ro" \
             bekten-art:ci
           for attempt in $(seq 1 30); do
-            if curl --fail --silent http://127.0.0.1:3000/api/health >/dev/null; then
+            if curl --fail --silent http://127.0.0.1:3000/api/ready >/dev/null; then
               exit 0
             fi
             sleep 2
@@ -106,4 +159,6 @@ jobs:
 
       - name: Clean smoke container
         if: always()
-        run: docker rm --force bekten-art-smoke 2>/dev/null || true
+        run: >-
+          docker rm --force bekten-art-smoke bekten-s3-tls bekten-minio
+          2>/dev/null || true

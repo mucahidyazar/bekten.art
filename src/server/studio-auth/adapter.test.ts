@@ -36,7 +36,7 @@ describe('Studio NextAuth adapter', () => {
             sessionToken: 'session-token',
             userId: 'user-1',
           },
-          user: {id: 'user-1', role: 'USER'},
+          user: {id: 'user-1', role: 'USER', studioStatus: 'ACTIVE'},
         }),
       }),
       {
@@ -55,7 +55,7 @@ describe('Studio NextAuth adapter', () => {
         sessionToken: 'session-token',
         userId: 'user-1',
       },
-      user: {id: 'user-1', role: 'EDITOR'},
+      user: {id: 'user-1', role: 'EDITOR', studioStatus: 'ACTIVE'},
     }
     const adapter = createStudioAdapter(
       baseAdapter({getSessionAndUser: vi.fn().mockResolvedValue(active)}),
@@ -65,6 +65,27 @@ describe('Studio NextAuth adapter', () => {
     await expect(adapter.getSessionAndUser?.('session-token')).resolves.toEqual(
       active,
     )
+  })
+
+  it('revokes a suspended editor database session immediately', async () => {
+    const deleteSession = vi.fn().mockResolvedValue(undefined)
+    const adapter = createStudioAdapter(
+      baseAdapter({
+        deleteSession,
+        getSessionAndUser: vi.fn().mockResolvedValue({
+          session: {
+            expires: new Date('2026-08-11T00:00:00.000Z'),
+            sessionToken: 'session-token',
+            userId: 'user-1',
+          },
+          user: {id: 'user-1', role: 'EDITOR', studioStatus: 'SUSPENDED'},
+        }),
+      }),
+      {storeVerificationToken: vi.fn()},
+    )
+
+    await expect(adapter.getSessionAndUser?.('session-token')).resolves.toBeNull()
+    expect(deleteSession).toHaveBeenCalledWith('session-token')
   })
 
   it('delegates the already-hashed NextAuth verification token to the coordinator', async () => {

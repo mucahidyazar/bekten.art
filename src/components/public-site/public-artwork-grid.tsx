@@ -3,7 +3,12 @@ import Link from 'next/link'
 import {localizedPath} from '@/lib/localized-path'
 
 import styles from './catalog-layouts.module.css'
+import {publicCopyLocale} from './public-copy'
 import {PublicEditorialImage} from './public-editorial-image'
+import {
+  NAV_FORWARD_TRANSITION,
+  SharedEditorialTransition,
+} from './public-view-transition'
 
 import type {PublicLocale} from './public-copy'
 import type {PublicArtwork} from '@/server/public-editorial'
@@ -66,20 +71,27 @@ export function PublicArtworkGrid({
         return (
           <li className={styles.artCard} key={work.id}>
             <article>
-              <Link href={localizedPath(locale, `/works/${work.slug}`)}>
+              <Link
+                href={localizedPath(locale, `/works/${work.slug}`)}
+                transitionTypes={[...NAV_FORWARD_TRANSITION]}
+              >
                 {media ? (
-                  <div className={styles.artImage}>
-                    <PublicEditorialImage
-                      media={media}
-                      priority={priorityFirst && index === 0}
-                      sizes="(max-width: 544px) 100vw, (max-width: 768px) 50vw, (max-width: 1152px) 33vw, 25vw"
-                    />
-                  </div>
+                  <SharedEditorialTransition kind="image" publicKey={work.slug}>
+                    <div className={styles.artImage}>
+                      <PublicEditorialImage
+                        media={media}
+                        priority={priorityFirst && index === 0}
+                        sizes="(max-width: 544px) 100vw, (max-width: 768px) 50vw, (max-width: 1152px) 33vw, 25vw"
+                      />
+                    </div>
+                  </SharedEditorialTransition>
                 ) : null}
                 <p className={styles.artNumber} aria-hidden="true">
                   {String(index + 1).padStart(2, '0')}
                 </p>
-                <h3 className={styles.artTitle}>{work.title}</h3>
+                <SharedEditorialTransition kind="title" publicKey={work.slug}>
+                  <h3 className={styles.artTitle}>{work.title}</h3>
+                </SharedEditorialTransition>
               </Link>
               {metadata.map(value => (
                 <p className={styles.artMeta} key={value}>
@@ -87,12 +99,13 @@ export function PublicArtworkGrid({
                 </p>
               ))}
               <p className={styles.availability}>
-                {availabilityCopy[locale][work.availability]}
+                {availabilityCopy[publicCopyLocale(locale)][work.availability]}
               </p>
               {actionLabel ? (
                 <Link
                   className={styles.editorialAction}
                   href={`${localizedPath(locale, `/works/${work.slug}`)}#availability-inquiry`}
+                  transitionTypes={[...NAV_FORWARD_TRANSITION]}
                 >
                   {actionLabel}
                 </Link>

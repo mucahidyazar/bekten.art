@@ -42,6 +42,7 @@ import {GoogleTagManager} from './google-tag-manager'
 
 describe('GoogleTagManager', () => {
   beforeEach(() => {
+    document.getElementById('google-tag-manager')?.remove()
     navigation.pathname = '/en'
     navigation.search = ''
     consent.decision = {
@@ -52,14 +53,24 @@ describe('GoogleTagManager', () => {
       version: 1,
     }
     consent.hydrated = true
-    window.dataLayer = [{'gtm.start': Date.now(), event: 'gtm.js'}]
+    window.dataLayer = []
+    window.gtag = undefined
   })
 
   it('does not load GTM before consent or after all optional purposes are rejected', () => {
     consent.decision = null
-    const {container, rerender} = render(<GoogleTagManager />)
+    const {rerender} = render(<GoogleTagManager />)
 
-    expect(container.querySelector('script')).toBeNull()
+    expect(document.getElementById('google-tag-manager')).toBeNull()
+    expect(window.dataLayer).toEqual(
+      expect.arrayContaining([
+        expect.arrayContaining(['consent', 'default']),
+        expect.objectContaining({event: 'gtm.js'}),
+      ]),
+    )
+    expect(window.dataLayer).not.toEqual(
+      expect.arrayContaining([expect.arrayContaining(['consent', 'update'])]),
+    )
 
     consent.decision = {
       analytics: false,
@@ -70,25 +81,43 @@ describe('GoogleTagManager', () => {
     }
     rerender(<GoogleTagManager />)
 
-    expect(container.querySelector('script')).toBeNull()
+    expect(document.getElementById('google-tag-manager')).toBeNull()
+  })
+
+  it('never loads or tracks Google tags inside the private dashboard', () => {
+    navigation.pathname = '/de/dashboard/languages'
+
+    render(<GoogleTagManager />)
+
+    expect(document.getElementById('google-tag-manager')).toBeNull()
+    expect(
+      dataLayerEvents().filter(item => item.event === 'virtual_page_view'),
+    ).toHaveLength(0)
   })
 
   it('loads one external GTM script without a consent-bypassing iframe', async () => {
-    const {container} = render(<GoogleTagManager nonce="request-nonce" />)
+    render(<GoogleTagManager nonce="request-nonce" />)
 
     await waitFor(() =>
       expect(
-        container.querySelector(
-          'script[src="https://www.googletagmanager.com/gtm.js?id=GTM-TEST123"]',
+        document.querySelector(
+          '#google-tag-manager[src="https://www.googletagmanager.com/gtm.js?id=GTM-TEST123"]',
         ),
       ).toBeInTheDocument(),
     )
-    expect(container.querySelectorAll('script')).toHaveLength(1)
-    expect(container.querySelector('script')).toHaveAttribute(
+    expect(document.querySelectorAll('#google-tag-manager')).toHaveLength(1)
+    expect(document.getElementById('google-tag-manager')).toHaveAttribute(
       'nonce',
       'request-nonce',
     )
-    expect(container.querySelector('iframe')).toBeNull()
+    expect(document.querySelector('iframe')).toBeNull()
+    expect(window.dataLayer).toEqual(
+      expect.arrayContaining([
+        expect.arrayContaining(['consent', 'default']),
+        expect.arrayContaining(['consent', 'update']),
+        expect.objectContaining({event: 'gtm.js'}),
+      ]),
+    )
   })
 
   it('does not duplicate the initial page view and emits one virtual view on navigation', async () => {
@@ -128,9 +157,7 @@ describe('GoogleTagManager', () => {
     await waitFor(() =>
       expect(
         dataLayerEvents().filter(item => item.event === 'virtual_page_view'),
-      ).toEqual([
-        expect.objectContaining({page_path: '/en/reset-password'}),
-      ]),
+      ).toEqual([expect.objectContaining({page_path: '/en/reset-password'})]),
     )
     expect(JSON.stringify(window.dataLayer)).not.toContain('super-secret-token')
   })

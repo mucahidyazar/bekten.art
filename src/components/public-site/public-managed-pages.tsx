@@ -41,16 +41,13 @@ export function PublicArtistPage({locale, page}: ManagedPageProps) {
 
   return (
     <article className={styles.page}>
-      <div className={styles.shell}>
-        <ManagedHero
-          composition="plain"
-          fallbackSrc="/me.jpg"
-          locale={locale}
-          media={pageHero(page)}
-          page={page}
-          paragraphs={paragraphs.slice(0, 1)}
-        />
-      </div>
+      <ManagedHero
+        fallbackSrc="/me.jpg"
+        locale={locale}
+        media={pageHero(page)}
+        page={page}
+        paragraphs={paragraphs.slice(0, 1)}
+      />
 
       {biography.length > 0 ? (
         <section className={styles.paperSection}>
@@ -123,16 +120,14 @@ export function PublicCollectorsPage({
 
   return (
     <article className={styles.page}>
-      <div className={styles.shell}>
-        <ManagedHero
-          action={{href: '#collector-inquiry', label: copy.inquiry}}
-          fallbackSrc="/img/heritage-collection-hero.jpg"
-          locale={locale}
-          media={pageHero(page)}
-          page={page}
-          paragraphs={paragraphs}
-        />
-      </div>
+      <ManagedHero
+        action={{href: '#collector-inquiry', label: copy.inquiry}}
+        fallbackSrc="/img/heritage-collection-hero.jpg"
+        locale={locale}
+        media={pageHero(page)}
+        page={page}
+        paragraphs={paragraphs}
+      />
 
       <section
         aria-label={copy.ways}
@@ -180,16 +175,14 @@ export function PublicCommissionPage({
 
   return (
     <article className={styles.page}>
-      <div className={styles.shell}>
-        <ManagedHero
-          action={{href: '#commission-inquiry', label: copy.inquiry}}
-          fallbackSrc="/img/heritage-collection-hero.jpg"
-          locale={locale}
-          media={pageHero(page)}
-          page={page}
-          paragraphs={paragraphs}
-        />
-      </div>
+      <ManagedHero
+        action={{href: '#commission-inquiry', label: copy.inquiry}}
+        fallbackSrc="/img/heritage-collection-hero.jpg"
+        locale={locale}
+        media={pageHero(page)}
+        page={page}
+        paragraphs={paragraphs}
+      />
 
       <section className={`${styles.paperSection} ${styles.processSection}`}>
         <div className={styles.shell}>
@@ -241,16 +234,14 @@ export function PublicPrivateViewingsPage({
 
   return (
     <article className={styles.page}>
-      <div className={styles.shell}>
-        <ManagedHero
-          action={{href: '#private-viewing-inquiry', label: copy.inquiry}}
-          fallbackSrc="/img/heritage-studio-hero.jpg"
-          locale={locale}
-          media={pageHero(page)}
-          page={page}
-          paragraphs={paragraphs}
-        />
-      </div>
+      <ManagedHero
+        action={{href: '#private-viewing-inquiry', label: copy.inquiry}}
+        fallbackSrc="/img/heritage-studio-hero.jpg"
+        locale={locale}
+        media={pageHero(page)}
+        page={page}
+        paragraphs={paragraphs}
+      />
 
       <section aria-label={copy.benefits} className={styles.benefitsBand}>
         <div className={styles.shell}>
@@ -311,17 +302,14 @@ export function PublicStudioPage({locale, page}: ManagedPageProps) {
 
   return (
     <article className={styles.page}>
-      <div className={styles.shell}>
-        <ManagedHero
-          action={{href: '#creative-process', label: copy.process}}
-          composition="panoramic"
-          fallbackSrc="/img/heritage-studio-hero.jpg"
-          locale={locale}
-          media={pageHero(page)}
-          page={{...page, eyebrow: page.eyebrow ?? copy.inside}}
-          paragraphs={paragraphs.slice(0, 1)}
-        />
-      </div>
+      <ManagedHero
+        action={{href: '#creative-process', label: copy.process}}
+        fallbackSrc="/img/heritage-studio-hero.jpg"
+        locale={locale}
+        media={pageHero(page)}
+        page={{...page, eyebrow: page.eyebrow ?? copy.inside}}
+        paragraphs={paragraphs.slice(0, 1)}
+      />
 
       {note.length > 0 ? (
         <aside className={`${styles.shell} ${styles.studioNote}`}>

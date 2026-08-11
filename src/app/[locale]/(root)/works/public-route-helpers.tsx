@@ -1,21 +1,24 @@
 import type {Metadata} from 'next'
 
-import Image from 'next/image'
-import Link from 'next/link'
 import {notFound} from 'next/navigation'
 
 import styles from '@/components/public-site/catalog-layouts.module.css'
-import {PublicArtworkFrame} from '@/components/public-site/public-artwork-frame'
-import {isPublicLocale} from '@/components/public-site/public-copy'
-import {PublicEditorialCard} from '@/components/public-site/public-editorial-card'
-import {localizedPath} from '@/lib/localized-path'
 import {
-  editorialLocaleSchema,
+  publicCopyLocale,
+  publicLocale,
+} from '@/components/public-site/public-copy'
+import {PublicEditorialCard} from '@/components/public-site/public-editorial-card'
+import {PublicEditorialHero} from '@/components/public-site/public-editorial-hero'
+import {isSafeLocaleCode, localizedPath} from '@/lib/localized-path'
+import {
   kebabSlugSchema,
 } from '@/server/editorial-content'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
-import type {PublicLocale} from '@/components/public-site/public-copy'
+import type {
+  BuiltInPublicLocale,
+  PublicLocale,
+} from '@/components/public-site/public-copy'
 import type {PublicEditorialMediaPlacement} from '@/server/public-editorial'
 import type {ReactNode} from 'react'
 
@@ -125,6 +128,7 @@ function PublicEditorialList({
             eyebrow={item.eyebrow}
             href={item.href}
             media={item.media}
+            publicKey={item.publicKey}
             title={item.title}
             variant={variant === 'rows' ? 'row' : 'default'}
           />
@@ -142,67 +146,29 @@ function PublicPageIntro({
   kicker,
   media,
   title,
+  titleDensity,
+  transitionKey,
 }: PageIntroProps) {
-  const hero =
-    illustration === 'landscape' ? (
-      <figure
-        className={`${styles.introMedia} ${styles.landscapeMedia}`}
-        data-catalog-hero="landscape"
-      >
-        <Image
-          alt=""
-          aria-hidden="true"
-          height={936}
-          priority
-          sizes="(max-width: 896px) 100vw, 60vw"
-          src="/img/heritage-landscape-hero.jpg"
-          width={1680}
-        />
-      </figure>
-    ) : illustration === 'collection' ? (
-      <figure
-        className={`${styles.introMedia} ${styles.collectionMedia}`}
-        data-catalog-hero="collection"
-      >
-        <PublicArtworkFrame
-          fallbackSrc="/img/heritage-collection-hero.jpg"
-          priority
-          sizes="(max-width: 896px) 100vw, 58vw"
-        />
-      </figure>
-    ) : media ? (
-      <figure className={styles.introMedia}>
-        <PublicArtworkFrame
-          media={media}
-          priority
-          sizes="(max-width: 896px) 100vw, 58vw"
-        />
-      </figure>
-    ) : null
-
   return (
-    <header
-      className={`${styles.pageIntro} ${illustration === 'collection' ? styles.collectionIntro : ''}`.trim()}
-    >
-      <div className={`${styles.sectionInner} ${styles.introGrid}`}>
-        <div className={styles.introCopy}>
-          <p className="heritage-kicker">{kicker}</p>
-          <h1 className="heritage-display">{title}</h1>
-          <p className={styles.introText}>{intro}</p>
-          {introSecondary ? (
-            <p className={`${styles.introText} ${styles.introTextSecondary}`}>
-              {introSecondary}
-            </p>
-          ) : null}
-          {actionHref && actionLabel ? (
-            <Link className="heritage-text-link" href={actionHref}>
-              {actionLabel}
-            </Link>
-          ) : null}
-        </div>
-        {hero}
-      </div>
-    </header>
+    <PublicEditorialHero
+      action={
+        actionHref && actionLabel
+          ? {href: actionHref, label: actionLabel}
+          : undefined
+      }
+      eyebrow={kicker}
+      fallbackAlt={media?.altText ?? title}
+      fallbackSrc={
+        illustration === 'collection'
+          ? '/img/heritage-collection-hero.jpg'
+          : '/img/heritage-landscape-hero.jpg'
+      }
+      media={media}
+      paragraphs={[intro, ...(introSecondary ? [introSecondary] : [])]}
+      title={title}
+      titleDensity={titleDensity}
+      transitionKey={transitionKey}
+    />
   )
 }
 function PlainTextBody({body}: Readonly<{body: string}>) {
@@ -225,14 +191,19 @@ type SeoRecord = Readonly<{
   description: string
   noIndex: boolean
   title: string
+  transitionKey?: string
 }>
 
-function editorialMetadata(seo: SeoRecord, locale: PublicLocale): Metadata {
-  const canonicalPath = localizedPath(locale, seo.canonicalPath)
+function editorialMetadata(
+  seo: SeoRecord,
+  locale: PublicLocale,
+  contentLocale: BuiltInPublicLocale = publicCopyLocale(locale),
+): Metadata {
+  const canonicalPath = localizedPath(contentLocale, seo.canonicalPath)
 
   return prepareMetadata({
     alternates: {canonical: canonicalPath},
-    contentLocale: locale,
+    contentLocale,
     description: seo.description,
     openGraph: {
       description: seo.description,
@@ -266,6 +237,8 @@ type PageIntroProps = Readonly<{
   kicker: string
   media?: PublicEditorialMediaPlacement
   title: string
+  titleDensity?: 'compact' | 'standard'
+  transitionKey?: string
 }>
 
 type ArchiveSectionProps = Readonly<{
@@ -290,6 +263,7 @@ function listMetadata(
       title,
     },
     locale,
+    publicCopyLocale(locale),
   )
 }
 
@@ -300,6 +274,7 @@ type EditorialListItem = Readonly<{
   href: string
   id: string
   media?: PublicEditorialMediaPlacement
+  publicKey: string
   title: string
 }>
 
@@ -316,32 +291,42 @@ function secondaryMedia(entity: {
 async function parsePublicParams(
   params: Promise<RouteParams>,
   options: Readonly<{slug: true}>,
-): Promise<Readonly<{locale: PublicLocale; slug: string}>>
+): Promise<
+  Readonly<{
+    contentLocale: BuiltInPublicLocale
+    locale: PublicLocale
+    slug: string
+  }>
+>
 async function parsePublicParams(
   params: Promise<RouteParams>,
   options?: Readonly<{slug?: false}>,
-): Promise<Readonly<{locale: PublicLocale}>>
+): Promise<
+  Readonly<{contentLocale: BuiltInPublicLocale; locale: PublicLocale}>
+>
 async function parsePublicParams(
   params: Promise<RouteParams>,
   options: Readonly<{slug?: boolean}> = {},
 ) {
   const resolved = await params
-  const localeResult = editorialLocaleSchema.safeParse(resolved.locale)
+  const locale = publicLocale(resolved.locale)
 
-  if (!localeResult.success || !isPublicLocale(localeResult.data)) {
+  if (!isSafeLocaleCode(resolved.locale)) {
     return notFound()
   }
 
-  if (!options.slug) return {locale: localeResult.data}
+  const contentLocale = publicCopyLocale(locale)
+
+  if (!options.slug) return {contentLocale, locale}
 
   const slugResult = kebabSlugSchema.safeParse(resolved.slug)
 
   if (!slugResult.success) return notFound()
 
-  return {locale: localeResult.data, slug: slugResult.data}
+  return {contentLocale, locale, slug: slugResult.data}
 }
 
-const publicRouteCopy: Readonly<Record<PublicLocale, PublicRouteCopy>> =
+const publicRouteCopy: Readonly<Record<BuiltInPublicLocale, PublicRouteCopy>> =
   Object.freeze({
     en: {
       articleDetails: 'Article details',
@@ -364,7 +349,7 @@ const publicRouteCopy: Readonly<Record<PublicLocale, PublicRouteCopy>> =
         introSecondary:
           'Explore each collection to see its published works and details.',
         kicker: 'Collections',
-        title: 'Memory, land & belonging',
+        title: 'Memory, land & home',
       },
       dimensions: 'Dimensions',
       detailsFromWork: 'Details from this work',
@@ -440,7 +425,7 @@ const publicRouteCopy: Readonly<Record<PublicLocale, PublicRouteCopy>> =
         introSecondary:
           'Ар бир жыйнакты ачып, жарыяланган эмгектерди жана маалыматтарды көрүңүз.',
         kicker: 'Жыйнактар',
-        title: 'Эстутум, жер жана таандыктык',
+        title: 'Эстутум, жер жана үй',
       },
       dimensions: 'Өлчөмдөрү',
       detailsFromWork: 'Эмгектин деталдары',
@@ -515,7 +500,7 @@ const publicRouteCopy: Readonly<Record<PublicLocale, PublicRouteCopy>> =
         introSecondary:
           'Откройте каждую коллекцию, чтобы увидеть опубликованные работы и сведения.',
         kicker: 'Коллекции',
-        title: 'Память, земля и принадлежность',
+        title: 'Память, земля и дом',
       },
       dimensions: 'Размеры',
       detailsFromWork: 'Детали работы',
@@ -590,7 +575,7 @@ const publicRouteCopy: Readonly<Record<PublicLocale, PublicRouteCopy>> =
         introSecondary:
           'Yayımlanan eserleri ve ayrıntıları görmek için koleksiyonları keşfedin.',
         kicker: 'Koleksiyonlar',
-        title: 'Hafıza, toprak ve aidiyet',
+        title: 'Hafıza, toprak ve yurt',
       },
       dimensions: 'Ölçüler',
       detailsFromWork: 'Eserden detaylar',

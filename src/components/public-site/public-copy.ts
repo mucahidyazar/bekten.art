@@ -1,6 +1,21 @@
-export const PUBLIC_LOCALES = ['en', 'tr', 'ru', 'ky'] as const
+import {isSafeLocaleCode} from '@/lib/localized-path'
 
-export type PublicLocale = (typeof PUBLIC_LOCALES)[number]
+export type BuiltInPublicLocale = 'en' | 'ky' | 'ru' | 'tr'
+export const DEFAULT_PUBLIC_LOCALE_OPTIONS: readonly PublicLocaleOption[] =
+  Object.freeze([
+    {code: 'en', nativeName: 'English'},
+    {code: 'tr', nativeName: 'Türkçe'},
+    {code: 'ru', nativeName: 'Русский'},
+    {code: 'ky', nativeName: 'Кыргызча'},
+  ])
+export const PUBLIC_LOCALES = [
+  'en',
+  'tr',
+  'ru',
+  'ky',
+] as const satisfies readonly BuiltInPublicLocale[]
+
+export type PublicLocale = string
 
 type PublicShellCopy = Readonly<{
   availability: string
@@ -24,15 +39,28 @@ type PublicShellCopy = Readonly<{
   works: string
 }>
 
-export function isPublicLocale(locale: string): locale is PublicLocale {
+export type PublicLocaleOption = Readonly<{
+  code: string
+  nativeName: string
+}>
+
+export function isPublicLocale(locale: string): locale is BuiltInPublicLocale {
   return PUBLIC_LOCALES.some(candidate => candidate === locale)
 }
 
-export function publicLocale(locale: string): PublicLocale {
+export function publicCopyLocale(locale: string): BuiltInPublicLocale {
   return isPublicLocale(locale) ? locale : 'en'
 }
 
-export const publicShellCopy: Readonly<Record<PublicLocale, PublicShellCopy>> =
+export function publicLocale(locale: string): PublicLocale {
+  if (locale === 'kg') return 'ky'
+
+  return isSafeLocaleCode(locale) ? locale : 'en'
+}
+
+export const publicShellCopy: Readonly<
+  Record<BuiltInPublicLocale, PublicShellCopy>
+> =
   Object.freeze({
     en: {
       availability: 'Availability inquiry',
@@ -123,3 +151,7 @@ export const publicShellCopy: Readonly<Record<PublicLocale, PublicShellCopy>> =
       works: 'Eserler',
     },
   })
+
+export function publicShellCopyFor(locale: string) {
+  return publicShellCopy[publicCopyLocale(locale)]
+}

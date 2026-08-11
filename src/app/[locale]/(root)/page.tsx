@@ -3,13 +3,15 @@ import {Metadata} from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import {PublicArtworkFrame} from '@/components/public-site/public-artwork-frame'
 import {PublicArtworkGrid} from '@/components/public-site/public-artwork-grid'
 import {
+  publicCopyLocale,
   publicLocale,
-  type PublicLocale,
+  type BuiltInPublicLocale,
 } from '@/components/public-site/public-copy'
 import {PublicEditorialCard} from '@/components/public-site/public-editorial-card'
+import {PublicEditorialHero} from '@/components/public-site/public-editorial-hero'
+import {NAV_FORWARD_TRANSITION} from '@/components/public-site/public-view-transition'
 import {getSiteIdentity} from '@/components/seo/site-identity'
 import {localizedPath} from '@/lib/localized-path'
 import {publicEditorialReader} from '@/server/public-editorial'
@@ -21,7 +23,7 @@ type PageProps = Readonly<{params: Promise<{locale: string}>}>
 
 const homeCopy: Readonly<
   Record<
-    PublicLocale,
+    BuiltInPublicLocale,
     Readonly<{
       archiveEmpty: string
       archiveLabel: string
@@ -128,7 +130,7 @@ function firstMedia(placements: readonly PublicEditorialMediaPlacement[]) {
 
 export async function generateMetadata({params}: PageProps): Promise<Metadata> {
   const locale = publicLocale((await params).locale)
-  const copy = homeCopy[locale]
+  const copy = homeCopy[publicCopyLocale(locale)]
 
   return prepareMetadata({
     contentLocale: locale,
@@ -139,9 +141,10 @@ export async function generateMetadata({params}: PageProps): Promise<Metadata> {
 
 export default async function Home({params}: PageProps) {
   const locale = publicLocale((await params).locale)
-  const copy = homeCopy[locale]
+  const contentLocale = publicCopyLocale(locale)
+  const copy = homeCopy[contentLocale]
   const identity = getSiteIdentity(locale)
-  const content = await publicEditorialReader.getHomepage(locale)
+  const content = await publicEditorialReader.getHomepage(contentLocale)
   const heroMedia = content.hero
     ? firstMedia(content.hero.mediaPlacements)
     : null
@@ -152,6 +155,7 @@ export default async function Home({params}: PageProps) {
       href: localizedPath(locale, `/collections/${entry.slug}`),
       id: entry.id,
       media: firstMedia(entry.mediaPlacements),
+      publicKey: entry.slug,
       title: entry.title,
     })),
     ...content.exhibitions.slice(0, 1).map(entry => ({
@@ -160,6 +164,7 @@ export default async function Home({params}: PageProps) {
       href: localizedPath(locale, `/exhibitions/${entry.slug}`),
       id: entry.id,
       media: firstMedia(entry.mediaPlacements),
+      publicKey: entry.slug,
       title: entry.title,
     })),
     ...content.journalEntries.slice(0, 1).map(entry => ({
@@ -168,46 +173,33 @@ export default async function Home({params}: PageProps) {
       href: localizedPath(locale, `/journal/${entry.slug}`),
       id: entry.id,
       media: firstMedia(entry.mediaPlacements),
+      publicKey: entry.slug,
       title: entry.title,
     })),
   ]
 
   return (
     <div className="heritage-home">
-      <section className="heritage-home-hero">
-        <div className="heritage-shell heritage-home-hero__grid">
-          <div className="heritage-home-hero__copy">
-            <p className="heritage-kicker">{copy.kicker}</p>
-            <h1 className="heritage-display">{copy.title}</h1>
-            <p>{copy.intro}</p>
-            <Link
-              className="heritage-button"
-              href={localizedPath(locale, '/works')}
-            >
-              {copy.exploreWorks}
-              <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-
-          {content.hero && heroMedia ? (
-            <figure className="heritage-home-hero__art">
-              <PublicArtworkFrame
-                media={heroMedia}
-                priority
-                sizes="(max-width: 768px) 100vw, 58vw"
-              />
-              <figcaption className="heritage-home-hero__caption">
-                <span>{content.hero.title}</span>
-                <span>
-                  {[content.hero.year, content.hero.medium]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </span>
-              </figcaption>
-            </figure>
-          ) : null}
-        </div>
-      </section>
+      <PublicEditorialHero
+        action={{
+          href: localizedPath(locale, '/works'),
+          label: copy.exploreWorks,
+        }}
+        caption={content.hero?.title}
+        credit={
+          content.hero
+            ? [content.hero.year, content.hero.medium]
+                .filter(Boolean)
+                .join(' · ')
+            : undefined
+        }
+        eyebrow={copy.kicker}
+        fallbackAlt={content.hero?.title ?? copy.title}
+        fallbackSrc="/img/heritage-landscape-hero.jpg"
+        media={heroMedia ?? undefined}
+        paragraphs={[copy.intro]}
+        title={copy.title}
+      />
 
       <section className="heritage-section heritage-section--paper-light">
         <div className="heritage-shell">
@@ -219,6 +211,7 @@ export default async function Home({params}: PageProps) {
             <Link
               className="heritage-text-link"
               href={localizedPath(locale, '/works')}
+              transitionTypes={[...NAV_FORWARD_TRANSITION]}
             >
               {copy.viewAll}
             </Link>
@@ -253,6 +246,7 @@ export default async function Home({params}: PageProps) {
             <Link
               className="heritage-button"
               href={localizedPath(locale, '/about')}
+              transitionTypes={[...NAV_FORWARD_TRANSITION]}
             >
               {copy.discoverArtist}
               <span aria-hidden="true">→</span>
@@ -288,6 +282,7 @@ export default async function Home({params}: PageProps) {
           <Link
             className="heritage-text-link"
             href={localizedPath(locale, '/about')}
+            transitionTypes={[...NAV_FORWARD_TRANSITION]}
           >
             Bekten
           </Link>

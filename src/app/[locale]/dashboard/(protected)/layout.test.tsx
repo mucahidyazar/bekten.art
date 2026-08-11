@@ -8,7 +8,10 @@ const mocks = vi.hoisted(() => ({
   requireStudioEditor: vi.fn(),
 }))
 
-vi.mock('next/navigation', () => ({redirect: mocks.redirect}))
+vi.mock('next/navigation', () => ({
+  redirect: mocks.redirect,
+  usePathname: () => '/dashboard',
+}))
 vi.mock('@/server/studio-auth/configured-access', () => ({
   requireStudioEditor: mocks.requireStudioEditor,
 }))
@@ -39,6 +42,24 @@ describe('Studio protected layout', () => {
     expect(screen.getByRole('navigation', {name: 'Studio'})).toHaveTextContent(
       'Artworks',
     )
+    expect(screen.getByRole('link', {name: 'Languages'})).toHaveAttribute(
+      'href',
+      '/dashboard/languages',
+    )
+    expect(screen.getByTestId('studio-shell')).toHaveAttribute(
+      'data-shadcn-shell',
+      'true',
+    )
+    expect(screen.getByTestId('studio-sidebar-header')).toHaveClass('h-16')
+    expect(screen.getByRole('banner')).toHaveClass('h-16')
+    expect(
+      screen.getByTestId('studio-sidebar-header').querySelector('span'),
+    ).toBeNull()
+    expect(
+      screen
+        .getAllByRole('button', {name: 'Collapse Studio navigation'})
+        .find(button => button.classList.contains('md:-right-[1.375rem]')),
+    ).toHaveClass('md:-right-[1.375rem]')
     expect(
       screen.queryByRole('link', {name: 'Operations'}),
     ).not.toBeInTheDocument()

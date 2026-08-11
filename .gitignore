@@ -9,6 +9,9 @@
 
 # testing
 /coverage
+/playwright-report
+/.playwright-mcp/
+/test-results
 
 # next.js
 /.next/

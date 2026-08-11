@@ -2,6 +2,8 @@ import {useRouter} from 'next/navigation'
 
 import {useEffect, useRef, useState, useTransition} from 'react'
 
+import {NAV_FORWARD_TRANSITION} from '@/components/public-site/public-view-transition'
+
 type ActionOptions = {
   redirectPath?: string
   onSuccess?: () => void
@@ -39,7 +41,9 @@ export const useServerAction = <P, R>(
           setIsSuccess(true)
           setError(undefined)
           if (options?.redirectPath) {
-            router.push(options?.redirectPath)
+            router.push(options.redirectPath, {
+              transitionTypes: [...NAV_FORWARD_TRANSITION],
+            })
           }
           if (options?.onSuccess) {
             options?.onSuccess()

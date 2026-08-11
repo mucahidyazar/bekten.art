@@ -57,7 +57,7 @@ describe('V2 editorial Prisma contract', () => {
   ])('%s carries localized editorial lifecycle metadata', (name, tableName) => {
     const block = model(name)
 
-    expect(block).toMatch(/locale\s+String\s+@db\.VarChar\(5\)/)
+    expect(block).toMatch(/locale\s+String\s+@db\.VarChar\(15\)/)
     expect(block).toMatch(/slug\s+String\s+@db\.VarChar\(160\)/)
     expect(block).toMatch(
       /displayOrder\s+Int\s+@default\(0\)\s+@map\("display_order"\)/,
@@ -164,7 +164,7 @@ describe('V2 editorial Prisma contract', () => {
     expect(revision).toMatch(
       /entityId\s+String\s+@map\("entity_id"\)\s+@db\.Uuid/,
     )
-    expect(revision).toMatch(/locale\s+String\s+@db\.VarChar\(5\)/)
+    expect(revision).toMatch(/locale\s+String\s+@db\.VarChar\(15\)/)
     expect(revision).toMatch(/version\s+Int/)
     expect(revision).toMatch(/operation\s+ContentRevisionOperation/)
     expect(revision).toMatch(/snapshot\s+Json/)

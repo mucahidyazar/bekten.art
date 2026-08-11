@@ -21,6 +21,10 @@ activity history, and source-grounded editorial starter content.
   PostgreSQL folders organize Garage objects without changing object keys.
   Editors upload, rename and move; owners also delete. Context menus and drag
   and drop call the same validated server operations as explicit buttons.
+- The media upload surface sits at the right edge of the Media Library header,
+  not in a separate card. It uses an irregular translucent quatrefoil-shaped
+  dropzone that gains contrast for drag-over, hover and keyboard focus; click
+  and drop share the same validated upload path.
 - `/dashboard/users` is owner-only. It supports invitation, role changes,
   suspension/reactivation and resend. The final active owner can never be
   demoted or suspended, including concurrent requests. Access changes revoke

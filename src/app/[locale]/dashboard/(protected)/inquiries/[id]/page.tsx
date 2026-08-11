@@ -4,6 +4,7 @@ import {z} from 'zod'
 
 import {StudioInquiryDetail} from '@/components/studio/studio-inquiry-detail'
 import {inquiryStatusSchema} from '@/server/inquiries/inquiry-validation'
+import {requireStudioEditor} from '@/server/studio-auth/configured-access'
 import {configuredStudioInquiryService} from '@/server/studio-inquiries/configured-studio-inquiry-service'
 
 import {updateStudioInquiryAction} from '../inquiry-actions'
@@ -46,6 +47,8 @@ const inquirySchema = z
 export default async function StudioInquiryDetailPage({
   params,
 }: PageProps<'/[locale]/dashboard/inquiries/[id]'>) {
+  await requireStudioEditor()
+
   const {id} = await params
   const found = await configuredStudioInquiryService.findById(
     z.string().uuid().parse(id),

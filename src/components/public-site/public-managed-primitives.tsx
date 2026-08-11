@@ -3,7 +3,9 @@ import Link from 'next/link'
 import {localizedPath} from '@/lib/localized-path'
 
 import {PublicArtworkFrame} from './public-artwork-frame'
+import {PublicEditorialHero} from './public-editorial-hero'
 import styles from './public-managed-pages.module.css'
+import {NAV_FORWARD_TRANSITION} from './public-view-transition'
 
 import type {PublicLocale} from './public-copy'
 import type {
@@ -39,7 +41,13 @@ export function EditorialLink({href, label, locale}: EditorialLinkProps) {
   const resolvedHref = href.startsWith('#') ? href : localizedPath(locale, href)
 
   return (
-    <Link className={styles.textLink} href={resolvedHref}>
+    <Link
+      className={styles.textLink}
+      href={resolvedHref}
+      transitionTypes={
+        href.startsWith('#') ? undefined : [...NAV_FORWARD_TRANSITION]
+      }
+    >
       <span>{label}</span>
       <span aria-hidden="true">→</span>
     </Link>
@@ -85,7 +93,6 @@ export function ManagedFigure({
 
 export function ManagedHero({
   action,
-  composition = 'framed',
   fallbackSrc,
   locale,
   media,
@@ -93,34 +100,24 @@ export function ManagedHero({
   paragraphs,
 }: ManagedHeroProps) {
   return (
-    <header
-      className={`${styles.hero} ${composition === 'panoramic' ? styles.panoramicHero : ''}`}
-    >
-      <div className={styles.heroCopy}>
-        {page.eyebrow ? <p className={styles.eyebrow}>{page.eyebrow}</p> : null}
-        <h1 className={styles.title}>{page.title}</h1>
-        <span aria-hidden="true" className={styles.rustRule} />
-        <div className={styles.lede}>
-          {paragraphs.map(paragraph => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
-        </div>
-        {action ? (
-          <EditorialLink
-            href={action.href}
-            label={action.label}
-            locale={locale}
-          />
-        ) : null}
-      </div>
-      <ManagedFigure
-        fallbackSrc={fallbackSrc}
-        framing={composition}
-        media={media}
-        priority
-        variant="hero"
-      />
-    </header>
+    <PublicEditorialHero
+      action={
+        action
+          ? {
+              href: action.href.startsWith('#')
+                ? action.href
+                : localizedPath(locale, action.href),
+              label: action.label,
+            }
+          : undefined
+      }
+      eyebrow={page.eyebrow}
+      fallbackAlt={media ? undefined : page.title}
+      fallbackSrc={fallbackSrc}
+      media={media}
+      paragraphs={paragraphs}
+      title={page.title}
+    />
   )
 }
 

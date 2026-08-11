@@ -2,7 +2,7 @@ import {unstable_noStore as noStore} from 'next/cache'
 
 import {contentRepository} from '@/server/database/content'
 
-import type {AppLocale} from '@/lib/localized-path'
+import type {BuiltInAppLocale} from '@/lib/localized-path'
 import type {
   ArtistStat,
   Memory,
@@ -26,7 +26,7 @@ export type HomepageContent = Readonly<{
 }>
 
 export async function getHomepageContent(
-  locale: AppLocale,
+  locale: BuiltInAppLocale,
 ): Promise<HomepageContent> {
   noStore()
 
@@ -54,7 +54,7 @@ export async function getHomepageContent(
 }
 
 export async function getPublishedNewsArticle(
-  locale: AppLocale,
+  locale: BuiltInAppLocale,
   identifier: string,
 ): Promise<NewsArticle | null> {
   noStore()
@@ -66,7 +66,7 @@ export async function getPublishedNewsArticle(
 }
 
 export async function getPublishedNewsArticles(
-  locale: AppLocale,
+  locale: BuiltInAppLocale,
   limit = 50,
 ): Promise<NewsArticle[]> {
   noStore()

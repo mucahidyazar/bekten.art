@@ -99,4 +99,15 @@ describe('validateProductionEnvironment', () => {
       'NEXT_PUBLIC_GOOGLE_ANALYTICS_ID must be a valid GA4 measurement ID',
     )
   })
+
+  it('accepts URL-safe base64 Svix webhook signing secrets', () => {
+    const result = validateProductionEnvironment({
+      ...validEnvironment,
+      RESEND_WEBHOOK_SECRET: 'whsec_base64url-secret_value',
+    })
+
+    expect(result.issues).not.toContain(
+      'RESEND_WEBHOOK_SECRET must be a valid Resend signing secret',
+    )
+  })
 })

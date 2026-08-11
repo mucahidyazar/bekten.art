@@ -2,10 +2,9 @@
 
 import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import {renderToStaticMarkup} from 'react-dom/server'
 import {describe, expect, it, vi} from 'vitest'
 
-import {ConsentBootstrap} from './consent-bootstrap'
+import {initializeGoogleConsent} from './consent-bootstrap'
 import {ConsentManager, ConsentProvider, useConsent} from './consent-provider'
 import {ConsentGoogleMap, getSafeGoogleMapsEmbedUrl} from './google-map'
 import {
@@ -14,8 +13,21 @@ import {
   parseStoredConsent,
 } from './model'
 
+const navigation = vi.hoisted(() => ({pathname: '/'}))
+
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
+}))
+vi.mock('next/script', () => ({
+  default: ({
+    strategy,
+    ...properties
+  }: React.ComponentProps<'script'> & {strategy?: string}) => (
+    <script data-nscript={strategy} {...properties} />
+  ),
+}))
+vi.mock('next/navigation', () => ({
+  usePathname: () => navigation.pathname,
 }))
 
 function renderConsentUi(children?: React.ReactNode) {
@@ -30,10 +42,25 @@ function renderConsentUi(children?: React.ReactNode) {
 function ConsentProbe() {
   const {decision} = useConsent()
 
-  return <output>{decision?.analytics ? 'analytics-on' : 'analytics-off'}</output>
+  return (
+    <output>{decision?.analytics ? 'analytics-on' : 'analytics-off'}</output>
+  )
 }
 
 describe('Google consent preferences', () => {
+  it('keeps the private dashboard free from public consent chrome', async () => {
+    navigation.pathname = '/dashboard/languages'
+
+    renderConsentUi()
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('region', {name: 'title'}),
+      ).not.toBeInTheDocument(),
+    )
+    navigation.pathname = '/'
+  })
+
   it('rejects malformed and obsolete stored decisions', () => {
     expect(parseStoredConsent('not-json')).toBeNull()
     expect(
@@ -58,20 +85,33 @@ describe('Google consent preferences', () => {
     ).toBeNull()
   })
 
-  it('renders a nonce-protected default-denied bootstrap before GTM', () => {
-    const markup = renderToStaticMarkup(<ConsentBootstrap nonce="request-nonce" />)
+  it('initializes default-denied consent before the first GTM event without duplicates', () => {
+    window.dataLayer = []
+    window.gtag = undefined
 
-    expect(markup).toContain('nonce="request-nonce"')
-    expect(markup).toContain("'consent','default'")
-    expect(markup).toContain("analytics_storage:'denied'")
-    expect(markup).toContain("ad_user_data:'denied'")
-    expect(markup).toContain("ad_personalization:'denied'")
-    expect(markup.indexOf("'consent','default'")).toBeLessThan(
-      markup.indexOf(CONSENT_STORAGE_KEY),
-    )
-    expect(markup.indexOf("'consent','update'")).toBeLessThan(
-      markup.indexOf("event:'gtm.js'"),
-    )
+    const decision = createConsentDecision(true, false, false)
+
+    initializeGoogleConsent(decision)
+    initializeGoogleConsent(decision)
+
+    expect(window.dataLayer).toEqual([
+      expect.arrayContaining(['consent', 'default']),
+      expect.arrayContaining(['set', 'ads_data_redaction', true]),
+      expect.arrayContaining(['set', 'url_passthrough', false]),
+      expect.arrayContaining(['consent', 'update']),
+      expect.objectContaining({event: 'gtm.js'}),
+      expect.arrayContaining(['consent', 'update']),
+    ])
+    expect(
+      window.dataLayer?.filter(
+        item =>
+          typeof item === 'object' &&
+          !Array.isArray(item) &&
+          item !== null &&
+          'event' in item &&
+          item.event === 'gtm.js',
+      ),
+    ).toHaveLength(1)
   })
 
   it('offers equal accept and reject controls and persists rejection', async () => {
@@ -90,13 +130,13 @@ describe('Google consent preferences', () => {
     await user.click(reject)
 
     await waitFor(() => expect(screen.queryByRole('region')).toBeNull())
-    expect(parseStoredConsent(localStorage.getItem(CONSENT_STORAGE_KEY))).toMatchObject(
-      {
-        analytics: false,
-        externalMedia: false,
-        marketing: false,
-      },
-    )
+    expect(
+      parseStoredConsent(localStorage.getItem(CONSENT_STORAGE_KEY)),
+    ).toMatchObject({
+      analytics: false,
+      externalMedia: false,
+      marketing: false,
+    })
     expect(gtag).toHaveBeenCalledWith(
       'consent',
       'update',
@@ -126,13 +166,13 @@ describe('Google consent preferences', () => {
     await user.click(screen.getByRole('checkbox', {name: 'externalMediaTitle'}))
     await user.click(screen.getByRole('button', {name: 'savePreferences'}))
 
-    expect(parseStoredConsent(localStorage.getItem(CONSENT_STORAGE_KEY))).toMatchObject(
-      {
-        analytics: true,
-        externalMedia: true,
-        marketing: false,
-      },
-    )
+    expect(
+      parseStoredConsent(localStorage.getItem(CONSENT_STORAGE_KEY)),
+    ).toMatchObject({
+      analytics: true,
+      externalMedia: true,
+      marketing: false,
+    })
   })
 
   it('synchronizes a consent change made in another browser tab', async () => {

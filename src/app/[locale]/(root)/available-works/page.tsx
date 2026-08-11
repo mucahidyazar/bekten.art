@@ -19,8 +19,8 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata({
   params,
 }: AvailableWorksPageProps): Promise<Metadata> {
-  const {locale} = await parsePublicParams(params)
-  const copy = publicRouteCopy[locale].availableWorks
+  const {contentLocale, locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[contentLocale].availableWorks
 
   return listMetadata(locale, 'available-works', copy.title, copy.intro)
 }
@@ -28,20 +28,20 @@ export async function generateMetadata({
 export default async function AvailableWorksPage({
   params,
 }: AvailableWorksPageProps) {
-  const {locale} = await parsePublicParams(params)
-  const copy = publicRouteCopy[locale].availableWorks
-  const works = await publicEditorialReader.listAvailableWorks(locale)
+  const {contentLocale, locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[contentLocale].availableWorks
+  const works = await publicEditorialReader.listAvailableWorks(contentLocale)
 
   return (
     <div className={styles.page}>
       <PublicPageIntro {...copy} illustration="landscape" />
       <PublicArchiveSection
-        accessibleName={publicRouteCopy[locale].availableSelection}
+        accessibleName={publicRouteCopy[contentLocale].availableSelection}
         light
       >
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>
-            {publicRouteCopy[locale].availableSelection}
+            {publicRouteCopy[contentLocale].availableSelection}
           </h2>
           <p className={styles.sectionCount}>
             {String(works.length).padStart(2, '0')}
@@ -49,7 +49,7 @@ export default async function AvailableWorksPage({
         </div>
         {works.length > 0 ? (
           <PublicArtworkGrid
-            actionLabel={publicRouteCopy[locale].availabilityInquiry}
+            actionLabel={publicRouteCopy[contentLocale].availabilityInquiry}
             locale={locale}
             priorityFirst
             works={works}

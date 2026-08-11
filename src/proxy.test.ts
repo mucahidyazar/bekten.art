@@ -1,9 +1,10 @@
-import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest'
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   intlMiddleware: vi.fn(),
   next: vi.fn(),
   redirect: vi.fn(),
+  rewrite: vi.fn(),
 }))
 
 vi.mock('next-intl/middleware', () => ({
@@ -20,30 +21,36 @@ vi.mock('next/server', () => ({
   NextResponse: {
     next: mocks.next,
     redirect: mocks.redirect,
+    rewrite: mocks.rewrite,
   },
 }))
 
 describe('internationalization proxy', () => {
+  let normalizeLocalizedDashboardPathname: (pathname: string) => string | null
+  let normalizeDefaultLocalePathname: (pathname: string) => string | null
   let normalizeLegacyLocalePathname: (pathname: string) => string | null
-  let normalizePrefixedEnglishPathname: (pathname: string) => string | null
   let proxy: (request: never) => unknown
   let routing: Record<string, unknown>
   let shouldBypassInternationalization: (pathname: string) => boolean
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    vi.resetModules()
     ;({
       default: proxy,
+      normalizeDefaultLocalePathname,
+      normalizeLocalizedDashboardPathname,
       normalizeLegacyLocalePathname,
-      normalizePrefixedEnglishPathname,
       routing,
       shouldBypassInternationalization,
     } = await import('./proxy'))
-  })
-
-  beforeEach(() => {
     mocks.intlMiddleware.mockReset()
     mocks.next.mockReset()
     mocks.redirect.mockReset()
+    mocks.rewrite.mockReset()
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
   })
 
   it('keeps English prefixless and uses explicit valid prefixes for other locales', () => {
@@ -55,31 +62,33 @@ describe('internationalization proxy', () => {
     })
   })
 
-  it('maps prefixed English routes to their prefixless canonical pathname', () => {
-    expect(normalizePrefixedEnglishPathname('/en')).toBe('/')
-    expect(normalizePrefixedEnglishPathname('/en/works/silent-steppe')).toBe(
-      '/works/silent-steppe',
+  it('collapses locale-prefixed dashboard routes to the canonical prefixless workspace path', () => {
+    expect(normalizeLocalizedDashboardPathname('/tr/dashboard')).toBe(
+      '/dashboard',
     )
-    expect(normalizePrefixedEnglishPathname('/english')).toBeNull()
-    expect(normalizePrefixedEnglishPathname('/tr/works')).toBeNull()
-  })
-
-  it('collapses prefixed English legacy routes directly to their V2 canonical route', () => {
-    expect(normalizePrefixedEnglishPathname('/en/about')).toBe('/about')
-    expect(normalizePrefixedEnglishPathname('/en/dashboard/sign-in')).toBe(
+    expect(normalizeLocalizedDashboardPathname('/ky/dashboard/sign-in')).toBe(
       '/dashboard/sign-in',
     )
-    expect(normalizePrefixedEnglishPathname('/en/gallery')).toBe('/works')
-    expect(normalizePrefixedEnglishPathname('/en/news')).toBe('/journal')
-    expect(normalizePrefixedEnglishPathname('/en/news/studio-visit')).toBe(
-      '/journal/studio-visit',
+    expect(normalizeLocalizedDashboardPathname('/de/dashboard/users')).toBe(
+      '/dashboard/users',
     )
+    expect(normalizeLocalizedDashboardPathname('/ru/works')).toBeNull()
   })
 
   it('permanently normalizes the legacy kg locale without changing the rest of the path', () => {
     expect(normalizeLegacyLocalePathname('/kg')).toBe('/ky')
     expect(normalizeLegacyLocalePathname('/kg/news/42')).toBe('/ky/news/42')
     expect(normalizeLegacyLocalePathname('/en/gallery')).toBeNull()
+  })
+
+  it('normalizes explicit English URLs directly to their prefixless canonical route', () => {
+    expect(normalizeDefaultLocalePathname('/en')).toBe('/')
+    expect(normalizeDefaultLocalePathname('/en/works')).toBe('/works')
+    expect(normalizeDefaultLocalePathname('/en/news')).toBe('/journal')
+    expect(normalizeDefaultLocalePathname('/en/news/studio-note')).toBe(
+      '/journal/studio-note',
+    )
+    expect(normalizeDefaultLocalePathname('/tr/works')).toBeNull()
   })
 
   it('never internationalizes metadata, API, framework or public asset routes', () => {
@@ -134,10 +143,10 @@ describe('internationalization proxy', () => {
     expect(mocks.redirect).toHaveBeenCalledWith(redirectUrl, 308)
   })
 
-  it('permanently redirects prefixed English URLs without losing query parameters', () => {
+  it('permanently redirects locale-prefixed dashboard URLs without losing query parameters', () => {
     const redirectUrl = {
-      pathname: '/en/works',
-      search: '?view=archive',
+      pathname: '/tr/dashboard/sign-in',
+      search: '?callbackUrl=%2Ftr%2Fdashboard',
     }
     const response = {headers: {set: vi.fn()}, kind: 'redirect'}
 
@@ -147,14 +156,14 @@ describe('internationalization proxy', () => {
       proxy({
         headers: new Headers(),
         nextUrl: {
-          pathname: '/en/works',
+          pathname: '/tr/dashboard/sign-in',
           clone: () => redirectUrl,
         },
       } as never),
     ).toBe(response)
     expect(redirectUrl).toEqual({
-      pathname: '/works',
-      search: '?view=archive',
+      pathname: '/dashboard/sign-in',
+      search: '?callbackUrl=%2Ftr%2Fdashboard',
     })
     expect(mocks.redirect).toHaveBeenCalledWith(redirectUrl, 308)
     expect(mocks.intlMiddleware).not.toHaveBeenCalled()
@@ -170,20 +179,27 @@ describe('internationalization proxy', () => {
     mocks.intlMiddleware.mockReturnValue(response)
 
     expect(proxy(request as never)).toBe(response)
-    expect(mocks.intlMiddleware).toHaveBeenCalledWith(
-      expect.objectContaining({
-        headers: expect.any(Headers),
-        nextUrl: request.nextUrl,
-      }),
+    expect(mocks.intlMiddleware).toHaveBeenCalledWith(request)
+    expect(response.headers.set).toHaveBeenCalledWith(
+      'Content-Security-Policy',
+      expect.stringContaining("frame-ancestors 'none'"),
     )
-    const securedRequest = mocks.intlMiddleware.mock.calls[0]?.[0] as {
-      headers: Headers
-    }
+  })
 
-    expect(securedRequest.headers.get('x-nonce')).toMatch(/^[a-f0-9]{32}$/)
-    expect(securedRequest.headers.get('Content-Security-Policy')).toContain(
-      "frame-ancestors 'none'",
-    )
+  it('lets a safe dynamic locale route reach the locale layout for registry validation', () => {
+    const request = {
+      headers: new Headers(),
+      nextUrl: {pathname: '/de/works'},
+    }
+    const response = {headers: {set: vi.fn()}, kind: 'next'}
+
+    mocks.next.mockReturnValue(response)
+
+    expect(proxy(request as never)).toBe(response)
+    expect(mocks.intlMiddleware).not.toHaveBeenCalled()
+    expect(mocks.next).toHaveBeenCalledWith({
+      request: {headers: expect.any(Headers)},
+    })
   })
 
   it('delegates prefixless English routes to next-intl', () => {
@@ -199,5 +215,71 @@ describe('internationalization proxy', () => {
     expect(mocks.intlMiddleware).toHaveBeenCalledWith(
       expect.objectContaining({nextUrl: request.nextUrl}),
     )
+  })
+
+  it('permanently normalizes a directly prefixed English route without losing its query', () => {
+    const redirectUrl = {pathname: '/en/works', search: '?view=grid'}
+    const request = {
+      headers: new Headers(),
+      nextUrl: {pathname: '/en/works', clone: () => redirectUrl},
+    }
+    const response = {headers: {set: vi.fn()}, kind: 'redirect'}
+
+    mocks.redirect.mockReturnValue(response)
+
+    expect(proxy(request as never)).toBe(response)
+    expect(redirectUrl).toEqual({pathname: '/works', search: '?view=grid'})
+    expect(mocks.redirect).toHaveBeenCalledWith(redirectUrl, 308)
+    expect(mocks.intlMiddleware).not.toHaveBeenCalled()
+  })
+
+  it('bypasses next-intl only when a prefixed English pathname is its own internal rewrite target', () => {
+    const request = {
+      headers: new Headers({'x-pathname': '/works'}),
+      nextUrl: {pathname: '/en/works'},
+    }
+    const response = {headers: {set: vi.fn()}, kind: 'next'}
+
+    mocks.next.mockReturnValue(response)
+
+    expect(proxy(request as never)).toBe(response)
+    expect(mocks.intlMiddleware).not.toHaveBeenCalled()
+    expect(mocks.next).toHaveBeenCalledWith({
+      request: {headers: expect.any(Headers)},
+    })
+  })
+
+  it('keeps the original request URL while forwarding nonce headers through the next-intl rewrite', () => {
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'http://127.0.0.1:3000')
+
+    const request = {
+      headers: new Headers(),
+      nextUrl: {pathname: '/works'},
+    }
+    const intlHeaders = new Headers({
+      'x-middleware-rewrite': 'http://localhost:3000/en/works',
+    })
+    const intlResponse = {headers: intlHeaders, ok: true}
+    const securedResponse = {headers: new Headers(), kind: 'rewrite'}
+
+    mocks.intlMiddleware.mockReturnValue(intlResponse)
+    mocks.rewrite.mockReturnValue(securedResponse)
+
+    expect(proxy(request as never)).toBe(securedResponse)
+    expect(mocks.intlMiddleware).toHaveBeenCalledWith(request)
+    expect(mocks.rewrite).toHaveBeenCalledWith(
+      'http://127.0.0.1:3000/en/works',
+      {
+        headers: intlHeaders,
+        request: {headers: expect.any(Headers)},
+      },
+    )
+
+    const forwardedHeaders = mocks.rewrite.mock.calls[0]?.[1]?.request
+      .headers as Headers
+
+    expect(forwardedHeaders.get('x-nonce')).toMatch(/^[a-f0-9]{32}$/u)
+    expect(forwardedHeaders.get('x-pathname')).toBe('/works')
+
   })
 })

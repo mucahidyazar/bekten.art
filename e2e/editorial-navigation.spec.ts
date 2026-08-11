@@ -9,7 +9,166 @@ const supportedLocales = [
   {locale: 'ky', path: '/ky'},
 ] as const
 
+const collectionLocales = [
+  {path: '/collections', title: 'Memory, land & home'},
+  {path: '/tr/collections', title: 'Hafıza, toprak ve yurt'},
+  {path: '/ru/collections', title: 'Память, земля и дом'},
+  {path: '/ky/collections', title: 'Эстутум, жер жана үй'},
+] as const
+
 test.describe('V2 editorial shell and navigation', () => {
+  test('keeps every localized Collections title within two stable lines', async ({
+    page,
+  }) => {
+    for (const locale of collectionLocales) {
+      await page.goto(locale.path)
+
+      const title = page.getByRole('heading', {
+        level: 1,
+        name: locale.title,
+      })
+      const metrics = await title.evaluate(element => {
+        const style = getComputedStyle(element)
+        const lineHeight = Number.parseFloat(style.lineHeight)
+
+        return {
+          lines: Math.round(
+            element.getBoundingClientRect().height / lineHeight,
+          ),
+          titleDensity: element.getAttribute('data-title-density'),
+        }
+      })
+
+      expect(metrics.titleDensity).toBe('compact')
+      expect(metrics.lines).toBeLessThanOrEqual(2)
+    }
+  })
+
+  test('runs a native transition while preserving public chrome', async ({
+    page,
+  }) => {
+    await page.goto('/works')
+
+    const supported = await page.evaluate(
+      () => typeof document.startViewTransition === 'function',
+    )
+
+    test.skip(!supported, 'View Transition API is unavailable in this browser')
+
+    const animationFrames = await page.evaluate(async () => {
+      const transition = document.startViewTransition(() => {
+        document.body.dataset.viewTransitionProbe = 'ready'
+      })
+      const frames: string[][] = []
+
+      for (let index = 0; index < 6; index += 1) {
+        frames.push(
+          document.getAnimations().map(animation => {
+            const browserAnimation = animation as Animation & {
+              animationName?: string
+              pseudoElement?: string
+            }
+
+            return (
+              browserAnimation.pseudoElement ??
+              browserAnimation.animationName ??
+              'unclassified-animation'
+            )
+          }),
+        )
+        await new Promise(resolve =>
+          requestAnimationFrame(() => resolve(undefined)),
+        )
+      }
+
+      await transition.finished
+
+      return frames
+    })
+
+    expect(
+      animationFrames.some(frame =>
+        frame.some(name => name.includes('view-transition')),
+      ),
+    ).toBe(true)
+
+    await page.evaluate(() => {
+      const original = document.startViewTransition.bind(document)
+      const trackedWindow = window as Window & {
+        __routeViewTransitionCalls?: number
+        __routeViewTransitionFrames?: string[][]
+      }
+
+      trackedWindow.__routeViewTransitionCalls = 0
+      trackedWindow.__routeViewTransitionFrames = []
+      document.startViewTransition = ((
+        ...arguments_: Parameters<Document['startViewTransition']>
+      ) => {
+        trackedWindow.__routeViewTransitionCalls =
+          (trackedWindow.__routeViewTransitionCalls ?? 0) + 1
+        const transition = original(...arguments_)
+
+        void (async () => {
+          for (let index = 0; index < 6; index += 1) {
+            await new Promise(resolve =>
+              requestAnimationFrame(() => resolve(undefined)),
+            )
+            trackedWindow.__routeViewTransitionFrames?.push(
+              document.getAnimations().map(animation => {
+                const browserAnimation = animation as Animation & {
+                  animationName?: string
+                  pseudoElement?: string
+                }
+
+                return (
+                  browserAnimation.pseudoElement ??
+                  browserAnimation.animationName ??
+                  'unclassified-animation'
+                )
+              }),
+            )
+          }
+        })()
+
+        return transition
+      }) as Document['startViewTransition']
+    })
+
+    const firstWork = page.locator('main a[href^="/works/"]').first()
+
+    await firstWork.click()
+    await expect(page).toHaveURL(/\/works\/[a-z0-9-]+\/?$/u)
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (window as Window & {__routeViewTransitionCalls?: number})
+              .__routeViewTransitionCalls ?? 0,
+        ),
+      )
+      .toBeGreaterThan(0)
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          (
+            window as Window & {__routeViewTransitionFrames?: string[][]}
+          ).__routeViewTransitionFrames?.some(frame =>
+            frame.some(name => name.includes('view-transition')),
+          ),
+        ),
+      )
+      .toBe(true)
+    await expect(
+      page.getByTestId('heritage-frame-overlay').first(),
+    ).toBeVisible()
+    await expect(page.getByTestId('heritage-header')).toBeVisible()
+    expect(
+      await page
+        .getByTestId('heritage-header')
+        .evaluate(element => getComputedStyle(element).viewTransitionName),
+    ).toBe('persistent-header')
+  })
+
   test('serves prefixless English and normalizes legacy locale URLs', async ({
     page,
     request,
@@ -186,7 +345,7 @@ test.describe('V2 editorial shell and navigation', () => {
       await expect(
         page.getByRole('heading', {
           level: 1,
-          name: 'Memory, land & belonging',
+          name: 'Memory, land & home',
         }),
       ).toBeVisible()
     }

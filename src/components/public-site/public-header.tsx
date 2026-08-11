@@ -7,12 +7,25 @@ import {usePathname} from 'next/navigation'
 import {localizedPath} from '@/lib/localized-path'
 
 import {LocaleSwitcher} from './locale-switcher'
-import {publicShellCopy, type PublicLocale} from './public-copy'
+import {
+  DEFAULT_PUBLIC_LOCALE_OPTIONS,
+  publicShellCopyFor,
+} from './public-copy'
+import {
+  NAV_BACK_TRANSITION,
+  NAV_LATERAL_TRANSITION,
+} from './public-view-transition'
 
-type PublicHeaderProps = Readonly<{locale: PublicLocale}>
+type PublicHeaderProps = Readonly<{
+  locale: string
+  locales?: readonly Readonly<{code: string; nativeName: string}>[]
+}>
 
-export function PublicHeader({locale}: PublicHeaderProps) {
-  const copy = publicShellCopy[locale]
+export function PublicHeader({
+  locale,
+  locales = DEFAULT_PUBLIC_LOCALE_OPTIONS,
+}: PublicHeaderProps) {
+  const copy = publicShellCopyFor(locale)
   const pathname = usePathname()
   const navigation = [
     {href: '/', label: copy.home},
@@ -31,15 +44,23 @@ export function PublicHeader({locale}: PublicHeaderProps) {
   function isCurrentRoute(href: string) {
     const target = localizedPath(locale, href)
 
-    if (target === '/') return pathname === target
+    if (href === '/') return pathname === target
 
     return pathname === target || pathname.startsWith(`${target}/`)
   }
 
   return (
-    <header className="heritage-header" data-testid="heritage-header">
+    <header
+      className="heritage-header"
+      data-testid="heritage-header"
+      style={{viewTransitionName: 'persistent-header'}}
+    >
       <div className="heritage-shell heritage-header__inner">
-        <Link className="heritage-wordmark" href={localizedPath(locale, '/')}>
+        <Link
+          className="heritage-wordmark"
+          href={localizedPath(locale, '/')}
+          transitionTypes={[...NAV_BACK_TRANSITION]}
+        >
           <Image
             alt=""
             aria-hidden="true"
@@ -58,6 +79,11 @@ export function PublicHeader({locale}: PublicHeaderProps) {
               aria-current={isCurrentRoute(item.href) ? 'page' : undefined}
               href={localizedPath(locale, item.href)}
               key={item.href}
+              transitionTypes={[
+                ...(item.href === '/'
+                  ? NAV_BACK_TRANSITION
+                  : NAV_LATERAL_TRANSITION),
+              ]}
             >
               {item.label}
             </Link>
@@ -65,7 +91,7 @@ export function PublicHeader({locale}: PublicHeaderProps) {
         </nav>
 
         <div className="heritage-header__actions">
-          <LocaleSwitcher locale={locale} />
+          <LocaleSwitcher locale={locale} locales={locales} />
         </div>
 
         <details className="heritage-mobile-menu">
@@ -76,6 +102,11 @@ export function PublicHeader({locale}: PublicHeaderProps) {
                 aria-current={isCurrentRoute(item.href) ? 'page' : undefined}
                 href={localizedPath(locale, item.href)}
                 key={item.href}
+                transitionTypes={[
+                  ...(item.href === '/'
+                    ? NAV_BACK_TRANSITION
+                    : NAV_LATERAL_TRANSITION),
+                ]}
               >
                 {item.label}
               </Link>
@@ -85,6 +116,7 @@ export function PublicHeader({locale}: PublicHeaderProps) {
                 aria-current={isCurrentRoute(item.href) ? 'page' : undefined}
                 href={localizedPath(locale, item.href)}
                 key={item.href}
+                transitionTypes={[...NAV_LATERAL_TRANSITION]}
               >
                 {item.label}
               </Link>

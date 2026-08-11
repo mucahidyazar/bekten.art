@@ -6,10 +6,8 @@ import {headers} from 'next/headers'
 import {notFound} from 'next/navigation'
 
 import {NextIntlClientProvider} from 'next-intl'
-import {ViewTransitions} from 'next-view-transitions'
 import {Suspense} from 'react'
 
-import {ConsentBootstrap} from '@/components/consent/consent-bootstrap'
 import {
   ConsentManager,
   ConsentProvider,
@@ -25,10 +23,10 @@ import {
 } from '@/components/seo/structured-data'
 import {Toaster} from '@/components/ui/toaster'
 import {ME} from '@/constants'
-import {LOCALES} from '@/constants/locales'
+import {isPrivateDashboardPath} from '@/lib/private-dashboard-path'
+import {publicSiteLocaleRegistry} from '@/server/site-locales/public-site-locales'
+import {loadPublicMessages} from '@/server/translations/configured-translations'
 import {prepareMetadata} from '@/utils/prepare-metadata'
-
-import {resolveMessagesLocale} from '../../../i18n'
 
 export async function generateMetadata({
   params,
@@ -40,11 +38,7 @@ export async function generateMetadata({
 
 async function getMessages(locale: string) {
   try {
-    const messagesLocale = resolveMessagesLocale(locale)
-
-    return (
-      await import(`../../../public/locales/${messagesLocale}/common.json`)
-    ).default
+    return await loadPublicMessages(publicLocale(locale))
   } catch {
     notFound()
   }
@@ -59,8 +53,17 @@ type LayoutProps = {
 export default async function RootLayout({children, params}: LayoutProps) {
   const [{locale}, requestHeaders] = await Promise.all([params, headers()])
   const currentLocale = publicLocale(locale)
-  const messages = await getMessages(currentLocale)
   const nonce = requestHeaders.get('x-nonce') ?? undefined
+  const privateDashboard = isPrivateDashboardPath(
+    requestHeaders.get('x-pathname') ?? '/',
+  )
+  const [messages, publicLocales] = await Promise.all([
+    getMessages(currentLocale),
+    privateDashboard ? Promise.resolve([]) : publicSiteLocaleRegistry.list(),
+  ])
+  const currentLocaleDefinition = publicLocales.find(
+    localeDefinition => localeDefinition.code === currentLocale,
+  )
   const identity = getSiteIdentity(currentLocale)
 
   // Determine domain for structured data
@@ -71,19 +74,28 @@ export default async function RootLayout({children, params}: LayoutProps) {
       : 'https://bekten.art')
 
   return (
-    <ViewTransitions>
-      <html lang={currentLocale} suppressHydrationWarning>
-        <head>
-          <ConsentBootstrap nonce={nonce} />
-
-          {/* Hreflang tags for multilingual SEO */}
-          <HrefLang locales={LOCALES} defaultLocale="en" />
-        </head>
-        <body
-          className="bg-background text-foreground overflow-x-hidden"
-          suppressHydrationWarning
-        >
-          <NextIntlClientProvider locale={currentLocale} messages={messages}>
+    <html
+      data-scroll-behavior="smooth"
+      dir={currentLocaleDefinition?.direction === 'RTL' ? 'rtl' : 'ltr'}
+      lang={currentLocale}
+      suppressHydrationWarning
+    >
+      <head>
+        {privateDashboard ? null : (
+          <HrefLang
+            locales={publicLocales.map(localeDefinition => localeDefinition.code)}
+            defaultLocale="en"
+          />
+        )}
+      </head>
+      <body
+        className="bg-background text-foreground overflow-x-hidden"
+        suppressHydrationWarning
+      >
+        <NextIntlClientProvider locale={currentLocale} messages={messages}>
+          {privateDashboard ? (
+            children
+          ) : (
             <ConsentProvider>
               {children}
               <ConsentManager />
@@ -92,36 +104,39 @@ export default async function RootLayout({children, params}: LayoutProps) {
                 <GoogleTagManager nonce={nonce} />
               </Suspense>
             </ConsentProvider>
-          </NextIntlClientProvider>
+          )}
+        </NextIntlClientProvider>
 
-          <Toaster />
+        <Toaster />
 
-          {/* Structured Data */}
-          <PersonStructuredData
-            name={ME.fullName}
-            alternateName="Bekten"
-            description={identity.artistDescription}
-            url={domain}
-            image={`${domain}/me.jpg`}
-            jobTitle={identity.jobTitle}
-            nationality="Kyrgyzstani"
-            birthPlace="Kyrgyzstan"
-            sameAs={[`https://instagram.com/${ME.social.instagram}`]}
-          />
-          <OrganizationStructuredData
-            name="Bekten Studio"
-            description={identity.organizationDescription}
-            url={domain}
-            logo={`${domain}/svg/full-logo.svg`}
-            sameAs={[`https://instagram.com/${ME.social.instagram}`]}
-          />
-          <WebsiteStructuredData
-            name={SITE_NAME}
-            description={identity.siteDescription}
-            url={domain}
-          />
-        </body>
-      </html>
-    </ViewTransitions>
+        {privateDashboard ? null : (
+          <>
+            <PersonStructuredData
+              name={ME.fullName}
+              alternateName="Bekten"
+              description={identity.artistDescription}
+              url={domain}
+              image={`${domain}/me.jpg`}
+              jobTitle={identity.jobTitle}
+              nationality="Kyrgyzstani"
+              birthPlace="Kyrgyzstan"
+              sameAs={[`https://instagram.com/${ME.social.instagram}`]}
+            />
+            <OrganizationStructuredData
+              name="Bekten Studio"
+              description={identity.organizationDescription}
+              url={domain}
+              logo={`${domain}/svg/full-logo.svg`}
+              sameAs={[`https://instagram.com/${ME.social.instagram}`]}
+            />
+            <WebsiteStructuredData
+              name={SITE_NAME}
+              description={identity.siteDescription}
+              url={domain}
+            />
+          </>
+        )}
+      </body>
+    </html>
   )
 }

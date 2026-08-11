@@ -26,6 +26,53 @@ function dependencies() {
 }
 
 describe('Studio magic-link request boundary', () => {
+  it('rejects an oversized request before parsing identity or consuming rate limits', async () => {
+    const deps = dependencies()
+    const oversizedRequest = new Request(
+      'https://bekten.art/api/auth/signin/email',
+      {
+        body: new URLSearchParams({email: `${'a'.repeat(20_000)}@example.com`}),
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          origin: 'https://bekten.art',
+        },
+        method: 'POST',
+      },
+    )
+
+    const result = await guardStudioMagicLinkRequest(oversizedRequest, deps)
+
+    expect(result.allowed).toBe(false)
+    if (result.allowed) throw new Error('Expected the request to be rejected')
+
+    expect(result.response.status).toBe(413)
+    expect(deps.consumeRateLimit).not.toHaveBeenCalled()
+  })
+
+  it('rejects encoded or unsupported bodies before parsing them', async () => {
+    const deps = dependencies()
+    const encodedRequest = new Request(
+      'https://bekten.art/api/auth/signin/email',
+      {
+        body: 'compressed',
+        headers: {
+          'content-encoding': 'gzip',
+          'content-type': 'application/x-www-form-urlencoded',
+          origin: 'https://bekten.art',
+        },
+        method: 'POST',
+      },
+    )
+
+    const result = await guardStudioMagicLinkRequest(encodedRequest, deps)
+
+    expect(result.allowed).toBe(false)
+    if (result.allowed) throw new Error('Expected the request to be rejected')
+
+    expect(result.response.status).toBe(415)
+    expect(deps.consumeRateLimit).not.toHaveBeenCalled()
+  })
+
   it('requires an exact same-origin mutation', async () => {
     const deps = dependencies()
 

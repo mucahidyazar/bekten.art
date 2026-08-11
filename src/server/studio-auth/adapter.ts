@@ -1,4 +1,4 @@
-import {isStudioEditorRole} from './roles'
+import {isStudioAccountActive, isStudioEditorRole} from './roles'
 
 import type {StudioVerificationToken} from './magic-link-coordinator'
 import type {Adapter} from 'next-auth/adapters'
@@ -28,8 +28,14 @@ export function createStudioAdapter(
     async getSessionAndUser(sessionToken) {
       const current = await getSessionAndUser(sessionToken)
       const role = (current?.user as {role?: unknown} | undefined)?.role
+      const studioStatus = (
+        current?.user as {studioStatus?: unknown} | undefined
+      )?.studioStatus
 
-      if (!current || isStudioEditorRole(role)) {
+      if (
+        !current ||
+        (isStudioEditorRole(role) && isStudioAccountActive(studioStatus))
+      ) {
         return current
       }
 

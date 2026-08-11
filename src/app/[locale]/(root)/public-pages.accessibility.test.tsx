@@ -24,7 +24,11 @@ vi.mock('@/components/public-site/public-footer', () => ({
   PublicFooter: () => <footer data-testid="v2-footer">V2 footer</footer>,
 }))
 vi.mock('@/components/public-site/public-header', () => ({
-  PublicHeader: () => <header data-testid="v2-header">V2 header</header>,
+  PublicHeader: ({locale}: {locale: string}) => (
+    <header data-locale={locale} data-testid="v2-header">
+      V2 header
+    </header>
+  ),
 }))
 vi.mock('@/components/seo/breadcrumb', () => ({
   Breadcrumb: ({showNavigation = true}: {showNavigation?: boolean}) =>
@@ -40,7 +44,12 @@ vi.mock('@/components/consent/google-map', () => ({
 
 describe('public page landmarks', () => {
   it('provides a skip link targeting the focusable main content', async () => {
-    render(await RootLayout({children: <p>Page content</p>}))
+    render(
+      await RootLayout({
+        children: <p>Page content</p>,
+        params: Promise.resolve({locale: 'en'}),
+      }),
+    )
 
     expect(
       screen.getByRole('link', {name: /skip to main content/i}),
@@ -50,6 +59,24 @@ describe('public page landmarks', () => {
     expect(screen.getByTestId('v2-header')).toBeVisible()
     expect(screen.getByTestId('v2-footer')).toBeVisible()
     expect(screen.queryByRole('navigation', {name: 'Breadcrumb'})).toBeNull()
+  })
+
+  it('uses the URL locale for the public shell and page copy', async () => {
+    getPublicContactInfo.mockResolvedValueOnce(null)
+
+    const layout = await RootLayout({
+      children: await ContactPage({params: Promise.resolve({locale: 'tr'})}),
+      params: Promise.resolve({locale: 'tr'}),
+    })
+
+    render(layout)
+
+    expect(screen.getByTestId('v2-header')).toHaveAttribute(
+      'data-locale',
+      'tr',
+    )
+    expect(screen.getByRole('heading', {level: 1, name: 'İletişim'})).toBeVisible()
+    expect(getPublicContactInfo).toHaveBeenCalledWith('tr')
   })
 
   it('keeps one page heading and names the contact map frame', async () => {
@@ -62,7 +89,7 @@ describe('public page landmarks', () => {
       socials: [],
       workingHours: '',
     })
-    render(await ContactPage())
+    render(await ContactPage({params: Promise.resolve({locale: 'en'})}))
 
     expect(screen.getAllByRole('heading', {level: 1})).toHaveLength(1)
     expect(screen.getByRole('heading', {name: 'Contact'})).toBeVisible()
@@ -91,7 +118,7 @@ describe('public page landmarks', () => {
   it('does not publish a developer mailbox when Studio contact data is absent', async () => {
     getPublicContactInfo.mockResolvedValueOnce(null)
 
-    render(await ContactPage())
+    render(await ContactPage({params: Promise.resolve({locale: 'en'})}))
 
     expect(screen.queryByText('support@mucahid.dev')).toBeNull()
     expect(

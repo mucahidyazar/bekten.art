@@ -7,6 +7,7 @@ import {useLocale, useTranslations} from 'next-intl'
 import {useTheme} from 'next-themes'
 import {useTransition} from 'react'
 
+import {NAV_LATERAL_TRANSITION} from '@/components/public-site/public-view-transition'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {LOCALE, LOCALES} from '@/constants'
 import {useHydrated} from '@/hooks/use-hydrated'
+import {localizedPath} from '@/lib/localized-path'
 import {cn} from '@/utils'
 
 import type {AppLocale} from '@/lib/localized-path'
@@ -51,13 +53,9 @@ export function AppTools({className}: AppToolsProps) {
 
   function onSelectChange(newLocale: keyof typeof LOCALE) {
     startTransition(() => {
-      const hasPrefix = pathname.startsWith(`/${locale}`)
-
-      if (hasPrefix) {
-        router.push(pathname.replace(`/${locale}`, `/${newLocale}`))
-      } else {
-        router.push(`/${newLocale}/${pathname}`)
-      }
+      router.push(localizedPath(newLocale, pathname), {
+        transitionTypes: [...NAV_LATERAL_TRANSITION],
+      })
     })
   }
 

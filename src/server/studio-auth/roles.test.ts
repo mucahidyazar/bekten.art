@@ -41,7 +41,13 @@ describe('Studio roles', () => {
 describe('Studio access guards', () => {
   it('authorizes with the current database role, not a session role claim', async () => {
     const access = createStudioAccess({
-      findUserById: vi.fn().mockResolvedValue({id: 'user-1', role: 'EDITOR'}),
+      findUserById: vi
+        .fn()
+        .mockResolvedValue({
+          id: 'user-1',
+          role: 'EDITOR',
+          studioStatus: 'ACTIVE',
+        }),
       getSession: vi.fn().mockResolvedValue({
         ...session,
         user: {...session.user, role: 'USER'},
@@ -51,6 +57,7 @@ describe('Studio access guards', () => {
     await expect(access.requireEditor()).resolves.toEqual({
       id: 'user-1',
       role: 'EDITOR',
+      studioStatus: 'ACTIVE',
     })
   })
 
@@ -69,7 +76,30 @@ describe('Studio access guards', () => {
 
   it('rejects a current non-editor database role', async () => {
     const access = createStudioAccess({
-      findUserById: vi.fn().mockResolvedValue({id: 'user-1', role: 'USER'}),
+      findUserById: vi
+        .fn()
+        .mockResolvedValue({
+          id: 'user-1',
+          role: 'USER',
+          studioStatus: 'ACTIVE',
+        }),
+      getSession: vi.fn().mockResolvedValue(session),
+    })
+
+    await expect(access.requireEditor()).rejects.toBeInstanceOf(
+      StudioEditorRequiredError,
+    )
+  })
+
+  it('rejects a suspended editor even when its database role is retained', async () => {
+    const access = createStudioAccess({
+      findUserById: vi
+        .fn()
+        .mockResolvedValue({
+          id: 'user-1',
+          role: 'EDITOR',
+          studioStatus: 'SUSPENDED',
+        }),
       getSession: vi.fn().mockResolvedValue(session),
     })
 
@@ -80,7 +110,13 @@ describe('Studio access guards', () => {
 
   it('keeps owner-only operations explicit', async () => {
     const access = createStudioAccess({
-      findUserById: vi.fn().mockResolvedValue({id: 'user-1', role: 'EDITOR'}),
+      findUserById: vi
+        .fn()
+        .mockResolvedValue({
+          id: 'user-1',
+          role: 'EDITOR',
+          studioStatus: 'ACTIVE',
+        }),
       getSession: vi.fn().mockResolvedValue(session),
     })
 

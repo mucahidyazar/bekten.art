@@ -1,6 +1,7 @@
 type StudioUser = Readonly<{
   id: string
   role: string
+  studioStatus: string
 }>
 
 type StudioSession = Readonly<{
@@ -62,7 +63,7 @@ export function createStudioAccess<User extends StudioUser>(
   async function requireEditor() {
     const user = await currentUser()
 
-    if (!isStudioEditorRole(user.role)) {
+    if (!isStudioEditorRole(user.role) || !isStudioAccountActive(user.studioStatus)) {
       throw new StudioEditorRequiredError()
     }
 
@@ -72,7 +73,7 @@ export function createStudioAccess<User extends StudioUser>(
   async function requireOwner() {
     const user = await currentUser()
 
-    if (!isStudioOwnerRole(user.role)) {
+    if (!isStudioOwnerRole(user.role) || !isStudioAccountActive(user.studioStatus)) {
       throw new StudioOwnerRequiredError()
     }
 
@@ -80,6 +81,14 @@ export function createStudioAccess<User extends StudioUser>(
   }
 
   return Object.freeze({requireEditor, requireOwner})
+}
+
+export function isStudioAccountActive(status: unknown) {
+  return status === 'ACTIVE'
+}
+
+export function isStudioAccountSigninAllowed(status: unknown) {
+  return status === 'ACTIVE' || status === 'INVITED'
 }
 
 export function isStudioEditorRole(role: unknown) {

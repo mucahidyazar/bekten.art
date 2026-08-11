@@ -3,53 +3,59 @@
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 
-import {localizedPath} from '@/lib/localized-path'
+import {isSafeLocaleCode, localizedPath} from '@/lib/localized-path'
 
-import {PUBLIC_LOCALES, type PublicLocale} from './public-copy'
+import {
+  DEFAULT_PUBLIC_LOCALE_OPTIONS,
+  isPublicLocale,
+} from './public-copy'
+import {NAV_LATERAL_TRANSITION} from './public-view-transition'
 
-const localeNames: Readonly<Record<PublicLocale, string>> = Object.freeze({
-  en: 'English',
-  ky: 'Кыргызча',
-  ru: 'Русский',
-  tr: 'Türkçe',
-})
-
-const navigationLabels: Readonly<Record<PublicLocale, string>> = Object.freeze({
+const navigationLabels = Object.freeze({
   en: 'Languages',
   ky: 'Тилдер',
   ru: 'Языки',
   tr: 'Diller',
 })
 
-export function LocaleSwitcher({locale}: Readonly<{locale: PublicLocale}>) {
+type LocaleSwitcherProps = Readonly<{
+  locale: string
+  locales?: readonly Readonly<{code: string; nativeName: string}>[]
+}>
+
+export function LocaleSwitcher({
+  locale,
+  locales = DEFAULT_PUBLIC_LOCALE_OPTIONS,
+}: LocaleSwitcherProps) {
   const pathname = usePathname() || localizedPath(locale, '/')
+  const navigationLabel = navigationLabels[isPublicLocale(locale) ? locale : 'en']
 
   return (
     <nav
-      aria-label={navigationLabels[locale]}
+      aria-label={navigationLabel}
       className="heritage-locale-switcher"
     >
-      {PUBLIC_LOCALES.map(candidate => (
+      {locales.map(candidate => (
         <Link
-          aria-current={candidate === locale ? 'page' : undefined}
-          href={buildLocaleSiblingPath(pathname, candidate)}
-          hrefLang={candidate}
-          key={candidate}
-          lang={candidate}
+          aria-current={candidate.code === locale ? 'page' : undefined}
+          href={buildLocaleSiblingPath(pathname, candidate.code)}
+          hrefLang={candidate.code}
+          key={candidate.code}
+          lang={candidate.code}
+          transitionTypes={[...NAV_LATERAL_TRANSITION]}
         >
-          <span className="sr-only">{localeNames[candidate]}</span>
-          <span aria-hidden="true">{candidate}</span>
+          <span className="sr-only">{candidate.nativeName}</span>
+          <span aria-hidden="true">{candidate.code}</span>
         </Link>
       ))}
     </nav>
   )
 }
 
-export function buildLocaleSiblingPath(pathname: string, locale: PublicLocale) {
+export function buildLocaleSiblingPath(pathname: string, locale: string) {
   const segments = pathname.split('/').filter(Boolean)
   const first = segments[0]
-  const hasLocale =
-    first === 'kg' || PUBLIC_LOCALES.some(candidate => candidate === first)
+  const hasLocale = first === 'kg' || (first ? isSafeLocaleCode(first) : false)
   const remaining = hasLocale ? segments.slice(1) : segments
   const localizedDetailRoots = new Set([
     'collections',

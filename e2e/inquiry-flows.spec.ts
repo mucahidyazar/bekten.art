@@ -26,7 +26,9 @@ async function expectInquiryPage(
     `${route} requires its managed page to be published in the E2E database`,
   ).toBe(true)
   await page.waitForLoadState('networkidle')
-  await expect(page.getByRole('heading', {name: formHeading})).toBeVisible()
+  await expect(
+    page.getByRole('heading', {exact: true, name: formHeading}),
+  ).toBeVisible()
 }
 
 async function captureInquiryRequests(page: Page) {
@@ -189,7 +191,9 @@ test.describe('V2 premium public inquiries', () => {
     await expectInquiryPage(page, '/private-viewings', 'Private viewing')
     await fillContactFields(page)
     await page.getByLabel('Preferred date').fill('2027-04-12')
-    await page.getByLabel('Alternative date (optional)').fill('2027-04-13')
+    await page
+      .getByLabel('Alternative date (optional)', {exact: true})
+      .fill('2027-04-13')
     await page.getByLabel('Attendees (optional)').fill('3')
     await page
       .getByLabel('Your note (optional)')

@@ -102,8 +102,8 @@
 
 .sectionInner {
   margin-inline: auto;
-  max-width: 96rem;
-  padding-inline: clamp(1.25rem, 4.2vw, 5rem);
+  max-width: var(--heritage-container-max);
+  padding-inline: var(--heritage-container-padding);
   width: 100%;
 }
 
@@ -384,6 +384,10 @@
   border-top: 1px solid var(--heritage-line);
   margin-top: 1.6rem;
   padding-top: 1.4rem;
+}
+
+.detailInquiryContainer {
+  padding-block: clamp(3rem, 6vw, 6rem);
 }
 
 .factList {

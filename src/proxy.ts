@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from 'next/server'
 
 import createMiddleware from 'next-intl/middleware'
 
-import {APP_LOCALES} from '@/lib/localized-path'
+import {APP_LOCALES, isSafeLocaleCode} from '@/lib/localized-path'
 import {buildContentSecurityPolicy} from '@/server/security/content-security-policy'
 
 const routingConfig = {
@@ -14,16 +14,52 @@ const routingConfig = {
 
 const intlMiddleware = createMiddleware(routingConfig)
 const PUBLIC_FILE_PATTERN = /\/[^/]+\.[^/]+$/
-const PREFIXLESS_LEGACY_ROUTES = Object.freeze({
-  '/artist': '/about',
-  '/gallery': '/works',
-  '/news': '/journal',
-})
+const LOCALIZED_DASHBOARD_PATTERN =
+  /^\/(?<locale>[^/]+)\/dashboard(?<suffix>\/.*)?$/u
 
 export const config = {
   matcher: [
     '/((?!api(?:/|$)|_next(?:/|$)|robots\\.txt$|sitemap\\.xml$|favicon\\.ico$|.*\\.[^/]+$).*)',
   ],
+}
+
+export function isDynamicLocalePathname(pathname: string) {
+  const candidate = pathname.split('/').filter(Boolean)[0]
+
+  return Boolean(
+    candidate &&
+      candidate !== 'kg' &&
+      !APP_LOCALES.some(locale => locale === candidate) &&
+      isSafeLocaleCode(candidate),
+  )
+}
+
+export function isInternalDefaultLocaleRewrite(
+  pathname: string,
+  originalPathname: string | null,
+) {
+  if (!originalPathname) return false
+
+  if (pathname === '/en') return originalPathname === '/'
+  if (!pathname.startsWith('/en/')) return false
+
+  return pathname.slice(3) === originalPathname
+}
+
+export function normalizeDefaultLocalePathname(pathname: string) {
+  if (pathname === '/en') return '/'
+  if (!pathname.startsWith('/en/')) return null
+
+  const prefixless = pathname.slice(3)
+
+  if (prefixless === '/news') return '/journal'
+  if (prefixless.startsWith('/news/')) {
+    return `/journal${prefixless.slice('/news'.length)}`
+  }
+  if (prefixless === '/gallery') return '/works'
+  if (prefixless === '/artist') return '/about'
+
+  return prefixless
 }
 
 export function normalizeLegacyLocalePathname(pathname: string) {
@@ -38,24 +74,18 @@ export function normalizeLegacyLocalePathname(pathname: string) {
   return null
 }
 
-export function normalizePrefixedEnglishPathname(pathname: string) {
-  if (pathname === '/en') return '/'
+export function normalizeLocalizedDashboardPathname(pathname: string) {
+  const match = LOCALIZED_DASHBOARD_PATTERN.exec(pathname)
 
-  if (pathname.startsWith('/en/')) {
-    const prefixlessPathname = pathname.slice(3)
-
-    if (prefixlessPathname.startsWith('/news/')) {
-      return `/journal${prefixlessPathname.slice('/news'.length)}`
-    }
-
-    return (
-      PREFIXLESS_LEGACY_ROUTES[
-        prefixlessPathname as keyof typeof PREFIXLESS_LEGACY_ROUTES
-      ] ?? prefixlessPathname
-    )
+  if (
+    !match ||
+    (!isSafeLocaleCode(match.groups?.locale ?? '') &&
+      match.groups?.locale !== 'kg')
+  ) {
+    return null
   }
 
-  return null
+  return `/dashboard${match.groups?.suffix ?? ''}`
 }
 
 export const routing = routingConfig
@@ -74,8 +104,51 @@ function createSecurityContext(request: NextRequest) {
   headers.set('x-pathname', request.nextUrl.pathname)
 
   return {
+    headers,
     policy,
-    request: new NextRequest(request, {headers}),
+    request,
+  }
+}
+
+function withSecurityRequestHeaders(
+  response: NextResponse,
+  requestHeaders: Headers,
+) {
+  if (!response.ok) return response
+
+  const rewriteDestination = response.headers.get('x-middleware-rewrite')
+  const init = {
+    headers: response.headers,
+    request: {headers: requestHeaders},
+  }
+
+  return rewriteDestination
+    ? NextResponse.rewrite(
+        canonicalInternalRewriteDestination(rewriteDestination),
+        init,
+      )
+    : NextResponse.next(init)
+}
+
+function canonicalInternalRewriteDestination(rewriteDestination: string) {
+  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.trim()
+
+  if (!configuredAppUrl) return rewriteDestination
+
+  try {
+    const destination = new URL(rewriteDestination)
+    const canonicalOrigin = new URL(configuredAppUrl)
+
+    if (!['http:', 'https:'].includes(canonicalOrigin.protocol)) {
+      return rewriteDestination
+    }
+
+    destination.protocol = canonicalOrigin.protocol
+    destination.host = canonicalOrigin.host
+
+    return destination.toString()
+  } catch {
+    return rewriteDestination
   }
 }
 
@@ -102,7 +175,20 @@ export function shouldBypassInternationalization(pathname: string) {
 }
 
 export default function proxy(request: NextRequest) {
+  const originalPathname = request.headers.get('x-pathname')
   const security = createSecurityContext(request)
+
+  if (
+    isInternalDefaultLocaleRewrite(
+      request.nextUrl.pathname,
+      originalPathname,
+    )
+  ) {
+    return withContentSecurityPolicy(
+      NextResponse.next({request: {headers: security.headers}}),
+      security.policy,
+    )
+  }
 
   if (shouldBypassInternationalization(request.nextUrl.pathname)) {
     return withContentSecurityPolicy(
@@ -112,7 +198,8 @@ export default function proxy(request: NextRequest) {
   }
 
   const canonicalPathname =
-    normalizePrefixedEnglishPathname(request.nextUrl.pathname) ??
+    normalizeDefaultLocalePathname(request.nextUrl.pathname) ??
+    normalizeLocalizedDashboardPathname(request.nextUrl.pathname) ??
     normalizeLegacyLocalePathname(request.nextUrl.pathname)
 
   if (canonicalPathname) {
@@ -126,8 +213,18 @@ export default function proxy(request: NextRequest) {
     )
   }
 
+  if (isDynamicLocalePathname(request.nextUrl.pathname)) {
+    return withContentSecurityPolicy(
+      NextResponse.next({request: {headers: security.headers}}),
+      security.policy,
+    )
+  }
+
   return withContentSecurityPolicy(
-    intlMiddleware(security.request),
+    withSecurityRequestHeaders(
+      intlMiddleware(security.request),
+      security.headers,
+    ),
     security.policy,
   )
 }

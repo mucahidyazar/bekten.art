@@ -15,6 +15,23 @@ enum UserRole {
   OWNER
 }
 
+enum StudioAccountStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+}
+
+enum SiteLocaleStatus {
+  DRAFT
+  ACTIVE
+  DISABLED
+}
+
+enum TextDirection {
+  LTR
+  RTL
+}
+
 enum ContentStatus {
   DRAFT
   PUBLISHED
@@ -132,42 +149,91 @@ enum OutboxStatus {
 }
 
 model User {
-  id                    String                @id @default(uuid()) @db.Uuid
-  name                  String?
-  email                 String?               @unique
-  emailVerified         DateTime?             @map("email_verified")
-  image                 String?
-  role                  UserRole              @default(USER)
-  passwordHash          String?               @map("password_hash")
-  passwordResetRequired Boolean               @default(false) @map("password_reset_required")
-  sessionVersion        Int                   @default(0) @map("session_version")
-  phone                 String?
-  address               String?
-  bio                   String?
-  website               String?
-  twitter               String?
-  instagram             String?
-  linkedin              String?
-  github                String?
-  working_hours         String?
-  map_embed_url         String?
-  years_experience      Int                   @default(0)
-  artworks_count        Int                   @default(0)
-  exhibitions_count     Int                   @default(0)
-  last_sign_in_at       DateTime?
-  created_at            DateTime              @default(now())
-  updated_at            DateTime              @updatedAt
-  accounts              Account[]
-  audit_events          AuditEvent[]          @relation("AuditEventActor")
-  contentRevisions      ContentRevision[]     @relation("ContentRevisionActor")
-  feedback_resolutions  Feedback[]            @relation("FeedbackResolver")
-  inquiryInternalNotes  InquiryInternalNote[] @relation("InquiryInternalNoteAuthor")
-  media_objects         MediaObject[]         @relation("MediaObjectUploader")
-  password_reset_tokens PasswordResetToken[]
-  sessions              Session[]
-  socials               Social[]
+  id                     String                  @id @default(uuid()) @db.Uuid
+  name                   String?
+  email                  String?                 @unique
+  emailVerified          DateTime?               @map("email_verified")
+  image                  String?
+  role                   UserRole                @default(USER)
+  studioStatus           StudioAccountStatus     @default(ACTIVE) @map("studio_status")
+  invitedAt              DateTime?               @map("invited_at")
+  acceptedAt             DateTime?               @map("accepted_at")
+  suspendedAt            DateTime?               @map("suspended_at")
+  invitedByUserId        String?                 @map("invited_by_user_id") @db.Uuid
+  sessionVersion         Int                     @default(0) @map("session_version")
+  phone                  String?
+  address                String?
+  bio                    String?
+  website                String?
+  twitter                String?
+  instagram              String?
+  linkedin               String?
+  github                 String?
+  working_hours          String?
+  map_embed_url          String?
+  years_experience       Int                     @default(0)
+  artworks_count         Int                     @default(0)
+  exhibitions_count      Int                     @default(0)
+  last_sign_in_at        DateTime?
+  created_at             DateTime                @default(now())
+  updated_at             DateTime                @updatedAt
+  accounts               Account[]
+  audit_events           AuditEvent[]            @relation("AuditEventActor")
+  contentRevisions       ContentRevision[]       @relation("ContentRevisionActor")
+  feedback_resolutions   Feedback[]              @relation("FeedbackResolver")
+  inquiryInternalNotes   InquiryInternalNote[]   @relation("InquiryInternalNoteAuthor")
+  media_objects          MediaObject[]           @relation("MediaObjectUploader")
+  sessions               Session[]
+  socials                Social[]
+  uiTranslationOverrides UiTranslationOverride[]
+  invitedBy              User?                   @relation("StudioUserInviter", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+  studioInvitees         User[]                  @relation("StudioUserInviter")
+  createdSiteLocales     SiteLocale[]            @relation("SiteLocaleCreator")
+  updatedSiteLocales     SiteLocale[]            @relation("SiteLocaleUpdater")
+  mediaFolders           MediaFolder[]           @relation("MediaFolderCreator")
 
+  @@index([studioStatus, role])
+  @@index([invitedByUserId])
   @@map("users")
+}
+
+model SiteLocale {
+  code         String                  @id @db.VarChar(15)
+  englishName  String                  @map("english_name") @db.VarChar(80)
+  nativeName   String                  @map("native_name") @db.VarChar(80)
+  direction    TextDirection           @default(LTR)
+  status       SiteLocaleStatus        @default(DRAFT)
+  isDefault    Boolean                 @default(false) @map("is_default")
+  sortOrder    Int                     @default(0) @map("sort_order")
+  createdById  String?                 @map("created_by_id") @db.Uuid
+  updatedById  String?                 @map("updated_by_id") @db.Uuid
+  createdAt    DateTime                @default(now()) @map("created_at")
+  updatedAt    DateTime                @updatedAt @map("updated_at")
+  createdBy    User?                   @relation("SiteLocaleCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy    User?                   @relation("SiteLocaleUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  translations UiTranslationOverride[]
+
+  @@index([status, sortOrder])
+  @@index([createdById])
+  @@index([updatedById])
+  @@map("site_locales")
+}
+
+model UiTranslationOverride {
+  id              String     @id @default(uuid()) @db.Uuid
+  locale          String     @db.VarChar(15)
+  key             String     @db.VarChar(300)
+  value           String     @db.Text
+  updatedByUserId String?    @map("updated_by_user_id") @db.Uuid
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+  updatedByUser   User?      @relation(fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  siteLocale      SiteLocale @relation(fields: [locale], references: [code], onDelete: Restrict)
+
+  @@unique([locale, key])
+  @@index([key])
+  @@index([updatedByUserId])
+  @@map("ui_translation_overrides")
 }
 
 model Social {
@@ -185,8 +251,9 @@ model Social {
 
 model Artwork {
   id                 String              @id @default(uuid()) @db.Uuid
+  translationGroupId String              @default(uuid()) @map("translation_group_id") @db.Uuid
   collectionId       String?             @map("collection_id") @db.Uuid
-  locale             String              @db.VarChar(5)
+  locale             String              @db.VarChar(15)
   slug               String              @db.VarChar(160)
   title              String              @db.VarChar(200)
   description        String              @db.Text
@@ -215,6 +282,7 @@ model Artwork {
   inquiries          Inquiry[]
 
   @@unique([locale, slug])
+  @@unique([translationGroupId, locale])
   @@index([locale, status, displayOrder])
   @@index([status, publishedAt])
   @@index([collectionId, locale, status, displayOrder])
@@ -222,54 +290,58 @@ model Artwork {
 }
 
 model Collection {
-  id               String        @id @default(uuid()) @db.Uuid
-  locale           String        @db.VarChar(5)
-  slug             String        @db.VarChar(160)
-  title            String        @db.VarChar(200)
-  description      String        @db.Text
-  seoTitle         String        @map("seo_title") @db.VarChar(70)
-  seoDescription   String        @map("seo_description") @db.VarChar(170)
-  seoCanonicalPath String        @map("seo_canonical_path") @db.VarChar(2048)
-  seoNoIndex       Boolean       @default(false) @map("seo_no_index")
-  displayOrder     Int           @default(0) @map("display_order")
-  version          Int           @default(1)
-  status           ContentStatus @default(DRAFT)
-  publishedAt      DateTime?     @map("published_at")
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
-  artworks         Artwork[]
+  id                 String        @id @default(uuid()) @db.Uuid
+  translationGroupId String        @default(uuid()) @map("translation_group_id") @db.Uuid
+  locale             String        @db.VarChar(15)
+  slug               String        @db.VarChar(160)
+  title              String        @db.VarChar(200)
+  description        String        @db.Text
+  seoTitle           String        @map("seo_title") @db.VarChar(70)
+  seoDescription     String        @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath   String        @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex         Boolean       @default(false) @map("seo_no_index")
+  displayOrder       Int           @default(0) @map("display_order")
+  version            Int           @default(1)
+  status             ContentStatus @default(DRAFT)
+  publishedAt        DateTime?     @map("published_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+  artworks           Artwork[]
 
   @@unique([locale, slug])
+  @@unique([translationGroupId, locale])
   @@index([locale, status, displayOrder])
   @@index([status, publishedAt])
   @@map("collections")
 }
 
 model Exhibition {
-  id               String              @id @default(uuid()) @db.Uuid
-  locale           String              @db.VarChar(5)
-  slug             String              @db.VarChar(160)
-  title            String              @db.VarChar(200)
-  subtitle         String?             @db.VarChar(300)
-  body             String              @db.Text
-  venue            String?             @db.VarChar(240)
-  city             String?             @db.VarChar(160)
-  country          String?             @db.VarChar(160)
-  startsAt         DateTime            @map("starts_at")
-  endsAt           DateTime?           @map("ends_at")
-  seoTitle         String              @map("seo_title") @db.VarChar(70)
-  seoDescription   String              @map("seo_description") @db.VarChar(170)
-  seoCanonicalPath String              @map("seo_canonical_path") @db.VarChar(2048)
-  seoNoIndex       Boolean             @default(false) @map("seo_no_index")
-  displayOrder     Int                 @default(0) @map("display_order")
-  version          Int                 @default(1)
-  status           ContentStatus       @default(DRAFT)
-  publishedAt      DateTime?           @map("published_at")
-  createdAt        DateTime            @default(now()) @map("created_at")
-  updatedAt        DateTime            @updatedAt @map("updated_at")
-  exhibitionWorks  ExhibitionArtwork[]
+  id                 String              @id @default(uuid()) @db.Uuid
+  translationGroupId String              @default(uuid()) @map("translation_group_id") @db.Uuid
+  locale             String              @db.VarChar(15)
+  slug               String              @db.VarChar(160)
+  title              String              @db.VarChar(200)
+  subtitle           String?             @db.VarChar(300)
+  body               String              @db.Text
+  venue              String?             @db.VarChar(240)
+  city               String?             @db.VarChar(160)
+  country            String?             @db.VarChar(160)
+  startsAt           DateTime            @map("starts_at")
+  endsAt             DateTime?           @map("ends_at")
+  seoTitle           String              @map("seo_title") @db.VarChar(70)
+  seoDescription     String              @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath   String              @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex         Boolean             @default(false) @map("seo_no_index")
+  displayOrder       Int                 @default(0) @map("display_order")
+  version            Int                 @default(1)
+  status             ContentStatus       @default(DRAFT)
+  publishedAt        DateTime?           @map("published_at")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  exhibitionWorks    ExhibitionArtwork[]
 
   @@unique([locale, slug])
+  @@unique([translationGroupId, locale])
   @@index([locale, status, displayOrder])
   @@index([status, publishedAt])
   @@index([startsAt, endsAt])
@@ -291,48 +363,52 @@ model ExhibitionArtwork {
 }
 
 model JournalEntry {
-  id               String        @id @default(uuid()) @db.Uuid
-  locale           String        @db.VarChar(5)
-  slug             String        @db.VarChar(160)
-  title            String        @db.VarChar(200)
-  excerpt          String        @db.Text
-  body             String        @db.Text
-  seoTitle         String        @map("seo_title") @db.VarChar(70)
-  seoDescription   String        @map("seo_description") @db.VarChar(170)
-  seoCanonicalPath String        @map("seo_canonical_path") @db.VarChar(2048)
-  seoNoIndex       Boolean       @default(false) @map("seo_no_index")
-  displayOrder     Int           @default(0) @map("display_order")
-  version          Int           @default(1)
-  status           ContentStatus @default(DRAFT)
-  publishedAt      DateTime?     @map("published_at")
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
+  id                 String        @id @default(uuid()) @db.Uuid
+  translationGroupId String        @default(uuid()) @map("translation_group_id") @db.Uuid
+  locale             String        @db.VarChar(15)
+  slug               String        @db.VarChar(160)
+  title              String        @db.VarChar(200)
+  excerpt            String        @db.Text
+  body               String        @db.Text
+  seoTitle           String        @map("seo_title") @db.VarChar(70)
+  seoDescription     String        @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath   String        @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex         Boolean       @default(false) @map("seo_no_index")
+  displayOrder       Int           @default(0) @map("display_order")
+  version            Int           @default(1)
+  status             ContentStatus @default(DRAFT)
+  publishedAt        DateTime?     @map("published_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
 
   @@unique([locale, slug])
+  @@unique([translationGroupId, locale])
   @@index([locale, status, displayOrder])
   @@index([status, publishedAt])
   @@map("journal_entries")
 }
 
 model Page {
-  id               String        @id @default(uuid()) @db.Uuid
-  locale           String        @db.VarChar(5)
-  slug             String        @db.VarChar(160)
-  title            String        @db.VarChar(200)
-  eyebrow          String?       @db.VarChar(120)
-  body             String        @db.Text
-  seoTitle         String        @map("seo_title") @db.VarChar(70)
-  seoDescription   String        @map("seo_description") @db.VarChar(170)
-  seoCanonicalPath String        @map("seo_canonical_path") @db.VarChar(2048)
-  seoNoIndex       Boolean       @default(false) @map("seo_no_index")
-  displayOrder     Int           @default(0) @map("display_order")
-  version          Int           @default(1)
-  status           ContentStatus @default(DRAFT)
-  publishedAt      DateTime?     @map("published_at")
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
+  id                 String        @id @default(uuid()) @db.Uuid
+  translationGroupId String        @default(uuid()) @map("translation_group_id") @db.Uuid
+  locale             String        @db.VarChar(15)
+  slug               String        @db.VarChar(160)
+  title              String        @db.VarChar(200)
+  eyebrow            String?       @db.VarChar(120)
+  body               String        @db.Text
+  seoTitle           String        @map("seo_title") @db.VarChar(70)
+  seoDescription     String        @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath   String        @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex         Boolean       @default(false) @map("seo_no_index")
+  displayOrder       Int           @default(0) @map("display_order")
+  version            Int           @default(1)
+  status             ContentStatus @default(DRAFT)
+  publishedAt        DateTime?     @map("published_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
 
   @@unique([locale, slug])
+  @@unique([translationGroupId, locale])
   @@index([locale, status, displayOrder])
   @@index([status, publishedAt])
   @@map("pages")
@@ -340,7 +416,7 @@ model Page {
 
 model NewsArticle {
   id           String        @id @default(uuid()) @db.Uuid
-  locale       String        @db.VarChar(5)
+  locale       String        @db.VarChar(15)
   slug         String        @db.VarChar(160)
   title        String        @db.VarChar(200)
   subtitle     String?       @db.VarChar(300)
@@ -369,32 +445,34 @@ model NewsArticle {
 }
 
 model PressItem {
-  id               String        @id @default(uuid()) @db.Uuid
-  locale           String        @db.VarChar(5)
-  slug             String        @db.VarChar(160)
-  title            String        @db.VarChar(200)
-  subtitle         String?       @db.VarChar(300)
-  description      String        @db.Text
-  content          String?       @db.Text
-  imageUrl         String?       @map("image_url") @db.Text
-  imageAlt         String?       @map("image_alt") @db.VarChar(300)
-  objectKey        String?       @map("object_key") @db.VarChar(1024)
-  outlet           String        @db.VarChar(200)
-  sourceUrl        String        @map("source_url") @db.Text
-  publishedOn      DateTime?     @map("published_on") @db.Date
-  category         PressCategory
-  seoTitle         String?       @map("seo_title") @db.VarChar(70)
-  seoDescription   String?       @map("seo_description") @db.VarChar(170)
-  seoCanonicalPath String?       @map("seo_canonical_path") @db.VarChar(2048)
-  seoNoIndex       Boolean       @default(false) @map("seo_no_index")
-  displayOrder     Int           @default(0) @map("display_order")
-  version          Int           @default(1)
-  status           ContentStatus @default(DRAFT)
-  publishedAt      DateTime?     @map("published_at")
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
+  id                 String        @id @default(uuid()) @db.Uuid
+  translationGroupId String        @default(uuid()) @map("translation_group_id") @db.Uuid
+  locale             String        @db.VarChar(15)
+  slug               String        @db.VarChar(160)
+  title              String        @db.VarChar(200)
+  subtitle           String?       @db.VarChar(300)
+  description        String        @db.Text
+  content            String?       @db.Text
+  imageUrl           String?       @map("image_url") @db.Text
+  imageAlt           String?       @map("image_alt") @db.VarChar(300)
+  objectKey          String?       @map("object_key") @db.VarChar(1024)
+  outlet             String        @db.VarChar(200)
+  sourceUrl          String        @map("source_url") @db.Text
+  publishedOn        DateTime?     @map("published_on") @db.Date
+  category           PressCategory
+  seoTitle           String?       @map("seo_title") @db.VarChar(70)
+  seoDescription     String?       @map("seo_description") @db.VarChar(170)
+  seoCanonicalPath   String?       @map("seo_canonical_path") @db.VarChar(2048)
+  seoNoIndex         Boolean       @default(false) @map("seo_no_index")
+  displayOrder       Int           @default(0) @map("display_order")
+  version            Int           @default(1)
+  status             ContentStatus @default(DRAFT)
+  publishedAt        DateTime?     @map("published_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
 
   @@unique([locale, slug])
+  @@unique([translationGroupId, locale])
   @@index([locale, status, displayOrder])
   @@index([status, publishedAt])
   @@map("press_items")
@@ -402,7 +480,7 @@ model PressItem {
 
 model Testimonial {
   id           String              @id @default(uuid()) @db.Uuid
-  locale       String              @db.VarChar(5)
+  locale       String              @db.VarChar(15)
   name         String              @db.VarChar(120)
   title        String              @db.VarChar(180)
   company      String?             @db.VarChar(150)
@@ -426,7 +504,7 @@ model Testimonial {
 
 model WorkshopItem {
   id              String        @id @default(uuid()) @db.Uuid
-  locale          String        @db.VarChar(5)
+  locale          String        @db.VarChar(15)
   slug            String        @db.VarChar(160)
   title           String        @db.VarChar(200)
   description     String        @db.Text
@@ -451,7 +529,7 @@ model WorkshopItem {
 
 model Memory {
   id           String        @id @default(uuid()) @db.Uuid
-  locale       String        @db.VarChar(5)
+  locale       String        @db.VarChar(15)
   slug         String        @db.VarChar(160)
   title        String        @db.VarChar(160)
   description  String        @db.Text
@@ -473,7 +551,7 @@ model Memory {
 
 model ArtistStat {
   id           String        @id @default(uuid()) @db.Uuid
-  locale       String        @db.VarChar(5)
+  locale       String        @db.VarChar(15)
   value        String        @db.VarChar(40)
   label        String        @db.VarChar(100)
   description  String        @db.VarChar(500)
@@ -490,7 +568,7 @@ model ArtistStat {
 
 model ContactInfo {
   id           String   @id @default(uuid()) @db.Uuid
-  locale       String   @unique @db.VarChar(5)
+  locale       String   @unique @db.VarChar(15)
   email        String   @db.VarChar(320)
   phone        String   @db.VarChar(40)
   address      String   @db.VarChar(500)
@@ -511,7 +589,7 @@ model Feedback {
   email             String         @db.VarChar(320)
   subject           String         @db.VarChar(200)
   message           String         @db.Text
-  locale            String         @db.VarChar(5)
+  locale            String         @db.VarChar(15)
   rating            Int?
   source            String         @default("contact-form") @db.VarChar(80)
   status            FeedbackStatus @default(NEW)
@@ -532,7 +610,7 @@ model Feedback {
 model NewsletterSubscriber {
   id                    String           @id @default(uuid()) @db.Uuid
   email                 String           @unique @db.VarChar(320)
-  locale                String           @db.VarChar(5)
+  locale                String           @db.VarChar(15)
   source                String           @db.VarChar(80)
   status                NewsletterStatus @default(PENDING)
   consentedAt           DateTime         @map("consented_at")
@@ -551,7 +629,9 @@ model MediaObject {
   id                String                  @id @default(uuid()) @db.Uuid
   provider          String                  @default("garage") @db.VarChar(32)
   objectKey         String                  @unique @map("object_key") @db.VarChar(1024)
+  folderId          String?                 @map("folder_id") @db.Uuid
   filename          String                  @db.VarChar(255)
+  displayName       String                  @map("display_name") @db.VarChar(255)
   originalFilename  String                  @map("original_filename") @db.VarChar(255)
   mimeType          String                  @map("mime_type") @db.VarChar(127)
   sizeBytes         Int                     @map("size_bytes")
@@ -560,17 +640,39 @@ model MediaObject {
   height            Int?
   visibility        MediaVisibility         @default(PRIVATE)
   status            MediaStatus             @default(UPLOADING)
+  version           Int                     @default(1)
   uploadedByUserId  String?                 @map("uploaded_by_user_id") @db.Uuid
   createdAt         DateTime                @default(now()) @map("created_at")
   updatedAt         DateTime                @updatedAt @map("updated_at")
   uploadedByUser    User?                   @relation("MediaObjectUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
   instagramPosts    InstagramPost[]
   contentPlacements ContentMediaPlacement[]
+  folder            MediaFolder?            @relation(fields: [folderId], references: [id], onDelete: Restrict)
 
   @@index([status, createdAt])
   @@index([visibility, status])
   @@index([checksumSha256])
+  @@index([folderId, createdAt])
   @@map("media_objects")
+}
+
+model MediaFolder {
+  id             String        @id @default(uuid()) @db.Uuid
+  parentId       String?       @map("parent_id") @db.Uuid
+  name           String        @db.VarChar(120)
+  normalizedName String        @map("normalized_name") @db.VarChar(120)
+  version        Int           @default(1)
+  createdById    String?       @map("created_by_id") @db.Uuid
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  parent         MediaFolder?  @relation("MediaFolderTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children       MediaFolder[] @relation("MediaFolderTree")
+  mediaObjects   MediaObject[]
+  createdBy      User?         @relation("MediaFolderCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([parentId, normalizedName])
+  @@index([createdById])
+  @@map("media_folders")
 }
 
 model ContentMediaPlacement {
@@ -599,7 +701,7 @@ model ContentRevision {
   id               String                   @id @default(uuid()) @db.Uuid
   entityType       EditorialEntityType      @map("entity_type")
   entityId         String                   @map("entity_id") @db.Uuid
-  locale           String                   @db.VarChar(5)
+  locale           String                   @db.VarChar(15)
   version          Int
   operation        ContentRevisionOperation
   snapshot         Json
@@ -622,7 +724,7 @@ model Inquiry {
   submissionId         String                @unique @map("submission_id") @db.Uuid
   type                 InquiryType
   status               InquiryStatus         @default(NEW)
-  locale               String                @db.VarChar(5)
+  locale               String                @db.VarChar(15)
   name                 String                @db.VarChar(120)
   email                String                @db.VarChar(320)
   phone                String?               @db.VarChar(40)
@@ -640,7 +742,7 @@ model Inquiry {
   relatedArtworkTitle  String?               @map("related_artwork_title") @db.VarChar(200)
   relatedArtworkSlug   String?               @map("related_artwork_slug") @db.VarChar(160)
   relatedArtworkYear   Int?                  @map("related_artwork_year")
-  relatedArtworkLocale String?               @map("related_artwork_locale") @db.VarChar(5)
+  relatedArtworkLocale String?               @map("related_artwork_locale") @db.VarChar(15)
   labels               String[]              @default([])
   purgeAfter           DateTime?             @map("erase_personal_data_after")
   createdAt            DateTime              @default(now()) @map("created_at")
@@ -811,17 +913,4 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
-}
-
-model PasswordResetToken {
-  id         String    @id @default(cuid())
-  userId     String    @db.Uuid
-  tokenHash  String    @unique
-  expiresAt  DateTime
-  usedAt     DateTime?
-  created_at DateTime  @default(now())
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, expiresAt])
-  @@map("password_reset_tokens")
 }

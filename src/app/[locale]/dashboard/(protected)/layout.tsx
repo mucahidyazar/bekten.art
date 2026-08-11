@@ -1,22 +1,10 @@
-import Link from 'next/link'
 import {redirect} from 'next/navigation'
 
+import {StudioShell} from '@/components/studio/studio-shell'
 import {requireStudioEditor} from '@/server/studio-auth/configured-access'
 import {isStudioOwnerRole} from '@/server/studio-auth/roles'
 
 import type {ReactNode} from 'react'
-
-const editorialNavigation = [
-  {href: '/dashboard', label: 'Overview'},
-  {href: '/dashboard/artworks', label: 'Artworks'},
-  {href: '/dashboard/collections', label: 'Collections'},
-  {href: '/dashboard/exhibitions', label: 'Exhibitions'},
-  {href: '/dashboard/journal', label: 'Journal'},
-  {href: '/dashboard/pages', label: 'Pages'},
-  {href: '/dashboard/press', label: 'Press'},
-  {href: '/dashboard/inquiries', label: 'Inquiries'},
-  {href: '/dashboard/media', label: 'Media'},
-] as const
 
 export const dynamic = 'force-dynamic'
 
@@ -40,58 +28,6 @@ export default async function StudioProtectedLayout({
   }
 
   return (
-    <div className="min-h-dvh bg-[#eee6d5] text-stone-950">
-      <a
-        className="sr-only z-50 bg-stone-950 px-4 py-3 text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
-        href="#studio-content"
-      >
-        Skip to Studio content
-      </a>
-      <header className="border-b border-stone-400/60 bg-[#f8f2e6] px-6 py-5">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-6">
-          <Link
-            className="font-serif text-2xl tracking-tight"
-            href="/dashboard"
-          >
-            Bekten Studio
-          </Link>
-          <p className="text-xs font-semibold tracking-[0.2em] text-red-900 uppercase">
-            Private editorial workspace
-          </p>
-        </div>
-      </header>
-      <div className="mx-auto grid max-w-7xl gap-8 px-6 py-8 md:grid-cols-[13rem_1fr]">
-        <nav
-          aria-label="Studio"
-          className="overflow-x-auto md:sticky md:top-8 md:self-start"
-        >
-          <ul className="flex min-w-max gap-1 md:grid md:min-w-0">
-            {editorialNavigation.map(item => (
-              <li key={item.href}>
-                <Link
-                  className="block border-l-2 border-transparent px-4 py-3 font-medium transition hover:border-red-900 hover:bg-white/40 focus-visible:border-red-900 focus-visible:bg-white/40 focus-visible:outline-none"
-                  href={item.href}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-            {isStudioOwnerRole(user.role) ? (
-              <li className="mt-0 border-stone-400/60 md:mt-4 md:border-t md:pt-4">
-                <Link
-                  className="block border-l-2 border-transparent px-4 py-3 font-medium transition hover:border-red-900 hover:bg-white/40 focus-visible:border-red-900 focus-visible:bg-white/40 focus-visible:outline-none"
-                  href="/dashboard/operations"
-                >
-                  Operations
-                </Link>
-              </li>
-            ) : null}
-          </ul>
-        </nav>
-        <main id="studio-content" tabIndex={-1}>
-          {children}
-        </main>
-      </div>
-    </div>
+    <StudioShell owner={isStudioOwnerRole(user.role)}>{children}</StudioShell>
   )
 }

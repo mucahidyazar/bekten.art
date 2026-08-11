@@ -73,7 +73,7 @@ function resendApiKeyIssue(environment: Environment) {
 }
 
 function resendWebhookSecretIssue(environment: Environment) {
-  return /^whsec_[A-Za-z0-9+/]{8,}={0,2}$/u.test(
+  return /^whsec_[A-Za-z0-9+/_-]{8,}={0,2}$/u.test(
     value(environment, 'RESEND_WEBHOOK_SECRET'),
   )
     ? null

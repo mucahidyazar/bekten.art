@@ -16,7 +16,9 @@ const input = {
   },
 }
 
-function databaseWithUser(user: {id: string; role: string} | null) {
+function databaseWithUser(
+  user: {id: string; role: string; studioStatus: string} | null,
+) {
   const transaction = {
     auditEvent: {create: vi.fn().mockResolvedValue({id: 'audit-1'})},
     outboxJob: {create: vi.fn().mockResolvedValue({id: 'job-1'})},
@@ -37,6 +39,7 @@ describe('database Studio magic-link store', () => {
       const {database, transaction} = databaseWithUser({
         id: '11111111-1111-4111-8111-111111111111',
         role,
+        studioStatus: 'ACTIVE',
       })
       const store = createDatabaseStudioMagicLinkStore(database)
 
@@ -88,6 +91,20 @@ describe('database Studio magic-link store', () => {
     const {database, transaction} = databaseWithUser({
       id: 'user-1',
       role: 'USER',
+      studioStatus: 'ACTIVE',
+    })
+    const store = createDatabaseStudioMagicLinkStore(database)
+
+    await expect(store.queue(input)).resolves.toEqual({accepted: false})
+    expect(transaction.verificationToken.create).not.toHaveBeenCalled()
+    expect(transaction.outboxJob.create).not.toHaveBeenCalled()
+  })
+
+  it('does not issue a magic link to a suspended editor', async () => {
+    const {database, transaction} = databaseWithUser({
+      id: '11111111-1111-4111-8111-111111111111',
+      role: 'EDITOR',
+      studioStatus: 'SUSPENDED',
     })
     const store = createDatabaseStudioMagicLinkStore(database)
 

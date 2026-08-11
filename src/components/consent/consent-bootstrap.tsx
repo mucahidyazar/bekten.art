@@ -1,49 +1,52 @@
-import {CONSENT_STORAGE_KEY, CONSENT_VERSION} from './model'
+import {type ConsentDecision, toGoogleConsentState} from './model'
 
-type ConsentBootstrapProps = {
-  nonce?: string
+const defaultConsentState = Object.freeze({
+  ad_personalization: 'denied',
+  ad_storage: 'denied',
+  ad_user_data: 'denied',
+  analytics_storage: 'denied',
+  functionality_storage: 'denied',
+  personalization_storage: 'denied',
+  security_storage: 'granted',
+  wait_for_update: 500,
+})
+
+function hasGtmBootstrap(dataLayer: readonly unknown[]) {
+  return dataLayer.some(
+    item =>
+      item !== null &&
+      typeof item === 'object' &&
+      !Array.isArray(item) &&
+      'event' in item &&
+      item.event === 'gtm.js' &&
+      'bektenConsentBootstrap' in item &&
+      item.bektenConsentBootstrap === true,
+  )
 }
 
-const bootstrapSource = `(function(w){
-  w.dataLayer=w.dataLayer||[];
-  w.gtag=w.gtag||function(){w.dataLayer.push(arguments);};
-  var g=w.gtag;
-  g('consent','default',{
-    ad_storage:'denied',
-    analytics_storage:'denied',
-    ad_user_data:'denied',
-    ad_personalization:'denied',
-    functionality_storage:'denied',
-    personalization_storage:'denied',
-    security_storage:'granted',
-    wait_for_update:500
-  });
-  g('set','ads_data_redaction',true);
-  g('set','url_passthrough',false);
-  try {
-    var raw=w.localStorage.getItem('${CONSENT_STORAGE_KEY}');
-    var c=raw?JSON.parse(raw):null;
-    if(c&&c.version===${CONSENT_VERSION}&&typeof c.analytics==='boolean'&&typeof c.marketing==='boolean'&&typeof c.externalMedia==='boolean'){
-      g('consent','update',{
-        ad_storage:c.marketing?'granted':'denied',
-        analytics_storage:c.analytics?'granted':'denied',
-        ad_user_data:c.marketing?'granted':'denied',
-        ad_personalization:c.marketing?'granted':'denied',
-        functionality_storage:c.externalMedia?'granted':'denied',
-        personalization_storage:c.marketing?'granted':'denied',
-        security_storage:'granted'
-      });
-    }
-  } catch(e) {}
-  w.dataLayer.push({'gtm.start':new Date().getTime(),event:'gtm.js'});
-})(window);`
+export function initializeGoogleConsent(decision?: ConsentDecision | null) {
+  const dataLayer = (window.dataLayer ??= [])
+  const alreadyInitialized = hasGtmBootstrap(dataLayer)
 
-export function ConsentBootstrap({nonce}: ConsentBootstrapProps) {
-  return (
-    <script
-      id="consent-mode-bootstrap"
-      nonce={nonce}
-      dangerouslySetInnerHTML={{__html: bootstrapSource}}
-    />
-  )
+  window.gtag ??= (...arguments_) => {
+    window.dataLayer?.push(arguments_)
+  }
+
+  if (!alreadyInitialized) {
+    window.gtag('consent', 'default', defaultConsentState)
+    window.gtag('set', 'ads_data_redaction', true)
+    window.gtag('set', 'url_passthrough', false)
+  }
+
+  if (decision) {
+    window.gtag('consent', 'update', toGoogleConsentState(decision))
+  }
+
+  if (!alreadyInitialized) {
+    dataLayer.push({
+      bektenConsentBootstrap: true,
+      event: 'gtm.js',
+      'gtm.start': Date.now(),
+    })
+  }
 }

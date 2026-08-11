@@ -22,16 +22,16 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata({
   params,
 }: CollectionsPageProps): Promise<Metadata> {
-  const {locale} = await parsePublicParams(params)
-  const copy = publicRouteCopy[locale].collections
+  const {contentLocale, locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[contentLocale].collections
 
   return listMetadata(locale, 'collections', copy.title, copy.intro)
 }
 
 export default async function CollectionsPage({params}: CollectionsPageProps) {
-  const {locale} = await parsePublicParams(params)
-  const copy = publicRouteCopy[locale].collections
-  const collections = await publicEditorialReader.listCollections(locale)
+  const {contentLocale, locale} = await parsePublicParams(params)
+  const copy = publicRouteCopy[contentLocale].collections
+  const collections = await publicEditorialReader.listCollections(contentLocale)
   const [featured, ...archive] = collections
 
   return (
@@ -45,24 +45,26 @@ export default async function CollectionsPage({params}: CollectionsPageProps) {
         }
         actionLabel={
           featured
-            ? publicRouteCopy[locale].viewCollection
-            : publicRouteCopy[locale].collectionArchive
+            ? publicRouteCopy[contentLocale].viewCollection
+            : publicRouteCopy[contentLocale].collectionArchive
         }
         illustration="collection"
+        titleDensity="compact"
       />
       <PublicArchiveSection id="collection-archive" light>
         {featured ? (
           <>
             <section
-              aria-label={publicRouteCopy[locale].featuredCollection}
+              aria-label={publicRouteCopy[contentLocale].featuredCollection}
               className={styles.featuredRegion}
             >
               <PublicEditorialCard
-                actionLabel={publicRouteCopy[locale].viewCollection}
+                actionLabel={publicRouteCopy[contentLocale].viewCollection}
                 description={featured.description}
                 eyebrow={copy.kicker}
                 href={localizedPath(locale, `/collections/${featured.slug}`)}
                 media={heroMedia(featured)}
+                publicKey={featured.slug}
                 title={featured.title}
                 variant="featured"
               />
@@ -71,12 +73,12 @@ export default async function CollectionsPage({params}: CollectionsPageProps) {
               <div className={styles.section}>
                 <div className={styles.sectionHeader}>
                   <h2 className={styles.sectionTitle}>
-                    {publicRouteCopy[locale].collectionArchive}
+                    {publicRouteCopy[contentLocale].collectionArchive}
                   </h2>
                 </div>
                 <PublicEditorialList
-                  accessibleName={publicRouteCopy[locale].collectionArchive}
-                  actionLabel={publicRouteCopy[locale].viewCollection}
+                  accessibleName={publicRouteCopy[contentLocale].collectionArchive}
+                  actionLabel={publicRouteCopy[contentLocale].viewCollection}
                   empty={copy.empty}
                   items={archive.map(collection => ({
                     description: collection.description,
@@ -87,6 +89,7 @@ export default async function CollectionsPage({params}: CollectionsPageProps) {
                     ),
                     id: collection.id,
                     media: heroMedia(collection),
+                    publicKey: collection.slug,
                     title: collection.title,
                   }))}
                 />

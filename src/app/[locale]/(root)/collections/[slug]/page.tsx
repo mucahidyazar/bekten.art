@@ -29,26 +29,28 @@ const readPublishedCollection = cache(
 )
 
 async function readCollection(params: CollectionDetailPageProps['params']) {
-  const {locale, slug} = await parsePublicParams(params, {slug: true})
-  const detail = await readPublishedCollection(locale, slug)
+  const {contentLocale, locale, slug} = await parsePublicParams(params, {
+    slug: true,
+  })
+  const detail = await readPublishedCollection(contentLocale, slug)
 
   if (!detail) return notFound()
 
-  return {detail, locale}
+  return {contentLocale, detail, locale}
 }
 
 export async function generateMetadata({
   params,
 }: CollectionDetailPageProps): Promise<Metadata> {
-  const {detail, locale} = await readCollection(params)
+  const {contentLocale, detail, locale} = await readCollection(params)
 
-  return editorialMetadata(detail.collection.seo, locale)
+  return editorialMetadata(detail.collection.seo, locale, contentLocale)
 }
 
 export default async function CollectionDetailPage({
   params,
 }: CollectionDetailPageProps) {
-  const {detail, locale} = await readCollection(params)
+  const {contentLocale, detail, locale} = await readCollection(params)
   const {collection, works} = detail
   const media = heroMedia(collection)
   const headingId = 'collection-works-title'
@@ -58,12 +60,13 @@ export default async function CollectionDetailPage({
       <article>
         <PublicPageIntro
           intro={collection.description}
-          kicker={publicRouteCopy[locale].collections.kicker}
+          kicker={publicRouteCopy[contentLocale].collections.kicker}
           media={media}
           title={collection.title}
+          transitionKey={collection.slug}
         />
         <section
-          aria-label={publicRouteCopy[locale].collectionNote}
+          aria-label={publicRouteCopy[contentLocale].collectionNote}
           className={styles.collectionNote}
         >
           <div className={styles.sectionInner}>
@@ -73,7 +76,7 @@ export default async function CollectionDetailPage({
         <PublicArchiveSection labelledBy={headingId} light>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle} id={headingId}>
-              {publicRouteCopy[locale].collectionWorks}
+              {publicRouteCopy[contentLocale].collectionWorks}
             </h2>
             <p className={styles.sectionCount}>
               {String(works.length).padStart(2, '0')}
@@ -82,7 +85,7 @@ export default async function CollectionDetailPage({
           {works.length > 0 ? (
             <PublicArtworkGrid locale={locale} works={works} />
           ) : (
-            <p role="status">{publicRouteCopy[locale].works.empty}</p>
+            <p role="status">{publicRouteCopy[contentLocale].works.empty}</p>
           )}
         </PublicArchiveSection>
       </article>

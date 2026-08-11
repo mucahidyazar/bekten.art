@@ -227,6 +227,20 @@ describe('database inquiry persistence', () => {
     })
   })
 
+  it('matches the database limit of at most twenty inquiry labels', async () => {
+    const configured = fixture()
+
+    await expect(
+      configured.persistence.unitOfWork.execute(transaction =>
+        configured.persistence.management.replaceLabels(transaction, {
+          inquiryId,
+          labels: Array.from({length: 21}, (_, index) => `label-${index}`),
+        }),
+      ),
+    ).rejects.toThrow()
+    expect(configured.transaction.inquiry.update).not.toHaveBeenCalled()
+  })
+
   it('rejects transaction tokens created by a different persistence boundary', async () => {
     const first = fixture()
     const second = fixture()
