@@ -27,9 +27,7 @@ export function createPrismaPublicEditorialDatabase(
 ): PublicEditorialDatabase {
   return Object.freeze({
     $transaction<Result>(
-      callback: (
-        transaction: PublicEditorialTransaction,
-      ) => Promise<Result>,
+      callback: (transaction: PublicEditorialTransaction) => Promise<Result>,
     ) {
       return client.$transaction(async transaction =>
         callback({

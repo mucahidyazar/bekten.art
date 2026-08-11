@@ -62,30 +62,46 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 
 ## 5. Public editorial heritage deneyimi
 
-- [ ] Tasarım tokenları, tipografi, parşömen/grain ve responsive grid'i uygula
-- [ ] Header, footer ve locale-aware navigasyonu yeniden tasarla
-- [ ] Home sayfasını geliştir
-- [ ] Collections ve collection detail sayfalarını geliştir
-- [ ] Works, available works ve work detail sayfalarını geliştir
-- [ ] Exhibitions ve exhibition detail sayfalarını geliştir
-- [ ] Artist, studio ve archive sayfalarını geliştir
-- [ ] Journal, journal detail ve press sayfalarını geliştir
-- [ ] Collectors, commission ve private-viewings sayfalarını geliştir
-- [ ] Availability, commission ve private-viewings formlarını geliştir
-- [ ] Demo içeriğin Studio'dan tamamen değiştirilebilir olduğunu doğrula
+- [x] Yirmi referans ekranını route ve reusable layout primitive'lerine eşle
+- [x] Tasarım tokenları, tipografi, parşömen/grain ve responsive grid'i
+      referanslara birebir yaklaştır
+- [x] Gerçek eski logoyu header ve ilgili footer yüzeylerine yerleştir
+- [x] Header, footer ve locale-aware navigasyonu referans stilinde tamamla
+- [x] Home sayfasını referans kompozisyonuna göre tamamla
+- [x] Collections ve collection detail sayfalarını referans kompozisyonuna göre
+      tamamla
+- [x] Works, available works ve work detail sayfalarını referans kompozisyonuna
+      göre tamamla
+- [x] Exhibitions ve exhibition detail sayfalarını referans kompozisyonuna göre
+      tamamla
+- [x] Artist, studio ve archive sayfalarını referans kompozisyonuna göre tamamla
+- [x] Journal, journal detail ve press sayfalarını referans kompozisyonuna göre
+      tamamla
+- [x] Collectors, commission ve private-viewings sayfalarını referans
+      kompozisyonuna göre tamamla
+- [x] Availability, commission ve private-viewings formlarını referans
+      kompozisyonuna göre tamamla
+- [x] Demo içeriğin Studio'dan tamamen değiştirilebilir olduğunu doğrula
+- [x] GPT Image 2 demo eserlerini optimize et ve deterministik Studio seed'ine
+      bağla
 
 ## 6. Kalite ve production
 
 - [x] Inquiry ve Resend outbox akışını idempotent tamamla
 - [x] Garage private/public medya güvenlik sınırlarını doğrula
-- [ ] Dört locale çeviri, canonical, hreflang, sitemap ve structured data'yı
+- [x] Coolify envanterinde PocketBase bulunmadığını ve `garage-s3` servisinin
+      çalıştığını doğrula
+- [x] Dört locale çeviri, canonical, hreflang, sitemap ve structured data'yı
       tamamla
-- [ ] WCAG 2.1 AA, keyboard, focus, contrast ve reduced-motion testlerini geçir
-- [ ] Analytics consent ve hassas URL redaction'ını doğrula
-- [ ] Unit/integration coverage'i tüm metriklerde en az `%80` geçir
+- [x] İngilizce prefixsiz default route ve `/en/**` kalıcı redirect sözleşmesini
+      tamamla
+- [x] WCAG 2.1 AA, keyboard, focus, contrast ve reduced-motion testlerini geçir
+- [x] Analytics consent ve hassas URL redaction'ını doğrula
+- [x] Unit/integration coverage'i tüm metriklerde en az `%80` geçir
 - [ ] Kritik Playwright E2E akışlarını geçir
 - [ ] Lint, typecheck, test, coverage, build, audit ve Docker readiness'i geçir
 - [ ] Coolify migration, env, deploy, health ve readiness doğrulamasını tamamla
-- [ ] Geçici `backup/` klasörünü tamamen sil
+- [ ] Garage'a V2 demo varlıklarını yükle ve Studio seed operasyonunu doğrula
+- [x] Geçici `backup/` klasörünü tamamen sil
 - [ ] Requirement-by-requirement final audit yap
 - [ ] V2 goal'ünü yalnız bütün kanıtlar tamamlandığında kapat

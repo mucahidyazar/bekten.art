@@ -15,6 +15,29 @@ const HREFLANG_BY_LOCALE: Record<AppLocale, string> = {
   ky: 'ky-KG',
 }
 
+const NON_PARALLEL_DETAIL_ROOTS = new Set([
+  'collections',
+  'exhibitions',
+  'journal',
+  'press',
+  'works',
+])
+const ROUTES_WITH_METADATA_CANONICAL = new Set([
+  'archive',
+  'artist',
+  'available-works',
+  'collections',
+  'collectors',
+  'commission-a-work',
+  'contact',
+  'exhibitions',
+  'journal',
+  'press',
+  'private-viewings',
+  'studio',
+  'works',
+])
+
 interface HrefLangProps {
   locales?: readonly string[]
   defaultLocale?: AppLocale
@@ -47,16 +70,22 @@ function buildLocalizedLinks(
 ) {
   const {locale, publicPath} = getLocalizedRoute(pathname)
   const urls = localizedAlternates(baseUrl, publicPath)
+  const publicSegments = publicPath.split('/').filter(Boolean)
+  const hasUnverifiedLocalizedSlug =
+    publicSegments.length > 1 &&
+    NON_PARALLEL_DETAIL_ROOTS.has(publicSegments[0] ?? '')
 
   return {
     canonical: urls[locale],
-    alternates: [
-      ...locales.map(currentLocale => ({
-        hrefLang: HREFLANG_BY_LOCALE[currentLocale],
-        href: urls[currentLocale],
-      })),
-      {hrefLang: 'x-default', href: urls[defaultLocale]},
-    ],
+    alternates: hasUnverifiedLocalizedSlug
+      ? []
+      : [
+          ...locales.map(currentLocale => ({
+            hrefLang: HREFLANG_BY_LOCALE[currentLocale],
+            href: urls[currentLocale],
+          })),
+          {hrefLang: 'x-default', href: urls[defaultLocale]},
+        ],
   }
 }
 
@@ -75,10 +104,16 @@ export function HrefLang({
     supportedLocales,
     defaultLocale,
   )
+  const {publicPath} = getLocalizedRoute(pathname)
+  const routeRoot = publicPath.split('/').filter(Boolean)[0]
+  const hasMetadataCanonical =
+    routeRoot !== undefined && ROUTES_WITH_METADATA_CANONICAL.has(routeRoot)
 
   return (
     <>
-      <link rel="canonical" href={links.canonical} />
+      {hasMetadataCanonical ? null : (
+        <link rel="canonical" href={links.canonical} />
+      )}
       {links.alternates.map(alternate => (
         <link
           key={alternate.hrefLang}

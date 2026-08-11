@@ -13,4 +13,10 @@ describe('legacy about route', () => {
 
     expect(permanentRedirect).toHaveBeenCalledWith('/ky/artist')
   })
+
+  it('redirects legacy English routes to the prefixless V2 route', async () => {
+    await AboutPage({params: Promise.resolve({locale: 'en'})})
+
+    expect(permanentRedirect).toHaveBeenLastCalledWith('/artist')
+  })
 })

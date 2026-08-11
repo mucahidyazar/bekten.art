@@ -226,6 +226,7 @@ describe('Studio editorial actions', () => {
         entityId: '00000000-0000-4000-8000-000000000002',
         entityType: 'ARTWORK',
         expectedVersion: 4,
+        revalidationPaths: ['/', '/works', '/works/winter-light'],
       }),
     )
   })

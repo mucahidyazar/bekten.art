@@ -40,5 +40,5 @@
     "**/*.d.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "taxonomy", "backup"]
+  "exclude": ["node_modules", "taxonomy"]
 }

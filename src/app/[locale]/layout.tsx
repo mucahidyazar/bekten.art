@@ -15,9 +15,9 @@ import {
   ConsentProvider,
 } from '@/components/consent/consent-provider'
 import {GoogleTagManager} from '@/components/lib/google-tag-manager'
-import {QueryProvider} from '@/components/providers/query-provider'
-import {ThemeProvider} from '@/components/providers/theme-provider'
+import {publicLocale} from '@/components/public-site/public-copy'
 import {HrefLang} from '@/components/seo/hreflang'
+import {getSiteIdentity, SITE_NAME} from '@/components/seo/site-identity'
 import {
   OrganizationStructuredData,
   PersonStructuredData,
@@ -30,8 +30,12 @@ import {prepareMetadata} from '@/utils/prepare-metadata'
 
 import {resolveMessagesLocale} from '../../../i18n'
 
-export async function generateMetadata(): Promise<Metadata> {
-  return prepareMetadata()
+export async function generateMetadata({
+  params,
+}: Pick<LayoutProps, 'params'>): Promise<Metadata> {
+  const locale = publicLocale((await params).locale)
+
+  return prepareMetadata({contentLocale: locale})
 }
 
 async function getMessages(locale: string) {
@@ -54,8 +58,10 @@ type LayoutProps = {
 }
 export default async function RootLayout({children, params}: LayoutProps) {
   const [{locale}, requestHeaders] = await Promise.all([params, headers()])
-  const messages = await getMessages(locale)
+  const currentLocale = publicLocale(locale)
+  const messages = await getMessages(currentLocale)
   const nonce = requestHeaders.get('x-nonce') ?? undefined
+  const identity = getSiteIdentity(currentLocale)
 
   // Determine domain for structured data
   const domain =
@@ -66,7 +72,7 @@ export default async function RootLayout({children, params}: LayoutProps) {
 
   return (
     <ViewTransitions>
-      <html lang={locale} suppressHydrationWarning>
+      <html lang={currentLocale} suppressHydrationWarning>
         <head>
           <ConsentBootstrap nonce={nonce} />
 
@@ -74,23 +80,13 @@ export default async function RootLayout({children, params}: LayoutProps) {
           <HrefLang locales={LOCALES} defaultLocale="en" />
         </head>
         <body
-          className="font-editorial bg-background flex flex-col overflow-x-hidden"
+          className="bg-background text-foreground overflow-x-hidden"
           suppressHydrationWarning
         >
-          <NextIntlClientProvider locale={locale} messages={messages}>
+          <NextIntlClientProvider locale={currentLocale} messages={messages}>
             <ConsentProvider>
-              <QueryProvider>
-                <ThemeProvider
-                  attribute="class"
-                  defaultTheme="light"
-                  enableSystem
-                  nonce={nonce}
-                  themes={['light', 'dark', 'navy', 'system']}
-                >
-                  {children}
-                  <ConsentManager />
-                </ThemeProvider>
-              </QueryProvider>
+              {children}
+              <ConsentManager />
 
               <Suspense>
                 <GoogleTagManager nonce={nonce} />
@@ -104,31 +100,24 @@ export default async function RootLayout({children, params}: LayoutProps) {
           <PersonStructuredData
             name={ME.fullName}
             alternateName="Bekten"
-            description={ME.description}
+            description={identity.artistDescription}
             url={domain}
             image={`${domain}/me.jpg`}
-            jobTitle={ME.job}
+            jobTitle={identity.jobTitle}
             nationality="Kyrgyzstani"
             birthPlace="Kyrgyzstan"
-            sameAs={[
-              `https://instagram.com/${ME.social.instagram}`,
-              `https://wa.me/${ME.social.whatsapp}`,
-            ]}
+            sameAs={[`https://instagram.com/${ME.social.instagram}`]}
           />
           <OrganizationStructuredData
-            name={ME.company.name}
-            description="Contemporary art gallery and workshop by Bekten Usubaliev"
+            name="Bekten Studio"
+            description={identity.organizationDescription}
             url={domain}
-            logo={`${domain}/logo.svg`}
+            logo={`${domain}/svg/full-logo.svg`}
             sameAs={[`https://instagram.com/${ME.social.instagram}`]}
-            contactPoint={{
-              telephone: `+${ME.social.phone}`,
-              contactType: 'customer service',
-            }}
           />
           <WebsiteStructuredData
-            name={`${ME.fullName} - Artist Portfolio`}
-            description={ME.description}
+            name={SITE_NAME}
+            description={identity.siteDescription}
             url={domain}
           />
         </body>

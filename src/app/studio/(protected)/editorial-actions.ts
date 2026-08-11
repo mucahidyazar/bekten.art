@@ -6,6 +6,7 @@ import {redirect} from 'next/navigation'
 
 import {z} from 'zod'
 
+import {localizedPath} from '@/lib/localized-path'
 import {editorialContentRepository} from '@/server/editorial-persistence/configured-content'
 import {editorialPublishingService} from '@/server/editorial-persistence/configured-publishing'
 import {EditorialVersionConflictError} from '@/server/editorial-publishing'
@@ -107,12 +108,16 @@ function revalidationPaths(
     PRESS_ENTRY: 'press',
   } satisfies Readonly<Record<EditorialEntityType, string>>
   const segment = publicSegments[entityType]
+  const indexPath = entityType === 'PAGE' ? '/' : `/${segment}`
+  const detailPath = entityType === 'PAGE' ? `/${slug}` : `/${segment}/${slug}`
 
-  return [
-    `/${locale}`,
-    `/${locale}/${segment}`,
-    `/${locale}/${segment}/${slug}`,
-  ]
+  return Array.from(
+    new Set([
+      localizedPath(locale, '/'),
+      localizedPath(locale, indexPath),
+      localizedPath(locale, detailPath),
+    ]),
+  )
 }
 
 function validationState(error: z.ZodError): StudioActionState {

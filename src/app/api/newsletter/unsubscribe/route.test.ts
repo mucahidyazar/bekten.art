@@ -44,6 +44,18 @@ describe('/api/newsletter/unsubscribe', () => {
     )
   })
 
+  it('GET keeps the default English unsubscribe UI prefixless', async () => {
+    const response = await GET(
+      new Request(
+        `https://bekten.art/api/newsletter/unsubscribe?token=${token}`,
+      ),
+    )
+
+    expect(response.headers.get('location')).toBe(
+      'https://bekten.art/newsletter-preferences?action=newsletter-unsubscribe',
+    )
+  })
+
   it('POST consumes the staged token and returns the same result on replay', async () => {
     const first = await POST(mutation())
 
@@ -52,10 +64,10 @@ describe('/api/newsletter/unsubscribe', () => {
 
     expect(mocks.unsubscribe).toHaveBeenCalledTimes(2)
     expect(first.headers.get('location')).toBe(
-      'https://bekten.art/en?newsletter=unsubscribed',
+      'https://bekten.art/?newsletter=unsubscribed',
     )
     expect(replay.headers.get('location')).toBe(
-      'https://bekten.art/en?newsletter=unsubscribed',
+      'https://bekten.art/?newsletter=unsubscribed',
     )
   })
 

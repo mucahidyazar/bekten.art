@@ -3,9 +3,15 @@ import {expect, test} from '@playwright/test'
 import {scanForWcagAaViolations} from './helpers/accessibility'
 
 const publicRoutes = [
-  {name: 'home', path: '/en'},
-  {name: 'contact', path: '/en/contact'},
-  {name: 'news', path: '/en/news'},
+  {name: 'home', path: '/'},
+  {name: 'works', path: '/works'},
+  {name: 'available works', path: '/available-works'},
+  {name: 'collections', path: '/collections'},
+  {name: 'exhibitions', path: '/exhibitions'},
+  {name: 'journal', path: '/journal'},
+  {name: 'press', path: '/press'},
+  {name: 'archive', path: '/archive'},
+  {name: 'contact', path: '/contact'},
 ] as const
 
 test.describe('WCAG 2.1 AA public-page smoke', () => {

@@ -8,12 +8,8 @@ function normalizePathname(pathname: string) {
   }
 
   const [pathOnly] = pathname.split(/[?#]/u, 1)
-  const withLeadingSlash = pathOnly.startsWith('/')
-    ? pathOnly
-    : `/${pathOnly}`
-  const normalized = withLeadingSlash
-    .replace(/\/+/g, '/')
-    .replace(/\/$/, '')
+  const withLeadingSlash = pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`
+  const normalized = withLeadingSlash.replace(/\/+/g, '/').replace(/\/$/, '')
 
   return normalized === '' ? '/' : normalized
 }
@@ -47,7 +43,7 @@ export function localizedPath(locale: AppLocale, pathname: string) {
 
   const publicPathname = segments.join('/') || '/'
 
-  return publicPathname === '/'
-    ? `/${locale}`
-    : `/${locale}${publicPathname}`
+  if (locale === 'en') return publicPathname
+
+  return publicPathname === '/' ? `/${locale}` : `/${locale}${publicPathname}`
 }

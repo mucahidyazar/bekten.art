@@ -81,12 +81,15 @@ interface PublicEditorialReader {
     slug: string,
   ): Promise<PublicPressEntry | null>
   getWork(locale: EditorialLocale, slug: string): Promise<PublicArtwork | null>
+  listAvailableWorks(locale: EditorialLocale): Promise<readonly PublicArtwork[]>
   listCollections(locale: EditorialLocale): Promise<readonly PublicCollection[]>
   listExhibitions(locale: EditorialLocale): Promise<readonly PublicExhibition[]>
   listJournalEntries(
     locale: EditorialLocale,
   ): Promise<readonly PublicJournalEntry[]>
-  listPressEntries(locale: EditorialLocale): Promise<readonly PublicPressEntry[]>
+  listPressEntries(
+    locale: EditorialLocale,
+  ): Promise<readonly PublicPressEntry[]>
   listWorks(locale: EditorialLocale): Promise<readonly PublicArtwork[]>
 }
 

@@ -45,6 +45,16 @@ describe('/api/newsletter/confirm', () => {
     expect(response.headers.get('set-cookie')).toContain('HttpOnly')
   })
 
+  it('GET keeps the default English confirmation UI prefixless', async () => {
+    const response = await GET(
+      new Request(`https://bekten.art/api/newsletter/confirm?token=${token}`),
+    )
+
+    expect(response.headers.get('location')).toBe(
+      'https://bekten.art/newsletter-preferences?action=newsletter-confirm',
+    )
+  })
+
   it('GET rejects a missing token without mutation', async () => {
     const response = await GET(
       new Request('https://bekten.art/api/newsletter/confirm'),
@@ -52,7 +62,7 @@ describe('/api/newsletter/confirm', () => {
 
     expect(mocks.confirm).not.toHaveBeenCalled()
     expect(response.headers.get('location')).toBe(
-      'https://bekten.art/en?newsletter=unavailable',
+      'https://bekten.art/?newsletter=unavailable',
     )
   })
 
@@ -62,7 +72,7 @@ describe('/api/newsletter/confirm', () => {
     expect(mocks.confirm).toHaveBeenCalledWith(token)
     expect(response.status).toBe(303)
     expect(response.headers.get('location')).toBe(
-      'https://bekten.art/en?newsletter=confirmed',
+      'https://bekten.art/?newsletter=confirmed',
     )
     expect(response.headers.get('set-cookie')).toContain(
       'bekten_newsletter_confirmation=;',

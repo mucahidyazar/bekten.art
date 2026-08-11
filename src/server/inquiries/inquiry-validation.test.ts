@@ -51,6 +51,15 @@ describe('public inquiry validation', () => {
       },
     },
     {
+      expectedType: 'COLLECTOR',
+      input: {
+        ...sharedInput,
+        message: 'I would like to begin a private collecting conversation.',
+        subject: 'Collector introduction',
+        type: 'COLLECTOR',
+      },
+    },
+    {
       expectedType: 'GENERAL',
       input: {
         ...sharedInput,

@@ -163,6 +163,44 @@ describe('PublicInquiryForm', () => {
     })
   })
 
+  it('uses the prefixless privacy route for the default English locale', () => {
+    render(<PublicInquiryForm locale="en" type="GENERAL" />)
+
+    expect(screen.getByRole('link', {name: 'Privacy Policy'})).toHaveAttribute(
+      'href',
+      '/privacy-policy',
+    )
+  })
+
+  it('submits collector conversations as a distinct inquiry type', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(acceptedResponse())
+
+    vi.stubGlobal('fetch', fetchMock)
+    const user = userEvent.setup()
+
+    render(<PublicInquiryForm locale="en" type="COLLECTOR" />)
+
+    expect(
+      screen.getByRole('heading', {name: 'Collector inquiry'}),
+    ).toBeInTheDocument()
+    await user.type(screen.getByLabelText('Full name'), 'Ada Collector')
+    await user.type(screen.getByLabelText('Email address'), 'ada@example.com')
+    await user.type(screen.getByLabelText('Subject'), 'Collection introduction')
+    await user.type(
+      screen.getByLabelText('Message'),
+      'I would like to begin a private conversation about collecting.',
+    )
+    await user.click(screen.getByRole('checkbox', {name: /privacy policy/i}))
+    await user.click(screen.getByRole('button', {name: 'Send private request'}))
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce())
+    expect(submittedBody(fetchMock)).toMatchObject({
+      message: 'I would like to begin a private conversation about collecting.',
+      subject: 'Collection introduction',
+      type: 'COLLECTOR',
+    })
+  })
+
   it('omits empty optional private-viewing fields and supports a custom privacy route', async () => {
     const fetchMock = vi.fn().mockResolvedValue(acceptedResponse())
 

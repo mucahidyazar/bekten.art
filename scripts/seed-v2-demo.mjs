@@ -154,7 +154,7 @@ export async function readValidatedDemoAsset(item, rootDirectory) {
   let candidate
 
   try {
-    allowedRoot = await realpath(resolve(rootDirectory, 'public/img/art'))
+    allowedRoot = await realpath(resolve(rootDirectory, 'public/img'))
     candidate = await realpath(resolve(rootDirectory, item.assetPath))
   } catch {
     throw new Error('V2_DEMO_ASSET_READ_FAILED')

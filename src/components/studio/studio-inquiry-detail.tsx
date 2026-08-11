@@ -19,7 +19,8 @@ type StudioInquiryDetailValue = Readonly<{
   relatedArtworkTitle: string | null
   status: 'ARCHIVED' | 'CLOSED' | 'IN_REVIEW' | 'NEW' | 'RESPONDED'
   subject?: string | null
-  type: 'AVAILABILITY' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
+  type:
+    'AVAILABILITY' | 'COLLECTOR' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
 }>
 
 type StudioInquiryNote = Readonly<{

@@ -42,9 +42,7 @@ function placement(
   }
 }
 
-function artworkSnapshot(
-  overrides: Readonly<Record<string, unknown>> = {},
-) {
+function artworkSnapshot(overrides: Readonly<Record<string, unknown>> = {}) {
   return {
     availability: 'ON_REQUEST',
     collectionId: null,
@@ -130,10 +128,7 @@ function snapshotFor(entityType: string) {
   }
 }
 
-function row(
-  id: string,
-  overrides: Readonly<Record<string, unknown>> = {},
-) {
+function row(id: string, overrides: Readonly<Record<string, unknown>> = {}) {
   return {
     displayOrder: 0,
     id,
@@ -177,17 +172,19 @@ function publicMedia(
   }
 }
 
-function fixture(input: {
-  artworks?: readonly unknown[]
-  collections?: readonly unknown[]
-  exhibitionArtworks?: readonly unknown[]
-  exhibitions?: readonly unknown[]
-  journalEntries?: readonly unknown[]
-  media?: readonly unknown[]
-  pages?: readonly unknown[]
-  pressItems?: readonly unknown[]
-  revisions?: readonly unknown[]
-} = {}) {
+function fixture(
+  input: {
+    artworks?: readonly unknown[]
+    collections?: readonly unknown[]
+    exhibitionArtworks?: readonly unknown[]
+    exhibitions?: readonly unknown[]
+    journalEntries?: readonly unknown[]
+    media?: readonly unknown[]
+    pages?: readonly unknown[]
+    pressItems?: readonly unknown[]
+    revisions?: readonly unknown[]
+  } = {},
+) {
   const transaction = {
     artwork: {findMany: vi.fn(async () => input.artworks ?? [])},
     collection: {findMany: vi.fn(async () => input.collections ?? [])},
@@ -209,7 +206,11 @@ function fixture(input: {
     $transaction: vi.fn(async callback => callback(transaction)),
   } as unknown as PublicEditorialDatabase
 
-  return {database, reader: createDatabasePublicEditorialReader(database), transaction}
+  return {
+    database,
+    reader: createDatabasePublicEditorialReader(database),
+    transaction,
+  }
 }
 
 describe('database public editorial reader', () => {
@@ -249,7 +250,10 @@ describe('database public editorial reader', () => {
       orderBy: [{displayOrder: 'asc'}, {id: 'asc'}],
       where: {locale: 'en', publishedAt: {not: null}, status: 'PUBLISHED'},
     })
-    expect(result.map(item => item.title)).toEqual(['Sample Work', 'Second Work'])
+    expect(result.map(item => item.title)).toEqual([
+      'Sample Work',
+      'Second Work',
+    ])
     expect(result[1]?.mediaPlacements).toEqual([
       expect.objectContaining({
         mediaObjectId: IDS.mediaHero,
@@ -292,13 +296,51 @@ describe('database public editorial reader', () => {
     await expect(reader.getWork('en', 'sample-work')).resolves.toEqual(
       expect.objectContaining({slug: 'sample-work', title: 'Sample Work'}),
     )
-    await expect(reader.getWork('en', 'unpublished-draft-slug')).resolves.toBeNull()
+    await expect(
+      reader.getWork('en', 'unpublished-draft-slug'),
+    ).resolves.toBeNull()
     expect(transaction.contentRevision.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
           entityType: 'ARTWORK',
           locale: 'en',
           snapshot: {equals: 'sample-work', path: ['slug']},
+        }),
+      }),
+    )
+    expect(transaction.artwork.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({id: {in: [IDS.artworkA]}}),
+      }),
+    )
+  })
+
+  it('targets available artwork snapshots before media hydration', async () => {
+    const {reader, transaction} = fixture({
+      artworks: [row(IDS.artworkA), row(IDS.artworkB)],
+      media: [publicMedia()],
+      revisions: [
+        revision(
+          'ARTWORK',
+          IDS.artworkA,
+          artworkSnapshot({availability: 'AVAILABLE'}),
+        ),
+        revision(
+          'ARTWORK',
+          IDS.artworkB,
+          artworkSnapshot({availability: 'ON_REQUEST'}),
+        ),
+      ],
+    })
+
+    await expect(reader.listAvailableWorks('en')).resolves.toEqual([
+      expect.objectContaining({availability: 'AVAILABLE'}),
+    ])
+    expect(transaction.contentRevision.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          entityType: 'ARTWORK',
+          snapshot: {equals: 'AVAILABLE', path: ['availability']},
         }),
       }),
     )
@@ -347,10 +389,7 @@ describe('database public editorial reader', () => {
 
   it('builds exhibition details from deterministic join ordering and published works', async () => {
     const {reader, transaction} = fixture({
-      artworks: [
-        row(IDS.artworkA),
-        row(IDS.artworkB, {status: 'ARCHIVED'}),
-      ],
+      artworks: [row(IDS.artworkA), row(IDS.artworkB, {status: 'ARCHIVED'})],
       exhibitionArtworks: [
         {artworkId: IDS.artworkB, displayOrder: 0},
         {artworkId: IDS.artworkA, displayOrder: 1},
@@ -392,9 +431,9 @@ describe('database public editorial reader', () => {
     await expect(reader.listCollections('en')).resolves.toHaveLength(1)
     await expect(reader.listExhibitions('en')).resolves.toHaveLength(1)
     await expect(reader.listJournalEntries('en')).resolves.toHaveLength(1)
-    await expect(reader.getJournalEntry('en', 'sample-journal')).resolves.toEqual(
-      expect.objectContaining({title: 'Sample Journal'}),
-    )
+    await expect(
+      reader.getJournalEntry('en', 'sample-journal'),
+    ).resolves.toEqual(expect.objectContaining({title: 'Sample Journal'}))
     await expect(reader.listPressEntries('en')).resolves.toHaveLength(1)
     await expect(reader.getPressEntry('en', 'sample-press')).resolves.toEqual(
       expect.objectContaining({publishedOn: '2026-08-01T00:00:00.000Z'}),

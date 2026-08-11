@@ -41,6 +41,15 @@ const commissionInquiryInputSchema = z
   })
   .strict()
 
+const collectorInquiryInputSchema = z
+  .object({
+    ...sharedPublicShape,
+    message: messageSchema,
+    subject: z.string().trim().min(2).max(120),
+    type: z.literal('COLLECTOR'),
+  })
+  .strict()
+
 const generalInquiryInputSchema = z
   .object({
     ...sharedPublicShape,
@@ -105,6 +114,7 @@ export const inquirySubmissionContextSchema = z
 
 export const publicInquiryInputSchema = z.discriminatedUnion('type', [
   availabilityInquiryInputSchema,
+  collectorInquiryInputSchema,
   commissionInquiryInputSchema,
   privateViewingInquiryInputSchema,
   generalInquiryInputSchema,

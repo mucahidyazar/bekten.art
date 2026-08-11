@@ -20,6 +20,7 @@ interface BreadcrumbItem {
 interface BreadcrumbProps {
   items?: BreadcrumbItem[]
   className?: string
+  showNavigation?: boolean
 }
 
 const EXTRA_LABELS: Readonly<
@@ -130,7 +131,11 @@ function buildBreadcrumbItems(pathname: string): BreadcrumbItem[] {
   return items
 }
 
-export async function Breadcrumb({items, className = ''}: BreadcrumbProps) {
+export async function Breadcrumb({
+  items,
+  className = '',
+  showNavigation = true,
+}: BreadcrumbProps) {
   const pathname = (await headers()).get('x-pathname') ?? '/'
   const breadcrumbItems = items || buildBreadcrumbItems(pathname)
 
@@ -145,6 +150,10 @@ export async function Breadcrumb({items, className = ''}: BreadcrumbProps) {
     name: item.name,
     url: `${domain}${item.url}`,
   }))
+
+  if (!showNavigation) {
+    return <BreadcrumbStructuredData items={structuredDataItems} />
+  }
 
   return (
     <div className="app-container">

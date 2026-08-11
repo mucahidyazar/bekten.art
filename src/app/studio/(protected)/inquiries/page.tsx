@@ -7,6 +7,7 @@ import {configuredStudioInquiryService} from '@/server/studio-inquiries/configur
 
 const inquiryTypeSchema = z.enum([
   'AVAILABILITY',
+  'COLLECTOR',
   'COMMISSION',
   'GENERAL',
   'PRIVATE_VIEWING',
@@ -90,6 +91,7 @@ export default async function StudioInquiriesPage({
           >
             <option value="">All</option>
             <option value="AVAILABILITY">Availability</option>
+            <option value="COLLECTOR">Collector</option>
             <option value="COMMISSION">Commission</option>
             <option value="PRIVATE_VIEWING">Private viewing</option>
             <option value="GENERAL">General</option>

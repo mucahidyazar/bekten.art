@@ -2,6 +2,7 @@
 
 import {type FormEvent, useEffect, useId, useRef, useState} from 'react'
 
+import {localizedPath} from '@/lib/localized-path'
 import {cn} from '@/utils/cn'
 
 import {inquiryHeading, publicInquiryCopy} from './public-inquiry-copy'
@@ -32,11 +33,13 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
   )
   const artwork = 'artwork' in props ? props.artwork : undefined
   const privacyPolicyHref =
-    props.privacyPolicyHref ?? `/${props.locale}/privacy-policy`
+    props.privacyPolicyHref ?? localizedPath(props.locale, '/privacy-policy')
   const validationMessages = {
     invalid: copy.validationInvalid,
     required: copy.validationRequired,
   }
+  const isMessageInquiry =
+    props.type === 'COLLECTOR' || props.type === 'GENERAL'
 
   useEffect(() => {
     if (retryAfterSeconds === null) return
@@ -339,7 +342,7 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
               </>
             ) : null}
 
-            {props.type === 'GENERAL' ? (
+            {isMessageInquiry ? (
               <div className="sm:col-span-2">
                 <Field
                   error={fieldErrors[`${formId}-subject`]}
@@ -390,7 +393,7 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
             <div className="sm:col-span-2">
               <Field
                 error={fieldErrors[`${formId}-message`]}
-                label={props.type === 'GENERAL' ? copy.message : copy.note}
+                label={isMessageInquiry ? copy.message : copy.note}
                 labelFor={`${formId}-message`}
               >
                 <textarea
@@ -400,7 +403,7 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
                   maxLength={4_000}
                   minLength={10}
                   name="message"
-                  required={props.type === 'GENERAL'}
+                  required={isMessageInquiry}
                   rows={6}
                 />
               </Field>

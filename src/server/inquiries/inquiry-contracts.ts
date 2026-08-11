@@ -13,6 +13,14 @@ export type AvailabilityInquiryRecord = InquiryRecordBase &
     type: 'AVAILABILITY'
   }>
 
+export type CollectorInquiryRecord = InquiryRecordBase &
+  Readonly<{
+    message: string
+    relatedArtworkSnapshot: null
+    subject: string
+    type: 'COLLECTOR'
+  }>
+
 export type CommissionInquiryRecord = InquiryRecordBase &
   Readonly<{
     brief: string
@@ -34,6 +42,7 @@ export type InquiryLocale = 'en' | 'tr' | 'ru' | 'ky'
 
 export type InquiryRecord =
   | AvailabilityInquiryRecord
+  | CollectorInquiryRecord
   | CommissionInquiryRecord
   | GeneralInquiryRecord
   | PrivateViewingInquiryRecord
@@ -62,7 +71,7 @@ export type InquiryStatus =
   'ARCHIVED' | 'CLOSED' | 'IN_REVIEW' | 'NEW' | 'RESPONDED'
 
 export type InquiryType =
-  'AVAILABILITY' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
+  'AVAILABILITY' | 'COLLECTOR' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
 
 export type PrivateViewingInquiryRecord = InquiryRecordBase &
   Readonly<{

@@ -6,10 +6,7 @@ import {describe, expect, it} from 'vitest'
 const prismaRoot = join(process.cwd(), 'prisma')
 const schema = readFileSync(join(prismaRoot, 'schema.prisma'), 'utf8')
 const roleMigration = readFileSync(
-  join(
-    prismaRoot,
-    'migrations/20260810120000_add_studio_roles/migration.sql',
-  ),
+  join(prismaRoot, 'migrations/20260810120000_add_studio_roles/migration.sql'),
   'utf8',
 )
 const migration = readFileSync(
@@ -184,7 +181,7 @@ describe('V2 editorial Prisma contract', () => {
     const inquiry = model('Inquiry')
 
     expect(enumBlock('InquiryType')).toMatch(
-      /AVAILABILITY[\s\S]*COMMISSION[\s\S]*PRIVATE_VIEWING[\s\S]*GENERAL/,
+      /AVAILABILITY[\s\S]*COMMISSION[\s\S]*PRIVATE_VIEWING[\s\S]*COLLECTOR[\s\S]*GENERAL/,
     )
     expect(enumBlock('InquiryStatus')).toMatch(
       /NEW[\s\S]*IN_REVIEW[\s\S]*RESPONDED[\s\S]*CLOSED[\s\S]*ARCHIVED/,
@@ -265,14 +262,10 @@ describe('V2 editorial Prisma contract', () => {
     expect(migration).toContain('CREATE TABLE "inquiries"')
     expect(migration).toContain('CREATE TABLE "content_revisions"')
     expect(migration).toContain('CREATE TABLE "content_media_placements"')
+    expect(migration).toContain('COALESCE(LENGTH(BTRIM("brief")) > 0, false)')
+    expect(migration).toContain('COALESCE(LENGTH(BTRIM("subject")) > 0, false)')
     expect(migration).toContain(
-      'COALESCE(LENGTH(BTRIM("brief")) > 0, false)',
-    )
-    expect(migration).toContain(
-      'COALESCE(LENGTH(BTRIM("subject")) > 0, false)',
-    )
-    expect(migration).toContain(
-      'COALESCE("related_artwork_locale" IN (\'en\', \'tr\', \'ru\', \'ky\'), false)',
+      "COALESCE(\"related_artwork_locale\" IN ('en', 'tr', 'ru', 'ky'), false)",
     )
     expect(migration).toContain('Rollback strategy')
     expect(legacyMediaMigration).toContain(

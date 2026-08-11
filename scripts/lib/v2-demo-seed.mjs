@@ -99,6 +99,66 @@ const media = deepFreeze([
     sizeBytes: 85_307,
     width: 182,
   },
+  {
+    assetPath: 'public/img/heritage-landscape-hero.jpg',
+    checksumSha256:
+      'a16bb2d72feaeb7f7311a47a1ee65478a74643d9611dc0decdef734236c6436f',
+    filename: 'heritage-landscape-hero.jpg',
+    height: 941,
+    id: uuid('2', 8),
+    mimeType: 'image/jpeg',
+    objectKey: 'v2-demo/heritage/heritage-landscape-hero.jpg',
+    sizeBytes: 501_047,
+    width: 1672,
+  },
+  {
+    assetPath: 'public/img/heritage-collection-hero.jpg',
+    checksumSha256:
+      '6625db9797429bfc8fecda65da931243761c7ad0cc66ad66cf6250d05207493f',
+    filename: 'heritage-collection-hero.jpg',
+    height: 1086,
+    id: uuid('2', 9),
+    mimeType: 'image/jpeg',
+    objectKey: 'v2-demo/heritage/heritage-collection-hero.jpg',
+    sizeBytes: 793_403,
+    width: 1448,
+  },
+  {
+    assetPath: 'public/img/heritage-studio-hero.jpg',
+    checksumSha256:
+      '9451a68bffda69c35cc1ecfa81fc3c94351ca286684dde0456a5397df822715f',
+    filename: 'heritage-studio-hero.jpg',
+    height: 941,
+    id: uuid('2', 10),
+    mimeType: 'image/jpeg',
+    objectKey: 'v2-demo/heritage/heritage-studio-hero.jpg',
+    sizeBytes: 553_221,
+    width: 1672,
+  },
+  {
+    assetPath: 'public/img/heritage-three-voices.jpg',
+    checksumSha256:
+      '9fb826378d79087181629a966c779f0f36519159c27eb741583ea05d6a580af7',
+    filename: 'heritage-three-voices.jpg',
+    height: 1402,
+    id: uuid('2', 11),
+    mimeType: 'image/jpeg',
+    objectKey: 'v2-demo/artworks/heritage-three-voices.jpg',
+    sizeBytes: 769_084,
+    width: 1122,
+  },
+  {
+    assetPath: 'public/img/heritage-returning-home.jpg',
+    checksumSha256:
+      'ca8f0b0f7ebba09ef86ca883d7d8a97532c50dce8ca7dbeb19f954b814a4bb82',
+    filename: 'heritage-returning-home.jpg',
+    height: 1086,
+    id: uuid('2', 12),
+    mimeType: 'image/jpeg',
+    objectKey: 'v2-demo/artworks/heritage-returning-home.jpg',
+    sizeBytes: 770_980,
+    width: 1448,
+  },
 ])
 
 const copy = deepFreeze({
@@ -127,9 +187,9 @@ const copy = deepFreeze({
     ],
     exhibition: [
       'earth-memory',
-      'Earth Memory',
-      'A study in inherited landscapes',
-      'This demonstration exhibition brings paintings and archival studies into a single editorial sequence.',
+      'My Soul Sings',
+      'Landscapes, still lifes, and portraits',
+      'In February 2013, Al Hayat Gallery in Bishkek presented 36 paintings by Bekten Usubaliev, bringing together landscapes, still lifes, and portraits in an exhibition open through 7 March.',
     ],
     journal: [
       'from-the-studio',
@@ -141,7 +201,7 @@ const copy = deepFreeze({
       artist: [
         'The artist',
         'Practice',
-        'A demonstration biography introducing the artist, working method, and relationship to landscape.',
+        'Bekten Usubaliev was born in 1958 in Kurmenty, Issyk-Kul. He studied at the Semyon Chuikov art school and later completed his training at the Repin Institute in Saint Petersburg.\n\nAfter returning to Kyrgyzstan in 1989, he began teaching at the national art school. His practice moves between portrait, landscape, memory, and everyday life.\n\nThis source-grounded Studio biography remains fully editable and should be reviewed with the artist before production publication.',
       ],
       collectors: [
         'For collectors',
@@ -161,13 +221,13 @@ const copy = deepFreeze({
       studio: [
         'The studio',
         'Working archive',
-        'A demonstration studio profile designed to be replaced with the real address, process, and archive.',
+        'Bekten’s studio holds a working archive shaped by painting, drawing, teaching, and continual creative search. This demonstration profile intentionally contains no private address and can be replaced in Bekten Studio.',
       ],
     },
     press: [
       'landscapes-remembered',
-      'Landscapes remembered',
-      'A demonstration press entry connecting editorial context to its original publication.',
+      'My Soul Sings opens in Bishkek',
+      'A 2013 report on the Al Hayat Gallery exhibition of 36 paintings by Bekten Usubaliev.',
     ],
   },
   ky: {
@@ -195,9 +255,9 @@ const copy = deepFreeze({
     ],
     exhibition: [
       'jer-es-tutumu',
-      'Жердин эс тутуму',
-      'Мурасталган пейзаждарды изилдөө',
-      'Бул демо көргөзмө сүрөттөрдү жана архивдик изилдөөлөрдү бир редакциялык ыраатка бириктирет.',
+      'Жаным ырдайт',
+      'Пейзаждар, натюрморттор жана портреттер',
+      '2013-жылдын февралында Бишкектеги «Аль Хаят» галереясында Бектен Усубалиевдин 36 картинасы коюлуп, көргөзмө 7-мартка чейин уланган.',
     ],
     journal: [
       'ustakanadan',
@@ -209,7 +269,7 @@ const copy = deepFreeze({
       artist: [
         'Сүрөтчү',
         'Практика',
-        'Сүрөтчүнүн иш ыкмасын жана пейзаж менен байланышын тааныштырган демо өмүр баян.',
+        'Бектен Усубалиев 1958-жылы Ысык-Көлдүн Күрмөнтү айылында төрөлгөн. С. Чуйков атындагы көркөм окуу жайында жана Санкт-Петербургдагы Репин институтунда билим алган.\n\n1989-жылы Кыргызстанга кайтып келип, көркөм окуу жайында сабак бере баштаган. Бул Studio тексти сүрөтчү менен такталып, толугу менен өзгөртүлө алат.',
       ],
       collectors: [
         'Коллекционерлер үчүн',
@@ -263,9 +323,9 @@ const copy = deepFreeze({
     ],
     exhibition: [
       'pamyat-zemli',
-      'Память земли',
-      'Исследование унаследованных ландшафтов',
-      'Демонстрационная выставка объединяет живопись и архивные исследования в единую редакционную последовательность.',
+      'Моя душа поёт',
+      'Пейзажи, натюрморты и портреты',
+      'В феврале 2013 года галерея «Аль Хаят» в Бишкеке представила 36 картин Бектена Усубалиева; выставка продолжалась до 7 марта.',
     ],
     journal: [
       'iz-masterskoy',
@@ -277,7 +337,7 @@ const copy = deepFreeze({
       artist: [
         'Художник',
         'Практика',
-        'Демонстрационная биография о методе работы художника и его связи с ландшафтом.',
+        'Бектен Усубалиев родился в 1958 году в Курменты Иссык-Кульской области. Учился в художественном училище имени С. Чуйкова и в Институте имени Репина в Санкт-Петербурге.\n\nВернувшись в Кыргызстан в 1989 году, он начал преподавать. Этот текст Studio полностью редактируется и должен быть согласован с художником.',
       ],
       collectors: [
         'Коллекционерам',
@@ -331,9 +391,9 @@ const copy = deepFreeze({
     ],
     exhibition: [
       'topragin-hafizasi',
-      'Toprağın Hafızası',
-      'Miras kalan peyzajlar üzerine bir çalışma',
-      'Bu demo sergi, resimleri ve arşiv çalışmalarını tek bir editorial akışta buluşturuyor.',
+      'Ruhum Şarkı Söylüyor',
+      'Peyzajlar, natürmortlar ve portreler',
+      'Şubat 2013’te Bişkek’teki Al Hayat Galerisi, Bekten Usubaliev’in 36 resmini bir araya getiren ve 7 Mart’a kadar süren sergiyi açtı.',
     ],
     journal: [
       'atolyeden',
@@ -345,7 +405,7 @@ const copy = deepFreeze({
       artist: [
         'Sanatçı',
         'Pratik',
-        'Sanatçının çalışma yöntemini ve peyzajla ilişkisini tanıtan demo biyografi.',
+        'Bekten Usubaliev 1958’de Issık Göl bölgesindeki Kurmenty’de doğdu. Semyon Chuikov sanat okulunda ve Saint Petersburg’daki Repin Enstitüsü’nde eğitim gördü.\n\n1989’da Kırgızistan’a dönerek sanat okulunda ders vermeye başladı. Bu Studio metni tamamen düzenlenebilir ve yayın öncesinde sanatçıyla doğrulanmalıdır.',
       ],
       collectors: [
         'Koleksiyonerler için',
@@ -376,8 +436,24 @@ const copy = deepFreeze({
   },
 })
 
+function localizedSeedPath(locale, pathname) {
+  const normalizedPath = `/${pathname}`
+    .replace(/\/+/gu, '/')
+    .replace(/\/$/u, '')
+  const publicPath = normalizedPath || '/'
+
+  return locale === 'en'
+    ? publicPath
+    : publicPath === '/'
+      ? `/${locale}`
+      : `/${locale}${publicPath}`
+}
+
 function seo(locale, segment, slug, title, description) {
-  const canonicalPath = `/${locale}/${segment ? `${segment}/` : ''}${slug}`
+  const canonicalPath = localizedSeedPath(
+    locale,
+    `/${segment ? `${segment}/` : ''}${slug}`,
+  )
   const completeDescription =
     description.length >= 50
       ? description
@@ -391,9 +467,9 @@ function seo(locale, segment, slug, title, description) {
   }
 }
 
-function placement(entityId, entityType, mediaObject, index) {
+function placement(entityId, entityType, mediaObject, index, altText) {
   const editable = {
-    altText: `Editorial view for ${mediaObject.filename.replace(/\.png$/u, '')}`,
+    altText,
     caption: 'Replaceable demonstration media',
     credit: 'Bekten Studio demo',
     crop: 'ORIGINAL',
@@ -449,14 +525,17 @@ function contentItem({
   entityId,
   entityType,
   locale,
+  mediaAssetPath,
   placementIndex,
   row,
   segment,
   snapshot,
 }) {
-  const selectedMedia = media[(placementIndex - 1) % media.length]
+  const selectedMedia = mediaAssetPath
+    ? media.find(item => item.assetPath === mediaAssetPath)
+    : media[(placementIndex - 1) % media.length]
   const selectedPlacement = selectedMedia
-    ? placement(entityId, entityType, selectedMedia, placementIndex)
+    ? placement(entityId, entityType, selectedMedia, placementIndex, row.title)
     : null
   const placements = selectedPlacement ? [selectedPlacement.database] : []
   const editablePlacements = selectedPlacement
@@ -526,6 +605,7 @@ function buildContent() {
         entityId: collectionId,
         entityType: 'COLLECTION',
         locale,
+        mediaAssetPath: 'public/img/heritage-collection-hero.jpg',
         placementIndex: index,
         row: collectionRow,
         segment: 'collections',
@@ -562,6 +642,11 @@ function buildContent() {
           entityId,
           entityType: 'ARTWORK',
           locale,
+          mediaAssetPath: [
+            'public/img/heritage-landscape-hero.jpg',
+            'public/img/heritage-three-voices.jpg',
+            'public/img/heritage-returning-home.jpg',
+          ][artworkOrder],
           placementIndex: index,
           row,
           segment: 'works',
@@ -599,10 +684,10 @@ function buildContent() {
       body: exhibitionBody,
       city: 'Bishkek',
       country: 'Kyrgyzstan',
-      endsAt: new Date('2027-02-28T00:00:00.000Z'),
-      startsAt: new Date('2026-11-12T00:00:00.000Z'),
+      endsAt: new Date('2013-03-07T00:00:00.000Z'),
+      startsAt: new Date('2013-02-14T00:00:00.000Z'),
       subtitle: exhibitionSubtitle,
-      venue: 'Bekten Studio',
+      venue: 'Al Hayat Gallery',
     }
 
     items.push(
@@ -683,6 +768,10 @@ function buildContent() {
           entityId: pageId,
           entityType: 'PAGE',
           locale,
+          mediaAssetPath:
+            slug === 'studio'
+              ? 'public/img/heritage-studio-hero.jpg'
+              : undefined,
           placementIndex: index,
           row: pageRow,
           segment: '',
@@ -705,11 +794,12 @@ function buildContent() {
         'press',
       ),
       category: 'FEATURE',
-      content: `${pressExcerpt} This replaceable body demonstrates the press detail layout.`,
+      content: `${pressExcerpt} The linked source remains the authority; this Studio summary is editable.`,
       description: pressExcerpt,
-      outlet: 'Bekten Studio Journal',
-      publishedOn: new Date('2026-08-01T00:00:00.000Z'),
-      sourceUrl: 'https://bekten.art',
+      outlet: 'Vecherniy Bishkek',
+      publishedOn: new Date('2013-02-14T00:00:00.000Z'),
+      sourceUrl:
+        'https://www.vb.kg/doc/212800_v_bishkeke_otkrylas_vystavka_bektena_ysybalieva_.html',
       subtitle: null,
     }
 
@@ -821,13 +911,14 @@ function isCurrentMediaRow(row, item) {
 }
 
 function cacheRevalidationJob(item) {
-  const localeRoot = `/${item.row.locale}`
+  const localeRoot = localizedSeedPath(item.row.locale, '/')
   const listingPath = item.segment
-    ? `${localeRoot}/${item.segment}`
+    ? localizedSeedPath(item.row.locale, `/${item.segment}`)
     : localeRoot
-  const detailPath = item.segment
-    ? `${listingPath}/${item.row.slug}`
-    : `${localeRoot}/${item.row.slug}`
+  const detailPath = localizedSeedPath(
+    item.row.locale,
+    `/${item.segment ? `${item.segment}/` : ''}${item.row.slug}`,
+  )
 
   return {
     idempotencyKey: `editorial.cache-revalidate:${item.entityType}:${item.entityId}:v1`,

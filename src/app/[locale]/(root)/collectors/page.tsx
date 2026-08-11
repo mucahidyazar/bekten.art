@@ -1,7 +1,7 @@
 import {createPublicManagedRoute} from '@/components/public-site/public-managed-route'
 
 const collectorsRoute = createPublicManagedRoute({
-  inquiryType: 'GENERAL',
+  inquiryType: 'COLLECTOR',
   kind: 'collectors',
   slug: 'collectors',
 })

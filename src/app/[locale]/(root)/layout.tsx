@@ -1,22 +1,17 @@
-import 'swiper/css'
-import 'swiper/css/autoplay'
-import 'swiper/css/effect-fade'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
-import 'swiper/css/scrollbar'
-
 import {Metadata} from 'next'
 
 import {getLocale} from 'next-intl/server'
 
-import {Footer} from '@/components/footer'
-import {Header} from '@/components/organisms/header'
+import {publicLocale} from '@/components/public-site/public-copy'
+import {PublicFooter} from '@/components/public-site/public-footer'
+import {PublicHeader} from '@/components/public-site/public-header'
 import {Breadcrumb} from '@/components/seo/breadcrumb'
-import ProgressBar from '@/components/ui/progress-bar'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
 export async function generateMetadata(): Promise<Metadata> {
-  return prepareMetadata()
+  const locale = publicLocale(await getLocale())
+
+  return prepareMetadata({contentLocale: locale})
 }
 
 type LayoutProps = {
@@ -32,26 +27,19 @@ const skipLinkLabels: Record<string, string> = {
 }
 
 export default async function RootLayout({children}: LayoutProps) {
-  const locale = await getLocale()
+  const locale = publicLocale(await getLocale())
 
   return (
-    <div
-      className="flex max-h-screen min-h-screen w-full flex-col overflow-y-auto"
-      id="layout-wrapper"
-    >
-      <a
-        href="#main-content"
-        className="bg-background text-foreground focus-visible:ring-ring fixed top-4 left-4 z-[100] -translate-y-24 rounded-md border px-4 py-2 font-medium shadow-lg transition-transform focus:translate-y-0 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-      >
+    <div className="heritage-site" id="layout-wrapper">
+      <a href="#main-content" className="heritage-skip-link">
         {skipLinkLabels[locale] || skipLinkLabels.en}
       </a>
-      <Header />
-      <ProgressBar />
-      <main id="main-content" tabIndex={-1} className="flex-1">
-        <Breadcrumb />
+      <PublicHeader locale={locale} />
+      <main id="main-content" tabIndex={-1}>
+        <Breadcrumb showNavigation={false} />
         {children}
       </main>
-      <Footer className="flex flex-col items-center gap-4 py-8" />
+      <PublicFooter locale={locale} />
     </div>
   )
 }

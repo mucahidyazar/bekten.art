@@ -14,8 +14,8 @@ import {
   PublicStudioPage,
 } from './public-managed-pages'
 
-import type {PublicInquiryType} from '@/components/public-inquiry'
 import type {PublicLocale} from './public-copy'
+import type {PublicInquiryType} from '@/components/public-inquiry'
 import type {PublicPage} from '@/server/public-editorial'
 
 type ManagedPageRouteProps = Readonly<{
@@ -25,7 +25,7 @@ type ManagedPageRouteProps = Readonly<{
 type ManagedPageRouteOptions = Readonly<{
   inquiryType?: Extract<
     PublicInquiryType,
-    'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
+    'COLLECTOR' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
   >
   kind: 'artist' | 'collectors' | 'commission' | 'private-viewings' | 'studio'
   slug: string
@@ -99,12 +99,7 @@ export function createPublicManagedRoute({
       <PublicInquiryForm locale={locale} type={inquiryType} />
     ) : null
 
-    return managedPageComposition(
-      kind,
-      locale,
-      page,
-      inquiry,
-    )
+    return managedPageComposition(kind, locale, page, inquiry)
   }
 
   return Object.freeze({generateMetadata, Page})

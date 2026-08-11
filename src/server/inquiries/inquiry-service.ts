@@ -122,6 +122,7 @@ function inquiryRecord(
         relatedArtworkSnapshot: null,
         type: input.type,
       })
+    case 'COLLECTOR':
     case 'GENERAL':
       return Object.freeze({
         ...common,

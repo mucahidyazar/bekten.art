@@ -20,11 +20,11 @@ export type PublicInquiryFormProps = Readonly<{
         type: 'PRIVATE_VIEWING'
       }>
     | Readonly<{
-        type: 'COMMISSION' | 'GENERAL'
+        type: 'COLLECTOR' | 'COMMISSION' | 'GENERAL'
       }>
   )
 
 export type PublicInquiryLocale = 'en' | 'ky' | 'ru' | 'tr'
 
 export type PublicInquiryType =
-  'AVAILABILITY' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
+  'AVAILABILITY' | 'COLLECTOR' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'

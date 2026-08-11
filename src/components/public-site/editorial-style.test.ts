@@ -16,9 +16,41 @@ describe('editorial heritage style contract', () => {
     expect(css).toContain('--heritage-gold: #9a7b42')
     expect(css).toContain('--heritage-muted: #625c50')
     expect(css).toContain('.heritage-paper-grain')
-    expect(css).toContain('.heritage-framed-artwork')
+    expect(css).toContain('.heritage-artwork-frame')
     expect(css).toContain('.heritage-illustrated-band')
     expect(css).toContain('.heritage-reference-footer')
+    expect(css).toMatch(/\.heritage-header\s*\{[^}]*background:\s*transparent/u)
+    expect(css).not.toMatch(/\.heritage-header\s*\{[^}]*border-bottom:/u)
+  })
+
+  it('lets the header and every first hero reveal one continuous page paper', async () => {
+    const [globalCss, catalogCss, managedCss] = await Promise.all([
+      readFile(resolve(process.cwd(), 'src/app/[locale]/global.css'), 'utf8'),
+      readFile(
+        resolve(
+          process.cwd(),
+          'src/components/public-site/catalog-layouts.module.css',
+        ),
+        'utf8',
+      ),
+      readFile(
+        resolve(
+          process.cwd(),
+          'src/components/public-site/public-managed-pages.module.css',
+        ),
+        'utf8',
+      ),
+    ])
+
+    expect(globalCss).toMatch(
+      /\.heritage-home-hero\s*\{[^}]*background:\s*transparent/u,
+    )
+    expect(catalogCss).toMatch(/\.page\s*\{[^}]*background:\s*transparent/u)
+    expect(catalogCss).toMatch(
+      /\.pageIntro\s*\{[^}]*background:\s*transparent/u,
+    )
+    expect(managedCss).toMatch(/\.page\s*\{[^}]*background:\s*transparent/u)
+    expect(managedCss).toMatch(/\.hero\s*\{[^}]*background:\s*transparent/u)
   })
 
   it('keeps visible keyboard focus and a reduced-motion fallback', async () => {

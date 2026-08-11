@@ -1,5 +1,6 @@
 import {NextResponse} from 'next/server'
 
+import {APP_LOCALES, localizedPath, type AppLocale} from '@/lib/localized-path'
 import {isSameOriginMutation} from '@/server/auth/mutation-origin'
 import {getConfiguredNewsletterService} from '@/server/email/configured-newsletter-service'
 import {getPublicAppOrigin} from '@/server/email/public-api'
@@ -11,7 +12,7 @@ import {
 const COOKIE_NAME = 'bekten_newsletter_unsubscribe'
 const LOCALE_COOKIE = 'bekten_email_action_locale'
 const TOKEN_PATTERN = /^[A-Za-z0-9._-]{20,2048}$/u
-const LOCALES = new Set(['en', 'tr', 'ru', 'ky'])
+const LOCALES = new Set<string>(APP_LOCALES)
 
 function readCookie(request: Request, name: string) {
   return (request.headers.get('cookie') ?? '')
@@ -21,8 +22,16 @@ function readCookie(request: Request, name: string) {
     ?.slice(name.length + 1)
 }
 
-function locale(value: string | null | undefined) {
-  return value && LOCALES.has(value) ? value : 'en'
+function locale(value: string | null | undefined): AppLocale {
+  return value && LOCALES.has(value) ? (value as AppLocale) : 'en'
+}
+
+function preferencePath(targetLocale: AppLocale, action: string) {
+  return `${localizedPath(targetLocale, '/newsletter-preferences')}?action=${action}`
+}
+
+function newsletterResultPath(targetLocale: AppLocale, result: string) {
+  return `${localizedPath(targetLocale, '/')}?newsletter=${result}`
 }
 
 function resultRedirect(path: string) {
@@ -64,11 +73,11 @@ export async function GET(request: Request) {
   const targetLocale = locale(parameters.get('locale'))
 
   if (!TOKEN_PATTERN.test(token)) {
-    return resultRedirect('/en?newsletter=unavailable')
+    return resultRedirect(newsletterResultPath('en', 'unavailable'))
   }
 
   const response = resultRedirect(
-    `/${targetLocale}/newsletter-preferences?action=newsletter-unsubscribe`,
+    preferencePath(targetLocale, 'newsletter-unsubscribe'),
   )
 
   stageCookie(response, COOKIE_NAME, token)
@@ -128,14 +137,18 @@ export async function POST(request: Request) {
     if (!TOKEN_PATTERN.test(token)) throw new Error('INVALID_TOKEN')
 
     await getConfiguredNewsletterService().unsubscribe(token)
-    const response = resultRedirect(`/${targetLocale}?newsletter=unsubscribed`)
+    const response = resultRedirect(
+      newsletterResultPath(targetLocale, 'unsubscribed'),
+    )
 
     clearCookies(response)
 
     return response
   } catch {
     console.error('Newsletter unsubscribe failed')
-    const response = resultRedirect(`/${targetLocale}?newsletter=unavailable`)
+    const response = resultRedirect(
+      newsletterResultPath(targetLocale, 'unavailable'),
+    )
 
     clearCookies(response)
 

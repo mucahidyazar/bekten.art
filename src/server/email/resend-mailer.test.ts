@@ -290,4 +290,55 @@ describe('Resend mailer', () => {
       {idempotencyKey: 'inquiry.created:id:acknowledgement'},
     )
   })
+
+  it('keeps collector inquiries distinct in support and acknowledgement emails', async () => {
+    const send = vi
+      .fn()
+      .mockResolvedValue({data: {id: 'collector-email-id'}, error: null})
+    const mailer = createResendMailer(
+      {emails: {send}},
+      {
+        apiKey: 're_bekten_key',
+        from: 'Bekten Art <noreply@mucahid.dev>',
+        replyTo: 'support@mucahid.dev',
+      },
+    )
+
+    await mailer.sendInquiryNotification({
+      idempotencyKey: 'inquiry.created:collector:support',
+      inquiry: {
+        brief: null,
+        email: 'collector@example.com',
+        locale: 'en',
+        message: 'I would like to discuss building a collection.',
+        name: 'Ada Collector',
+        relatedArtworkTitle: null,
+        subject: 'Collection advisory',
+        type: 'COLLECTOR',
+      },
+      replyTo: 'collector@example.com',
+    })
+    await mailer.sendInquiryAcknowledgement({
+      idempotencyKey: 'inquiry.created:collector:acknowledgement',
+      locale: 'en',
+      name: 'Ada Collector',
+      to: 'collector@example.com',
+      type: 'COLLECTOR',
+    })
+
+    expect(send).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        subject: expect.stringContaining('Collector conversation'),
+      }),
+      {idempotencyKey: 'inquiry.created:collector:support'},
+    )
+    expect(send).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        html: expect.stringContaining('Collector conversation'),
+      }),
+      {idempotencyKey: 'inquiry.created:collector:acknowledgement'},
+    )
+  })
 })

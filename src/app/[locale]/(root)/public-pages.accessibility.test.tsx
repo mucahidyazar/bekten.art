@@ -27,7 +27,8 @@ vi.mock('@/components/public-site/public-header', () => ({
   PublicHeader: () => <header data-testid="v2-header">V2 header</header>,
 }))
 vi.mock('@/components/seo/breadcrumb', () => ({
-  Breadcrumb: () => <nav aria-label="Breadcrumb">Breadcrumb</nav>,
+  Breadcrumb: ({showNavigation = true}: {showNavigation?: boolean}) =>
+    showNavigation ? <nav aria-label="Breadcrumb">Breadcrumb</nav> : null,
 }))
 vi.mock('@/components/ui/progress-bar', () => ({default: () => null}))
 vi.mock('@/components/molecules/call-to-action', () => ({
@@ -48,9 +49,7 @@ describe('public page landmarks', () => {
     expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1')
     expect(screen.getByTestId('v2-header')).toBeVisible()
     expect(screen.getByTestId('v2-footer')).toBeVisible()
-    expect(
-      screen.getByRole('navigation', {name: 'Breadcrumb'}),
-    ).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', {name: 'Breadcrumb'})).toBeNull()
   })
 
   it('keeps one page heading and names the contact map frame', async () => {
@@ -67,9 +66,7 @@ describe('public page landmarks', () => {
 
     expect(screen.getAllByRole('heading', {level: 1})).toHaveLength(1)
     expect(screen.getByRole('heading', {name: 'Contact'})).toBeVisible()
-    expect(
-      screen.getByRole('img', {name: 'Bekten Usubaliev'}),
-    ).toBeVisible()
+    expect(screen.getByRole('img', {name: 'Bekten Usubaliev'})).toBeVisible()
     expect(screen.getByRole('heading', {name: 'Inquiry type'})).toBeVisible()
     expect(
       screen.getByRole('link', {name: 'Availability inquiry'}),
@@ -78,9 +75,10 @@ describe('public page landmarks', () => {
       'href',
       '/commission-a-work',
     )
-    expect(
-      screen.getByRole('link', {name: 'Private viewing'}),
-    ).toHaveAttribute('href', '/private-viewings')
+    expect(screen.getByRole('link', {name: 'Private viewing'})).toHaveAttribute(
+      'href',
+      '/private-viewings',
+    )
     expect(
       screen.getByRole('link', {name: 'studio@example.test'}),
     ).toHaveAttribute('href', 'mailto:studio@example.test')

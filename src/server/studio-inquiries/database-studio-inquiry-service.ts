@@ -27,6 +27,7 @@ export type StudioInquiryDatabase = Readonly<{
 const localeSchema = z.enum(['en', 'tr', 'ru', 'ky'])
 const inquiryTypeSchema = z.enum([
   'AVAILABILITY',
+  'COLLECTOR',
   'COMMISSION',
   'GENERAL',
   'PRIVATE_VIEWING',

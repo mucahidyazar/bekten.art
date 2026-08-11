@@ -37,11 +37,11 @@ describe('localized SEO components', () => {
     expect(buildLocalizedLinks('/tr/journal', 'https://bekten.art')).toEqual({
       canonical: 'https://bekten.art/tr/journal',
       alternates: [
-        {hrefLang: 'en-US', href: 'https://bekten.art/en/journal'},
+        {hrefLang: 'en-US', href: 'https://bekten.art/journal'},
         {hrefLang: 'tr-TR', href: 'https://bekten.art/tr/journal'},
         {hrefLang: 'ru-RU', href: 'https://bekten.art/ru/journal'},
         {hrefLang: 'ky-KG', href: 'https://bekten.art/ky/journal'},
-        {hrefLang: 'x-default', href: 'https://bekten.art/en/journal'},
+        {hrefLang: 'x-default', href: 'https://bekten.art/journal'},
       ],
     })
 
@@ -49,16 +49,16 @@ describe('localized SEO components', () => {
       buildLocalizedLinks('/kg/about', 'https://bekten.art').canonical,
     ).toBe('https://bekten.art/ky/about')
     expect(buildLocalizedLinks('/about', 'https://bekten.art').canonical).toBe(
-      'https://bekten.art/en/about',
+      'https://bekten.art/about',
     )
+    expect(
+      buildLocalizedLinks('/en/about', 'https://bekten.art').canonical,
+    ).toBe('https://bekten.art/about')
   })
 
   it('omits unverified alternates for editorial detail slugs', () => {
     expect(
-      buildLocalizedLinks(
-        '/tr/journal/winter-light',
-        'https://bekten.art',
-      ),
+      buildLocalizedLinks('/tr/journal/winter-light', 'https://bekten.art'),
     ).toEqual({
       alternates: [],
       canonical: 'https://bekten.art/tr/journal/winter-light',
@@ -76,8 +76,8 @@ describe('localized SEO components', () => {
       {name: 'Жеке көрүү', url: '/ky/private-viewings'},
     ])
     expect(buildBreadcrumbItems('/custom-page')).toEqual([
-      {name: 'Home', url: '/en'},
-      {name: 'Custom Page', url: '/en/custom-page'},
+      {name: 'Home', url: '/'},
+      {name: 'Custom Page', url: '/custom-page'},
     ])
   })
 
@@ -89,15 +89,44 @@ describe('localized SEO components', () => {
 
     expect(breadcrumb).toContain('aria-current="page"')
     expect(breadcrumb).toContain('href="/tr/journal"')
-    expect(links).toContain(
-      'rel="canonical" href="https://bekten.art/tr/journal/winter-light"',
-    )
+    expect(links).not.toContain('rel="canonical"')
     expect(links).not.toContain('rel="alternate"')
     expect(links).not.toContain('invalid')
   })
 
+  it('can preserve breadcrumb structured data without a visible layout band', async () => {
+    const breadcrumb = renderToStaticMarkup(
+      await Breadcrumb({showNavigation: false}),
+    )
+
+    expect(breadcrumb).toContain('application/ld+json')
+    expect(breadcrumb).not.toContain('<nav')
+  })
+
+  it('emits the manual canonical only when the route has no metadata canonical', () => {
+    navigation.pathname = '/tr'
+
+    const links = renderToStaticMarkup(<HrefLang />)
+
+    expect(links).toContain('rel="canonical" href="https://bekten.art/tr"')
+    expect(links).toContain('rel="alternate"')
+
+    navigation.pathname = '/tr/journal/winter-light'
+  })
+
+  it('does not duplicate the canonical owned by V2 route metadata', () => {
+    navigation.pathname = '/works'
+
+    const links = renderToStaticMarkup(<HrefLang />)
+
+    expect(links).not.toContain('rel="canonical"')
+    expect(links).toContain('rel="alternate"')
+
+    navigation.pathname = '/tr/journal/winter-light'
+  })
+
   it('does not render breadcrumbs on a localized home page', async () => {
-    navigation.pathname = '/en'
+    navigation.pathname = '/'
 
     expect(renderToStaticMarkup(await Breadcrumb({}))).toBe('')
 

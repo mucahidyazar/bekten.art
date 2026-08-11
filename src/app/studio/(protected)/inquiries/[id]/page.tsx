@@ -10,6 +10,7 @@ import {updateStudioInquiryAction} from '../inquiry-actions'
 
 const inquiryTypeSchema = z.enum([
   'AVAILABILITY',
+  'COLLECTOR',
   'COMMISSION',
   'GENERAL',
   'PRIVATE_VIEWING',

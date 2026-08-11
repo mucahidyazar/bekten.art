@@ -28,5 +28,6 @@ describe('robots metadata', () => {
     })
     expect(result.sitemap).toBe('https://bekten.art/sitemap.xml')
     expect(result.host).toBe('https://bekten.art')
+    expect(result.host).not.toContain('/en')
   })
 })

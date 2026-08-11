@@ -4,9 +4,6 @@ import sortExports from 'eslint-plugin-sort-exports'
 import unusedImports from 'eslint-plugin-unused-imports'
 
 const config = [
-  {
-    ignores: ['backup/**'],
-  },
   ...nextVitals,
   {
     files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'],

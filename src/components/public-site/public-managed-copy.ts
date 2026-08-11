@@ -240,26 +240,62 @@ export const publicManagedCopy: Readonly<
       inquiry: 'Буйрутма тууралуу суроо жөнөтүү',
       process: 'Буйрутма процесси',
       steps: [
-        {body: 'Оюңузду жана суроолоруңузду форма аркылуу жазыңыз.', title: 'Суроо'},
-        {body: 'Студия ниетиңизди угуп, багытты тактоого жардам берет.', title: 'Сүйлөшүү'},
-        {body: 'Чыгармачылык жана практикалык алкак түз талкууланат.', title: 'Багыт'},
-        {body: 'Иш кийинки кадамдар так макулдашылгандан кийин башталат.', title: 'Студия процесси'},
-        {body: 'Маек өнүккөн сайын студия сиз менен байланышта болот.', title: 'Улантуу'},
+        {
+          body: 'Оюңузду жана суроолоруңузду форма аркылуу жазыңыз.',
+          title: 'Суроо',
+        },
+        {
+          body: 'Студия ниетиңизди угуп, багытты тактоого жардам берет.',
+          title: 'Сүйлөшүү',
+        },
+        {
+          body: 'Чыгармачылык жана практикалык алкак түз талкууланат.',
+          title: 'Багыт',
+        },
+        {
+          body: 'Иш кийинки кадамдар так макулдашылгандан кийин башталат.',
+          title: 'Студия процесси',
+        },
+        {
+          body: 'Маек өнүккөн сайын студия сиз менен байланышта болот.',
+          title: 'Улантуу',
+        },
       ],
     },
     privateViewings: {
       benefits: 'Жакындан таанышуу',
       benefitItems: [
-        {body: 'Тандалган эмгектерди тынч шартта кунт коюп көрүңүз.', title: 'Кунт коюу'},
-        {body: 'Суроо берип, эмгек тууралуу жеткиликтүү маалыматты угуңуз.', title: 'Жеке маек'},
-        {body: 'Суроону сиз үчүн маанилүү эмгектерге ылайыктаңыз.', title: 'Ойлонулган тандоо'},
-        {body: 'Bekten Studio менен маекти жеке улантыңыз.', title: 'Маанилүү байланыш'},
+        {
+          body: 'Тандалган эмгектерди тынч шартта кунт коюп көрүңүз.',
+          title: 'Кунт коюу',
+        },
+        {
+          body: 'Суроо берип, эмгек тууралуу жеткиликтүү маалыматты угуңуз.',
+          title: 'Жеке маек',
+        },
+        {
+          body: 'Суроону сиз үчүн маанилүү эмгектерге ылайыктаңыз.',
+          title: 'Ойлонулган тандоо',
+        },
+        {
+          body: 'Bekten Studio менен маекти жеке улантыңыз.',
+          title: 'Маанилүү байланыш',
+        },
       ],
       expect: 'Эмнени күтүүгө болот',
       expectationItems: [
-        {body: 'Тандалган эмгектер жана алардын жарыяланган контексти менен таанышуу.', title: 'Таанышуу жана контекст'},
-        {body: 'Жакындан карап, өз оюңузду түзүүгө жетиштүү убакыт.', title: 'Эмгек менен убакыт'},
-        {body: 'Эмгектер жана кийинки кадамдар тууралуу суроо берүүгө мейкиндик.', title: 'Маек'},
+        {
+          body: 'Тандалган эмгектер жана алардын жарыяланган контексти менен таанышуу.',
+          title: 'Таанышуу жана контекст',
+        },
+        {
+          body: 'Жакындан карап, өз оюңузду түзүүгө жетиштүү убакыт.',
+          title: 'Эмгек менен убакыт',
+        },
+        {
+          body: 'Эмгектер жана кийинки кадамдар тууралуу суроо берүүгө мейкиндик.',
+          title: 'Маек',
+        },
       ],
       inquiry: 'Жеке көрүүгө өтүнүч',
     },
@@ -269,9 +305,18 @@ export const publicManagedCopy: Readonly<
       note: 'Студия жазмасы',
       process: 'Чыгармачылык процесс',
       processItems: [
-        {body: 'Иш калыптанганга чейин идеялар жана байкоолор чогултулат.', title: 'Байкоо'},
-        {body: 'Композиция, материал жана ритм студияда өнүгөт.', title: 'Өнүктүрүү'},
-        {body: 'Ар бир эмгек студиядан чыгар алдында толугу менен каралат.', title: 'Жыйынтыктоо'},
+        {
+          body: 'Иш калыптанганга чейин идеялар жана байкоолор чогултулат.',
+          title: 'Байкоо',
+        },
+        {
+          body: 'Композиция, материал жана ритм студияда өнүгөт.',
+          title: 'Өнүктүрүү',
+        },
+        {
+          body: 'Ар бир эмгек студиядан чыгар алдында толугу менен каралат.',
+          title: 'Жыйынтыктоо',
+        },
       ],
     },
   },
@@ -287,42 +332,102 @@ export const publicManagedCopy: Readonly<
     collectors: {
       inquiry: 'Начать запрос коллекционера',
       services: [
-        {body: 'Откройте работы, доступность которых можно обсудить сейчас.', label: 'Смотреть доступные работы', title: 'Доступные работы'},
-        {body: 'Запросите время для внимательного знакомства с выбранными работами.', label: 'Организовать частный просмотр', title: 'Частные просмотры'},
-        {body: 'Начните прямой разговор о работе для определённого контекста.', label: 'Обсудить заказ', title: 'Работы на заказ'},
+        {
+          body: 'Откройте работы, доступность которых можно обсудить сейчас.',
+          label: 'Смотреть доступные работы',
+          title: 'Доступные работы',
+        },
+        {
+          body: 'Запросите время для внимательного знакомства с выбранными работами.',
+          label: 'Организовать частный просмотр',
+          title: 'Частные просмотры',
+        },
+        {
+          body: 'Начните прямой разговор о работе для определённого контекста.',
+          label: 'Обсудить заказ',
+          title: 'Работы на заказ',
+        },
       ],
       ways: 'Способы коллекционирования',
     },
     commission: {
       faq: 'Частые вопросы',
       faqs: [
-        {answer: 'Расскажите о контексте, желаемом масштабе и приложите уместные ориентиры.', question: 'Что можно указать в запросе?'},
-        {answer: 'Да. Запрос начинает разговор и сам по себе не подтверждает заказ.', question: 'Можно ли задать вопросы до решения?'},
-        {answer: 'Направление и практические детали обсуждаются с вами до начала работы.', question: 'Как подтверждаются следующие шаги?'},
+        {
+          answer:
+            'Расскажите о контексте, желаемом масштабе и приложите уместные ориентиры.',
+          question: 'Что можно указать в запросе?',
+        },
+        {
+          answer:
+            'Да. Запрос начинает разговор и сам по себе не подтверждает заказ.',
+          question: 'Можно ли задать вопросы до решения?',
+        },
+        {
+          answer:
+            'Направление и практические детали обсуждаются с вами до начала работы.',
+          question: 'Как подтверждаются следующие шаги?',
+        },
       ],
       inquiry: 'Начать запрос на заказ',
       process: 'Процесс заказа',
       steps: [
-        {body: 'Опишите идею, контекст и вопросы в форме запроса.', title: 'Запрос'},
-        {body: 'Студия внимательно выслушает и поможет уточнить направление.', title: 'Разговор'},
-        {body: 'Художественные и практические рамки обсуждаются напрямую.', title: 'Направление'},
-        {body: 'Работа начинается после ясного согласования дальнейших шагов.', title: 'Процесс в студии'},
-        {body: 'Студия остаётся на связи по мере развития разговора.', title: 'Продолжение'},
+        {
+          body: 'Опишите идею, контекст и вопросы в форме запроса.',
+          title: 'Запрос',
+        },
+        {
+          body: 'Студия внимательно выслушает и поможет уточнить направление.',
+          title: 'Разговор',
+        },
+        {
+          body: 'Художественные и практические рамки обсуждаются напрямую.',
+          title: 'Направление',
+        },
+        {
+          body: 'Работа начинается после ясного согласования дальнейших шагов.',
+          title: 'Процесс в студии',
+        },
+        {
+          body: 'Студия остаётся на связи по мере развития разговора.',
+          title: 'Продолжение',
+        },
       ],
     },
     privateViewings: {
       benefits: 'Встреча с искусством',
       benefitItems: [
-        {body: 'Проведите время с выбранными работами в спокойной обстановке.', title: 'Внимательный взгляд'},
-        {body: 'Задайте вопросы и узнайте доступный контекст работ.', title: 'Личный диалог'},
-        {body: 'Сформируйте запрос вокруг наиболее важных для вас работ.', title: 'Продуманный выбор'},
-        {body: 'Продолжите разговор с Bekten Studio конфиденциально.', title: 'Значимая связь'},
+        {
+          body: 'Проведите время с выбранными работами в спокойной обстановке.',
+          title: 'Внимательный взгляд',
+        },
+        {
+          body: 'Задайте вопросы и узнайте доступный контекст работ.',
+          title: 'Личный диалог',
+        },
+        {
+          body: 'Сформируйте запрос вокруг наиболее важных для вас работ.',
+          title: 'Продуманный выбор',
+        },
+        {
+          body: 'Продолжите разговор с Bekten Studio конфиденциально.',
+          title: 'Значимая связь',
+        },
       ],
       expect: 'Чего ожидать',
       expectationItems: [
-        {body: 'Краткое знакомство с выбранными работами и опубликованным контекстом.', title: 'Знакомство и контекст'},
-        {body: 'Спокойное время, чтобы внимательно посмотреть и составить своё впечатление.', title: 'Время с работой'},
-        {body: 'Возможность задать вопросы о работах и дальнейших шагах.', title: 'Разговор'},
+        {
+          body: 'Краткое знакомство с выбранными работами и опубликованным контекстом.',
+          title: 'Знакомство и контекст',
+        },
+        {
+          body: 'Спокойное время, чтобы внимательно посмотреть и составить своё впечатление.',
+          title: 'Время с работой',
+        },
+        {
+          body: 'Возможность задать вопросы о работах и дальнейших шагах.',
+          title: 'Разговор',
+        },
       ],
       inquiry: 'Запросить частный просмотр',
     },
@@ -332,9 +437,18 @@ export const publicManagedCopy: Readonly<
       note: 'Заметка из студии',
       process: 'Творческий процесс',
       processItems: [
-        {body: 'Идеи, наблюдения и ориентиры собираются до появления формы.', title: 'Наблюдение'},
-        {body: 'Композиция, материал и ритм развиваются в студийной практике.', title: 'Развитие'},
-        {body: 'Каждая работа рассматривается как целое до выхода из студии.', title: 'Завершение'},
+        {
+          body: 'Идеи, наблюдения и ориентиры собираются до появления формы.',
+          title: 'Наблюдение',
+        },
+        {
+          body: 'Композиция, материал и ритм развиваются в студийной практике.',
+          title: 'Развитие',
+        },
+        {
+          body: 'Каждая работа рассматривается как целое до выхода из студии.',
+          title: 'Завершение',
+        },
       ],
     },
   },
@@ -350,42 +464,102 @@ export const publicManagedCopy: Readonly<
     collectors: {
       inquiry: 'Koleksiyoner talebi başlat',
       services: [
-        {body: 'Şu anda uygunluk görüşmesine açık eserleri keşfedin.', label: 'Uygun eserleri gör', title: 'Uygun eserler'},
-        {body: 'Seçili eserlerle daha odaklı bir ortamda karşılaşmak için talep oluşturun.', label: 'Kişisel gösterim düzenle', title: 'Kişisel gösterimler'},
-        {body: 'Belirli bir bağlam için geliştirilecek eser hakkında doğrudan konuşun.', label: 'Özel eseri görüş', title: 'Özel eserler'},
+        {
+          body: 'Şu anda uygunluk görüşmesine açık eserleri keşfedin.',
+          label: 'Uygun eserleri gör',
+          title: 'Uygun eserler',
+        },
+        {
+          body: 'Seçili eserlerle daha odaklı bir ortamda karşılaşmak için talep oluşturun.',
+          label: 'Kişisel gösterim düzenle',
+          title: 'Kişisel gösterimler',
+        },
+        {
+          body: 'Belirli bir bağlam için geliştirilecek eser hakkında doğrudan konuşun.',
+          label: 'Özel eseri görüş',
+          title: 'Özel eserler',
+        },
       ],
       ways: 'Koleksiyon oluşturma yolları',
     },
     commission: {
       faq: 'Sık sorulan sorular',
       faqs: [
-        {answer: 'Aklınızdakini anlatan bağlamı, tercih ettiğiniz ölçeği ve ilgili referansları paylaşın.', question: 'Talebime neler ekleyebilirim?'},
-        {answer: 'Evet. Talep bir konuşma başlangıcıdır ve tek başına özel eseri kesinleştirmez.', question: 'Karar vermeden önce soru sorabilir miyim?'},
-        {answer: 'Yön ve uygulamaya ilişkin ayrıntılar, çalışma başlamadan önce sizinle doğrudan görüşülür.', question: 'Sonraki adımlar nasıl kesinleşir?'},
+        {
+          answer:
+            'Aklınızdakini anlatan bağlamı, tercih ettiğiniz ölçeği ve ilgili referansları paylaşın.',
+          question: 'Talebime neler ekleyebilirim?',
+        },
+        {
+          answer:
+            'Evet. Talep bir konuşma başlangıcıdır ve tek başına özel eseri kesinleştirmez.',
+          question: 'Karar vermeden önce soru sorabilir miyim?',
+        },
+        {
+          answer:
+            'Yön ve uygulamaya ilişkin ayrıntılar, çalışma başlamadan önce sizinle doğrudan görüşülür.',
+          question: 'Sonraki adımlar nasıl kesinleşir?',
+        },
       ],
       inquiry: 'Özel eser talebi başlat',
       process: 'Özel eser süreci',
       steps: [
-        {body: 'Fikrinizi, bağlamı ve sorularınızı talep formuyla paylaşın.', title: 'Talep'},
-        {body: 'Stüdyo sizi dinler ve amaçlanan yönü netleştirmeye yardımcı olur.', title: 'Görüşme'},
-        {body: 'Sanatsal ve uygulamaya ilişkin kapsam doğrudan görüşülür.', title: 'Yön'},
-        {body: 'Çalışma ancak sonraki adımlar açıkça kararlaştırıldıktan sonra başlar.', title: 'Stüdyo süreci'},
-        {body: 'Konuşma geliştikçe stüdyo sizinle iletişimde kalır.', title: 'Devam'},
+        {
+          body: 'Fikrinizi, bağlamı ve sorularınızı talep formuyla paylaşın.',
+          title: 'Talep',
+        },
+        {
+          body: 'Stüdyo sizi dinler ve amaçlanan yönü netleştirmeye yardımcı olur.',
+          title: 'Görüşme',
+        },
+        {
+          body: 'Sanatsal ve uygulamaya ilişkin kapsam doğrudan görüşülür.',
+          title: 'Yön',
+        },
+        {
+          body: 'Çalışma ancak sonraki adımlar açıkça kararlaştırıldıktan sonra başlar.',
+          title: 'Stüdyo süreci',
+        },
+        {
+          body: 'Konuşma geliştikçe stüdyo sizinle iletişimde kalır.',
+          title: 'Devam',
+        },
       ],
     },
     privateViewings: {
       benefits: 'Daha yakından bir karşılaşma',
       benefitItems: [
-        {body: 'Seçili eserlerle kalabalıktan uzakta, odaklanarak zaman geçirin.', title: 'Yakından bakış'},
-        {body: 'Sorular sorun ve eserlerin mevcut bağlamını dinleyin.', title: 'Kişisel diyalog'},
-        {body: 'Talebi sizin için önemli eser ve sorular etrafında şekillendirin.', title: 'Özenli seçki'},
-        {body: 'Bekten Studio ile konuşmayı özel olarak sürdürün.', title: 'Anlamlı bağ'},
+        {
+          body: 'Seçili eserlerle kalabalıktan uzakta, odaklanarak zaman geçirin.',
+          title: 'Yakından bakış',
+        },
+        {
+          body: 'Sorular sorun ve eserlerin mevcut bağlamını dinleyin.',
+          title: 'Kişisel diyalog',
+        },
+        {
+          body: 'Talebi sizin için önemli eser ve sorular etrafında şekillendirin.',
+          title: 'Özenli seçki',
+        },
+        {
+          body: 'Bekten Studio ile konuşmayı özel olarak sürdürün.',
+          title: 'Anlamlı bağ',
+        },
       ],
       expect: 'Neler bekleyebilirsiniz',
       expectationItems: [
-        {body: 'Seçili eserlere ve yayımlanmış bağlamlarına kısa bir giriş.', title: 'Karşılama ve bağlam'},
-        {body: 'Yakından bakmak ve kendi karşılığınızı oluşturmak için sakin bir zaman.', title: 'Eserle zaman'},
-        {body: 'Eserler ve olası sonraki adımlar hakkında soru alanı.', title: 'Görüşme'},
+        {
+          body: 'Seçili eserlere ve yayımlanmış bağlamlarına kısa bir giriş.',
+          title: 'Karşılama ve bağlam',
+        },
+        {
+          body: 'Yakından bakmak ve kendi karşılığınızı oluşturmak için sakin bir zaman.',
+          title: 'Eserle zaman',
+        },
+        {
+          body: 'Eserler ve olası sonraki adımlar hakkında soru alanı.',
+          title: 'Görüşme',
+        },
       ],
       inquiry: 'Kişisel gösterim talep et',
     },
@@ -395,9 +569,18 @@ export const publicManagedCopy: Readonly<
       note: 'Stüdyo notu',
       process: 'Yaratıcı süreç',
       processItems: [
-        {body: 'Bir eser biçim kazanmadan önce fikirler, gözlemler ve referanslar birikir.', title: 'Gözlem'},
-        {body: 'Kompozisyon, malzeme ve ritim stüdyo pratiği içinde gelişir.', title: 'Geliştirme'},
-        {body: 'Her eser stüdyodan ayrılmadan önce bir bütün olarak değerlendirilir.', title: 'Tamamlama'},
+        {
+          body: 'Bir eser biçim kazanmadan önce fikirler, gözlemler ve referanslar birikir.',
+          title: 'Gözlem',
+        },
+        {
+          body: 'Kompozisyon, malzeme ve ritim stüdyo pratiği içinde gelişir.',
+          title: 'Geliştirme',
+        },
+        {
+          body: 'Her eser stüdyodan ayrılmadan önce bir bütün olarak değerlendirilir.',
+          title: 'Tamamlama',
+        },
       ],
     },
   },

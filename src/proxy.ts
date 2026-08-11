@@ -7,12 +7,18 @@ import {buildContentSecurityPolicy} from '@/server/security/content-security-pol
 
 const routingConfig = {
   defaultLocale: 'en',
-  localePrefix: 'always',
+  localeDetection: false,
+  localePrefix: 'as-needed',
   locales: [...APP_LOCALES],
 } as const
 
 const intlMiddleware = createMiddleware(routingConfig)
 const PUBLIC_FILE_PATTERN = /\/[^/]+\.[^/]+$/
+const PREFIXLESS_LEGACY_ROUTES = Object.freeze({
+  '/about': '/artist',
+  '/gallery': '/works',
+  '/news': '/journal',
+})
 
 export const config = {
   matcher: [
@@ -27,6 +33,26 @@ export function normalizeLegacyLocalePathname(pathname: string) {
 
   if (pathname.startsWith('/kg/')) {
     return `/ky${pathname.slice(3)}`
+  }
+
+  return null
+}
+
+export function normalizePrefixedEnglishPathname(pathname: string) {
+  if (pathname === '/en') return '/'
+
+  if (pathname.startsWith('/en/')) {
+    const prefixlessPathname = pathname.slice(3)
+
+    if (prefixlessPathname.startsWith('/news/')) {
+      return `/journal${prefixlessPathname.slice('/news'.length)}`
+    }
+
+    return (
+      PREFIXLESS_LEGACY_ROUTES[
+        prefixlessPathname as keyof typeof PREFIXLESS_LEGACY_ROUTES
+      ] ?? prefixlessPathname
+    )
   }
 
   return null
@@ -84,12 +110,14 @@ export default function proxy(request: NextRequest) {
     )
   }
 
-  const legacyPathname = normalizeLegacyLocalePathname(request.nextUrl.pathname)
+  const canonicalPathname =
+    normalizePrefixedEnglishPathname(request.nextUrl.pathname) ??
+    normalizeLegacyLocalePathname(request.nextUrl.pathname)
 
-  if (legacyPathname) {
+  if (canonicalPathname) {
     const redirectUrl = request.nextUrl.clone()
 
-    redirectUrl.pathname = legacyPathname
+    redirectUrl.pathname = canonicalPathname
 
     return withContentSecurityPolicy(
       NextResponse.redirect(redirectUrl, 308),

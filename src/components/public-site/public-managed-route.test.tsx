@@ -70,6 +70,30 @@ describe('createPublicManagedRoute', () => {
     expect(screen.getByText('GENERAL form')).toBeVisible()
   })
 
+  it.each([
+    ['artist', 'Pratiği keşfet'],
+    ['studio', 'Yaratıcı süreç'],
+    ['private-viewings', 'Daha yakından bir karşılaşma'],
+  ] as const)(
+    'renders the %s composition selected by the route',
+    async (kind, landmark) => {
+      getPage.mockResolvedValueOnce(managedPage)
+      const route = createPublicManagedRoute({
+        inquiryType:
+          kind === 'private-viewings' ? 'PRIVATE_VIEWING' : undefined,
+        kind,
+        slug: kind,
+      })
+
+      render(await route.Page({params: Promise.resolve({locale: 'tr'})}))
+
+      expect(screen.getByRole('heading', {name: landmark})).toBeVisible()
+      if (kind === 'private-viewings') {
+        expect(screen.getByText('PRIVATE_VIEWING form')).toBeVisible()
+      }
+    },
+  )
+
   it('uses managed SEO and fails closed when content or locale is unavailable', async () => {
     const route = createPublicManagedRoute({kind: 'artist', slug: 'artist'})
 

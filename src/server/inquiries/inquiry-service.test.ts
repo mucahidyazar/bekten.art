@@ -221,6 +221,39 @@ describe('inquiry service', () => {
     )
   })
 
+  it('keeps collector conversations distinct in persistence and operations', async () => {
+    const configured = configuredService()
+
+    await configured.service.submit(
+      {
+        consent: true,
+        email: 'collector@example.com',
+        locale: 'en',
+        message: 'I would like to begin a private collecting conversation.',
+        name: 'Ada Collector',
+        subject: 'Collector introduction',
+        submissionId,
+        type: 'COLLECTOR',
+      },
+      submissionContext,
+    )
+
+    expect(configured.repository.create).toHaveBeenCalledWith(
+      transaction,
+      expect.objectContaining({
+        message: 'I would like to begin a private collecting conversation.',
+        subject: 'Collector introduction',
+        type: 'COLLECTOR',
+      }),
+    )
+    expect(configured.outbox.enqueue).toHaveBeenCalledWith(
+      transaction,
+      expect.objectContaining({
+        payload: expect.objectContaining({type: 'COLLECTOR'}),
+      }),
+    )
+  })
+
   it('returns the same generic result for duplicate and missing-artwork submissions', async () => {
     const duplicate = configuredService()
     const missing = configuredService()

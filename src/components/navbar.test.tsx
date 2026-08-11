@@ -28,6 +28,6 @@ describe('Navbar', () => {
 
     expect(
       screen.getAllByRole('link').map(link => link.getAttribute('href')),
-    ).toEqual(['/en', '/en/news', '/en/about', '/en/gallery', '/en/contact'])
+    ).toEqual(['/', '/news', '/about', '/gallery', '/contact'])
   })
 })

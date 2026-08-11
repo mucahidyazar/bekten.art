@@ -59,7 +59,7 @@ export default defineConfig({
       },
     },
     environment: 'jsdom',
-    exclude: [...configDefaults.exclude, 'backup/**'],
+    exclude: [...configDefaults.exclude],
     globals: true,
     include: [
       'prisma/**/*.test.ts',

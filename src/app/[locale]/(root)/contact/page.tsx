@@ -1,294 +1,279 @@
-import {Metadata} from 'next'
+import type {Metadata} from 'next'
 
-import {
-  ClockIcon,
-  LinkIcon,
-  MailIcon,
-  MapPinIcon,
-  PaletteIcon,
-  PhoneIcon,
-} from 'lucide-react'
-import {getLocale, getTranslations} from 'next-intl/server'
+import Link from 'next/link'
+
+import {getLocale} from 'next-intl/server'
 
 import {ConsentGoogleMap} from '@/components/consent/google-map'
-import {FeedbackForm} from '@/components/forms/feedback-form'
-import {CallToAction} from '@/components/molecules/call-to-action'
-import {Badge} from '@/components/ui/badge'
-import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
-import {Separator} from '@/components/ui/separator'
+import {PublicInquiryForm} from '@/components/public-inquiry'
+import {PublicArtworkFrame} from '@/components/public-site/public-artwork-frame'
+import {
+  publicLocale,
+  publicShellCopy,
+  type PublicLocale,
+} from '@/components/public-site/public-copy'
+import {localizedPath} from '@/lib/localized-path'
 import {getPublicContactInfo} from '@/server/contact/public-contact'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
+const contactCopy: Readonly<
+  Record<
+    PublicLocale,
+    Readonly<{
+      address: string
+      contactDetails: string
+      description: string
+      exhibitionDescription: string
+      inquiryIntro: string
+      inquiryType: string
+      instagram: string
+      mapTitle: string
+      metaDescription: string
+      phone: string
+      serviceDescriptions: Readonly<{
+        availability: string
+        commission: string
+        privateViewing: string
+      }>
+      title: string
+    }>
+  >
+> = Object.freeze({
+  en: {
+    address: 'Studio',
+    contactDetails: 'Direct contact',
+    description:
+      'For the archive, exhibitions, commissions and private viewings, begin a conversation with Bekten Studio.',
+    exhibitionDescription: 'Exhibition proposals and collaborations.',
+    inquiryIntro: 'Choose the conversation that best matches your inquiry.',
+    inquiryType: 'Inquiry type',
+    instagram: 'Instagram',
+    mapTitle: 'Bekten Studio map',
+    metaDescription:
+      'Contact Bekten Studio about artwork availability, commissions, exhibitions and private viewings.',
+    phone: 'Phone',
+    serviceDescriptions: {
+      availability: 'Questions about available and upcoming works.',
+      commission: 'Discuss an artwork created for a particular setting.',
+      privateViewing: 'Arrange a focused conversation and studio viewing.',
+    },
+    title: 'Contact',
+  },
+  ky: {
+    address: 'Устакана',
+    contactDetails: 'Түз байланыш',
+    description:
+      'Архив, көргөзмөлөр, буйрутмалар жана жеке көрүүлөр боюнча Bekten Studio менен сүйлөшүүнү баштаңыз.',
+    exhibitionDescription: 'Көргөзмө сунуштары жана кызматташтык.',
+    inquiryIntro: 'Сурооңузга эң ылайыктуу багытты тандаңыз.',
+    inquiryType: 'Кайрылуунун түрү',
+    instagram: 'Instagram',
+    mapTitle: 'Bekten Studio картасы',
+    metaDescription:
+      'Чыгармалар, буйрутмалар, көргөзмөлөр жана жеке көрүүлөр боюнча Bekten Studio менен байланышыңыз.',
+    phone: 'Телефон',
+    serviceDescriptions: {
+      availability: 'Жеткиликтүү жана жаңы эмгектер тууралуу суроолор.',
+      commission: 'Белгилүү бир мейкиндик үчүн жаңы эмгекти талкуулоо.',
+      privateViewing: 'Студияда жеке көрүү жана маек уюштуруу.',
+    },
+    title: 'Байланыш',
+  },
+  ru: {
+    address: 'Студия',
+    contactDetails: 'Прямая связь',
+    description:
+      'Свяжитесь с Bekten Studio по вопросам архива, выставок, заказов и частных просмотров.',
+    exhibitionDescription: 'Выставочные предложения и сотрудничество.',
+    inquiryIntro: 'Выберите направление, которое соответствует вашему запросу.',
+    inquiryType: 'Тип запроса',
+    instagram: 'Instagram',
+    mapTitle: 'Карта Bekten Studio',
+    metaDescription:
+      'Свяжитесь с Bekten Studio по вопросам доступности работ, заказов, выставок и частных просмотров.',
+    phone: 'Телефон',
+    serviceDescriptions: {
+      availability: 'Вопросы о доступных и готовящихся работах.',
+      commission: 'Обсудить произведение для определённого пространства.',
+      privateViewing: 'Организовать личную беседу и просмотр в студии.',
+    },
+    title: 'Контакты',
+  },
+  tr: {
+    address: 'Stüdyo',
+    contactDetails: 'Doğrudan iletişim',
+    description:
+      'Arşiv, sergiler, özel eserler ve kişisel gösterimler için Bekten Studio ile bir görüşme başlatın.',
+    exhibitionDescription: 'Sergi önerileri ve iş birlikleri.',
+    inquiryIntro: 'Talebinize en uygun görüşme başlığını seçin.',
+    inquiryType: 'Talep türü',
+    instagram: 'Instagram',
+    mapTitle: 'Bekten Studio haritası',
+    metaDescription:
+      'Eser uygunluğu, özel eser, sergi ve kişisel gösterim için Bekten Studio ile iletişime geçin.',
+    phone: 'Telefon',
+    serviceDescriptions: {
+      availability: 'Mevcut ve yakında sunulacak eserler hakkında sorular.',
+      commission: 'Belirli bir mekân için üretilecek eseri görüşün.',
+      privateViewing: 'Odaklı bir görüşme ve stüdyo ziyareti planlayın.',
+    },
+    title: 'İletişim',
+  },
+})
+
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('contact')
+  const locale = publicLocale(await getLocale())
+  const copy = contactCopy[locale]
 
   return prepareMetadata({
-    title: t('metaTitle'),
-    description: t('metaDescription'),
-    page: 'contact',
+    alternates: {canonical: localizedPath(locale, '/contact')},
+    contentLocale: locale,
+    description: copy.metaDescription,
+    title: copy.title,
   })
 }
 
 export default async function ContactPage() {
-  const [t, locale] = await Promise.all([
-    getTranslations('contact'),
-    getLocale(),
-  ])
-
-  const contactData = await getPublicContactInfo(
-    locale as 'en' | 'tr' | 'ru' | 'ky',
-  )
-
-  if (!contactData) {
-    return (
-      <div className="app-container w-full space-y-10 pt-8">
-        <div className="app-container space-y-6 text-center">
-          <h1 className="text-4xl font-bold lg:text-6xl">
-            {t('contactUnavailable')}
-          </h1>
-          <p className="text-muted-foreground text-xl">
-            {t('contactUnavailableDescription')}
-          </p>
-        </div>
-        <FeedbackForm locale={locale as 'en' | 'tr' | 'ru' | 'ky'} />
-      </div>
-    )
-  }
-
-  // Get social media links
-  const userSocials = contactData.socials
-
-  // Prepare contact info
-  const contactInfo = {
-    address: contactData.address,
-    email: contactData.email,
-    mapEmbedUrl: contactData.mapEmbedUrl || '',
-    phone: contactData.phone,
-    workingHours: contactData.workingHours || '',
-  }
-
-  // Parse working hours JSON
-  let workingHours: Record<string, string> = {
-    'Monday - Friday': t('defaultWorkingHours.Monday - Friday'),
-    Saturday: t('defaultWorkingHours.Saturday'),
-    Sunday: t('defaultWorkingHours.Sunday'),
-  }
-
-  if (contactInfo.workingHours) {
-    try {
-      const parsedWorkingHours: unknown = JSON.parse(contactInfo.workingHours)
-
-      if (
-        parsedWorkingHours &&
-        typeof parsedWorkingHours === 'object' &&
-        Object.values(parsedWorkingHours).every(
-          value => typeof value === 'string',
-        )
-      ) {
-        workingHours = parsedWorkingHours as Record<string, string>
-      }
-    } catch {
-      // Keep the localized defaults when stored contact data is malformed.
-    }
-  }
-
-  // Parse address lines
-  const addressLines = contactInfo.address.split('\n')
+  const locale = publicLocale(await getLocale())
+  const copy = contactCopy[locale]
+  const contact = await getPublicContactInfo(locale)
+  const shellCopy = publicShellCopy[locale]
+  const inquiryOptions = [
+    {
+      description: copy.serviceDescriptions.availability,
+      href: '/available-works',
+      index: '01',
+      label: shellCopy.availability,
+    },
+    {
+      description: copy.serviceDescriptions.commission,
+      href: '/commission-a-work',
+      index: '02',
+      label: shellCopy.commission,
+    },
+    {
+      description: copy.serviceDescriptions.privateViewing,
+      href: '/private-viewings',
+      index: '03',
+      label: shellCopy.privateViewing,
+    },
+    {
+      description: copy.exhibitionDescription,
+      href: '/exhibitions',
+      index: '04',
+      label: shellCopy.exhibitions,
+    },
+  ] as const
 
   return (
-    <div className="app-container">
-      {/* Hero Section */}
-      <div className="space-y-6 text-center">
-        <div className="space-y-4">
-          <Badge
-            variant="secondary"
-            className="bg-primary/10 text-primary border-primary/20"
-          >
-            <MailIcon className="mr-2 h-3 w-3" />
-            {t('title')}
-          </Badge>
-          <h1 className="text-4xl font-bold lg:text-6xl">{t('subtitle')}</h1>
-          <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
-            {t('description')}
-          </p>
+    <div className="heritage-contact">
+      <header className="heritage-contact__hero">
+        <div className="heritage-shell heritage-contact__hero-grid">
+          <div className="heritage-contact__hero-copy">
+            <p className="heritage-kicker">Bekten Studio</p>
+            <h1 className="heritage-display">{copy.title}</h1>
+            <span aria-hidden="true" className="heritage-ornament" />
+            <p>{copy.description}</p>
+          </div>
+          <figure className="heritage-contact__portrait">
+            <PublicArtworkFrame
+              fallbackAlt="Bekten Usubaliev"
+              fallbackSrc="/me.jpg"
+              priority
+              sizes="(max-width: 760px) 100vw, 52vw"
+            />
+          </figure>
         </div>
-      </div>
+      </header>
 
-      {/* Contact Cards Grid */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        {/* Contact Information */}
-        <div className="space-y-6">
-          <Card className="border-border/50 bg-card overflow-hidden rounded-2xl border shadow-lg">
-            <CardHeader className="bg-muted/30 border-border/50 border-b">
-              <CardTitle className="flex items-center space-x-3 text-xl font-semibold">
-                <div className="bg-primary/20 flex h-8 w-8 items-center justify-center rounded-lg">
-                  <PaletteIcon className="text-primary h-4 w-4" />
+      <section
+        aria-labelledby="contact-inquiry-title"
+        className="heritage-section heritage-section--paper-light heritage-contact__conversation"
+      >
+        <div className="heritage-shell heritage-contact__conversation-grid">
+          <PublicInquiryForm
+            className="heritage-contact__form"
+            locale={locale}
+            type="GENERAL"
+          />
+
+          <aside className="heritage-contact__services">
+            <p className="heritage-kicker">02 · Bekten Studio</p>
+            <h2 id="contact-inquiry-title">{copy.inquiryType}</h2>
+            <p>{copy.inquiryIntro}</p>
+            <nav aria-label={copy.inquiryType}>
+              {inquiryOptions.map(option => (
+                <Link
+                  aria-label={option.label}
+                  className="heritage-contact__service-card"
+                  href={localizedPath(locale, option.href)}
+                  key={option.href}
+                >
+                  <span aria-hidden="true">{option.index}</span>
+                  <span>
+                    <strong>{option.label}</strong>
+                    <small>{option.description}</small>
+                  </span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              ))}
+            </nav>
+          </aside>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="contact-details-title"
+        className="heritage-contact__lower heritage-paper-grain"
+      >
+        <div className="heritage-shell heritage-contact__lower-grid">
+          <div className="heritage-contact__direct">
+            <p className="heritage-kicker">03 · Bekten Studio</p>
+            <h2 id="contact-details-title">{copy.contactDetails}</h2>
+            <address className="heritage-contact__details">
+              {contact?.email ? (
+                <a href={`mailto:${contact.email}`}>{contact.email}</a>
+              ) : null}
+              {contact?.phone ? (
+                <div>
+                  <span>{copy.phone}</span>
+                  <a href={`tel:${contact.phone.replace(/\s/gu, '')}`}>
+                    {contact.phone}
+                  </a>
                 </div>
-                <span>{t('studioInfo')}</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6 p-6">
-              {/* Address */}
-              <div className="group from-muted/30 to-muted/20 hover:from-muted/40 hover:to-muted/30 rounded-xl bg-gradient-to-r p-4 transition-colors">
-                <div className="flex items-start space-x-3">
-                  <div className="bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
-                    <MapPinIcon className="text-primary h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-foreground mb-1 font-semibold">
-                      {t('address')}
-                    </h3>
-                    {addressLines.map((line: string, index: number) => (
-                      <p key={index} className="text-muted-foreground">
-                        {line}
-                      </p>
+              ) : null}
+              {contact?.address ? (
+                <div>
+                  <span>{copy.address}</span>
+                  <p>
+                    {contact.address.split('\n').map(line => (
+                      <span key={line}>{line}</span>
                     ))}
-                  </div>
+                  </p>
                 </div>
-              </div>
-
-              {/* Phone */}
-              <div className="group from-muted/30 to-muted/20 hover:from-muted/40 hover:to-muted/30 rounded-xl bg-gradient-to-r p-4 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
-                    <PhoneIcon className="text-primary h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-foreground mb-1 font-semibold">
-                      {t('phone')}
-                    </h3>
-                    <a
-                      href={`tel:${contactInfo.phone.replace(/\s/g, '')}`}
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {contactInfo.phone}
-                    </a>
-                  </div>
+              ) : null}
+              {contact?.socials.map(social => (
+                <div key={social.id}>
+                  <span>{copy.instagram}</span>
+                  <a href={social.url} rel="noreferrer" target="_blank">
+                    {social.url.replace(/^https?:\/\/(?:www\.)?/u, '')}
+                  </a>
                 </div>
-              </div>
+              ))}
+            </address>
+          </div>
 
-              {/* Email */}
-              <div className="group from-muted/30 to-muted/20 hover:from-muted/40 hover:to-muted/30 rounded-xl bg-gradient-to-r p-4 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
-                    <MailIcon className="text-primary h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-foreground mb-1 font-semibold">
-                      {t('email')}
-                    </h3>
-                    <a
-                      href={`mailto:${contactInfo.email}`}
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {contactInfo.email}
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Social Media Links - Dynamic */}
-              {userSocials.map((social, index) => {
-                const displayText = social.url.includes('http')
-                  ? social.url.replace(/^https?:\/\//, '').replace(/^www\./, '')
-                  : social.url
-
-                return (
-                  <div
-                    key={
-                      social.id || `${social.platform}-${index}-${social.url}`
-                    }
-                  >
-                    <div className="group from-muted/30 to-muted/20 hover:from-muted/40 hover:to-muted/30 rounded-xl bg-gradient-to-r p-4 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div className="bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
-                          <LinkIcon className="text-primary h-5 w-5" />
-                        </div>
-                        <div>
-                          <h3 className="text-foreground mb-1 font-semibold capitalize">
-                            {social.platform}
-                          </h3>
-                          <a
-                            href={
-                              social.url.startsWith('http')
-                                ? social.url
-                                : `https://${social.url}`
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-muted-foreground hover:text-primary transition-colors"
-                          >
-                            {displayText}
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-
-              <Separator />
-
-              {/* Studio Hours */}
-              <div className="group from-muted/30 to-muted/20 hover:from-muted/40 hover:to-muted/30 rounded-xl bg-gradient-to-r p-4 transition-colors">
-                <div className="flex items-start space-x-3">
-                  <div className="bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
-                    <ClockIcon className="text-primary h-5 w-5" />
-                  </div>
-                  <div className="w-full">
-                    <h3 className="text-foreground mb-2 font-semibold">
-                      {t('studioHours')}
-                    </h3>
-                    <div className="text-muted-foreground w-full space-y-1 text-sm">
-                      {Object.entries(workingHours).map(([day, hours]) => (
-                        <div key={day} className="flex justify-between">
-                          <span>{day}</span>
-                          <span>{hours}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Map */}
-        <div className="space-y-6">
-          <Card className="border-border/50 bg-card overflow-hidden rounded-2xl border shadow-lg">
-            <CardHeader className="bg-muted/30 border-border/50 border-b">
-              <CardTitle className="flex items-center space-x-3 text-xl font-semibold">
-                <div className="bg-primary/20 flex h-8 w-8 items-center justify-center rounded-lg">
-                  <MapPinIcon className="text-primary h-4 w-4" />
-                </div>
-                <span>{t('findStudio')}</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
+          {contact?.mapEmbedUrl ? (
+            <div className="heritage-contact__map">
+              <p className="heritage-kicker">04 · {copy.address}</p>
               <ConsentGoogleMap
-                src={contactInfo.mapEmbedUrl}
-                title={`${t('studioName')} – ${t('studioLocation')} studio map`}
+                src={contact.mapEmbedUrl}
+                title={copy.mapTitle}
               />
-            </CardContent>
-          </Card>
+            </div>
+          ) : null}
         </div>
-      </div>
-
-      <FeedbackForm locale={locale as 'en' | 'tr' | 'ru' | 'ky'} />
-
-      <CallToAction
-        title={t('readyToTalk')}
-        description={t('readyDescription')}
-        primaryButtonText={t('sendEmail')}
-        primaryButtonHref={`mailto:${contactInfo.email}`}
-        secondaryButtonText={t('callNow')}
-        secondaryButtonHref={`tel:${contactInfo.phone.replace(/\s/g, '')}`}
-        iconName="mail"
-        className="py-0"
-      />
+      </section>
     </div>
   )
 }

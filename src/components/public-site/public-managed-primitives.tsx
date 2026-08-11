@@ -1,10 +1,9 @@
-import Image from 'next/image'
 import Link from 'next/link'
 
 import {localizedPath} from '@/lib/localized-path'
 
+import {PublicArtworkFrame} from './public-artwork-frame'
 import styles from './public-managed-pages.module.css'
-import {PublicEditorialImage} from './public-editorial-image'
 
 import type {PublicLocale} from './public-copy'
 import type {
@@ -14,6 +13,7 @@ import type {
 
 type ManagedFigureProps = Readonly<{
   fallbackSrc: string
+  framing?: 'framed' | 'panoramic' | 'plain'
   media?: PublicEditorialMediaPlacement
   priority?: boolean
   variant?: 'detail' | 'hero'
@@ -21,6 +21,7 @@ type ManagedFigureProps = Readonly<{
 
 type ManagedHeroProps = Readonly<{
   action?: Readonly<{href: string; label: string}>
+  composition?: 'framed' | 'panoramic' | 'plain'
   fallbackSrc: string
   locale: PublicLocale
   media?: PublicEditorialMediaPlacement
@@ -34,70 +35,6 @@ type EditorialLinkProps = Readonly<{
   locale: PublicLocale
 }>
 
-export function bodyParagraphs(body: string) {
-  return body
-    .split(/\n\s*\n/u)
-    .map(paragraph => paragraph.trim())
-    .filter(Boolean)
-}
-
-export function pageHero(page: PublicPage) {
-  return (
-    page.mediaPlacements.find(placement => placement.role === 'HERO') ??
-    page.mediaPlacements[0]
-  )
-}
-
-export function pageDetailMedia(page: PublicPage) {
-  const hero = pageHero(page)
-
-  return page.mediaPlacements.find(placement => placement !== hero)
-}
-
-export function ManagedFigure({
-  fallbackSrc,
-  media,
-  priority = false,
-  variant = 'detail',
-}: ManagedFigureProps) {
-  return (
-    <figure className={styles[variant === 'hero' ? 'heroFigure' : 'detailFigure']}>
-      <div className={styles.frame}>
-        {media ? (
-          <PublicEditorialImage
-            media={media}
-            priority={priority}
-            sizes={
-              variant === 'hero'
-                ? '(max-width: 800px) 100vw, 58vw'
-                : '(max-width: 800px) 100vw, 42vw'
-            }
-          />
-        ) : (
-          <Image
-            alt=""
-            aria-hidden="true"
-            fill
-            priority={priority}
-            sizes={
-              variant === 'hero'
-                ? '(max-width: 800px) 100vw, 58vw'
-                : '(max-width: 800px) 100vw, 42vw'
-            }
-            src={fallbackSrc}
-          />
-        )}
-      </div>
-      {media && (media.caption || media.credit) ? (
-        <figcaption className={styles.caption}>
-          {media.caption ? <span>{media.caption}</span> : null}
-          {media.credit ? <span>{media.credit}</span> : null}
-        </figcaption>
-      ) : null}
-    </figure>
-  )
-}
-
 export function EditorialLink({href, label, locale}: EditorialLinkProps) {
   const resolvedHref = href.startsWith('#') ? href : localizedPath(locale, href)
 
@@ -109,8 +46,46 @@ export function EditorialLink({href, label, locale}: EditorialLinkProps) {
   )
 }
 
+export function ManagedFigure({
+  fallbackSrc,
+  framing = 'framed',
+  media,
+  priority = false,
+  variant = 'detail',
+}: ManagedFigureProps) {
+  const figureClassName = [
+    styles[variant === 'hero' ? 'heroFigure' : 'detailFigure'],
+    styles[`${framing}Figure`],
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  return (
+    <figure className={figureClassName}>
+      <PublicArtworkFrame
+        className={styles[`${framing}ArtworkFrame`]}
+        fallbackSrc={fallbackSrc}
+        media={media}
+        priority={priority}
+        sizes={
+          variant === 'hero'
+            ? '(max-width: 800px) 100vw, 58vw'
+            : '(max-width: 800px) 100vw, 42vw'
+        }
+      />
+      {media && (media.caption || media.credit) ? (
+        <figcaption className={styles.caption}>
+          {media.caption ? <span>{media.caption}</span> : null}
+          {media.credit ? <span>{media.credit}</span> : null}
+        </figcaption>
+      ) : null}
+    </figure>
+  )
+}
+
 export function ManagedHero({
   action,
+  composition = 'framed',
   fallbackSrc,
   locale,
   media,
@@ -118,7 +93,9 @@ export function ManagedHero({
   paragraphs,
 }: ManagedHeroProps) {
   return (
-    <header className={styles.hero}>
+    <header
+      className={`${styles.hero} ${composition === 'panoramic' ? styles.panoramicHero : ''}`}
+    >
       <div className={styles.heroCopy}>
         {page.eyebrow ? <p className={styles.eyebrow}>{page.eyebrow}</p> : null}
         <h1 className={styles.title}>{page.title}</h1>
@@ -129,11 +106,16 @@ export function ManagedHero({
           ))}
         </div>
         {action ? (
-          <EditorialLink href={action.href} label={action.label} locale={locale} />
+          <EditorialLink
+            href={action.href}
+            label={action.label}
+            locale={locale}
+          />
         ) : null}
       </div>
       <ManagedFigure
         fallbackSrc={fallbackSrc}
+        framing={composition}
         media={media}
         priority
         variant="hero"
@@ -142,11 +124,33 @@ export function ManagedHero({
   )
 }
 
-export function SectionHeading({children}: Readonly<{children: React.ReactNode}>) {
+export function SectionHeading({
+  children,
+}: Readonly<{children: React.ReactNode}>) {
   return (
     <div className={styles.sectionHeading}>
       <h2>{children}</h2>
       <span aria-hidden="true" />
     </div>
+  )
+}
+
+export function bodyParagraphs(body: string) {
+  return body
+    .split(/\n\s*\n/u)
+    .map(paragraph => paragraph.trim())
+    .filter(Boolean)
+}
+
+export function pageDetailMedia(page: PublicPage) {
+  const hero = pageHero(page)
+
+  return page.mediaPlacements.find(placement => placement !== hero)
+}
+
+export function pageHero(page: PublicPage) {
+  return (
+    page.mediaPlacements.find(placement => placement.role === 'HERO') ??
+    page.mediaPlacements[0]
   )
 }

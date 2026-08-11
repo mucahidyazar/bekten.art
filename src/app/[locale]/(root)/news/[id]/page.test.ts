@@ -25,7 +25,7 @@ describe('legacy news detail route', () => {
     })
 
     expect(navigation.permanentRedirect).toHaveBeenCalledWith(
-      '/en/journal/studio%20visit',
+      '/journal/studio%20visit',
     )
     expect(navigation.notFound).not.toHaveBeenCalled()
   })

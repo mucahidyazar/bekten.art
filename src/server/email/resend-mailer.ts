@@ -7,7 +7,8 @@ type InquiryEmail = Readonly<{
   name: string
   relatedArtworkTitle: string | null
   subject: string | null
-  type: 'AVAILABILITY' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
+  type:
+    'AVAILABILITY' | 'COLLECTOR' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
 }>
 const emailPattern = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/u
 
@@ -269,6 +270,7 @@ function feedbackAcknowledgementContent(input: Readonly<{name: string}>) {
 
 function inquiryTypeLabel(type: InquiryEmail['type']) {
   if (type === 'AVAILABILITY') return 'Artwork availability'
+  if (type === 'COLLECTOR') return 'Collector conversation'
   if (type === 'COMMISSION') return 'Commission'
   if (type === 'PRIVATE_VIEWING') return 'Private viewing'
 

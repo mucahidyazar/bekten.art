@@ -129,13 +129,11 @@ describe('V2 cleanup contract', () => {
     },
   )
 
-  it('records the temporary backup without allowing runtime imports', () => {
-    const manifestPath = join(root, 'backup/manifest.md')
-
-    expect(existsSync(manifestPath)).toBe(true)
-    expect(source('tsconfig.json')).toMatch(/"backup"/)
-    expect(source('eslint.config.mjs')).toMatch(/backup\/\*\*/)
-    expect(source('vitest.config.mts')).toMatch(/backup\/\*\*/)
+  it('removes the temporary backup and every backup-specific config exception', () => {
+    expect(existsSync(join(root, 'backup'))).toBe(false)
+    expect(source('tsconfig.json')).not.toMatch(/"backup"/)
+    expect(source('eslint.config.mjs')).not.toMatch(/backup\/\*\*/)
+    expect(source('vitest.config.mts')).not.toMatch(/backup\/\*\*/)
 
     const runtimeFiles = ['src', 'e2e', 'scripts', 'prisma']
       .flatMap(directory => [...filesUnder(directory)])

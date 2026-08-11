@@ -111,11 +111,14 @@ describe('V2 demo seed runner', () => {
   })
 
   it('verifies the repository asset size and checksum before upload', async () => {
-    const [asset] = createDemoSeedPlan().media
+    const assets = createDemoSeedPlan().media
+    const [asset] = assets
 
-    await expect(
-      readValidatedDemoAsset(asset, process.cwd()),
-    ).resolves.toHaveLength(asset.sizeBytes)
+    for (const currentAsset of assets) {
+      await expect(
+        readValidatedDemoAsset(currentAsset, process.cwd()),
+      ).resolves.toHaveLength(currentAsset.sizeBytes)
+    }
     await expect(
       readValidatedDemoAsset(
         {...asset, checksumSha256: '0'.repeat(64)},

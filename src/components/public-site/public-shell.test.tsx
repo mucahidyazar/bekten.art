@@ -1,15 +1,21 @@
 import {render, screen, within} from '@testing-library/react'
-import {describe, expect, it} from 'vitest'
+import {describe, expect, it, vi} from 'vitest'
+
+const navigation = vi.hoisted(() => ({pathname: '/works'}))
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => navigation.pathname,
+}))
 
 import {PublicFooter} from './public-footer'
 import {PublicHeader} from './public-header'
 
 describe('editorial public shell', () => {
   it.each([
-    ['en', 'Works', 'Collections', 'Inquire'],
-    ['tr', 'Eserler', 'Koleksiyonlar', 'İletişime geç'],
-    ['ru', 'Работы', 'Коллекции', 'Связаться'],
-    ['ky', 'Эмгектер', 'Жыйнактар', 'Байланышуу'],
+    ['en', 'Works', 'Collections', 'Contact'],
+    ['tr', 'Eserler', 'Koleksiyonlar', 'İletişim'],
+    ['ru', 'Работы', 'Коллекции', 'Контакты'],
+    ['ky', 'Эмгектер', 'Жыйнактар', 'Байланыш'],
   ] as const)(
     'renders locale-aware primary navigation for %s without account or commerce links',
     (locale, works, collections, inquire) => {
@@ -29,7 +35,9 @@ describe('editorial public shell', () => {
         'href',
         locale === 'en' ? '/collections' : `/${locale}/collections`,
       )
-      expect(within(header).getByRole('link', {name: inquire})).toHaveAttribute(
+      expect(
+        within(navigation).getByRole('link', {name: inquire}),
+      ).toHaveAttribute(
         'href',
         locale === 'en' ? '/contact' : `/${locale}/contact`,
       )
@@ -48,10 +56,15 @@ describe('editorial public shell', () => {
     const home = screen.getByRole('link', {name: 'Bekten — Home'})
 
     expect(home).toHaveAttribute('href', '/')
-    expect(within(home).getByRole('img', {name: ''})).toHaveAttribute(
+    expect(home.querySelector('img')).toHaveAttribute(
       'src',
       '/svg/full-logo.svg',
     )
+    expect(
+      within(
+        screen.getByRole('navigation', {name: 'Primary navigation'}),
+      ).getByRole('link', {name: 'Works'}),
+    ).toHaveAttribute('aria-current', 'page')
   })
 
   it('provides a restrained contact footer and all premium inquiry paths', () => {

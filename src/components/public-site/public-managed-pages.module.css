@@ -1,7 +1,5 @@
 .page {
-  background:
-    radial-gradient(circle at 16% 12%, rgb(255 255 255 / 28%), transparent 24rem),
-    var(--heritage-paper);
+  background: transparent;
   color: var(--heritage-ink);
   overflow: clip;
 }
@@ -15,9 +13,10 @@
 
 .hero {
   align-items: center;
+  background: transparent;
   display: grid;
-  gap: clamp(2.5rem, 7vw, 7rem);
-  grid-template-columns: minmax(17rem, 0.72fr) minmax(24rem, 1.28fr);
+  gap: clamp(2.5rem, 5vw, 5rem);
+  grid-template-columns: minmax(20rem, 0.9fr) minmax(24rem, 1.1fr);
   min-height: min(50rem, 78vh);
   padding-block: clamp(3.5rem, 8vw, 8rem);
   position: relative;
@@ -25,8 +24,18 @@
 
 .hero::before {
   background:
-    linear-gradient(135deg, transparent 28%, rgb(116 92 58 / 6%) 28.2%, transparent 28.5%),
-    linear-gradient(18deg, transparent 54%, rgb(116 92 58 / 5%) 54.2%, transparent 54.5%);
+    linear-gradient(
+      135deg,
+      transparent 28%,
+      rgb(116 92 58 / 6%) 28.2%,
+      transparent 28.5%
+    ),
+    linear-gradient(
+      18deg,
+      transparent 54%,
+      rgb(116 92 58 / 5%) 54.2%,
+      transparent 54.5%
+    );
   content: '';
   inset: 5% 42% 0 -12vw;
   pointer-events: none;
@@ -51,7 +60,7 @@
 
 .title {
   font-family: var(--heritage-display);
-  font-size: clamp(3rem, 6vw, 6.8rem);
+  font-size: clamp(3rem, 5.2vw, 6.2rem);
   font-weight: 400;
   letter-spacing: 0.025em;
   line-height: 0.96;
@@ -97,27 +106,50 @@
   filter: drop-shadow(0 1.75rem 2rem rgb(58 43 25 / 16%));
 }
 
-.frame {
-  background: var(--heritage-paper-deep);
-  border: 1px solid color-mix(in srgb, var(--heritage-gold) 68%, var(--heritage-ink));
-  box-shadow:
-    inset 0 0 0 0.3rem var(--heritage-paper-light),
-    inset 0 0 0 0.42rem color-mix(in srgb, var(--heritage-gold) 62%, transparent),
-    0 1.25rem 3.5rem rgb(44 34 23 / 13%);
-  min-height: clamp(23rem, 50vw, 41rem);
-  overflow: hidden;
-  padding: 0.68rem;
-  position: relative;
+.plainArtworkFrame,
+.panoramicArtworkFrame {
+  filter: none;
 }
 
-.detailFigure .frame {
-  min-height: clamp(20rem, 38vw, 34rem);
+.plainArtworkFrame :global(.heritage-artwork-frame__art),
+.panoramicArtworkFrame :global(.heritage-artwork-frame__art) {
+  inset: 0;
 }
 
-.frame img {
-  height: 100%;
-  object-fit: cover;
-  width: 100%;
+.plainArtworkFrame :global(.heritage-artwork-frame__overlay),
+.panoramicArtworkFrame :global(.heritage-artwork-frame__overlay) {
+  display: none;
+}
+
+.panoramicHero {
+  grid-template-columns: minmax(0, 1fr);
+  isolation: isolate;
+}
+
+.panoramicHero .heroCopy,
+.panoramicHero .panoramicFigure {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.panoramicHero .heroCopy {
+  padding-left: clamp(0rem, 2vw, 2rem);
+  width: min(36%, 34rem);
+}
+
+.panoramicFigure {
+  filter: none;
+  inset: 0;
+  z-index: -1;
+}
+
+.panoramicArtworkFrame {
+  aspect-ratio: 1672 / 941;
+  min-height: min(50rem, 78vh);
+}
+
+.panoramicArtworkFrame :global(.heritage-artwork-frame__art img) {
+  object-position: center;
 }
 
 .caption {
@@ -146,7 +178,10 @@
   padding: 0.75rem 1.15rem;
   text-decoration: none;
   text-transform: uppercase;
-  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
 }
 
 .textLink:hover {
@@ -189,7 +224,10 @@
   align-items: start;
   display: grid;
   gap: clamp(2rem, 6vw, 6rem);
-  grid-template-columns: minmax(14rem, 0.65fr) minmax(18rem, 0.8fr) minmax(20rem, 1.2fr);
+  grid-template-columns: minmax(14rem, 0.65fr) minmax(18rem, 0.8fr) minmax(
+      20rem,
+      1.2fr
+    );
   padding-block: clamp(4rem, 8vw, 8rem);
 }
 
@@ -267,7 +305,11 @@
 
 .studioNote {
   background:
-    radial-gradient(circle at 90% 30%, rgb(154 123 66 / 12%), transparent 26rem),
+    radial-gradient(
+      circle at 90% 30%,
+      rgb(154 123 66 / 12%),
+      transparent 26rem
+    ),
     color-mix(in srgb, var(--heritage-paper-light) 62%, transparent);
   border: 1px solid var(--heritage-line);
   margin-block: clamp(1rem, 4vw, 4rem);
@@ -282,11 +324,13 @@
 }
 
 .processSection > .sectionHeading,
+.processSection > .shell > .sectionHeading,
 .servicesSection .sectionHeading {
   text-align: center;
 }
 
 .processSection > .sectionHeading > span,
+.processSection > .shell > .sectionHeading > span,
 .servicesSection .sectionHeading > span {
   margin-inline: auto;
 }
@@ -473,6 +517,25 @@
     grid-template-columns: 1fr;
   }
 
+  .panoramicHero {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panoramicHero .heroCopy {
+    padding-left: 0;
+    width: 100%;
+  }
+
+  .panoramicFigure {
+    order: 2;
+    z-index: 0;
+  }
+
+  .panoramicArtworkFrame {
+    min-height: clamp(22rem, 68vw, 34rem);
+  }
+
   .hero {
     min-height: auto;
   }
@@ -501,6 +564,7 @@
   }
 
   .commissionSteps li:nth-child(3),
+  .commissionSteps li:nth-child(5),
   .benefitsGrid article:nth-child(3) {
     border-left: 0;
   }
@@ -518,11 +582,6 @@
 
   .title {
     font-size: clamp(2.8rem, 14vw, 4.7rem);
-  }
-
-  .frame,
-  .detailFigure .frame {
-    min-height: min(116vw, 32rem);
   }
 
   .caption {

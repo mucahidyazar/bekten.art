@@ -32,7 +32,7 @@ test.describe('consent mode and Google network gating', () => {
       gtmRequests.push(route.request().url())
       await route.fulfill({body: '', contentType: 'application/javascript'})
     })
-    await page.goto('/en')
+    await page.goto('/')
 
     const defaultConsent = await page.evaluate(() => {
       const entries = (window.dataLayer ?? []).map(entry =>
@@ -55,12 +55,14 @@ test.describe('consent mode and Google network gating', () => {
 
     await page.getByRole('button', {name: 'Accept all'}).click()
 
-    await expect.poll(() => readConsent(page)).toMatchObject({
-      analytics: true,
-      externalMedia: true,
-      marketing: true,
-      version: 1,
-    })
+    await expect
+      .poll(() => readConsent(page))
+      .toMatchObject({
+        analytics: true,
+        externalMedia: true,
+        marketing: true,
+        version: 1,
+      })
     await expect(page.locator('script#google-tag-manager')).toHaveCount(1)
     await expect.poll(() => gtmRequests.length).toBe(1)
   })
@@ -80,15 +82,17 @@ test.describe('consent mode and Google network gating', () => {
       }
     })
 
-    await page.goto('/en')
+    await page.goto('/')
     await page.getByRole('button', {name: 'Reject optional'}).click()
 
-    await expect.poll(() => readConsent(page)).toMatchObject({
-      analytics: false,
-      externalMedia: false,
-      marketing: false,
-      version: 1,
-    })
+    await expect
+      .poll(() => readConsent(page))
+      .toMatchObject({
+        analytics: false,
+        externalMedia: false,
+        marketing: false,
+        version: 1,
+      })
 
     await page.reload()
 
@@ -102,7 +106,7 @@ test.describe('consent mode and Google network gating', () => {
     await page.route(GTM_ROUTE, async route => {
       await route.fulfill({body: '', contentType: 'application/javascript'})
     })
-    await page.goto('/en')
+    await page.goto('/')
     await page.getByRole('button', {name: 'Accept all'}).click()
     await page.getByRole('button', {name: 'Open privacy preferences'}).click()
 
@@ -111,12 +115,14 @@ test.describe('consent mode and Google network gating', () => {
     await page.getByRole('checkbox', {name: 'External media'}).uncheck()
     await page.getByRole('button', {name: 'Save preferences'}).click()
 
-    await expect.poll(() => readConsent(page)).toMatchObject({
-      analytics: false,
-      externalMedia: false,
-      marketing: false,
-      version: 1,
-    })
+    await expect
+      .poll(() => readConsent(page))
+      .toMatchObject({
+        analytics: false,
+        externalMedia: false,
+        marketing: false,
+        version: 1,
+      })
 
     const latestConsentUpdate = await page.evaluate(() => {
       const updates = (window.dataLayer ?? [])

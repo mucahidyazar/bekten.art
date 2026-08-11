@@ -1,199 +1,298 @@
 import {Metadata} from 'next'
 
+import Image from 'next/image'
 import Link from 'next/link'
 
+import {PublicArtworkFrame} from '@/components/public-site/public-artwork-frame'
+import {PublicArtworkGrid} from '@/components/public-site/public-artwork-grid'
 import {
-  ArrowRightIcon,
-  HeartIcon,
-  PaletteIcon,
-  SparklesIcon,
-} from 'lucide-react'
-import {getTranslations} from 'next-intl/server'
-
-import {CallToAction} from '@/components/molecules/call-to-action'
-import {HeroVideo} from '@/components/molecules/hero-video'
-import {TestimonialsSection} from '@/components/molecules/testimonials-section'
-import {ArtistSection} from '@/components/sections/artist-section'
-import {MemoriesSection} from '@/components/sections/memories-section'
-import {WorkshopSection} from '@/components/sections/workshop-section'
-import {Badge} from '@/components/ui/badge'
-import {buttonVariants} from '@/components/ui/button'
+  publicLocale,
+  type PublicLocale,
+} from '@/components/public-site/public-copy'
+import {PublicEditorialCard} from '@/components/public-site/public-editorial-card'
+import {getSiteIdentity} from '@/components/seo/site-identity'
 import {localizedPath} from '@/lib/localized-path'
-import {getHomepageContent} from '@/services'
-import {cn} from '@/utils'
+import {publicEditorialReader} from '@/server/public-editorial'
 import {prepareMetadata} from '@/utils/prepare-metadata'
 
-import type {AppLocale} from '@/lib/localized-path'
+import type {PublicEditorialMediaPlacement} from '@/server/public-editorial'
 
-type PageProps = Readonly<{params: Promise<{locale: AppLocale}>}>
+type PageProps = Readonly<{params: Promise<{locale: string}>}>
+
+const homeCopy: Readonly<
+  Record<
+    PublicLocale,
+    Readonly<{
+      archiveEmpty: string
+      archiveLabel: string
+      aboutArtist: string
+      aboutLabel: string
+      collections: string
+      contextsLabel: string
+      exhibitions: string
+      exploreWorks: string
+      intro: string
+      journal: string
+      kicker: string
+      latestStories: string
+      selectedWorks: string
+      title: string
+      discoverArtist: string
+      viewAll: string
+    }>
+  >
+> = Object.freeze({
+  en: {
+    archiveEmpty: 'The Studio is preparing this part of the archive.',
+    archiveLabel: 'Archive',
+    aboutArtist: 'About the artist',
+    aboutLabel: 'Artist & studio',
+    collections: 'Collections',
+    contextsLabel: 'Notes & contexts',
+    exhibitions: 'Exhibitions',
+    exploreWorks: 'Explore works',
+    intro:
+      'Bekten’s practice brings landscape, inherited memory and human presence into quiet conversation.',
+    journal: 'Journal',
+    kicker: 'Contemporary artist · Bishkek',
+    latestStories: 'From the working archive',
+    selectedWorks: 'Selected works',
+    title: 'Art that remembers',
+    discoverArtist: 'Discover the artist',
+    viewAll: 'View the archive',
+  },
+  ky: {
+    archiveEmpty: 'Студия архивдин бул бөлүгүн даярдап жатат.',
+    archiveLabel: 'Архив',
+    aboutArtist: 'Сүрөтчү жөнүндө',
+    aboutLabel: 'Сүрөтчү жана студия',
+    collections: 'Жыйнактар',
+    contextsLabel: 'Жазуулар жана контексттер',
+    exhibitions: 'Көргөзмөлөр',
+    exploreWorks: 'Эмгектерди көрүү',
+    intro:
+      'Бектендин чыгармачылыгы пейзажды, мураска калган эстутумду жана адамдын катышуусун тынч баарлашууга бириктирет.',
+    journal: 'Журнал',
+    kicker: 'Заманбап сүрөтчү · Бишкек',
+    latestStories: 'Иштөөчү архивден',
+    selectedWorks: 'Тандалган эмгектер',
+    title: 'Эстеген искусство',
+    discoverArtist: 'Сүрөтчүнү таануу',
+    viewAll: 'Архивди көрүү',
+  },
+  ru: {
+    archiveEmpty: 'Студия готовит эту часть архива.',
+    archiveLabel: 'Архив',
+    aboutArtist: 'О художнике',
+    aboutLabel: 'Художник и студия',
+    collections: 'Коллекции',
+    contextsLabel: 'Заметки и контексты',
+    exhibitions: 'Выставки',
+    exploreWorks: 'Смотреть работы',
+    intro:
+      'Практика Бектена соединяет пейзаж, унаследованную память и человеческое присутствие в тихом диалоге.',
+    journal: 'Журнал',
+    kicker: 'Современный художник · Бишкек',
+    latestStories: 'Из рабочего архива',
+    selectedWorks: 'Избранные работы',
+    title: 'Искусство, которое помнит',
+    discoverArtist: 'Узнать о художнике',
+    viewAll: 'Смотреть архив',
+  },
+  tr: {
+    archiveEmpty: 'Stüdyo arşivin bu bölümünü hazırlıyor.',
+    archiveLabel: 'Arşiv',
+    aboutArtist: 'Sanatçı hakkında',
+    aboutLabel: 'Sanatçı ve stüdyo',
+    collections: 'Koleksiyonlar',
+    contextsLabel: 'Notlar ve bağlamlar',
+    exhibitions: 'Sergiler',
+    exploreWorks: 'Eserleri keşfet',
+    intro:
+      'Bekten’in pratiği peyzajı, miras kalan hafızayı ve insan varlığını sakin bir diyalogda buluşturuyor.',
+    journal: 'Journal',
+    kicker: 'Çağdaş sanatçı · Bişkek',
+    latestStories: 'Çalışan arşivden',
+    selectedWorks: 'Seçili eserler',
+    title: 'Hatırlayan sanat',
+    discoverArtist: 'Sanatçıyı keşfet',
+    viewAll: 'Arşivi incele',
+  },
+})
+
+function firstMedia(placements: readonly PublicEditorialMediaPlacement[]) {
+  return (
+    placements.find(placement => placement.role === 'HERO') ?? placements[0]
+  )
+}
 
 export async function generateMetadata({params}: PageProps): Promise<Metadata> {
-  const {locale} = await params
-  const t = await getTranslations({locale, namespace: 'homepage'})
+  const locale = publicLocale((await params).locale)
+  const copy = homeCopy[locale]
 
   return prepareMetadata({
-    title: t('metaTitle'),
-    description: t('metaDescription'),
+    contentLocale: locale,
+    description: copy.intro,
+    title: `${copy.title} — Bekten`,
   })
 }
 
 export default async function Home({params}: PageProps) {
-  const {locale} = await params
-  const [t, content] = await Promise.all([
-    getTranslations({locale, namespace: 'homepage'}),
-    getHomepageContent(locale),
-  ])
+  const locale = publicLocale((await params).locale)
+  const copy = homeCopy[locale]
+  const identity = getSiteIdentity(locale)
+  const content = await publicEditorialReader.getHomepage(locale)
+  const heroMedia = content.hero
+    ? firstMedia(content.hero.mediaPlacements)
+    : null
+  const editorialFeatures = [
+    ...content.collections.slice(0, 1).map(entry => ({
+      description: entry.description,
+      eyebrow: copy.collections,
+      href: localizedPath(locale, `/collections/${entry.slug}`),
+      id: entry.id,
+      media: firstMedia(entry.mediaPlacements),
+      title: entry.title,
+    })),
+    ...content.exhibitions.slice(0, 1).map(entry => ({
+      description: entry.subtitle || entry.body,
+      eyebrow: copy.exhibitions,
+      href: localizedPath(locale, `/exhibitions/${entry.slug}`),
+      id: entry.id,
+      media: firstMedia(entry.mediaPlacements),
+      title: entry.title,
+    })),
+    ...content.journalEntries.slice(0, 1).map(entry => ({
+      description: entry.excerpt,
+      eyebrow: copy.journal,
+      href: localizedPath(locale, `/journal/${entry.slug}`),
+      id: entry.id,
+      media: firstMedia(entry.mediaPlacements),
+      title: entry.title,
+    })),
+  ]
 
   return (
-    <div id="home" className="w-full pt-8">
-      {/* Creative Artist Hero Section */}
-      <section
-        aria-labelledby="home-hero-heading"
-        className="relative overflow-hidden pt-10 pb-40"
-      >
-        {/* Artistic Background Elements */}
-        <div aria-hidden="true" className="absolute inset-0">
-          {/* Paint Splashes */}
-          <div className="bg-primary/20 animate-float absolute top-20 left-20 h-4 w-4 rounded-full blur-sm" />
-          <div className="bg-primary/15 animate-float-delayed absolute top-40 right-32 h-6 w-6 rounded-full blur-md" />
-          <div className="bg-primary/25 animate-float-slow absolute bottom-40 left-1/3 h-3 w-3 rounded-full blur-sm" />
-          <div className="bg-primary/10 animate-float absolute top-1/2 right-1/4 h-5 w-5 rounded-full blur-lg" />
-
-          {/* Brush Strokes */}
-          <div className="from-primary/20 animate-brush-stroke absolute top-32 left-1/4 h-1 w-20 rotate-12 bg-gradient-to-r to-transparent" />
-          <div className="from-primary/15 animate-brush-stroke animation-delay-400 absolute right-1/3 bottom-32 h-1 w-16 -rotate-12 bg-gradient-to-l to-transparent" />
-          <div className="from-primary/10 animate-brush-stroke animation-delay-800 absolute top-2/3 left-10 h-1 w-12 rotate-45 bg-gradient-to-r to-transparent" />
-
-          {/* Canvas Texture */}
-          <div className="bg-canvas-texture absolute inset-0 opacity-5" />
-        </div>
-
-        {/* Floating Art Elements */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 overflow-hidden"
-        >
-          {/* Palette */}
-          <div className="animate-float-palette absolute top-1/4 left-16 h-8 w-8">
-            <PaletteIcon className="text-primary/20 h-full w-full" />
+    <div className="heritage-home">
+      <section className="heritage-home-hero">
+        <div className="heritage-shell heritage-home-hero__grid">
+          <div className="heritage-home-hero__copy">
+            <p className="heritage-kicker">{copy.kicker}</p>
+            <h1 className="heritage-display">{copy.title}</h1>
+            <p>{copy.intro}</p>
+            <Link
+              className="heritage-button"
+              href={localizedPath(locale, '/works')}
+            >
+              {copy.exploreWorks}
+              <span aria-hidden="true">→</span>
+            </Link>
           </div>
 
-          {/* Brushes */}
-          <div className="animate-float-brush absolute right-20 bottom-1/3 h-6 w-6 rotate-45">
-            <div className="bg-primary/15 h-full w-full rounded-full" />
-          </div>
-
-          {/* Color Drops */}
-          <div className="animate-color-drop absolute top-1/3 right-1/2 h-2 w-2 rounded-full bg-red-400/30" />
-          <div className="animate-color-drop animation-delay-600 absolute top-1/2 left-1/3 h-2 w-2 rounded-full bg-blue-400/30" />
-          <div className="animate-color-drop animation-delay-1200 absolute bottom-1/4 left-1/2 h-2 w-2 rounded-full bg-yellow-400/30" />
+          {content.hero && heroMedia ? (
+            <figure className="heritage-home-hero__art">
+              <PublicArtworkFrame
+                media={heroMedia}
+                priority
+                sizes="(max-width: 768px) 100vw, 58vw"
+              />
+              <figcaption className="heritage-home-hero__caption">
+                <span>{content.hero.title}</span>
+                <span>
+                  {[content.hero.year, content.hero.medium]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </span>
+              </figcaption>
+            </figure>
+          ) : null}
         </div>
+      </section>
 
-        <div className="app-container relative py-20">
-          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
-            {/* Artist Introduction */}
-            <div className="animate-fade-in-up space-y-8">
-              <div className="space-y-6">
-                <div className="animate-fade-in-up animation-delay-200">
-                  <Badge
-                    variant="secondary"
-                    className="bg-primary/10 text-primary border-primary/20 animate-pulse-gentle w-fit"
-                  >
-                    <SparklesIcon aria-hidden="true" className="mr-2 h-3 w-3" />
-                    {t('heroTitle')}
-                  </Badge>
-                </div>
-
-                <div className="animate-fade-in-up animation-delay-400">
-                  <h1
-                    id="home-hero-heading"
-                    className="text-6xl leading-none font-bold lg:text-8xl"
-                  >
-                    <span className="from-foreground via-primary to-foreground/70 animate-gradient-slow block bg-gradient-to-r bg-clip-text text-transparent">
-                      Bekten
-                    </span>
-                    <span className="from-primary via-foreground to-primary/70 animate-gradient-slow animation-delay-300 block bg-gradient-to-r bg-clip-text text-transparent">
-                      Usubaliev
-                    </span>
-                  </h1>
-                </div>
-
-                <div className="animate-fade-in-up animation-delay-600">
-                  <p className="text-2xl leading-relaxed font-light lg:text-3xl">
-                    {t('heroSubtitle')}
-                  </p>
-                  <p className="text-muted-foreground animate-fade-in animation-delay-800 mt-4 text-lg">
-                    {t('heroDescription')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="animate-fade-in-up animation-delay-1000 flex flex-wrap gap-4">
-                <Link
-                  href={localizedPath(locale, '/gallery')}
-                  className={cn(
-                    buttonVariants({size: 'lg'}),
-                    'bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-primary/25 group shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-xl',
-                  )}
-                >
-                  <PaletteIcon
-                    aria-hidden="true"
-                    className="mr-2 h-4 w-4 transition-transform group-hover:rotate-12"
-                  />
-                  {t('heroButton1')}
-                  <ArrowRightIcon
-                    aria-hidden="true"
-                    className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
-                  />
-                </Link>
-                <Link
-                  href={localizedPath(locale, '/about')}
-                  className={cn(
-                    buttonVariants({variant: 'outline', size: 'lg'}),
-                    'border-primary/30 text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground group transition-all duration-500 hover:scale-105',
-                  )}
-                >
-                  <HeartIcon
-                    aria-hidden="true"
-                    className="mr-2 h-4 w-4 transition-transform group-hover:scale-110"
-                  />
-                  {t('heroButton2')}
-                </Link>
-              </div>
+      <section className="heritage-section heritage-section--paper-light">
+        <div className="heritage-shell">
+          <div className="heritage-section-heading">
+            <div>
+              <p className="heritage-kicker">01 · {copy.archiveLabel}</p>
+              <h2>{copy.selectedWorks}</h2>
             </div>
-
-            {/* Hero Video */}
-            <div className="animate-fade-in-right animation-delay-1200 relative lg:order-2">
-              <HeroVideo />
-            </div>
+            <Link
+              className="heritage-text-link"
+              href={localizedPath(locale, '/works')}
+            >
+              {copy.viewAll}
+            </Link>
           </div>
+          {content.works.length > 0 ? (
+            <PublicArtworkGrid
+              locale={locale}
+              priorityFirst={!heroMedia}
+              works={content.works}
+            />
+          ) : (
+            <p>{copy.archiveEmpty}</p>
+          )}
         </div>
+      </section>
 
-        {/* Artistic Scroll Indicator */}
-        <div
-          aria-hidden="true"
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 transform animate-bounce"
-        >
-          <div className="border-primary/40 relative flex h-12 w-8 justify-center rounded-full border-2">
-            <div className="from-primary/60 to-primary/20 mt-2 h-4 w-1.5 animate-pulse rounded-full bg-gradient-to-b" />
-            <PaletteIcon className="text-primary/30 animate-spin-slow absolute -top-1 -right-1 h-3 w-3" />
+      <section className="heritage-artist-strip heritage-illustrated-band">
+        <div className="heritage-shell heritage-artist-strip__grid">
+          <figure className="heritage-artist-strip__portrait">
+            <Image
+              alt="Bekten Usubaliev"
+              height={778}
+              sizes="(max-width: 768px) 100vw, 34vw"
+              src="/me.jpg"
+              width={1180}
+            />
+          </figure>
+          <div className="heritage-artist-strip__copy">
+            <p className="heritage-kicker">{copy.aboutLabel}</p>
+            <h2>{copy.aboutArtist}</h2>
+            <p>{identity.artistDescription}</p>
+            <Link
+              className="heritage-button"
+              href={localizedPath(locale, '/artist')}
+            >
+              {copy.discoverArtist}
+              <span aria-hidden="true">→</span>
+            </Link>
           </div>
         </div>
       </section>
 
-      <CallToAction />
+      {editorialFeatures.length > 0 ? (
+        <section className="heritage-section">
+          <div className="heritage-shell">
+            <div className="heritage-section-heading">
+              <div>
+                <p className="heritage-kicker">02 · {copy.contextsLabel}</p>
+                <h2>{copy.latestStories}</h2>
+              </div>
+            </div>
+            <div className="heritage-editorial-grid">
+              {editorialFeatures.map(feature => (
+                <PublicEditorialCard {...feature} key={feature.id} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
-      {/* Workshop Showcase Section */}
-      <WorkshopSection items={content.workshopItems} locale={locale} />
-
-      {/* Artist Section */}
-      <ArtistSection items={content.artistStats} locale={locale} />
-
-      {/* Testimonials Section */}
-      <TestimonialsSection items={content.testimonials} />
-
-      {/* Memories in Paint Section */}
-      <MemoriesSection items={content.memories} locale={locale} />
+      <section className="heritage-home-quote heritage-paper-grain">
+        <div className="heritage-shell">
+          <blockquote>
+            <span aria-hidden="true">“</span>
+            {copy.intro}
+          </blockquote>
+          <Link
+            className="heritage-text-link"
+            href={localizedPath(locale, '/artist')}
+          >
+            Bekten
+          </Link>
+        </div>
+      </section>
     </div>
   )
 }

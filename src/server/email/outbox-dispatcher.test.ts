@@ -54,8 +54,12 @@ function configuredDispatcher(overrides: Record<string, unknown> = {}) {
     sendEmailVerification: vi.fn().mockResolvedValue({id: 'verify-id'}),
     sendFeedbackAcknowledgement: vi.fn().mockResolvedValue({id: 'ack-id'}),
     sendFeedbackNotification: vi.fn().mockResolvedValue({id: 'support-id'}),
-    sendInquiryAcknowledgement: vi.fn().mockResolvedValue({id: 'inquiry-ack-id'}),
-    sendInquiryNotification: vi.fn().mockResolvedValue({id: 'inquiry-support-id'}),
+    sendInquiryAcknowledgement: vi
+      .fn()
+      .mockResolvedValue({id: 'inquiry-ack-id'}),
+    sendInquiryNotification: vi
+      .fn()
+      .mockResolvedValue({id: 'inquiry-support-id'}),
     sendNewsletterConfirmation: vi.fn().mockResolvedValue({id: 'confirm-id'}),
     sendNewsletterWelcome: vi.fn().mockResolvedValue({id: 'welcome-id'}),
     sendPasswordReset: vi.fn().mockResolvedValue({id: 'reset-id'}),
@@ -146,6 +150,38 @@ describe('outbox dispatcher', () => {
       to: 'collector@example.com',
       type: 'AVAILABILITY',
     })
+  })
+
+  it('delivers a collector inquiry without collapsing it into a general inquiry', async () => {
+    const inquiryId = 'f0cfe454-08e7-433c-95af-ddf49ee64a80'
+    const {dispatcher, mailer, store} = configuredDispatcher({
+      idempotencyKey: `inquiry.created:${inquiryId}`,
+      payload: {inquiryId, locale: 'en', type: 'COLLECTOR'},
+      type: 'inquiry.created',
+    })
+
+    store.findInquiry.mockResolvedValueOnce({
+      brief: null,
+      email: 'collector@example.com',
+      locale: 'en',
+      message: 'I would like to discuss building a collection.',
+      name: 'Ada Collector',
+      relatedArtworkTitle: null,
+      subject: 'Collection advisory',
+      type: 'COLLECTOR',
+    })
+
+    await expect(dispatcher.dispatchOne()).resolves.toEqual({
+      status: 'completed',
+    })
+    expect(mailer.sendInquiryNotification).toHaveBeenCalledWith({
+      idempotencyKey: `inquiry.created:${inquiryId}:support`,
+      inquiry: expect.objectContaining({type: 'COLLECTOR'}),
+      replyTo: 'collector@example.com',
+    })
+    expect(mailer.sendInquiryAcknowledgement).toHaveBeenCalledWith(
+      expect.objectContaining({type: 'COLLECTOR'}),
+    )
   })
 
   it('terminally rejects a malformed persisted inquiry without calling Resend', async () => {

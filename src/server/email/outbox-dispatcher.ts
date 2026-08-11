@@ -9,6 +9,7 @@ const inquiryPayloadSchema = z
     locale: z.enum(['en', 'tr', 'ru', 'ky']),
     type: z.enum([
       'AVAILABILITY',
+      'COLLECTOR',
       'COMMISSION',
       'PRIVATE_VIEWING',
       'GENERAL',
@@ -26,6 +27,7 @@ const inquiryMessageSchema = z
     subject: z.string().max(200).nullable(),
     type: z.enum([
       'AVAILABILITY',
+      'COLLECTOR',
       'COMMISSION',
       'PRIVATE_VIEWING',
       'GENERAL',

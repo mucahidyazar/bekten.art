@@ -5,10 +5,7 @@ import {artworkEditSchema} from '@/server/editorial-content'
 
 import {inquiryLabelSchema, inquiryStatusSchema} from './inquiry-validation'
 
-import type {
-  ArtworkInquirySnapshot,
-  InquiryRecord,
-} from './inquiry-contracts'
+import type {ArtworkInquirySnapshot, InquiryRecord} from './inquiry-contracts'
 import type {
   InquiryAuditEvent,
   InquiryInternalNote,
@@ -97,6 +94,15 @@ const inquiryRecordSchema = z.discriminatedUnion('type', [
   z
     .object({
       ...recordBaseShape,
+      message: z.string().min(10).max(4_000),
+      relatedArtworkSnapshot: z.null(),
+      subject: z.string().min(2).max(200),
+      type: z.literal('COLLECTOR'),
+    })
+    .strict(),
+  z
+    .object({
+      ...recordBaseShape,
       attendees: z.number().int().min(1).max(12).nullable(),
       message: z.string().max(4_000).nullable(),
       preferredDates: z
@@ -170,6 +176,7 @@ function inquiryData(recordInput: InquiryRecord) {
         preferredTimeline: record.preferredTimeline,
         type: record.type,
       }
+    case 'COLLECTOR':
     case 'GENERAL':
       return {
         ...shared,
@@ -206,7 +213,9 @@ export function createDatabaseInquiryPersistence(
   }
 
   const unitOfWork = Object.freeze({
-    execute<Result>(work: (transaction: InquiryTransaction) => Promise<Result>) {
+    execute<Result>(
+      work: (transaction: InquiryTransaction) => Promise<Result>,
+    ) {
       return database.$transaction(async transaction => {
         const scope = Object.freeze({scope: 'database-inquiry'})
 
@@ -262,7 +271,8 @@ export function createDatabaseInquiryPersistence(
 
       const snapshot = artworkEditSchema.safeParse(revision.data.snapshot)
 
-      if (!snapshot.success || snapshot.data.locale !== parsed.locale) return null
+      if (!snapshot.success || snapshot.data.locale !== parsed.locale)
+        return null
 
       return Object.freeze({
         id: parsed.id,

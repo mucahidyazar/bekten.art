@@ -1,8 +1,10 @@
 import type {Metadata} from 'next'
 
-import {ME} from '../constants/me'
+import {getSiteIdentity, SITE_NAME} from '@/components/seo/site-identity'
+import {APP_LOCALES, type AppLocale} from '@/lib/localized-path'
 
 type TPrepareMetadata = Metadata & {
+  contentLocale?: AppLocale
   title?: string
   description?: string
   page?: string
@@ -16,14 +18,28 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
         : 'https://bekten.art'),
   ).origin
 
+  const {
+    authors,
+    contentLocale = 'en',
+    keywords,
+    openGraph,
+    page,
+    twitter,
+    ...rest
+  } = metadata
+  const identity = getSiteIdentity(contentLocale)
+  const OPEN_GRAPH_LOCALE: Readonly<Record<AppLocale, string>> = {
+    en: 'en_US',
+    ky: 'ky_KG',
+    ru: 'ru_RU',
+    tr: 'tr_TR',
+  }
   const DEFAULT_TITLE = {
-    default: 'Bekten Usubaliev - Contemporary Oil Painter | Kyrgyz Artist',
-    template: `%s | Bekten Usubaliev - Contemporary Artist`,
+    default: SITE_NAME,
+    template: `%s | Bekten Usubaliev`,
   }
   const title = metadata.title || DEFAULT_TITLE
-  const description = metadata.description || ME.descriptionFull
-
-  const {authors, openGraph, page, twitter, keywords, ...rest} = metadata
+  const description = metadata.description || identity.siteDescription
 
   const imagesUrl = new URL(`${domain}/api/og`)
 
@@ -41,23 +57,14 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
   // Static fallback image for WhatsApp and other platforms that don't support dynamic OG images
   const staticImage = `${domain}/link-preview.jpg`
 
-  // SEO Keywords for art and painting
   const defaultKeywords = [
     'Bekten Usubaliev',
     'contemporary artist',
-    'oil painting',
     'Kyrgyz artist',
-    'portrait painter',
-    'art gallery',
-    'contemporary art',
-    'Bishkek artist',
+    'artist archive',
+    'art exhibitions',
     'Central Asian art',
-    'modern painting',
-    'fine art',
-    'artist portfolio',
-    'painting workshop',
-    'art exhibition',
-    'cultural art',
+    'Kyrgyzstan art',
   ]
 
   const initialMetadata = {
@@ -81,20 +88,23 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
       title,
       description,
       type: 'website',
-      locale: 'en_US',
-      siteName: 'Bekten Usubaliev - Contemporary Artist',
+      alternateLocale: APP_LOCALES.filter(
+        locale => locale !== contentLocale,
+      ).map(locale => OPEN_GRAPH_LOCALE[locale]),
+      locale: OPEN_GRAPH_LOCALE[contentLocale],
+      siteName: SITE_NAME,
       images: [
         {
           url: dynamicImage,
           width: 1200,
           height: 630,
-          alt: 'Bekten Usubaliev - Contemporary Oil Painter',
+          alt: 'Bekten Usubaliev editorial archive',
         },
         {
           url: staticImage,
           width: 1200,
           height: 630,
-          alt: 'Bekten Usubaliev - Contemporary Oil Painter',
+          alt: 'Bekten Usubaliev editorial archive',
         },
       ],
     },
@@ -107,11 +117,11 @@ export function prepareMetadata(metadata: TPrepareMetadata = {}): Metadata {
       images: [
         {
           url: dynamicImage,
-          alt: 'Bekten Usubaliev - Contemporary Oil Painter',
+          alt: 'Bekten Usubaliev editorial archive',
         },
         {
           url: staticImage,
-          alt: 'Bekten Usubaliev - Contemporary Oil Painter',
+          alt: 'Bekten Usubaliev editorial archive',
         },
       ],
     },

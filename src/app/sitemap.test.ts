@@ -115,27 +115,32 @@ describe('V2 sitemap', () => {
 
     for (const locale of ['en', 'tr', 'ru', 'ky']) {
       for (const path of staticPaths) {
-        const suffix = path === '/' ? '' : path
+        const canonicalPath =
+          locale === 'en'
+            ? path
+            : path === '/'
+              ? `/${locale}`
+              : `/${locale}${path}`
 
-        expect(urls).toContain(`https://bekten.art/${locale}${suffix}`)
+        expect(urls).toContain(`https://bekten.art${canonicalPath}`)
       }
     }
 
-    expect([...urls].some(url => /\/(?:gallery|news|about)(?:\/|$)/u.test(url))).toBe(
-      false,
-    )
+    expect(
+      [...urls].some(url => /\/(?:gallery|news|about)(?:\/|$)/u.test(url)),
+    ).toBe(false)
     expect([...urls].some(url => url.includes('/kg'))).toBe(false)
 
     const works = entries.find(
-      entry => entry.url === 'https://bekten.art/en/works',
+      entry => entry.url === 'https://bekten.art/works',
     )
 
     expect(works?.alternates?.languages).toEqual({
-      en: 'https://bekten.art/en/works',
+      en: 'https://bekten.art/works',
       tr: 'https://bekten.art/tr/works',
       ru: 'https://bekten.art/ru/works',
       ky: 'https://bekten.art/ky/works',
-      'x-default': 'https://bekten.art/en/works',
+      'x-default': 'https://bekten.art/works',
     })
   })
 
@@ -231,7 +236,7 @@ describe('V2 sitemap', () => {
       entries.find(
         entry =>
           entry.url ===
-          `https://bekten.art/${entity.locale}${entity.publicPath}`,
+          `https://bekten.art${entity.locale === 'en' ? '' : `/${entity.locale}`}${entity.publicPath}`,
       ),
     )
 
@@ -239,9 +244,13 @@ describe('V2 sitemap', () => {
     expect(dynamicEntries[0]?.lastModified).toEqual(revisionAt)
     expect(entries.some(entry => entry.url.includes('missing'))).toBe(false)
     expect(entries.some(entry => entry.url.includes('future'))).toBe(false)
-    expect(entries.some(entry => entry.url.includes('wrong-locale'))).toBe(false)
+    expect(entries.some(entry => entry.url.includes('wrong-locale'))).toBe(
+      false,
+    )
     expect(entries.some(entry => entry.url.includes('unsafe'))).toBe(false)
-    expect(entries.some(entry => entry.url.includes('private-study'))).toBe(false)
+    expect(entries.some(entry => entry.url.includes('private-study'))).toBe(
+      false,
+    )
 
     for (const entity of entities) {
       expect(entity.delegate.findMany).toHaveBeenCalledWith({
@@ -269,9 +278,14 @@ describe('V2 sitemap', () => {
     const entries = await sitemap()
 
     expect(entries).toHaveLength(16 * 4)
-    expect(entries.every(entry => !/\/(?:works|collections|exhibitions|journal|press)\/.+/u.test(entry.url))).toBe(
-      true,
-    )
+    expect(
+      entries.every(
+        entry =>
+          !/\/(?:works|collections|exhibitions|journal|press)\/.+/u.test(
+            entry.url,
+          ),
+      ),
+    ).toBe(true)
     expect(consoleError).not.toHaveBeenCalled()
 
     consoleError.mockRestore()

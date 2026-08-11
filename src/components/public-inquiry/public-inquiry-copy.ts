@@ -12,6 +12,8 @@ type InquiryCopy = Readonly<{
   commissionBriefDescription: string
   commissionDescription: string
   commissionTitle: string
+  collectorDescription: string
+  collectorTitle: string
   consent: string
   email: string
   error: string
@@ -53,6 +55,13 @@ export function inquiryHeading(copy: InquiryCopy, type: PublicInquiryType) {
     }
   }
 
+  if (type === 'COLLECTOR') {
+    return {
+      description: copy.collectorDescription,
+      title: copy.collectorTitle,
+    }
+  }
+
   if (type === 'PRIVATE_VIEWING') {
     return {
       description: copy.privateViewingDescription,
@@ -78,6 +87,9 @@ export const publicInquiryCopy: Readonly<
     commissionDescription:
       'Begin a private conversation with the studio about a commissioned work.',
     commissionTitle: 'Commission inquiry',
+    collectorDescription:
+      'Begin a discreet conversation about collecting, commissioning, or privately viewing works.',
+    collectorTitle: 'Collector inquiry',
     consent:
       'I consent to the studio contacting me about this request and accept the',
     email: 'Email address',
@@ -119,6 +131,9 @@ export const publicInquiryCopy: Readonly<
     commissionDescription:
       'Жеке чыгарма тууралуу студия менен купуя сүйлөшүүнү баштаңыз.',
     commissionTitle: 'Жеке чыгармага өтүнүч',
+    collectorDescription:
+      'Чыгармаларды чогултуу, буйрутма берүү же жеке көрүү тууралуу купуя сүйлөшүүнү баштаңыз.',
+    collectorTitle: 'Коллекционердин өтүнүчү',
     consent:
       'Студиянын бул өтүнүч боюнча мага кайрылышына макулмун жана төмөнкүсүн кабыл алам:',
     email: 'Электрондук почта',
@@ -161,6 +176,9 @@ export const publicInquiryCopy: Readonly<
     commissionDescription:
       'Начните частный разговор со студией о создании работы на заказ.',
     commissionTitle: 'Индивидуальный заказ',
+    collectorDescription:
+      'Начните конфиденциальный разговор о коллекционировании, заказе или частном просмотре работ.',
+    collectorTitle: 'Запрос коллекционера',
     consent: 'Я разрешаю студии связаться со мной по этому запросу и принимаю',
     email: 'Электронная почта',
     error: 'Не удалось принять ваш запрос. Пожалуйста, попробуйте ещё раз.',
@@ -201,6 +219,9 @@ export const publicInquiryCopy: Readonly<
     commissionDescription:
       'Size özel bir eser için stüdyo ile gizli bir görüşme başlatın.',
     commissionTitle: 'Özel eser talebi',
+    collectorDescription:
+      'Eser edinme, özel sipariş veya özel gösterim hakkında gizli bir görüşme başlatın.',
+    collectorTitle: 'Koleksiyoner talebi',
     consent:
       'Stüdyonun bu taleple ilgili benimle iletişim kurmasına izin veriyor ve şunu kabul ediyorum:',
     email: 'E-posta adresi',

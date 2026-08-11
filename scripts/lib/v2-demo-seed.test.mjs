@@ -174,6 +174,15 @@ describe('V2 demo seed', () => {
     expect(JSON.stringify(plan)).not.toMatch(/priceMinor|currency/u)
     expect(
       plan.content
+        .filter(item => item.row.locale === 'en')
+        .every(
+          item =>
+            !item.row.seoCanonicalPath.startsWith('/en') &&
+            !item.revision.snapshot.seo.canonicalPath.startsWith('/en'),
+        ),
+    ).toBe(true)
+    expect(
+      plan.content
         .filter(item => item.entityType === 'ARTWORK')
         .every(item =>
           item.revision.snapshot.mediaPlacements.some(
@@ -181,6 +190,67 @@ describe('V2 demo seed', () => {
           ),
         ),
     ).toBe(true)
+    expect(
+      plan.content.every(item =>
+        item.placements.every(
+          placement => placement.altText === item.row.title,
+        ),
+      ),
+    ).toBe(true)
+  })
+
+  it('maps generated heritage assets to the intended editable Studio records', () => {
+    const plan = createDemoSeedPlan()
+    const mediaById = new Map(plan.media.map(item => [item.id, item]))
+    const assetFor = identity => {
+      const item = plan.content.find(
+        candidate => candidate.identity === identity,
+      )
+      const mediaObjectId = item?.placements[0]?.mediaObjectId
+
+      return mediaById.get(mediaObjectId)?.assetPath
+    }
+
+    expect(plan.media.map(item => item.assetPath)).toEqual(
+      expect.arrayContaining([
+        'public/img/heritage-collection-hero.jpg',
+        'public/img/heritage-landscape-hero.jpg',
+        'public/img/heritage-returning-home.jpg',
+        'public/img/heritage-studio-hero.jpg',
+        'public/img/heritage-three-voices.jpg',
+      ]),
+    )
+    expect(assetFor('COLLECTION:en:archive-of-earth')).toBe(
+      'public/img/heritage-collection-hero.jpg',
+    )
+    expect(assetFor('ARTWORK:en:silent-steppe')).toBe(
+      'public/img/heritage-landscape-hero.jpg',
+    )
+    expect(assetFor('ARTWORK:en:earth-script')).toBe(
+      'public/img/heritage-three-voices.jpg',
+    )
+    expect(assetFor('ARTWORK:en:winter-light')).toBe(
+      'public/img/heritage-returning-home.jpg',
+    )
+    expect(assetFor('PAGE:en:studio')).toBe(
+      'public/img/heritage-studio-hero.jpg',
+    )
+  })
+
+  it('uses source-grounded public context without private legacy contact data', () => {
+    const serialized = JSON.stringify(createDemoSeedPlan())
+    const artist = createDemoSeedPlan().content.find(
+      item => item.identity === 'PAGE:en:artist',
+    )
+    const exhibition = createDemoSeedPlan().content.find(
+      item => item.identity === 'EXHIBITION:en:earth-memory',
+    )
+
+    expect(artist?.row.body).toMatch(/1958/u)
+    expect(artist?.row.body).toMatch(/Repin/u)
+    expect(exhibition?.row.body).toMatch(/36 paintings/u)
+    expect(exhibition?.row.venue).toBe('Al Hayat Gallery')
+    expect(serialized).not.toMatch(/gmail\.com|Tynystanov|Тыныстанов/iu)
   })
 
   it('uploads deterministic assets and creates published rows, placements, revision and audit atomically', async () => {
@@ -233,7 +303,7 @@ describe('V2 demo seed', () => {
           entityId,
           entityType: 'ARTWORK',
           locale: 'en',
-          paths: ['/en', '/en/works', '/en/works/demo-work'],
+          paths: ['/', '/works', '/works/demo-work'],
           version: 1,
         },
         type: 'editorial.cache-revalidate',

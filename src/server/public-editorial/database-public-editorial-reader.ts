@@ -132,10 +132,7 @@ const exhibitionArtworkRowSchema = z.object({
   displayOrder: z.number().int().min(0),
 })
 
-function entityDelegate(
-  transaction: PublicEditorialTransaction,
-  name: string,
-) {
+function entityDelegate(transaction: PublicEditorialTransaction, name: string) {
   const selected = transaction[name] as Partial<EntityDelegate> | undefined
 
   if (!selected || typeof selected.findMany !== 'function') {
@@ -165,10 +162,7 @@ function immutableJson<T>(value: T): T {
   return value
 }
 
-function publishedRows(
-  rows: readonly unknown[],
-  locale: EditorialLocale,
-) {
+function publishedRows(rows: readonly unknown[], locale: EditorialLocale) {
   return rows.flatMap(row => {
     const parsed = publishedRowSchema.safeParse(row)
 
@@ -666,12 +660,7 @@ export function createDatabasePublicEditorialReader(
       const validSlug = slug(slugInput)
 
       return await read(async transaction =>
-        readEntityBySlug(
-          transaction,
-          'JOURNAL_ENTRY',
-          validLocale,
-          validSlug,
-        ),
+        readEntityBySlug(transaction, 'JOURNAL_ENTRY', validLocale, validSlug),
       )
     },
     async getPage(localeInput, slugInput) {
@@ -687,12 +676,7 @@ export function createDatabasePublicEditorialReader(
       const validSlug = slug(slugInput)
 
       return await read(async transaction =>
-        readEntityBySlug(
-          transaction,
-          'PRESS_ENTRY',
-          validLocale,
-          validSlug,
-        ),
+        readEntityBySlug(transaction, 'PRESS_ENTRY', validLocale, validSlug),
       )
     },
     async getWork(localeInput, slugInput) {
@@ -702,6 +686,23 @@ export function createDatabasePublicEditorialReader(
       return await read(async transaction =>
         readEntityBySlug(transaction, 'ARTWORK', validLocale, validSlug),
       )
+    },
+    async listAvailableWorks(localeInput) {
+      const validLocale = locale(localeInput)
+
+      return await read(async transaction => {
+        const works = await readEntitiesBySnapshotValue(
+          transaction,
+          'ARTWORK',
+          validLocale,
+          'availability',
+          'AVAILABLE',
+        )
+
+        return Object.freeze(
+          works.filter(work => work.availability === 'AVAILABLE'),
+        )
+      })
     },
     async listCollections(localeInput) {
       const validLocale = locale(localeInput)

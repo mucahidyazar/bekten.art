@@ -44,20 +44,15 @@ test.describe('public operational endpoints', () => {
 })
 
 test.describe('anonymous authorization boundary', () => {
-  test('keeps the retired admin and reserved studio routes unavailable', async ({
+  test('keeps the retired public admin route unavailable', async ({
     context,
     page,
   }) => {
     await context.clearCookies()
     await startWithOptionalConsentDenied(page)
-    await page.goto('/tr/admin')
+    await page.goto('/admin')
 
-    await expect(page).toHaveURL(/\/tr\/admin\/?$/u)
-    await expect(page.getByRole('heading', {name: '404'})).toBeVisible()
-
-    await page.goto('/en/studio')
-
-    await expect(page).toHaveURL(/\/en\/studio\/?$/u)
+    await expect(page).toHaveURL(/\/admin\/?$/u)
     await expect(page.getByRole('heading', {name: '404'})).toBeVisible()
   })
 })
