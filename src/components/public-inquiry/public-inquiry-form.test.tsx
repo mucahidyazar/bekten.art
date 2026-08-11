@@ -162,6 +162,69 @@ describe('PublicInquiryForm', () => {
     })
   })
 
+  it('omits empty optional private-viewing fields and supports a custom privacy route', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(acceptedResponse())
+
+    vi.stubGlobal('fetch', fetchMock)
+    const user = userEvent.setup()
+
+    render(
+      <PublicInquiryForm
+        locale="en"
+        privacyPolicyHref="/en/privacy"
+        type="PRIVATE_VIEWING"
+      />,
+    )
+    expect(screen.getByRole('link', {name: 'Privacy Policy'})).toHaveAttribute(
+      'href',
+      '/en/privacy',
+    )
+
+    await user.type(screen.getByLabelText('Full name'), 'Ada Collector')
+    await user.type(screen.getByLabelText('Email address'), 'ada@example.com')
+    await user.type(screen.getByLabelText('Preferred date'), '2027-04-12')
+    await user.type(
+      screen.getByLabelText('Your note (optional)'),
+      'I would prefer a calm morning appointment at the studio.',
+    )
+    await user.click(screen.getByRole('checkbox', {name: /privacy policy/i}))
+    await user.click(screen.getByRole('button', {name: 'Send private request'}))
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce())
+    expect(submittedBody(fetchMock)).toMatchObject({
+      message: 'I would prefer a calm morning appointment at the studio.',
+      preferredDates: ['2027-04-12'],
+      type: 'PRIVATE_VIEWING',
+    })
+    expect(submittedBody(fetchMock)).not.toHaveProperty('attendees')
+    expect(submittedBody(fetchMock)).not.toHaveProperty('phone')
+    expect(submittedBody(fetchMock)).not.toHaveProperty('relatedArtworkId')
+  })
+
+  it('supports title-only artwork context and omits an empty availability note', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(acceptedResponse())
+
+    vi.stubGlobal('fetch', fetchMock)
+    const user = userEvent.setup()
+
+    render(
+      <PublicInquiryForm
+        artwork={{id: artwork.id, title: artwork.title}}
+        locale="en"
+        type="AVAILABILITY"
+      />,
+    )
+    expect(screen.queryByText(/Oil on canvas/)).not.toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Full name'), 'Ada Collector')
+    await user.type(screen.getByLabelText('Email address'), 'ada@example.com')
+    await user.click(screen.getByRole('checkbox', {name: /privacy policy/i}))
+    await user.click(screen.getByRole('button', {name: 'Send private request'}))
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce())
+    expect(submittedBody(fetchMock)).not.toHaveProperty('message')
+  })
+
   it('submits the general inquiry subject and message without sales language', async () => {
     const fetchMock = vi.fn().mockResolvedValue(acceptedResponse())
 
@@ -284,6 +347,33 @@ describe('PublicInquiryForm', () => {
     expect(screen.getByLabelText('Email address')).toHaveValue(
       'ada@example.com',
     )
+    expect(
+      screen.getByRole('button', {name: 'Send private request'}),
+    ).toBeEnabled()
+  })
+
+  it('recovers with a generic error if a secure submission id cannot be created', async () => {
+    const fetchMock = vi.fn()
+
+    vi.stubGlobal('fetch', fetchMock)
+    vi.spyOn(globalThis.crypto, 'randomUUID').mockImplementation(() => {
+      throw new Error('browser internals must stay private')
+    })
+    const user = userEvent.setup()
+
+    render(<PublicInquiryForm locale="en" type="GENERAL" />)
+    await fillContactFields(user)
+    await user.type(screen.getByLabelText('Subject'), 'Studio archive')
+    await user.type(
+      screen.getByLabelText('Message'),
+      'Please share further information about the studio archive.',
+    )
+    await user.click(screen.getByRole('button', {name: 'Send private request'}))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'We could not receive your request. Please try again.',
+    )
+    expect(fetchMock).not.toHaveBeenCalled()
     expect(
       screen.getByRole('button', {name: 'Send private request'}),
     ).toBeEnabled()

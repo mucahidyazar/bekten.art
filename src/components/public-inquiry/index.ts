@@ -1,7 +1,7 @@
-export {
-  type PublicInquiryArtwork,
-  PublicInquiryForm,
-  type PublicInquiryFormProps,
-  type PublicInquiryLocale,
-  type PublicInquiryType,
-} from './public-inquiry-form'
+export type {
+  PublicInquiryArtwork,
+  PublicInquiryFormProps,
+  PublicInquiryLocale,
+  PublicInquiryType,
+} from './public-inquiry-types'
+export {PublicInquiryForm} from './public-inquiry-form'

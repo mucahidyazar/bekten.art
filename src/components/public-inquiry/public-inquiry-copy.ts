@@ -1,7 +1,7 @@
 import type {
   PublicInquiryLocale,
   PublicInquiryType,
-} from './public-inquiry-form'
+} from './public-inquiry-types'
 
 type InquiryCopy = Readonly<{
   action: string

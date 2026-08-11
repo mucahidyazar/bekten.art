@@ -5,13 +5,9 @@ import {type FormEvent, useId, useRef, useState} from 'react'
 import {cn} from '@/utils/cn'
 
 import {inquiryHeading, publicInquiryCopy} from './public-inquiry-copy'
+import {buildPublicInquiryPayload} from './public-inquiry-payload'
 
-export type PublicInquiryArtwork = Readonly<{
-  id: string
-  medium?: string | null
-  title: string
-  year?: number | null
-}>
+import type {PublicInquiryFormProps} from './public-inquiry-types'
 
 export function PublicInquiryForm(props: PublicInquiryFormProps) {
   const copy = publicInquiryCopy[props.locale]
@@ -33,14 +29,17 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
 
     const formElement = event.currentTarget
     const form = new FormData(formElement)
-    const submissionId =
-      submissionIdRef.current ?? globalThis.crypto.randomUUID()
-
-    submissionIdRef.current = submissionId
 
     try {
+      const submissionId =
+        submissionIdRef.current ?? globalThis.crypto.randomUUID()
+
+      submissionIdRef.current = submissionId
+
       const response = await fetch('/api/inquiries', {
-        body: JSON.stringify(inquiryPayload(form, props, submissionId)),
+        body: JSON.stringify(
+          buildPublicInquiryPayload(form, props, submissionId),
+        ),
         headers: {'Content-Type': 'application/json'},
         method: 'POST',
       })
@@ -343,113 +342,10 @@ export function PublicInquiryForm(props: PublicInquiryFormProps) {
   )
 }
 
-export type PublicInquiryFormProps = SharedPublicInquiryProps &
-  (
-    | Readonly<{
-        artwork: PublicInquiryArtwork
-        type: 'AVAILABILITY'
-      }>
-    | Readonly<{
-        artwork?: PublicInquiryArtwork
-        type: 'PRIVATE_VIEWING'
-      }>
-    | Readonly<{
-        type: 'COMMISSION' | 'GENERAL'
-      }>
-  )
-
-type SharedPublicInquiryProps = Readonly<{
-  className?: string
-  locale: PublicInquiryLocale
-  privacyPolicyHref?: string
-}>
-
-export type PublicInquiryLocale = 'en' | 'ky' | 'ru' | 'tr'
-
-type InquiryPayload = Readonly<
-  Record<string, boolean | number | string | string[]>
->
-
 const controlClassName =
   'min-h-12 w-full rounded-none border border-stone-500/70 bg-stone-50/60 px-3 py-2 text-base text-stone-950 shadow-sm transition-colors placeholder:text-stone-500 hover:border-stone-700 focus-visible:border-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-900 disabled:cursor-wait disabled:opacity-60'
 const labelClassName = 'block text-sm font-semibold text-stone-900'
 const descriptionClassName = 'mt-1 text-sm leading-6 text-stone-600'
-
-function optionalText(form: FormData, field: string) {
-  const value = String(form.get(field) ?? '').trim()
-
-  return value || undefined
-}
-
-function commonPayload(
-  form: FormData,
-  locale: PublicInquiryLocale,
-  submissionId: string,
-  type: PublicInquiryType,
-) {
-  const phone = optionalText(form, 'phone')
-
-  return {
-    consent: form.get('consent') === 'on',
-    email: String(form.get('email') ?? '').trim(),
-    locale,
-    name: String(form.get('name') ?? '').trim(),
-    ...(phone ? {phone} : {}),
-    submissionId,
-    type,
-    website: String(form.get('website') ?? ''),
-  }
-}
-
-function inquiryPayload(
-  form: FormData,
-  props: PublicInquiryFormProps,
-  submissionId: string,
-): InquiryPayload {
-  const common = commonPayload(form, props.locale, submissionId, props.type)
-  const message = optionalText(form, 'message')
-
-  if (props.type === 'AVAILABILITY') {
-    return {
-      ...common,
-      ...(message ? {message} : {}),
-      relatedArtworkId: props.artwork.id,
-    }
-  }
-
-  if (props.type === 'COMMISSION') {
-    const preferredTimeline = optionalText(form, 'preferredTimeline')
-
-    return {
-      ...common,
-      brief: String(form.get('brief') ?? '').trim(),
-      ...(message ? {message} : {}),
-      ...(preferredTimeline ? {preferredTimeline} : {}),
-    }
-  }
-
-  if (props.type === 'PRIVATE_VIEWING') {
-    const attendees = optionalText(form, 'attendees')
-    const preferredDates = form
-      .getAll('preferredDates')
-      .map(value => String(value).trim())
-      .filter(Boolean)
-
-    return {
-      ...common,
-      ...(attendees ? {attendees: Number(attendees)} : {}),
-      ...(message ? {message} : {}),
-      preferredDates,
-      ...(props.artwork ? {relatedArtworkId: props.artwork.id} : {}),
-    }
-  }
-
-  return {
-    ...common,
-    message: String(form.get('message') ?? '').trim(),
-    subject: String(form.get('subject') ?? '').trim(),
-  }
-}
 
 function Field({
   children,
@@ -478,6 +374,3 @@ function Field({
     </div>
   )
 }
-
-export type PublicInquiryType =
-  'AVAILABILITY' | 'COMMISSION' | 'GENERAL' | 'PRIVATE_VIEWING'
