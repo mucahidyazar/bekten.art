@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto'
 
 import {prisma} from '@/lib/db'
 import {getRequiredAuthSecret} from '@/server/auth/request-context'
+import {openStudioMagicLink} from '@/server/studio-auth/configured-magic-link'
 
 import {getConfiguredMailer} from './configured-mailer'
 import {
@@ -29,10 +30,15 @@ function getAppUrl() {
 }
 
 export function getConfiguredOutboxDispatcher() {
+  const engagementTokens = createEngagementTokens(getRequiredAuthSecret())
+
   configuredDispatcher ??= createOutboxDispatcher(
     createDatabaseOutboxStore(prisma as unknown as OutboxDatabase),
     getConfiguredMailer(),
-    createEngagementTokens(getRequiredAuthSecret()),
+    {
+      decrypt: engagementTokens.decrypt,
+      openStudioMagicLink,
+    },
     {appUrl: getAppUrl(), workerId},
   )
 

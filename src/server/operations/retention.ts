@@ -10,18 +10,22 @@ type RetentionDelegate<Row> = Readonly<{
 export type RetentionDatabase = Readonly<{
   emailWebhookEvent: RetentionDelegate<IdRow>
   feedback: RetentionDelegate<IdRow>
+  inquiry: RetentionDelegate<IdRow>
   outboxJob: RetentionDelegate<IdRow>
   passwordResetToken: RetentionDelegate<IdRow>
   rateLimitBucket: RetentionDelegate<RateLimitRow>
+  session: RetentionDelegate<IdRow>
   verificationToken: RetentionDelegate<VerificationTokenRow>
 }>
 
 export type RetentionSummary = Readonly<{
   emailWebhookEvents: number
   feedback: number
+  inquiries: number
   outboxJobs: number
   passwordResetTokens: number
   rateLimitBuckets: number
+  sessions: number
   verificationTokens: number
 }>
 
@@ -64,13 +68,21 @@ export function createRetentionService(
       const now = nowProvider()
       const [
         feedbackRows,
+        inquiryRows,
         rateLimitRows,
         outboxRows,
         webhookRows,
         verificationRows,
         passwordResetRows,
+        sessionRows,
       ] = await Promise.all([
         database.feedback.findMany({
+          orderBy: {purgeAfter: 'asc'},
+          select: {id: true},
+          take: batchSize,
+          where: {purgeAfter: {lte: now}},
+        }),
+        database.inquiry.findMany({
           orderBy: {purgeAfter: 'asc'},
           select: {id: true},
           take: batchSize,
@@ -109,10 +121,17 @@ export function createRetentionService(
           take: batchSize,
           where: {expiresAt: {lt: now}},
         }),
+        database.session.findMany({
+          orderBy: {expires: 'asc'},
+          select: {id: true},
+          take: batchSize,
+          where: {expires: {lt: now}},
+        }),
       ])
 
       const deletionTasks = [
         deleteIds(database.feedback, feedbackRows),
+        deleteIds(database.inquiry, inquiryRows),
         rateLimitRows.length === 0
           ? Promise.resolve(0)
           : database.rateLimitBucket
@@ -137,23 +156,28 @@ export function createRetentionService(
               })
               .then(({count}) => count),
         deleteIds(database.passwordResetToken, passwordResetRows),
+        deleteIds(database.session, sessionRows),
       ] as const
 
       const [
         feedback,
+        inquiries,
         rateLimitBuckets,
         outboxJobs,
         emailWebhookEvents,
         verificationTokens,
         passwordResetTokens,
+        sessions,
       ] = await Promise.all(deletionTasks)
 
       return {
         emailWebhookEvents,
         feedback,
+        inquiries,
         outboxJobs,
         passwordResetTokens,
         rateLimitBuckets,
+        sessions,
         verificationTokens,
       }
     },

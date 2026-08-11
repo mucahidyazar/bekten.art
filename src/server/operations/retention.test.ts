@@ -14,6 +14,10 @@ function databaseFixture() {
         .fn()
         .mockResolvedValue([{id: 'feedback-1'}, {id: 'feedback-2'}]),
     },
+    inquiry: {
+      deleteMany: vi.fn().mockResolvedValue({count: 1}),
+      findMany: vi.fn().mockResolvedValue([{id: 'inquiry-1'}]),
+    },
     outboxJob: {
       deleteMany: vi.fn().mockResolvedValue({count: 1}),
       findMany: vi.fn().mockResolvedValue([{id: 'outbox-1'}]),
@@ -28,6 +32,12 @@ function databaseFixture() {
         {action: 'login.ip', key: 'a'.repeat(64)},
         {action: 'register.ip', key: 'b'.repeat(64)},
       ]),
+    },
+    session: {
+      deleteMany: vi.fn().mockResolvedValue({count: 2}),
+      findMany: vi
+        .fn()
+        .mockResolvedValue([{id: 'session-1'}, {id: 'session-2'}]),
     },
     verificationToken: {
       deleteMany: vi.fn().mockResolvedValue({count: 1}),
@@ -63,6 +73,18 @@ describe('retention service', () => {
       take: 500,
       where: {updatedAt: {lt: new Date('2026-08-07T18:00:00.000Z')}},
     })
+    expect(database.inquiry.findMany).toHaveBeenCalledWith({
+      orderBy: {purgeAfter: 'asc'},
+      select: {id: true},
+      take: 500,
+      where: {purgeAfter: {lte: now}},
+    })
+    expect(database.session.findMany).toHaveBeenCalledWith({
+      orderBy: {expires: 'asc'},
+      select: {id: true},
+      take: 500,
+      where: {expires: {lt: now}},
+    })
     expect(database.outboxJob.findMany).toHaveBeenCalledWith({
       orderBy: {completedAt: 'asc'},
       select: {id: true},
@@ -92,9 +114,11 @@ describe('retention service', () => {
     expect(result).toEqual({
       emailWebhookEvents: 1,
       feedback: 2,
+      inquiries: 1,
       outboxJobs: 1,
       passwordResetTokens: 1,
       rateLimitBuckets: 2,
+      sessions: 2,
       verificationTokens: 1,
     })
   })
@@ -111,9 +135,11 @@ describe('retention service', () => {
     expect(result).toEqual({
       emailWebhookEvents: 0,
       feedback: 0,
+      inquiries: 0,
       outboxJobs: 0,
       passwordResetTokens: 0,
       rateLimitBuckets: 0,
+      sessions: 0,
       verificationTokens: 0,
     })
     for (const delegate of Object.values(database)) {

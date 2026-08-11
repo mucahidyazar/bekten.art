@@ -15,6 +15,13 @@ const newsletterWelcomePayloadSchema = z
     unsubscribeTokenEncrypted: z.string().min(20).max(2_048),
   })
   .strict()
+const studioMagicLinkPayloadSchema = z
+  .object({
+    expiresAt: z.iso.datetime(),
+    signInUrlEncrypted: z.string().min(20).max(8_192),
+    to: z.email().max(320),
+  })
+  .strict()
 
 type ClaimedJob = z.infer<typeof outboxJobRowSchema>
 
@@ -63,6 +70,14 @@ export type OutboxMailer = Readonly<{
       unsubscribeUrl: string
     }>,
   ) => Promise<unknown>
+  sendStudioMagicLink: (
+    input: Readonly<{
+      expiresAt: Date
+      idempotencyKey: string
+      signInUrl: string
+      to: string
+    }>,
+  ) => Promise<unknown>
 }>
 
 export type OutboxStore = Readonly<{
@@ -93,6 +108,7 @@ export type OutboxStore = Readonly<{
 
 type EngagementTokenReader = Readonly<{
   decrypt: (encrypted: string) => string
+  openStudioMagicLink: (encrypted: string) => string
 }>
 
 const transientError = 'EMAIL_DELIVERY_FAILED'
@@ -229,6 +245,43 @@ export function createOutboxDispatcher(
           token,
           subscriber.locale,
         ),
+      })
+
+      return
+    }
+
+    if (job.type === 'studio.magic-link.requested') {
+      const parsed = studioMagicLinkPayloadSchema.safeParse(job.payload)
+
+      if (!parsed.success) {
+        throw new Error(permanentError)
+      }
+
+      const expiresAt = new Date(parsed.data.expiresAt)
+      let signInUrl: URL
+
+      try {
+        signInUrl = new URL(
+          tokens.openStudioMagicLink(parsed.data.signInUrlEncrypted),
+        )
+      } catch {
+        throw new Error(permanentError)
+      }
+
+      if (
+        expiresAt.getTime() <= now().getTime() ||
+        signInUrl.origin !== new URL(dependencies.appUrl).origin ||
+        signInUrl.pathname !== '/api/auth/callback/email' ||
+        !signInUrl.searchParams.get('token')
+      ) {
+        throw new Error(permanentError)
+      }
+
+      await mailer.sendStudioMagicLink({
+        expiresAt,
+        idempotencyKey: job.idempotencyKey,
+        signInUrl: signInUrl.toString(),
+        to: parsed.data.to,
       })
 
       return

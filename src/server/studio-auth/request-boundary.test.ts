@@ -35,7 +35,9 @@ describe('Studio magic-link request boundary', () => {
     )
 
     expect(result.allowed).toBe(false)
-    expect(result.response?.status).toBe(403)
+    if (result.allowed) throw new Error('Expected the request to be rejected')
+
+    expect(result.response.status).toBe(403)
     expect(deps.consumeRateLimit).not.toHaveBeenCalled()
   })
 
@@ -69,11 +71,14 @@ describe('Studio magic-link request boundary', () => {
     const result = await guardStudioMagicLinkRequest(request(), deps)
 
     expect(result.allowed).toBe(false)
-    expect(result.response?.status).toBe(429)
-    expect(await result.response?.json()).toEqual({
+    if (result.allowed) throw new Error('Expected the request to be rejected')
+
+    expect(result.response.status).toBe(429)
+    expect(await result.response.json()).toEqual({
       error: 'Too many requests. Please try again later.',
       success: false,
     })
-    expect(result.response?.headers.get('retry-after')).toBe('120')
+    expect(result.response.headers.get('retry-after')).toBe('120')
+    expect(deps.consumeRateLimit).toHaveBeenCalledTimes(1)
   })
 })

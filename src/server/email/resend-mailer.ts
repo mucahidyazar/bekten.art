@@ -129,6 +129,16 @@ export function createResendMailer(
         },
       })
     },
+    async sendStudioMagicLink(
+      input: Readonly<{
+        expiresAt: Date
+        idempotencyKey: string
+        signInUrl: string
+        to: string
+      }>,
+    ) {
+      return deliver(studioMagicLinkContent(input), input)
+    },
   }
 }
 
@@ -308,6 +318,25 @@ function newsletterWelcomeContent(
     }),
     subject: copy.welcomeSubject,
     text: `${copy.welcomeBody}\n\n${copy.unsubscribe}: ${input.unsubscribeUrl}`,
+  }
+}
+
+function studioMagicLinkContent(
+  input: Readonly<{expiresAt: Date; signInUrl: string}>,
+) {
+  const expiration = input.expiresAt.toISOString()
+  const body =
+    'Use this private, one-time link to enter Bekten Studio. The link expires in 10 minutes. If you did not request it, you can ignore this email.'
+
+  return {
+    html: emailCard({
+      action: {label: 'Open Bekten Studio', url: input.signInUrl},
+      body: `<p>${escapeHtml(body)}</p><p><small>Expires: ${escapeHtml(expiration)}</small></p>`,
+      locale: 'en',
+      title: 'Bekten Studio sign-in',
+    }),
+    subject: 'Bekten Studio sign-in link',
+    text: `${body}\n\nOpen Bekten Studio: ${input.signInUrl}\nExpires: ${expiration}`,
   }
 }
 

@@ -2,45 +2,113 @@ import {PrismaAdapter} from '@next-auth/prisma-adapter'
 import {getServerSession, type NextAuthOptions} from 'next-auth'
 
 import {prisma} from '@/lib/db'
+import {getRequiredAuthSecret} from '@/server/auth/request-context'
 import {safeAuthRedirect} from '@/server/auth/safe-redirect'
-import {applySessionClaims, refreshJwtClaims} from '@/server/auth/session-utils'
+import {createStudioAdapter} from '@/server/studio-auth/adapter'
+import {configuredStudioMagicLink} from '@/server/studio-auth/configured-magic-link'
+import {createStudioEmailProvider} from '@/server/studio-auth/email-provider'
+import {isStudioEditorRole} from '@/server/studio-auth/roles'
+
+const secret = getRequiredAuthSecret()
+const canonicalUrl =
+  process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.NEXTAUTH_URL?.trim()
+const secureCookies =
+  process.env.NODE_ENV === 'production' ||
+  Boolean(canonicalUrl?.startsWith('https://'))
+const adapter = createStudioAdapter(
+  PrismaAdapter(prisma),
+  configuredStudioMagicLink,
+)
 
 export function auth() {
   return getServerSession(authOptions)
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter,
   callbacks: {
-    async jwt({token, user}) {
-      return refreshJwtClaims(token, user, userId =>
-        prisma.user.findUnique({
-          select: {
-            id: true,
-            passwordResetRequired: true,
-            role: true,
-            sessionVersion: true,
-          },
-          where: {id: userId},
-        }),
-      )
-    },
     async redirect({baseUrl, url}) {
-      return safeAuthRedirect(url, baseUrl, '/en')
+      return safeAuthRedirect(url, baseUrl, '/studio')
     },
-    async session({session, token}) {
-      return applySessionClaims(session, token)
+    async session({session, user}) {
+      const role = (user as {role?: string}).role
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          role,
+        },
+      } as typeof session
+    },
+    async signIn({email, user}) {
+      if (email?.verificationRequest) return true
+
+      return isStudioEditorRole((user as {role?: unknown}).role)
+    },
+  },
+  cookies: {
+    sessionToken: {
+      name: secureCookies
+        ? '__Secure-next-auth.session-token'
+        : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        path: '/',
+        sameSite: 'lax',
+        secure: secureCookies,
+      },
+    },
+  },
+  events: {
+    async signIn({isNewUser, user}) {
+      await prisma.auditEvent.create({
+        data: {
+          action: 'studio.sign-in.completed',
+          actorUserId: user.id,
+          entityType: 'StudioSession',
+          metadata: {isNewUser: Boolean(isNewUser)},
+        },
+      })
+    },
+    async signOut({session}) {
+      const userId = (session as {userId?: string} | undefined)?.userId
+
+      await prisma.auditEvent.create({
+        data: {
+          action: 'studio.sign-out.completed',
+          actorUserId: userId ?? null,
+          entityType: 'StudioSession',
+          metadata: {},
+        },
+      })
     },
   },
   pages: {
     error: '/studio/sign-in',
     signIn: '/studio/sign-in',
   },
-  providers: [],
-  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
+  providers: [
+    createStudioEmailProvider({
+      from: process.env.RESEND_FROM_EMAIL?.trim() || 'Bekten Studio',
+      maxAge: 10 * 60,
+      normalizeIdentifier: identifier =>
+        configuredStudioMagicLink.normalizeIdentifier(identifier),
+      secret,
+      sendVerificationRequest: ({expires, identifier, token, url}) =>
+        configuredStudioMagicLink.queueMail({
+          expires,
+          identifier,
+          token,
+          url,
+        }),
+    }),
+  ],
+  secret,
   session: {
-    maxAge: 12 * 60 * 60,
-    strategy: 'jwt',
-    updateAge: 60 * 60,
+    maxAge: 8 * 60 * 60,
+    strategy: 'database',
+    updateAge: 30 * 60,
   },
 }

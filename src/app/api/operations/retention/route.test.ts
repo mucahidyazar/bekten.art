@@ -15,9 +15,11 @@ describe('POST /api/operations/retention', () => {
     mocks.run.mockResolvedValue({
       emailWebhookEvents: 1,
       feedback: 2,
+      inquiries: 7,
       outboxJobs: 3,
       passwordResetTokens: 4,
       rateLimitBuckets: 5,
+      sessions: 8,
       verificationTokens: 6,
     })
   })
@@ -48,9 +50,11 @@ describe('POST /api/operations/retention', () => {
       data: {
         emailWebhookEvents: 1,
         feedback: 2,
+        inquiries: 7,
         outboxJobs: 3,
         passwordResetTokens: 4,
         rateLimitBuckets: 5,
+        sessions: 8,
         verificationTokens: 6,
       },
       success: true,

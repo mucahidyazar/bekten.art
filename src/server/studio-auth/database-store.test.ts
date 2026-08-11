@@ -7,7 +7,7 @@ const input = {
   identifierHash: 'a'.repeat(64),
   mail: {
     expires: new Date('2026-08-10T12:10:00.000Z'),
-    url: 'https://bekten.art/api/auth/callback/email?token=secret',
+    signInUrlEncrypted: 'v1.nonce.ciphertext.authentication-tag',
   },
   verification: {
     expires: new Date('2026-08-10T12:10:00.000Z'),
@@ -35,7 +35,7 @@ describe('database Studio magic-link store', () => {
     'atomically stores the hashed token, audit and outbox for %s',
     async role => {
       const {database, transaction} = databaseWithUser({
-        id: 'user-1',
+        id: '11111111-1111-4111-8111-111111111111',
         role,
       })
       const store = createDatabaseStudioMagicLinkStore(database)
@@ -49,16 +49,19 @@ describe('database Studio magic-link store', () => {
           idempotencyKey: `studio.magic-link:${input.verification.token}`,
           payload: {
             expiresAt: input.mail.expires.toISOString(),
-            signInUrl: input.mail.url,
+            signInUrlEncrypted: input.mail.signInUrlEncrypted,
             to: input.identifier,
           },
           type: 'studio.magic-link.requested',
         },
       })
+      expect(JSON.stringify(transaction.outboxJob.create.mock.calls)).not.toContain(
+        'token=secret',
+      )
       expect(transaction.auditEvent.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           action: 'studio.magic-link.requested',
-          actorUserId: 'user-1',
+          actorUserId: '11111111-1111-4111-8111-111111111111',
           entityType: 'StudioSession',
         }),
       })

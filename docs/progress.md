@@ -30,22 +30,22 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 
 ## 2. Domain ve içerik altyapısı
 
-- [ ] Collection domainini ve migration'ını test-first ekle
-- [ ] Exhibition domainini ve migration'ını test-first ekle
-- [ ] Journal entry ve editable page domainlerini test-first ekle
-- [ ] Inquiry domainini ve retention kurallarını test-first ekle
-- [ ] Content revision domainini ve immutable restore akışını test-first ekle
-- [ ] Artwork'i availability ve editorial metadata ile geliştir
-- [ ] Locale, slug, sıralama ve draft/published/archived sözleşmesini tamamla
-- [ ] Publish transaction ve cache invalidation akışını tamamla
+- [x] Collection domainini ve migration'ını test-first ekle
+- [x] Exhibition domainini ve migration'ını test-first ekle
+- [x] Journal entry ve editable page domainlerini test-first ekle
+- [x] Inquiry domainini ve retention kurallarını test-first ekle
+- [x] Content revision domainini ve immutable restore akışını test-first ekle
+- [x] Artwork'i availability ve editorial metadata ile geliştir
+- [x] Locale, slug, sıralama ve draft/published/archived sözleşmesini tamamla
+- [x] Publish transaction ve cache invalidation akışını tamamla
 - [ ] Düzenlenebilir demo seed'i production gate ile ekle
 
 ## 3. Bekten Studio erişimi ve temel deneyim
 
-- [ ] Resend magic-link akışını test-first geliştir
-- [ ] EDITOR ve OWNER authorization sınırlarını tamamla
-- [ ] Public auth route ve bağımlılıklarının kalmadığını doğrula
-- [ ] Bekten Studio responsive shell'ini geliştir
+- [x] Resend magic-link akışını test-first geliştir
+- [x] EDITOR ve OWNER authorization sınırlarını tamamla
+- [x] Public auth route ve bağımlılıklarının kalmadığını doğrula
+- [x] Bekten Studio responsive shell'ini geliştir
 - [ ] Owner-only operasyon alanını editörden ayır
 - [ ] Studio genel bakış ve görev odaklı boş durumları geliştir
 - [ ] Studio error, loading ve accessibility durumlarını tamamla

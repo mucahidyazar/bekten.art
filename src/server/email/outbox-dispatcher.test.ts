@@ -47,8 +47,16 @@ function configuredDispatcher(overrides: Record<string, unknown> = {}) {
     sendNewsletterConfirmation: vi.fn().mockResolvedValue({id: 'confirm-id'}),
     sendNewsletterWelcome: vi.fn().mockResolvedValue({id: 'welcome-id'}),
     sendPasswordReset: vi.fn().mockResolvedValue({id: 'reset-id'}),
+    sendStudioMagicLink: vi.fn().mockResolvedValue({id: 'studio-link-id'}),
   }
-  const tokens = {decrypt: vi.fn().mockReturnValue('plain-token')}
+  const tokens = {
+    decrypt: vi.fn().mockReturnValue('plain-token'),
+    openStudioMagicLink: vi
+      .fn()
+      .mockReturnValue(
+        'https://bekten.art/api/auth/callback/email?token=plain-studio-token',
+      ),
+  }
   const dispatcher = createOutboxDispatcher(store, mailer, tokens, {
     appUrl: 'https://bekten.art',
     now: () => now,
@@ -188,6 +196,35 @@ describe('outbox dispatcher', () => {
       unsubscribeUrl:
         'https://bekten.art/api/newsletter/unsubscribe?token=plain-token&locale=en',
     })
+  })
+
+  it('decrypts and delivers a same-origin Studio magic link without persisting plaintext', async () => {
+    const {dispatcher, mailer, tokens} = configuredDispatcher({
+      idempotencyKey: `studio.magic-link:${'a'.repeat(64)}`,
+      payload: {
+        expiresAt: '2026-08-10T12:10:00.000Z',
+        signInUrlEncrypted: 'v1.nonce.ciphertext.authentication-tag',
+        to: 'owner@example.com',
+      },
+      type: 'studio.magic-link.requested',
+    })
+
+    await expect(dispatcher.dispatchOne()).resolves.toEqual({
+      status: 'completed',
+    })
+    expect(tokens.openStudioMagicLink).toHaveBeenCalledWith(
+      'v1.nonce.ciphertext.authentication-tag',
+    )
+    expect(mailer.sendStudioMagicLink).toHaveBeenCalledWith({
+      expiresAt: new Date('2026-08-10T12:10:00.000Z'),
+      idempotencyKey: `studio.magic-link:${'a'.repeat(64)}`,
+      signInUrl:
+        'https://bekten.art/api/auth/callback/email?token=plain-studio-token',
+      to: 'owner@example.com',
+    })
+    expect(JSON.stringify(mailer.sendStudioMagicLink.mock.calls)).not.toContain(
+      'v1.nonce.ciphertext.authentication-tag',
+    )
   })
 
   it('fails an unsupported job type permanently', async () => {

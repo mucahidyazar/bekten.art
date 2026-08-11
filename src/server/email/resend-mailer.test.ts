@@ -202,4 +202,37 @@ describe('Resend mailer', () => {
       {idempotencyKey: 'newsletter:welcome'},
     )
   })
+
+  it('sends an escaped, retry-safe Studio sign-in link', async () => {
+    const send = vi
+      .fn()
+      .mockResolvedValue({data: {id: 'studio-email-id'}, error: null})
+    const mailer = createResendMailer(
+      {emails: {send}},
+      {
+        apiKey: 're_bekten_key',
+        from: 'Bekten Art <noreply@mucahid.dev>',
+        replyTo: 'support@mucahid.dev',
+      },
+    )
+
+    await mailer.sendStudioMagicLink({
+      expiresAt: new Date('2026-08-10T12:10:00.000Z'),
+      idempotencyKey: 'studio.magic-link:hash',
+      signInUrl:
+        'https://bekten.art/api/auth/callback/email?token=safe&email=owner%40example.com',
+      to: 'owner@example.com',
+    })
+
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        html: expect.stringContaining(
+          '/api/auth/callback/email?token=safe&amp;email=owner%40example.com',
+        ),
+        subject: expect.stringMatching(/Studio sign-in/i),
+        to: ['owner@example.com'],
+      }),
+      {idempotencyKey: 'studio.magic-link:hash'},
+    )
+  })
 })
