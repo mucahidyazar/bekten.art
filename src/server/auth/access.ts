@@ -136,12 +136,12 @@ const configuredAccess = createAuthAccess({
     return prisma.user.findUnique({where: {id: userId}})
   },
   async getSession() {
-    const [{getServerSession}, {authOptions}] = await Promise.all([
+    const [{getServerSession}, {getAuthOptions}] = await Promise.all([
       import('next-auth'),
       import('../../auth'),
     ])
 
-    return getServerSession(authOptions)
+    return getServerSession(getAuthOptions())
   },
 })
 

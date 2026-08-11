@@ -19,7 +19,7 @@ vi.stubEnv('AUTH_SECRET', 'a'.repeat(64))
 
 describe('auth options', () => {
   it('exposes only the private Studio email provider', async () => {
-    const {authOptions} = await import('./auth')
+    const authOptions = (await import('./auth')).getAuthOptions()
 
     expect(authOptions.providers).toHaveLength(1)
     expect(authOptions.providers[0]).toMatchObject({
@@ -30,7 +30,7 @@ describe('auth options', () => {
   })
 
   it('points the retained session protocol at the private Studio sign-in', async () => {
-    const {authOptions} = await import('./auth')
+    const authOptions = (await import('./auth')).getAuthOptions()
 
     expect(authOptions.pages).toEqual({
       error: '/studio/sign-in',
@@ -39,7 +39,7 @@ describe('auth options', () => {
   })
 
   it('uses short database sessions and hardened cookies', async () => {
-    const {authOptions} = await import('./auth')
+    const authOptions = (await import('./auth')).getAuthOptions()
 
     expect(authOptions.session).toMatchObject({
       maxAge: 8 * 60 * 60,
@@ -54,7 +54,7 @@ describe('auth options', () => {
   })
 
   it('keeps the verification request generic and role-gates token consumption', async () => {
-    const {authOptions} = await import('./auth')
+    const authOptions = (await import('./auth')).getAuthOptions()
     const signIn = authOptions.callbacks?.signIn
 
     await expect(
@@ -90,7 +90,7 @@ describe('auth options', () => {
   })
 
   it('maps the current adapter user into the database session', async () => {
-    const {authOptions} = await import('./auth')
+    const authOptions = (await import('./auth')).getAuthOptions()
 
     await expect(
       authOptions.callbacks?.session?.({
@@ -114,7 +114,7 @@ describe('auth options', () => {
   })
 
   it('keeps redirects on the canonical Studio origin', async () => {
-    const {authOptions} = await import('./auth')
+    const authOptions = (await import('./auth')).getAuthOptions()
 
     await expect(
       authOptions.callbacks?.redirect?.({
@@ -125,7 +125,7 @@ describe('auth options', () => {
   })
 
   it('normalizes exactly one Studio email address', async () => {
-    const {authOptions} = await import('./auth')
+    const authOptions = (await import('./auth')).getAuthOptions()
     const provider = authOptions.providers[0]
 
     expect(
@@ -136,7 +136,7 @@ describe('auth options', () => {
   })
 
   it('audits successful sign-in and sign-out lifecycle events', async () => {
-    const {authOptions} = await import('./auth')
+    const authOptions = (await import('./auth')).getAuthOptions()
 
     await authOptions.events?.signIn?.({
       account: null,
@@ -167,7 +167,8 @@ describe('auth options', () => {
   })
 
   it('provides the configured options to server-side session reads', async () => {
-    const {auth, authOptions} = await import('./auth')
+    const {auth, getAuthOptions} = await import('./auth')
+    const authOptions = getAuthOptions()
 
     getServerSession.mockResolvedValueOnce(null)
 

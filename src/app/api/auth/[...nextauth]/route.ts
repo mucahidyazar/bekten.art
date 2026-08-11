@@ -1,11 +1,13 @@
 import NextAuth from 'next-auth'
 
-import {authOptions} from '@/auth'
+import {getAuthOptions} from '@/auth'
 import {guardConfiguredStudioMagicLinkRequest} from '@/server/studio-auth/configured-request-boundary'
 
-const handler = NextAuth(authOptions)
+function handleAuthRequest(request: Request) {
+  return NextAuth(getAuthOptions())(request)
+}
 
-export const GET = handler
+export const GET = handleAuthRequest
 
 export async function POST(request: Request) {
   if (new URL(request.url).pathname === '/api/auth/signin/email') {
@@ -14,7 +16,7 @@ export async function POST(request: Request) {
     if (!boundary.allowed) return boundary.response
   }
 
-  return handler(request)
+  return handleAuthRequest(request)
 }
 
 export const dynamic = 'force-dynamic'

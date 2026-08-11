@@ -5,26 +5,32 @@ import {prisma} from '@/lib/db'
 import {getRequiredAuthSecret} from '@/server/auth/request-context'
 import {safeAuthRedirect} from '@/server/auth/safe-redirect'
 import {createStudioAdapter} from '@/server/studio-auth/adapter'
-import {configuredStudioMagicLink} from '@/server/studio-auth/configured-magic-link'
+import {getConfiguredStudioMagicLink} from '@/server/studio-auth/configured-magic-link'
 import {createStudioEmailProvider} from '@/server/studio-auth/email-provider'
 import {isStudioEditorRole} from '@/server/studio-auth/roles'
 
-const secret = getRequiredAuthSecret()
-const canonicalUrl =
-  process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.NEXTAUTH_URL?.trim()
-const secureCookies =
-  process.env.NODE_ENV === 'production' ||
-  Boolean(canonicalUrl?.startsWith('https://'))
-const adapter = createStudioAdapter(
-  PrismaAdapter(prisma),
-  configuredStudioMagicLink,
-)
+let cachedAuthOptions: NextAuthOptions | undefined
 
 export function auth() {
-  return getServerSession(authOptions)
+  return getServerSession(getAuthOptions())
 }
 
-export const authOptions: NextAuthOptions = {
+export function getAuthOptions(): NextAuthOptions {
+  if (cachedAuthOptions) return cachedAuthOptions
+
+  const secret = getRequiredAuthSecret()
+  const canonicalUrl =
+    process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.NEXTAUTH_URL?.trim()
+  const secureCookies =
+    process.env.NODE_ENV === 'production' ||
+    Boolean(canonicalUrl?.startsWith('https://'))
+  const configuredStudioMagicLink = getConfiguredStudioMagicLink()
+  const adapter = createStudioAdapter(
+    PrismaAdapter(prisma),
+    configuredStudioMagicLink,
+  )
+
+  cachedAuthOptions = {
   adapter,
   callbacks: {
     async redirect({baseUrl, url}) {
@@ -111,4 +117,7 @@ export const authOptions: NextAuthOptions = {
     strategy: 'database',
     updateAge: 30 * 60,
   },
+  }
+
+  return cachedAuthOptions
 }

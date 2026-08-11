@@ -5,15 +5,6 @@ import {createDatabaseStudioMagicLinkStore} from './database-store'
 import {createStudioMagicLinkCoordinator} from './magic-link-coordinator'
 import {createStudioMagicLinkSealer} from './sealed-link'
 
-const secret = getRequiredAuthSecret()
-const configuredAppUrl =
-  process.env.NEXTAUTH_URL?.trim() || process.env.NEXT_PUBLIC_APP_URL?.trim()
-
-if (!configuredAppUrl && process.env.NODE_ENV === 'production') {
-  throw new Error('Studio authentication origin is not configured')
-}
-
-const appOrigin = new URL(configuredAppUrl || 'http://localhost:3000').origin
 const store = createDatabaseStudioMagicLinkStore({
   $transaction: callback =>
     prisma.$transaction(transaction =>
@@ -33,13 +24,44 @@ const store = createDatabaseStudioMagicLinkStore({
       }),
     ),
 })
-const sealer = createStudioMagicLinkSealer(secret)
+let cachedConfiguration:
+  | Readonly<{
+      coordinator: ReturnType<typeof createStudioMagicLinkCoordinator>
+      open: ReturnType<typeof createStudioMagicLinkSealer>['open']
+    }>
+  | undefined
 
-export const configuredStudioMagicLink = createStudioMagicLinkCoordinator({
-  appOrigin,
-  queue: store.queue,
-  sealSignInUrl: sealer.seal,
-  secret,
-})
+function configuredMagicLink() {
+  if (cachedConfiguration) return cachedConfiguration
 
-export const openStudioMagicLink = sealer.open
+  const secret = getRequiredAuthSecret()
+  const configuredAppUrl =
+    process.env.NEXTAUTH_URL?.trim() || process.env.NEXT_PUBLIC_APP_URL?.trim()
+
+  if (!configuredAppUrl && process.env.NODE_ENV === 'production') {
+    throw new Error('Studio authentication origin is not configured')
+  }
+
+  const appOrigin = new URL(configuredAppUrl || 'http://localhost:3000').origin
+  const sealer = createStudioMagicLinkSealer(secret)
+
+  cachedConfiguration = Object.freeze({
+    coordinator: createStudioMagicLinkCoordinator({
+      appOrigin,
+      queue: store.queue,
+      sealSignInUrl: sealer.seal,
+      secret,
+    }),
+    open: sealer.open,
+  })
+
+  return cachedConfiguration
+}
+
+export function getConfiguredStudioMagicLink() {
+  return configuredMagicLink().coordinator
+}
+
+export function openStudioMagicLink(encrypted: string) {
+  return configuredMagicLink().open(encrypted)
+}
