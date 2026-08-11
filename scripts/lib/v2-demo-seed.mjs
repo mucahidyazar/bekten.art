@@ -481,10 +481,16 @@ function placement(entityId, entityType, mediaObject, index, altText) {
 
   return {
     database: {
-      ...editable,
+      altText: editable.altText,
+      caption: editable.caption,
+      credit: editable.credit,
+      crop: editable.crop,
+      displayOrder: editable.displayOrder,
       entityId,
       entityType,
       id: uuid('4', index),
+      mediaObjectId: editable.mediaObjectId,
+      role: editable.role,
     },
     editable,
   }
