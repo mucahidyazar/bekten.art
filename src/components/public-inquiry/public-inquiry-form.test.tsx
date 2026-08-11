@@ -285,6 +285,73 @@ describe('PublicInquiryForm', () => {
     )
   })
 
+  it('creates a new submission id when a failed request is edited before retry', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, {status: 500}))
+      .mockResolvedValueOnce(acceptedResponse())
+
+    vi.stubGlobal('fetch', fetchMock)
+    const randomUUID = vi
+      .spyOn(globalThis.crypto, 'randomUUID')
+      .mockReturnValueOnce('123e4567-e89b-42d3-a456-426614174000')
+      .mockReturnValueOnce('123e4567-e89b-42d3-a456-426614174002')
+    const user = userEvent.setup()
+
+    render(<PublicInquiryForm locale="en" type="GENERAL" />)
+    await fillContactFields(user)
+    await user.type(screen.getByLabelText('Subject'), 'Studio archive')
+    await user.type(
+      screen.getByLabelText('Message'),
+      'Please share further information about the studio archive.',
+    )
+    await user.click(screen.getByRole('button', {name: 'Send private request'}))
+    expect(await screen.findByRole('alert')).toBeVisible()
+
+    await user.clear(screen.getByLabelText('Message'))
+    await user.type(
+      screen.getByLabelText('Message'),
+      'Please share further information about the exhibition archive.',
+    )
+    await user.click(screen.getByRole('button', {name: 'Send private request'}))
+
+    expect(await screen.findByRole('status')).toBeVisible()
+    expect(randomUUID).toHaveBeenCalledTimes(2)
+    expect(submittedBody(fetchMock, 0).submissionId).not.toBe(
+      submittedBody(fetchMock, 1).submissionId,
+    )
+  })
+
+  it('honors Retry-After and prevents immediate rate-limit resubmission', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(null, {
+        headers: {'Retry-After': '90'},
+        status: 429,
+      }),
+    )
+
+    vi.stubGlobal('fetch', fetchMock)
+    const user = userEvent.setup()
+
+    render(<PublicInquiryForm locale="en" type="GENERAL" />)
+    await fillContactFields(user)
+    await user.type(screen.getByLabelText('Subject'), 'Studio archive')
+    await user.type(
+      screen.getByLabelText('Message'),
+      'Please share further information about the studio archive.',
+    )
+    await user.click(screen.getByRole('button', {name: 'Send private request'}))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Please wait 90 seconds before trying again.',
+    )
+    const submit = screen.getByRole('button', {name: 'Send private request'})
+
+    expect(submit).toBeDisabled()
+    await user.click(submit)
+    expect(fetchMock).toHaveBeenCalledOnce()
+  })
+
   it('disables every interactive field while the request is pending', async () => {
     let resolveRequest: ((value: Response) => void) | undefined
 
@@ -377,6 +444,27 @@ describe('PublicInquiryForm', () => {
     expect(
       screen.getByRole('button', {name: 'Send private request'}),
     ).toBeEnabled()
+  })
+
+  it('renders localized field errors and focuses the first invalid control', async () => {
+    const fetchMock = vi.fn()
+
+    vi.stubGlobal('fetch', fetchMock)
+    const user = userEvent.setup()
+
+    render(<PublicInquiryForm locale="tr" type="GENERAL" />)
+    await user.click(screen.getByRole('button', {name: 'Özel talep gönder'}))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Lütfen işaretli alanları kontrol edin.',
+    )
+    expect(screen.getByLabelText('Ad soyad')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    )
+    expect(screen.getByLabelText('Ad soyad')).toHaveFocus()
+    expect(screen.getAllByText('Bu alan zorunludur.').length).toBeGreaterThan(0)
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it.each([
