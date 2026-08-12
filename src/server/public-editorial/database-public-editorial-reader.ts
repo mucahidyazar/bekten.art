@@ -65,6 +65,7 @@ type Candidate<TType extends EditorialEntityType> = Readonly<{
   publishedAt: Date
   publicValue: PublicEntityMap[TType]
   snapshot: EditorialSnapshot
+  translationGroupId: string
   version: number
 }>
 
@@ -81,6 +82,12 @@ const HOMEPAGE_LIMITS = Object.freeze({
   pressEntries: 4,
   works: 6,
 })
+const FALLBACK_LOCALES = Object.freeze<readonly EditorialLocale[]>([
+  'en',
+  'tr',
+  'ru',
+  'ky',
+])
 const entityTypeSchema = z.enum([
   'ARTWORK',
   'COLLECTION',
@@ -96,6 +103,7 @@ const publishedRowSchema = z
     locale: editorialLocaleSchema,
     publishedAt: z.date(),
     status: z.literal('PUBLISHED'),
+    translationGroupId: z.string().uuid(),
     version: z.number().int().positive(),
   })
   .passthrough()
@@ -162,11 +170,13 @@ function immutableJson<T>(value: T): T {
   return value
 }
 
-function publishedRows(rows: readonly unknown[], locale: EditorialLocale) {
+function publishedRows(rows: readonly unknown[], locale?: EditorialLocale) {
   return rows.flatMap(row => {
     const parsed = publishedRowSchema.safeParse(row)
 
-    return parsed.success && parsed.data.locale === locale ? [parsed.data] : []
+    return parsed.success && (!locale || parsed.data.locale === locale)
+      ? [parsed.data]
+      : []
   })
 }
 
@@ -227,6 +237,7 @@ function provisionalCandidate<TType extends EditorialEntityType>(
       id: row.id,
       publishedAt: parsed.publishedAt,
       snapshot,
+      translationGroupId: row.translationGroupId,
       version: revision.version,
     })
   } catch {
@@ -307,12 +318,12 @@ function compareCandidates<TType extends EditorialEntityType>(
   )
 }
 
-async function hydrateEntities<TType extends EditorialEntityType>(
+async function hydrateCandidates<TType extends EditorialEntityType>(
   transaction: PublicEditorialTransaction,
   entityType: TType,
   locale: EditorialLocale,
   rows: readonly z.output<typeof publishedRowSchema>[],
-): Promise<readonly PublicEntityMap[TType][]> {
+): Promise<readonly Candidate<TType>[]> {
   if (rows.length === 0) return Object.freeze([])
 
   const rowsById = new Map(rows.map(row => [row.id, row]))
@@ -381,7 +392,83 @@ async function hydrateEntities<TType extends EditorialEntityType>(
 
   complete.sort(compareCandidates)
 
-  return Object.freeze(complete.map(({publicValue}) => publicValue))
+  return Object.freeze(complete)
+}
+
+function localePreference(requested: EditorialLocale) {
+  return Object.freeze([
+    requested,
+    ...FALLBACK_LOCALES.filter(locale => locale !== requested),
+  ])
+}
+
+function selectFallbackCandidates<TType extends EditorialEntityType>(
+  candidates: readonly Candidate<TType>[],
+  requested: EditorialLocale,
+) {
+  const preference = localePreference(requested)
+  const byGroup = new Map<string, Candidate<TType>[]>()
+
+  for (const candidate of candidates) {
+    const group = byGroup.get(candidate.translationGroupId) ?? []
+
+    byGroup.set(candidate.translationGroupId, [...group, candidate])
+  }
+
+  const selected = [...byGroup.values()].flatMap(group => {
+    for (const locale of preference) {
+      const candidate = group.find(item => item.publicValue.locale === locale)
+
+      if (candidate) return [candidate]
+    }
+
+    return []
+  })
+
+  selected.sort(compareCandidates)
+
+  return Object.freeze(selected)
+}
+
+async function readCandidatePool<TType extends EditorialEntityType>(
+  transaction: PublicEditorialTransaction,
+  entityType: TType,
+): Promise<readonly Candidate<TType>[]> {
+  const codec = editorialEntityCodecs[entityType]
+  const rows = publishedRows(
+    await entityDelegate(transaction, codec.delegate).findMany({
+      orderBy: [{displayOrder: 'asc'}, {id: 'asc'}],
+      where: {
+        locale: {in: [...FALLBACK_LOCALES]},
+        publishedAt: {not: null},
+        status: 'PUBLISHED',
+      },
+    }),
+  )
+
+  const hydrated = await Promise.all(
+    FALLBACK_LOCALES.map(locale =>
+      hydrateCandidates(
+        transaction,
+        entityType,
+        locale,
+        rows.filter(row => row.locale === locale),
+      ),
+    ),
+  )
+
+  return Object.freeze(hydrated.flat())
+}
+
+async function readCandidates<TType extends EditorialEntityType>(
+  transaction: PublicEditorialTransaction,
+  entityType: TType,
+  locale: EditorialLocale,
+) {
+  return selectFallbackCandidates(
+    await readCandidatePool(transaction, entityType),
+    locale,
+  )
 }
 
 async function readEntities<TType extends EditorialEntityType>(
@@ -389,16 +476,11 @@ async function readEntities<TType extends EditorialEntityType>(
   entityType: TType,
   locale: EditorialLocale,
 ): Promise<readonly PublicEntityMap[TType][]> {
-  const codec = editorialEntityCodecs[entityType]
-  const rows = publishedRows(
-    await entityDelegate(transaction, codec.delegate).findMany({
-      orderBy: [{displayOrder: 'asc'}, {id: 'asc'}],
-      where: {locale, publishedAt: {not: null}, status: 'PUBLISHED'},
-    }),
-    locale,
+  return Object.freeze(
+    (await readCandidates(transaction, entityType, locale)).map(
+      ({publicValue}) => publicValue,
+    ),
   )
-
-  return hydrateEntities(transaction, entityType, locale, rows)
 }
 
 async function readEntitiesByIds<TType extends EditorialEntityType>(
@@ -425,7 +507,11 @@ async function readEntitiesByIds<TType extends EditorialEntityType>(
     locale,
   )
 
-  return hydrateEntities(transaction, entityType, locale, rows)
+  return Object.freeze(
+    (
+      await hydrateCandidates(transaction, entityType, locale, rows)
+    ).map(({publicValue}) => publicValue),
+  )
 }
 
 async function entityIdsMatchingSnapshot(
@@ -475,21 +561,26 @@ async function readEntityBySlug<TType extends EditorialEntityType>(
   locale: EditorialLocale,
   slug: string,
 ) {
-  const entityIds = await entityIdsMatchingSnapshot(
-    transaction,
-    entityType,
-    locale,
-    'slug',
-    slug,
-  )
-  const entities = await readEntitiesByIds(
-    transaction,
-    entityType,
-    locale,
-    entityIds,
-  )
+  for (const candidateLocale of localePreference(locale)) {
+    const entityIds = await entityIdsMatchingSnapshot(
+      transaction,
+      entityType,
+      candidateLocale,
+      'slug',
+      slug,
+    )
+    const entities = await readEntitiesByIds(
+      transaction,
+      entityType,
+      candidateLocale,
+      entityIds,
+    )
+    const match = entities.find(entity => entity.slug === slug)
 
-  return entities.find(entity => entity.slug === slug) ?? null
+    if (match) return match
+  }
+
+  return null
 }
 
 async function readEntitiesBySnapshotValue<TType extends EditorialEntityType>(

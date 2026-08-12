@@ -22,33 +22,33 @@ const footerNavigationCopy: Readonly<
     Readonly<{
       allWorks: string
       availableWorks: string
-      legalNavigation: string
+      archiveNavigation: string
       workNavigation: string
     }>
   >
 > = Object.freeze({
   en: {
     allWorks: 'All works',
+    archiveNavigation: 'Footer archive navigation',
     availableWorks: 'Available works',
-    legalNavigation: 'Footer legal navigation',
     workNavigation: 'Footer work navigation',
   },
   ky: {
     allWorks: 'Бардык эмгектер',
+    archiveNavigation: 'Футердеги архив навигациясы',
     availableWorks: 'Жеткиликтүү эмгектер',
-    legalNavigation: 'Футердин укуктук навигациясы',
     workNavigation: 'Футердеги эмгектер навигациясы',
   },
   ru: {
     allWorks: 'Все работы',
+    archiveNavigation: 'Архивная навигация в подвале',
     availableWorks: 'Доступные работы',
-    legalNavigation: 'Правовая навигация в подвале',
     workNavigation: 'Навигация по работам в подвале',
   },
   tr: {
     allWorks: 'Tüm eserler',
+    archiveNavigation: 'Alt bilgi arşiv navigasyonu',
     availableWorks: 'Mevcut eserler',
-    legalNavigation: 'Alt bilgi yasal navigasyonu',
     workNavigation: 'Alt bilgi eser navigasyonu',
   },
 })
@@ -139,9 +139,27 @@ export function PublicFooter({locale}: PublicFooterProps) {
         </nav>
 
         <nav
-          aria-label={navigationCopy.legalNavigation}
+          aria-label={navigationCopy.archiveNavigation}
           className={styles.legalNavigation}
         >
+          <Link
+            href={localizedPath(locale, '/collectors')}
+            transitionTypes={[...NAV_LATERAL_TRANSITION]}
+          >
+            {copy.collectors}
+          </Link>
+          <Link
+            href={localizedPath(locale, '/exhibitions')}
+            transitionTypes={[...NAV_LATERAL_TRANSITION]}
+          >
+            {copy.exhibitions}
+          </Link>
+          <Link
+            href={localizedPath(locale, '/journal')}
+            transitionTypes={[...NAV_LATERAL_TRANSITION]}
+          >
+            {copy.journal}
+          </Link>
           <Link
             href={localizedPath(locale, '/press')}
             transitionTypes={[...NAV_LATERAL_TRANSITION]}

@@ -1,3 +1,10 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+
 import {publicManagedCopy} from './public-managed-copy'
 import styles from './public-managed-pages.module.css'
 import {
@@ -203,14 +210,16 @@ export function PublicCommissionPage({
 
       <section className={`${styles.shell} ${styles.faqSection}`}>
         <SectionHeading>{copy.faq}</SectionHeading>
-        <div className={styles.faqList}>
+        <Accordion className={styles.faqList} collapsible type="single">
           {copy.faqs.map(faq => (
-            <details key={faq.question}>
-              <summary>{faq.question}</summary>
-              <p>{faq.answer}</p>
-            </details>
+            <AccordionItem key={faq.question} value={faq.question}>
+              <AccordionTrigger>{faq.question}</AccordionTrigger>
+              <AccordionContent>
+                <p>{faq.answer}</p>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </section>
 
       <section

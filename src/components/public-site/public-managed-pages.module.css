@@ -441,21 +441,22 @@
   grid-template-columns: minmax(14rem, 0.55fr) minmax(22rem, 1.45fr);
 }
 
-.faqList details {
+.faqList > div {
   border-top: 1px solid var(--heritage-line);
-  padding-block: 1.35rem;
 }
 
-.faqList details:last-child {
+.faqList > div:last-child {
   border-bottom: 1px solid var(--heritage-line);
 }
 
-.faqList summary {
-  cursor: pointer;
+.faqList button {
   font-family: var(--heritage-display);
   font-size: 1.05rem;
+  font-weight: 400;
   letter-spacing: 0.035em;
-  padding-right: 2rem;
+  padding-block: 1.35rem;
+  text-align: left;
+  text-decoration: none;
 }
 
 .faqList p {

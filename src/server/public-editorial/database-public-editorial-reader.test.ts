@@ -252,7 +252,11 @@ describe('database public editorial reader', () => {
 
     expect(transaction.artwork.findMany).toHaveBeenCalledWith({
       orderBy: [{displayOrder: 'asc'}, {id: 'asc'}],
-      where: {locale: 'en', publishedAt: {not: null}, status: 'PUBLISHED'},
+      where: {
+        locale: {in: ['en', 'tr', 'ru', 'ky']},
+        publishedAt: {not: null},
+        status: 'PUBLISHED',
+      },
     })
     expect(result.map(item => item.title)).toEqual([
       'Sample Work',

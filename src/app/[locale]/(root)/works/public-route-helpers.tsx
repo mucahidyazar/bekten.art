@@ -63,9 +63,11 @@ type PublicRouteCopy = Readonly<{
   }>
   journalArchive: string
   medium: string
+  nextImage: string
   press: Readonly<{empty: string; intro: string; kicker: string; title: string}>
   pressCategories: Readonly<Record<PressCategory, string>>
   publicationDetails: string
+  previousImage: string
   readJournal: string
   readPress: string
   readAtSource: string
@@ -374,6 +376,7 @@ const publicRouteCopy: Readonly<Record<BuiltInPublicLocale, PublicRouteCopy>> =
       },
       journalArchive: 'Journal archive',
       medium: 'Medium',
+      nextImage: 'Next image',
       press: {
         empty: 'The press archive is being prepared.',
         intro:
@@ -388,6 +391,7 @@ const publicRouteCopy: Readonly<Record<BuiltInPublicLocale, PublicRouteCopy>> =
         REVIEW: 'Reviews',
       },
       publicationDetails: 'Publication details',
+      previousImage: 'Previous image',
       readJournal: 'Read entry',
       readPress: 'Read publication',
       readAtSource: 'Read at source',
@@ -449,6 +453,7 @@ const publicRouteCopy: Readonly<Record<BuiltInPublicLocale, PublicRouteCopy>> =
       },
       journalArchive: 'Журнал архиви',
       medium: 'Материал',
+      nextImage: 'Кийинки сүрөт',
       press: {
         empty: 'Басма сөз архиви даярдалып жатат.',
         intro:
@@ -463,6 +468,7 @@ const publicRouteCopy: Readonly<Record<BuiltInPublicLocale, PublicRouteCopy>> =
         REVIEW: 'Сын-пикирлер',
       },
       publicationDetails: 'Басылма тууралуу',
+      previousImage: 'Мурунку сүрөт',
       readJournal: 'Жазууну окуу',
       readPress: 'Басылманы окуу',
       readAtSource: 'Булактан окуу',
@@ -524,6 +530,7 @@ const publicRouteCopy: Readonly<Record<BuiltInPublicLocale, PublicRouteCopy>> =
       },
       journalArchive: 'Архив журнала',
       medium: 'Материал',
+      nextImage: 'Следующее изображение',
       press: {
         empty: 'Архив прессы готовится.',
         intro:
@@ -538,6 +545,7 @@ const publicRouteCopy: Readonly<Record<BuiltInPublicLocale, PublicRouteCopy>> =
         REVIEW: 'Рецензии',
       },
       publicationDetails: 'О публикации',
+      previousImage: 'Предыдущее изображение',
       readJournal: 'Читать запись',
       readPress: 'Читать публикацию',
       readAtSource: 'Читать в источнике',
@@ -600,6 +608,7 @@ const publicRouteCopy: Readonly<Record<BuiltInPublicLocale, PublicRouteCopy>> =
       },
       journalArchive: 'Journal arşivi',
       medium: 'Teknik',
+      nextImage: 'Sonraki görsel',
       press: {
         empty: 'Basın arşivi hazırlanıyor.',
         intro:
@@ -614,6 +623,7 @@ const publicRouteCopy: Readonly<Record<BuiltInPublicLocale, PublicRouteCopy>> =
         REVIEW: 'Eleştiriler',
       },
       publicationDetails: 'Yayın bilgileri',
+      previousImage: 'Önceki görsel',
       readJournal: 'Yazıyı oku',
       readPress: 'Yayını oku',
       readAtSource: 'Kaynağında oku',

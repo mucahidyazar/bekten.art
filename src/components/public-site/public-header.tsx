@@ -32,7 +32,7 @@ export function PublicHeader({
     {href: 'collections', label: copy.collections},
     {href: 'about', label: copy.studio},
     {href: 'works', label: copy.works},
-    {href: 'collectors', label: copy.collectors},
+    {href: 'studio', label: copy.studioPage},
     {href: 'contact', label: copy.contact},
   ] as const
   const secondaryNavigation = [

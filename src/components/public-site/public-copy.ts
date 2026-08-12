@@ -35,6 +35,7 @@ type PublicShellCopy = Readonly<{
   privateViewing: string
   press: string
   privacy: string
+  studioPage: string
   studio: string
   works: string
 }>
@@ -82,6 +83,7 @@ export const publicShellCopy: Readonly<
       privateViewing: 'Private viewing',
       privacy: 'Privacy',
       studio: 'About',
+      studioPage: 'Studio',
       works: 'Works',
     },
     ky: {
@@ -104,6 +106,7 @@ export const publicShellCopy: Readonly<
       privateViewing: 'Жеке көрүү',
       privacy: 'Купуялык',
       studio: 'Сүрөтчү тууралуу',
+      studioPage: 'Устакана',
       works: 'Эмгектер',
     },
     ru: {
@@ -126,6 +129,7 @@ export const publicShellCopy: Readonly<
       privateViewing: 'Частный просмотр',
       privacy: 'Конфиденциальность',
       studio: 'О художнике',
+      studioPage: 'Студия',
       works: 'Работы',
     },
     tr: {
@@ -148,6 +152,7 @@ export const publicShellCopy: Readonly<
       privateViewing: 'Kişisel gösterim',
       privacy: 'Gizlilik',
       studio: 'Hakkında',
+      studioPage: 'Stüdyo',
       works: 'Eserler',
     },
   })

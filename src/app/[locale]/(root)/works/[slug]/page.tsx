@@ -7,13 +7,12 @@ import {cache} from 'react'
 
 import {PublicInquiryForm} from '@/components/public-inquiry'
 import styles from '@/components/public-site/catalog-layouts.module.css'
-import {PublicArtworkFrame} from '@/components/public-site/public-artwork-frame'
 import {PublicContainer} from '@/components/public-site/public-container'
-import {PublicEditorialImage} from '@/components/public-site/public-editorial-image'
 import {
   PublicPageTransition,
   SharedEditorialTransition,
 } from '@/components/public-site/public-view-transition'
+import {PublicWorkMedia} from '@/components/public-site/public-work-media'
 import {ArtworkStructuredData} from '@/components/seo/structured-data'
 import {localizedPath} from '@/lib/localized-path'
 import {publicEditorialReader} from '@/server/public-editorial'
@@ -22,9 +21,7 @@ import {
   editorialMetadata,
   heroMedia,
   parsePublicParams,
-  PublicArchiveSection,
   publicRouteCopy,
-  secondaryMedia,
 } from '../public-route-helpers'
 
 type WorkDetailPageProps = Readonly<{
@@ -70,7 +67,9 @@ export default async function WorkDetailPage({params}: WorkDetailPageProps) {
   const {contentLocale, locale, work} = await readWork(params)
   const copy = publicRouteCopy[contentLocale]
   const media = heroMedia(work)
-  const gallery = secondaryMedia(work)
+  const workMedia = [...work.mediaPlacements].sort(
+    (left, right) => left.displayOrder - right.displayOrder,
+  )
   const factCandidates: readonly Readonly<{
     label: string
     value: number | string | null | undefined
@@ -106,18 +105,16 @@ export default async function WorkDetailPage({params}: WorkDetailPageProps) {
           <header className={styles.detailHero}>
             <div className={`${styles.sectionInner} ${styles.detailHeroGrid}`}>
               {media ? (
-                <figure className={styles.detailMedia}>
+                <div className={styles.detailMedia}>
                   <SharedEditorialTransition kind="image" publicKey={work.slug}>
-                    <PublicArtworkFrame
-                      media={media}
-                      priority
-                      sizes="(max-width: 768px) 100vw, 55vw"
+                    <PublicWorkMedia
+                      label={`${work.title} artwork`}
+                      media={workMedia}
+                      nextLabel={copy.nextImage}
+                      previousLabel={copy.previousImage}
                     />
                   </SharedEditorialTransition>
-                  {media.caption ? (
-                    <figcaption>{media.caption}</figcaption>
-                  ) : null}
-                </figure>
+                </div>
               ) : null}
               <div className={styles.detailCopy}>
                 <p className="heritage-kicker">{copy.workArchive}</p>
@@ -146,28 +143,6 @@ export default async function WorkDetailPage({params}: WorkDetailPageProps) {
               </div>
             </div>
           </header>
-          {gallery.length > 0 ? (
-            <PublicArchiveSection labelledBy="work-gallery-title" light>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle} id="work-gallery-title">
-                  {copy.detailsFromWork}
-                </h2>
-              </div>
-              <div className={styles.galleryGrid}>
-                {gallery.map(placement => (
-                  <figure key={placement.mediaObjectId}>
-                    <PublicEditorialImage
-                      media={placement}
-                      sizes="(max-width: 672px) 50vw, 33vw"
-                    />
-                    {placement.caption ? (
-                      <figcaption>{placement.caption}</figcaption>
-                    ) : null}
-                  </figure>
-                ))}
-              </div>
-            </PublicArchiveSection>
-          ) : null}
           <PublicContainer
             className={styles.detailInquiryContainer}
             id="availability-inquiry"
