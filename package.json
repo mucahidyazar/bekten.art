@@ -33,6 +33,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:editor:upsert": "node --env-file=.env scripts/upsert-dashboard-editor.mjs",
+    "db:refresh:local-editorial": "NODE_ENV=development ALLOW_LOCAL_EDITORIAL_REFRESH=true node --env-file=.env scripts/refresh-local-editorial-content.mjs",
     "db:seed:demo": "node scripts/seed-v2-demo.mjs",
     "db:seed:e2e": "node scripts/seed-e2e-fixtures.mjs",
     "db:seed:instagram": "node --env-file=.env scripts/seed-verified-instagram-content.mjs",
