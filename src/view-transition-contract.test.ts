@@ -106,8 +106,12 @@ describe('end-to-end native View Transition contract', () => {
 
   it('continues artwork card image and title transitions into the framed detail hero', () => {
     const workDetail = source('src/app/[locale]/(root)/works/[slug]/page.tsx')
+    const workMedia = source(
+      'src/components/public-site/public-work-media.tsx',
+    )
 
-    expect(workDetail).toContain('<PublicArtworkFrame')
+    expect(workDetail).toContain('<PublicWorkMedia')
+    expect(workMedia).toContain('<PublicArtworkFrame')
     expect(workDetail).toContain(
       '<SharedEditorialTransition kind="image" publicKey={work.slug}>',
     )

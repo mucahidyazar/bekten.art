@@ -220,29 +220,29 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 
 ## 11. Kaynaklı içerik, locale fallback ve public deneyim turu
 
-- [ ] About içeriğini doğrulanmış sanatçı biyografisi ve sergi geçmişiyle
+- [x] About içeriğini doğrulanmış sanatçı biyografisi ve sergi geçmişiyle
       dört dilde güçlendir
-- [ ] Demo/placeholder Journal ve public editorial metinlerini kaynaklı,
+- [x] Demo/placeholder Journal ve public editorial metinlerini kaynaklı,
       tutarlı içerikle değiştir
-- [ ] Public hero yüksekliği, görsel alanı ve metin başlangıcını desktop/mobile
+- [x] Public hero yüksekliği, görsel alanı ve metin başlangıcını desktop/mobile
       tüm route'larda ortak ritme getir
-- [ ] Header'da Collectors yerine Studio linkini göster; Collectors'ı footer'a
+- [x] Header'da Collectors yerine Studio linkini göster; Collectors'ı footer'a
       taşı
-- [ ] Public route'ların tamamı için görünür iç-link erişilebilirliğini denetle
-- [ ] Home, Collections, About ve Contact dışındaki hero medyalarını doğrulanmış
+- [x] Public route'ların tamamı için görünür iç-link erişilebilirliğini denetle
+- [x] Home, Collections, About ve Contact dışındaki hero medyalarını doğrulanmış
       Instagram/Garage eserleriyle değiştir
-- [ ] Work detail'de tek medya görünümünü koru; iki veya daha fazla medyada
+- [x] Work detail'de tek medya görünümünü koru; iki veya daha fazla medyada
       erişilebilir carousel göster
-- [ ] Liste ve detail sorgularına `seçili dil → İngilizce → ilk yayımlanmış dil`
+- [x] Liste ve detail sorgularına `seçili dil → İngilizce → ilk yayımlanmış dil`
       fallback zincirini ekle
-- [ ] Fallback içerikte seçili locale URL/kabuğunu koru; içerik `lang`, canonical
+- [x] Fallback içerikte seçili locale URL/kabuğunu koru; içerik `lang`, canonical
       ve hreflang değerlerini gerçek içerik diline bağla
-- [ ] Commission FAQ alanını animasyonlu shadcn Accordion'a geçir
-- [ ] Public yüzeylerde uygun olduğu halde kullanılmayan shadcn primitive'lerini
+- [x] Commission FAQ alanını animasyonlu shadcn Accordion'a geçir
+- [x] Public yüzeylerde uygun olduğu halde kullanılmayan shadcn primitive'lerini
       denetle ve yalnız işlevsel karşılığı olanları standardize et
-- [ ] `mucahidyazar@gmail.com` için local Dashboard magic-link girişini gerçek
+- [x] `mucahidyazar@gmail.com` için local Dashboard magic-link girişini gerçek
       Chrome oturumunda tamamla ve `/dashboard`u hazır bırak
-- [ ] RED/GREEN testleri, coverage, lint, typecheck, build ve desktop/mobile
+- [x] RED/GREEN testleri, coverage, lint, typecheck, build ve desktop/mobile
       browser doğrulamasını tamamla
 
 ## 11. Dinamik diller, medya yöneticisi ve Dashboard kullanıcıları
