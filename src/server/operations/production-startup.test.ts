@@ -126,4 +126,13 @@ describe('production startup contract', () => {
       'COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules ./node_modules',
     )
   })
+
+  it('shares a locked pnpm cache across production build stages', () => {
+    const cachedInstallSteps = productionDockerfile.match(
+      /RUN --mount=type=cache,id=bekten-pnpm-store,target=\/pnpm\/store,sharing=locked/gu,
+    )
+
+    expect(cachedInstallSteps).toHaveLength(3)
+    expect(productionDockerfile).toContain('ENV PNPM_STORE_DIR=/pnpm/store')
+  })
 })

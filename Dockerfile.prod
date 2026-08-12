@@ -2,6 +2,7 @@ FROM node:24-alpine AS base
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PNPM_HOME=/pnpm
+ENV PNPM_STORE_DIR=/pnpm/store
 ENV PATH=$PNPM_HOME:$PATH
 
 RUN apk add --no-cache libc6-compat openssl \
@@ -15,20 +16,23 @@ FROM base AS dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY prisma ./prisma
 COPY prisma.config.ts ./prisma.config.ts
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=bekten-pnpm-store,target=/pnpm/store,sharing=locked \
+  pnpm install --frozen-lockfile
 
 FROM base AS migration-runtime
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY scripts/migration-runtime/package.json ./scripts/migration-runtime/package.json
-RUN pnpm --filter @bekten/migration-runtime deploy --prod /migration-runtime
+RUN --mount=type=cache,id=bekten-pnpm-store,target=/pnpm/store,sharing=locked \
+  pnpm --filter @bekten/migration-runtime deploy --prod /migration-runtime
 COPY scripts/migration-runtime/prisma.config.ts /migration-runtime/prisma.config.ts
 
 FROM base AS seed-runtime
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY scripts/seed-runtime/package.json ./scripts/seed-runtime/package.json
-RUN pnpm --filter @bekten/seed-runtime deploy --prod /seed-runtime
+RUN --mount=type=cache,id=bekten-pnpm-store,target=/pnpm/store,sharing=locked \
+  pnpm --filter @bekten/seed-runtime deploy --prod /seed-runtime
 COPY prisma /seed-runtime/prisma
 RUN cd /seed-runtime && pnpm exec prisma generate --schema=prisma/schema.prisma
 
