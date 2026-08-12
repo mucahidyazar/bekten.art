@@ -49,9 +49,9 @@ async function readWork(params: WorkDetailPageProps['params']) {
 export async function generateMetadata({
   params,
 }: WorkDetailPageProps): Promise<Metadata> {
-  const {contentLocale, locale, work} = await readWork(params)
+  const {locale, work} = await readWork(params)
 
-  return editorialMetadata(work.seo, locale, contentLocale)
+  return editorialMetadata(work.seo, locale, work.locale)
 }
 
 function publicOrigin() {
@@ -64,7 +64,7 @@ function publicOrigin() {
 }
 
 export default async function WorkDetailPage({params}: WorkDetailPageProps) {
-  const {contentLocale, locale, work} = await readWork(params)
+  const {contentLocale, work} = await readWork(params)
   const copy = publicRouteCopy[contentLocale]
   const media = heroMedia(work)
   const workMedia = [...work.mediaPlacements].sort(
@@ -96,12 +96,12 @@ export default async function WorkDetailPage({params}: WorkDetailPageProps) {
             image={new URL(media.url, origin).toString()}
             name={work.title}
             url={new URL(
-              localizedPath(locale, work.seo.canonicalPath),
+              localizedPath(work.locale, work.seo.canonicalPath),
               origin,
             ).toString()}
           />
         ) : null}
-        <article>
+        <article lang={work.locale}>
           <header className={styles.detailHero}>
             <div className={`${styles.sectionInner} ${styles.detailHeroGrid}`}>
               {media ? (

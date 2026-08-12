@@ -69,10 +69,12 @@ export function createPublicManagedRoute({
   async function findPage(locale: string) {
     if (!isSafeLocaleCode(locale)) return null
 
-    const contentLocale = isPublicLocale(locale) ? locale : 'en'
-    const page = await publicEditorialReader.getPage(contentLocale, slug)
+    const uiLocale = isPublicLocale(locale) ? locale : 'en'
+    const page = await publicEditorialReader.getPage(uiLocale, slug)
 
-    return page ? Object.freeze({contentLocale, page}) : null
+    return page
+      ? Object.freeze({contentLocale: page.locale, page, uiLocale})
+      : null
   }
 
   async function generateMetadata({params}: ManagedPageRouteProps) {
@@ -104,15 +106,15 @@ export function createPublicManagedRoute({
 
     if (!resolved) notFound()
 
-    const {contentLocale, page} = resolved
+    const {contentLocale, page, uiLocale} = resolved
 
     const inquiry = inquiryType ? (
-      <PublicInquiryForm locale={contentLocale} type={inquiryType} />
+      <PublicInquiryForm locale={uiLocale} type={inquiryType} />
     ) : null
 
     return (
       <div lang={contentLocale}>
-        {managedPageComposition(kind, contentLocale, page, inquiry)}
+        {managedPageComposition(kind, uiLocale, page, inquiry)}
       </div>
     )
   }

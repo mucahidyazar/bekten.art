@@ -373,10 +373,51 @@ describe('database public editorial reader', () => {
     await expect(reader.getWork('tr', 'studio-light')).resolves.toEqual(
       expect.objectContaining({locale: 'en', title: 'Studio Light'}),
     )
+    await expect(reader.listAvailableWorks('tr')).resolves.toEqual([])
   })
 
-  it('targets available artwork snapshots before media hydration', async () => {
-    const {reader, transaction} = fixture({
+  it('applies the same requested-English-other fallback order to available works', async () => {
+    const translatedGroup = '90000000-0000-4000-8000-000000000003'
+    const {reader} = fixture({
+      artworks: [
+        row(IDS.artworkA, {translationGroupId: translatedGroup}),
+        row(IDS.artworkTr, {
+          locale: 'tr',
+          translationGroupId: translatedGroup,
+        }),
+        row(IDS.artworkEnglishOnly, {
+          translationGroupId: '90000000-0000-4000-8000-000000000004',
+        }),
+      ],
+      media: [publicMedia()],
+      revisions: [
+        revision(
+          'ARTWORK',
+          IDS.artworkA,
+          artworkSnapshot({availability: 'AVAILABLE'}),
+        ),
+        revision(
+          'ARTWORK',
+          IDS.artworkTr,
+          artworkSnapshot({availability: 'ON_REQUEST', locale: 'tr'}),
+          2,
+          'tr',
+        ),
+        revision(
+          'ARTWORK',
+          IDS.artworkEnglishOnly,
+          artworkSnapshot({availability: 'AVAILABLE', slug: 'english-only'}),
+        ),
+      ],
+    })
+
+    await expect(reader.listAvailableWorks('tr')).resolves.toEqual([
+      expect.objectContaining({locale: 'en', slug: 'english-only'}),
+    ])
+  })
+
+  it('filters availability after locale fallback selection', async () => {
+    const {reader} = fixture({
       artworks: [row(IDS.artworkA), row(IDS.artworkB)],
       media: [publicMedia()],
       revisions: [
@@ -396,19 +437,6 @@ describe('database public editorial reader', () => {
     await expect(reader.listAvailableWorks('en')).resolves.toEqual([
       expect.objectContaining({availability: 'AVAILABLE'}),
     ])
-    expect(transaction.contentRevision.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          entityType: 'ARTWORK',
-          snapshot: {equals: 'AVAILABLE', path: ['availability']},
-        }),
-      }),
-    )
-    expect(transaction.artwork.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({id: {in: [IDS.artworkA]}}),
-      }),
-    )
   })
 
   it('rejects invalid locale and slug boundaries before database access', async () => {

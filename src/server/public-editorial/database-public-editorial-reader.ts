@@ -782,13 +782,7 @@ export function createDatabasePublicEditorialReader(
       const validLocale = locale(localeInput)
 
       return await read(async transaction => {
-        const works = await readEntitiesBySnapshotValue(
-          transaction,
-          'ARTWORK',
-          validLocale,
-          'availability',
-          'AVAILABLE',
-        )
+        const works = await readEntities(transaction, 'ARTWORK', validLocale)
 
         return Object.freeze(
           works.filter(work => work.availability === 'AVAILABLE'),

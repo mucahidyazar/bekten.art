@@ -589,7 +589,7 @@ describe('V2 public editorial detail routes', () => {
     expect(JSON.stringify(schema)).not.toMatch(/offer|price/iu)
   })
 
-  it('uses real media placements for the work detail gallery and exposes a facts rail', async () => {
+  it('uses a carousel only when a work has multiple media and exposes a facts rail', async () => {
     reader.getWork.mockResolvedValueOnce({
       ...work,
       mediaPlacements: [media, galleryMedia],
@@ -601,9 +601,30 @@ describe('V2 public editorial detail routes', () => {
       screen.getByRole('complementary', {name: 'Work facts'}),
     ).toBeVisible()
     expect(
-      screen.getByRole('heading', {level: 2, name: 'Details from this work'}),
-    ).toBeVisible()
-    expect(screen.getAllByRole('img')).toHaveLength(2)
+      screen.getByRole('region', {name: 'Silent Steppe artwork'}),
+    ).toHaveAttribute('aria-roledescription', 'carousel')
+    expect(screen.getByRole('button', {name: 'Next image'})).toBeVisible()
+    expect(
+      screen
+        .getByRole('region', {name: 'Silent Steppe artwork'})
+        .querySelectorAll('img:not([alt=""])'),
+    ).toHaveLength(2)
+  })
+
+  it('marks fallback content language and canonicalizes to the source locale', async () => {
+    reader.getWork.mockResolvedValueOnce(work)
+
+    const view = render(
+      await WorkDetailPage({params: detailParams(work.slug, 'tr')}),
+    )
+
+    expect(view.container.querySelector('article')).toHaveAttribute(
+      'lang',
+      'en',
+    )
+    await expect(
+      generateWorkDetailMetadata({params: detailParams(work.slug, 'tr')}),
+    ).resolves.toMatchObject({alternates: {canonical: '/works/silent-steppe'}})
   })
 
   it('renders collection and exhibition details with their associated works', async () => {

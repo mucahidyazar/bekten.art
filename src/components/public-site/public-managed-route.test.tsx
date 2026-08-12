@@ -155,4 +155,28 @@ describe('createPublicManagedRoute', () => {
       robots: {follow: true, index: false},
     })
   })
+
+  it('keeps built-in locale UI while marking and canonicalizing fallback content', async () => {
+    const route = createPublicManagedRoute({kind: 'artist', slug: 'artist'})
+    const englishPage = {
+      ...managedPage,
+      locale: 'en',
+      seo: {...managedPage.seo, canonicalPath: '/about'},
+    }
+
+    getPage.mockResolvedValueOnce(englishPage).mockResolvedValueOnce(englishPage)
+
+    const {container} = render(
+      await route.Page({params: Promise.resolve({locale: 'tr'})}),
+    )
+
+    expect(container.firstElementChild).toHaveAttribute('lang', 'en')
+    await expect(
+      route.generateMetadata({params: Promise.resolve({locale: 'tr'})}),
+    ).resolves.toMatchObject({
+      alternates: {canonical: '/about'},
+      openGraph: {locale: 'en_US'},
+      robots: {follow: true, index: false},
+    })
+  })
 })
