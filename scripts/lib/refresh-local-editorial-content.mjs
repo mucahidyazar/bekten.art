@@ -4,6 +4,14 @@ const EXEMPT_IDENTITIES = new Set([
   'PAGE:contact',
   'PAGE:home',
 ])
+const LOCAL_DATABASE_HOSTS = new Set([
+  '127.0.0.1',
+  '::1',
+  'host.docker.internal',
+  'localhost',
+  '192.168.50.130',
+])
+const LOCAL_REFRESH_CONFIRMATION = 'bekten-art-local-refresh'
 
 function isExempt(item) {
   return (
@@ -54,9 +62,18 @@ function stripImmutableRowFields(row) {
 }
 
 export function assertLocalEditorialRefreshAllowed(environment) {
+  let databaseUrl
+
+  try {
+    databaseUrl = new URL(environment.DATABASE_URL ?? '')
+  } catch {
+    throw new Error('LOCAL_EDITORIAL_REFRESH_FORBIDDEN')
+  }
+
   if (
     environment.NODE_ENV !== 'development' ||
-    environment.ALLOW_LOCAL_EDITORIAL_REFRESH !== 'true'
+    environment.ALLOW_LOCAL_EDITORIAL_REFRESH !== LOCAL_REFRESH_CONFIRMATION ||
+    !LOCAL_DATABASE_HOSTS.has(databaseUrl.hostname)
   ) {
     throw new Error('LOCAL_EDITORIAL_REFRESH_FORBIDDEN')
   }

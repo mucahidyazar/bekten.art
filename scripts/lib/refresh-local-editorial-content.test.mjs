@@ -103,7 +103,8 @@ describe('local editorial content refresh', () => {
   it('requires an explicit development-only opt in', () => {
     expect(() =>
       assertLocalEditorialRefreshAllowed({
-        ALLOW_LOCAL_EDITORIAL_REFRESH: 'true',
+        ALLOW_LOCAL_EDITORIAL_REFRESH: 'bekten-art-local-refresh',
+        DATABASE_URL: 'postgresql://user:secret@127.0.0.1:5432/bekten_art',
         NODE_ENV: 'production',
       }),
     ).toThrowError('LOCAL_EDITORIAL_REFRESH_FORBIDDEN')
@@ -112,10 +113,19 @@ describe('local editorial content refresh', () => {
     ).toThrowError('LOCAL_EDITORIAL_REFRESH_FORBIDDEN')
     expect(() =>
       assertLocalEditorialRefreshAllowed({
-        ALLOW_LOCAL_EDITORIAL_REFRESH: 'true',
+        ALLOW_LOCAL_EDITORIAL_REFRESH: 'bekten-art-local-refresh',
+        DATABASE_URL: 'postgresql://user:secret@127.0.0.1:5432/bekten_art',
         NODE_ENV: 'development',
       }),
     ).not.toThrow()
+    expect(() =>
+      assertLocalEditorialRefreshAllowed({
+        ALLOW_LOCAL_EDITORIAL_REFRESH: 'bekten-art-local-refresh',
+        DATABASE_URL:
+          'postgresql://user:secret@database.example.com/bekten_art',
+        NODE_ENV: 'development',
+      }),
+    ).toThrowError('LOCAL_EDITORIAL_REFRESH_FORBIDDEN')
   })
 
   it('uses one real Instagram work per translation group and preserves exempt imagery', () => {
