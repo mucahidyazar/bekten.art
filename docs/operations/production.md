@@ -13,8 +13,8 @@ the same HTTPS origin. Behind Coolify, `AUTH_TRUST_PROXY` must be exactly
 `true`. Coolify's proxy must overwrite (or append its own address to) forwarded
 client-IP headers; the application intentionally consumes only the rightmost
 valid `X-Forwarded-For` hop. Configure the proxy to reject request bodies larger
-than 16 KiB on the Dashboard magic-link endpoint as an outer resource limit;
-the application enforces the same limit before parsing the form body.
+than 16 KiB on the Dashboard magic-link endpoint as an outer resource limit; the
+application enforces the same limit before parsing the form body.
 
 ## Pre-deploy checklist
 
@@ -113,3 +113,19 @@ and the restore path have all been verified.
 - Revoke old Garage/Resend credentials after the replacement is live.
 - Do not expose raw provider errors to users; correlate by timestamp and the
   structured event name in server logs.
+
+## Verified release — 2026-08-12
+
+Revision `6f0446a7e555511735116a81d5dcc9936f3ab77c` was deployed through
+Coolify. The production readiness endpoint reported `ok` for configuration,
+database, email and object storage. A real private Garage media object returned
+WebP content through the application route, both scheduled operations completed
+successfully, and a Dashboard magic link was delivered through Resend with
+successful signed `email.sent` and `email.delivered` webhook callbacks. The
+application-scoped Apify token also completed a one-result Instagram Actor smoke
+run. No credential value is recorded in this runbook.
+
+The pre-release PostgreSQL custom-format dump is stored outside the repository
+under the operator backup directory. Its SHA-256 is
+`c867cf9e5883ff613309b894c1b6065cc226ab14621440d2bede4c2930615423`; it was
+restored into isolated PostgreSQL 17 before release.

@@ -132,10 +132,11 @@ tamamlanan kararlar silinmez.
       public olan kebab-case içerik slug'ı kullanılacak ve UUID/unsafe anahtar
       fail-closed reddedilecek.
 - [x] **2026-08-11 — Dinamik tam CMS dili:** Dashboard'dan eklenen yeni dil UI
-      çevirileri, public selector/URL, SEO ve editoryal içerik kapsamına birlikte
-      girecek. Eksik UI veya editoryal değer İngilizceye düşecek; İngilizce
-      prefixsiz kalacak. Yeni dil önce taslak/preview olacak, owner tarafından
-      etkinleştirilecek ve içeriği varsa silinmek yerine devre dışı bırakılacak.
+      çevirileri, public selector/URL, SEO ve editoryal içerik kapsamına
+      birlikte girecek. Eksik UI veya editoryal değer İngilizceye düşecek;
+      İngilizce prefixsiz kalacak. Yeni dil önce taslak/preview olacak, owner
+      tarafından etkinleştirilecek ve içeriği varsa silinmek yerine devre dışı
+      bırakılacak.
 - [x] **2026-08-11 — Editoryal dil kimliği:** Aynı eserin veya sayfanın dil
       varyantları stable translation group ile bağlanacak. İngilizce fallback
       gösterilen URL duplicate SEO üretmeyecek; canonical İngilizce kayda
@@ -153,16 +154,17 @@ tamamlanan kararlar silinmez.
 - [x] **2026-08-11 — Dashboard kullanıcı yönetimi:** `/dashboard/users` yalnız
       OWNER/ADMIN'e açık olacak. Erişim Resend üzerinden tek kullanımlık süreli
       magic-link davetiyle verilecek; rol, askıya alma ve erişim kaldırma audit
-      edilecek. Son aktif OWNER hiçbir eşzamanlı akışta kaldırılamayacak,
-      askıya alınamayacak veya yetkisi düşürülemeyecek.
-- [x] **2026-08-11 — Local owner:** `mucahidyazar@gmail.com` local ortamda
-      OWNER rolüne yükseltilecek; production yetkileri Coolify/deploy fazında
-      ayrıca doğrulanacak.
+      edilecek. Son aktif OWNER hiçbir eşzamanlı akışta kaldırılamayacak, askıya
+      alınamayacak veya yetkisi düşürülemeyecek.
+- [x] **2026-08-11 — Local owner:** `mucahidyazar@gmail.com` local ortamda OWNER
+      rolüne yükseltilecek; production yetkileri Coolify/deploy fazında ayrıca
+      doğrulanacak.
 - [x] **2026-08-11 — Dashboard activity log:** İçerik, yayınlama, translation,
       locale, media, inquiry, kullanıcı ve operasyon mutasyonları ortak
-      `AuditEvent` akışında tutulacak. `/dashboard/activity` yalnız OWNER/ADMIN'e
-      açık, filtrelenebilir ve sayfalı olacak; token, tam e-posta, çeviri değeri,
-      private object key veya form PII audit metadata'sına yazılmayacak.
+      `AuditEvent` akışında tutulacak. `/dashboard/activity` yalnız
+      OWNER/ADMIN'e açık, filtrelenebilir ve sayfalı olacak; token, tam e-posta,
+      çeviri değeri, private object key veya form PII audit metadata'sına
+      yazılmayacak.
 - [x] **2026-08-11 — Instagram gerçek içerik cutover'ı:** Mevcut Apify
       entegrasyonu yalnız `bekten_usubaliev` hesabından gelen, caption'ı
       incelenmiş ve READY/PUBLIC Garage medyası bulunan kayıtları kaynak kabul
@@ -188,7 +190,13 @@ tamamlanan kararlar silinmez.
       yalnız doğrulanmış `bekten_usubaliev` Instagram kayıtlarının READY/PUBLIC
       Garage medyasını kullanacak; GPT üretimi editorial hero görselleri burada
       kullanılmayacak.
+- [x] **2026-08-12 — Production cutover:** V2 `main` revizyonu Coolify'a
+      alınacak; bütün secret'lar runtime-only tutulacak. Garage private bucket
+      yalnız Bekten local-development ve güncel production anahtarlarına açık
+      olacak. Resend domain-sınırlı production anahtarı, imzalı webhook,
+      outbox/retention task'leri ve Apify uygulama tokenı canlı smoke testleri
+      geçmeden teslim tamamlanmış sayılmayacak. Bu kontrollerin tamamı geçti.
 
 ## Bekleyen kullanıcı kararları
 
-- [ ] Henüz bekleyen karar yok.
+- [x] Henüz bekleyen karar yok.

@@ -102,14 +102,14 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 - [x] Local lint, typecheck, test, coverage, build ve audit kapılarını geçir
 - [x] Production Docker image'ını frozen lockfile ile başarıyla üret
 - [x] Docker readiness'i production env ile local production smoke'ta doğrula
-- [ ] Production secret rotasyonu ve Coolify env yenilemesini deploy öncesi
+- [x] Production secret rotasyonu ve Coolify env yenilemesini deploy öncesi
       tamamla
-- [ ] Coolify migration, env, deploy, health ve readiness doğrulamasını tamamla
+- [x] Coolify migration, env, deploy, health ve readiness doğrulamasını tamamla
 - [x] Garage'a V2 demo varlıklarını yükle ve Studio seed operasyonunu doğrula
 - [x] Geçici `backup/` klasörünü tamamen sil
 - [x] Requirement-by-requirement final audit yap; deployment dışındaki tüm
       maddelerin kod, veri, test veya browser kanıtını doğrula
-- [ ] V2 goal'ünü yalnız bütün kanıtlar tamamlandığında kapat
+- [x] V2 goal'ünü yalnız bütün kanıtlar tamamlandığında kapat
 
 ## 7. Görünür içerik ve route düzeltmeleri
 
@@ -216,14 +216,14 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 - [x] Full lint, typecheck, unit/integration coverage, build ve Playwright
       kapılarını yeniden geçir
 - [x] Docker image build ve local `/api/ready` smoke kanıtını yeniden al
-- [ ] Coolify, Garage, Resend ve production secret işlemlerini en son tamamla
+- [x] Coolify, Garage, Resend ve production secret işlemlerini en son tamamla
 
 ## 11. Kaynaklı içerik, locale fallback ve public deneyim turu
 
-- [x] About içeriğini doğrulanmış sanatçı biyografisi ve sergi geçmişiyle
-      dört dilde güçlendir
-- [x] Demo/placeholder Journal ve public editorial metinlerini kaynaklı,
-      tutarlı içerikle değiştir
+- [x] About içeriğini doğrulanmış sanatçı biyografisi ve sergi geçmişiyle dört
+      dilde güçlendir
+- [x] Demo/placeholder Journal ve public editorial metinlerini kaynaklı, tutarlı
+      içerikle değiştir
 - [x] Public hero yüksekliği, görsel alanı ve metin başlangıcını desktop/mobile
       tüm route'larda ortak ritme getir
 - [x] Header'da Collectors yerine Studio linkini göster; Collectors'ı footer'a
@@ -235,8 +235,8 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
       erişilebilir carousel göster
 - [x] Liste ve detail sorgularına `seçili dil → İngilizce → ilk yayımlanmış dil`
       fallback zincirini ekle
-- [x] Fallback içerikte seçili locale URL/kabuğunu koru; içerik `lang`, canonical
-      ve hreflang değerlerini gerçek içerik diline bağla
+- [x] Fallback içerikte seçili locale URL/kabuğunu koru; içerik `lang`,
+      canonical ve hreflang değerlerini gerçek içerik diline bağla
 - [x] Commission FAQ alanını animasyonlu shadcn Accordion'a geçir
 - [x] Public yüzeylerde uygun olduğu halde kullanılmayan shadcn primitive'lerini
       denetle ve yalnız işlevsel karşılığı olanları standardize et
@@ -290,7 +290,7 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
       tarayıcıda doğrula
 - [x] Değişen kapsam coverage'ini en az `%80`; full lint, typecheck, test, E2E,
       build ve audit kapılarını geçir
-- [ ] Coolify ve production deployment işlemlerini bu geliştirmeler tamamen
+- [x] Coolify ve production deployment işlemlerini bu geliştirmeler tamamen
       doğrulandıktan sonra en son yap
 
 ## 12. Kaynaklı gerçek içerik ve runtime regresyonları
@@ -333,8 +333,8 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
 - [x] Dashboard girişinde `last_sign_in_at` ve audit kaydını atomik güncelle
 - [x] Dinamik locale'lerde Dashboard koruması, eksik çeviri aktivasyon kapısı,
       canonical/noindex, sitemap ve hreflang fallback kurallarını tamamla
-- [x] CI E2E için kişisel hesaptan bağımsız, tekrar çalıştırılabilir test fixture
-      seed'i ekle
+- [x] CI E2E için kişisel hesaptan bağımsız, tekrar çalıştırılabilir test
+      fixture seed'i ekle
 - [x] Media Library'ye klavyeyle menü dolaşımı, klasöre taşıma, güvenli rename
       dialog'u ve cursor tabanlı eski medya yükleme akışı ekle
 - [x] Activity sayfasında servis limitini aşan sayfa numaralarını güvenle
@@ -343,5 +343,36 @@ yapılır. Sıra, bağımlılık yönünü gösterir; aktif iş yukarıdan aşa�
       validatorlerinde doğrula
 - [x] Final lint, typecheck, coverage, build, audit ve Playwright kapılarının
       tamamını son revision üzerinde yeniden geçir
-- [ ] Kullanıcı son local kontrolünü yaptıktan sonra Coolify/deployment
+- [x] Kullanıcı son local kontrolünü yaptıktan sonra Coolify/deployment
       işlemlerini ayrı ve son adım olarak uygula
+
+## 15. Production teslim kanıtı — 2026-08-12
+
+- [x] Exact `main` revision `6f0446a7e555511735116a81d5dcc9936f3ab77c` Coolify
+      üzerinde yeniden deploy edildi ve healthy duruma ulaştı
+- [x] Yalnız `NEXT_PUBLIC_APP_URL` ve Google ölçüm/container kimliklerini
+      build-time bırakarak bütün veritabanı, auth, Garage, Resend ve operasyon
+      sırlarını runtime-only yaptım
+- [x] Auth, outbox, Resend, Garage ve Apify production credential'larını
+      döndürdüm; eski Bekten Garage production anahtarlarını kaldırdım
+- [x] `bekten-art-private-media` bucket'ının website erişiminin kapalı, yeni
+      production anahtarının yalnız read/write ve owner olmadan yetkili olduğunu
+      doğruladım
+- [x] `/api/health` ve `/api/ready` için `200`; configuration, database, email
+      ve object storage kontrolleri için `ok` kanıtı aldım
+- [x] Public dört locale, prefixsiz İngilizce, `/en` redirect'i, Dashboard auth
+      redirect'i ve gerçek Garage WebP medya yanıtını production üzerinde
+      doğruladım
+- [x] Coolify outbox ve retention scheduled task'lerini manuel çalıştırıp
+      `Success` sonucunu doğruladım
+- [x] Production Dashboard magic-link isteğini yeni Resend anahtarıyla
+      gönderdim; teslimatı ve `email.sent` / `email.delivered` webhook başarı
+      olaylarını doğruladım
+- [x] Yeni Apify tokenıyla production Instagram Actor smoke run'ını bir sonuçla
+      başarıyla tamamladım
+- [x] Deploy öncesi PostgreSQL backup'ını repository dışında sakladım ve izole
+      PostgreSQL 17 restore testini tamamladım:
+      `c867cf9e5883ff613309b894c1b6065cc226ab14621440d2bede4c2930615423`
+- [x] Final kapılarda 178 test dosyası / 1049 test, `%88.76` statement, `%80.75`
+      branch, `%90.37` function, `%90.04` line coverage; lint, typecheck,
+      production build ve `pnpm audit` temiz geçti
