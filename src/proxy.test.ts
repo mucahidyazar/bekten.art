@@ -55,6 +55,7 @@ describe('internationalization proxy', () => {
 
   it('keeps English prefixless and uses explicit valid prefixes for other locales', () => {
     expect(routing).toEqual({
+      alternateLinks: false,
       defaultLocale: 'en',
       localeDetection: false,
       localePrefix: 'as-needed',
@@ -174,7 +175,7 @@ describe('internationalization proxy', () => {
       headers: new Headers(),
       nextUrl: {pathname: '/tr/gallery'},
     }
-    const response = {headers: {set: vi.fn()}, kind: 'intl'}
+    const response = {headers: new Headers(), kind: 'intl'}
 
     mocks.intlMiddleware.mockReturnValue(response)
 
@@ -182,9 +183,8 @@ describe('internationalization proxy', () => {
     expect(mocks.intlMiddleware).toHaveBeenCalledWith(
       expect.objectContaining({nextUrl: request.nextUrl}),
     )
-    expect(response.headers.set).toHaveBeenCalledWith(
-      'Content-Security-Policy',
-      expect.stringContaining("frame-ancestors 'none'"),
+    expect(response.headers.get('Content-Security-Policy')).toContain(
+      "frame-ancestors 'none'",
     )
   })
 
@@ -209,7 +209,7 @@ describe('internationalization proxy', () => {
       headers: new Headers(),
       nextUrl: {pathname: '/works'},
     }
-    const response = {headers: {set: vi.fn()}, kind: 'intl'}
+    const response = {headers: new Headers(), kind: 'intl'}
 
     mocks.intlMiddleware.mockReturnValue(response)
 
@@ -235,20 +235,22 @@ describe('internationalization proxy', () => {
     expect(mocks.intlMiddleware).not.toHaveBeenCalled()
   })
 
-  it('bypasses next-intl only when a prefixed English pathname is its own internal rewrite target', () => {
+  it('does not trust a client-supplied pathname marker when canonicalizing English URLs', () => {
+    const redirectUrl = {pathname: '/en/works'}
     const request = {
       headers: new Headers({'x-pathname': '/works'}),
-      nextUrl: {pathname: '/en/works'},
+      nextUrl: {pathname: '/en/works', clone: () => redirectUrl},
     }
-    const response = {headers: {set: vi.fn()}, kind: 'next'}
+    const response = {headers: {set: vi.fn()}, kind: 'redirect'}
 
-    mocks.next.mockReturnValue(response)
+    mocks.redirect.mockReturnValue(response)
 
     expect(proxy(request as never)).toBe(response)
+    expect(mocks.redirect).toHaveBeenCalledWith(
+      {pathname: '/works'},
+      308,
+    )
     expect(mocks.intlMiddleware).not.toHaveBeenCalled()
-    expect(mocks.next).toHaveBeenCalledWith({
-      request: {headers: expect.any(Headers)},
-    })
   })
 
   it('preserves the next-intl rewrite while forwarding nonce headers on the request', () => {
@@ -265,6 +267,9 @@ describe('internationalization proxy', () => {
 
     expect(proxy(request as never)).toBe(intlResponse)
     expect(mocks.rewrite).not.toHaveBeenCalled()
+    expect(intlHeaders.get('x-middleware-rewrite')).toBe(
+      'http://localhost:3000/en/works',
+    )
 
     const forwardedRequest = mocks.intlMiddleware.mock.calls[0]?.[0] as {
       headers: Headers

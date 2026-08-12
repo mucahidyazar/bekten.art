@@ -6,6 +6,7 @@ import {APP_LOCALES, isSafeLocaleCode} from '@/lib/localized-path'
 import {buildContentSecurityPolicy} from '@/server/security/content-security-policy'
 
 const routingConfig = {
+  alternateLinks: false,
   defaultLocale: 'en',
   localeDetection: false,
   localePrefix: 'as-needed',
@@ -32,18 +33,6 @@ export function isDynamicLocalePathname(pathname: string) {
       !APP_LOCALES.some(locale => locale === candidate) &&
       isSafeLocaleCode(candidate),
   )
-}
-
-export function isInternalDefaultLocaleRewrite(
-  pathname: string,
-  originalPathname: string | null,
-) {
-  if (!originalPathname) return false
-
-  if (pathname === '/en') return originalPathname === '/'
-  if (!pathname.startsWith('/en/')) return false
-
-  return pathname.slice(3) === originalPathname
 }
 
 export function normalizeDefaultLocalePathname(pathname: string) {
@@ -133,20 +122,7 @@ export function shouldBypassInternationalization(pathname: string) {
 }
 
 export default function proxy(request: NextRequest) {
-  const originalPathname = request.headers.get('x-pathname')
   const security = createSecurityContext(request)
-
-  if (
-    isInternalDefaultLocaleRewrite(
-      request.nextUrl.pathname,
-      originalPathname,
-    )
-  ) {
-    return withContentSecurityPolicy(
-      NextResponse.next({request: {headers: security.headers}}),
-      security.policy,
-    )
-  }
 
   if (shouldBypassInternationalization(request.nextUrl.pathname)) {
     return withContentSecurityPolicy(

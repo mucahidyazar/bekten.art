@@ -189,6 +189,24 @@ test.describe('V2 editorial shell and navigation', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'ky')
   })
 
+  test('keeps the default-locale rewrite internal without trusting forwarded hosts', async ({
+    request,
+  }) => {
+    const response = await request.get('/works?view=grid', {
+      headers: {
+        host: 'evil.invalid',
+        'x-forwarded-host': 'evil.invalid',
+        'x-forwarded-proto': 'http',
+      },
+      maxRedirects: 0,
+    })
+
+    expect(response.status()).toBe(200)
+    expect(response.headers().link).toBeUndefined()
+    expect(response.headers().location).toBeUndefined()
+    expect(await response.text()).not.toContain('evil.invalid')
+  })
+
   for (const redirect of [
     {from: '/en', to: '/'},
     {from: '/en/works?view=grid', to: '/works?view=grid'},
@@ -202,6 +220,18 @@ test.describe('V2 editorial shell and navigation', () => {
       expect(response.headers().location).toBe(redirect.to)
     })
   }
+
+  test('ignores a forged pathname marker on a prefixed English URL', async ({
+    request,
+  }) => {
+    const response = await request.get('/en/works', {
+      headers: {'x-pathname': '/works'},
+      maxRedirects: 0,
+    })
+
+    expect(response.status()).toBe(308)
+    expect(response.headers().location).toBe('/works')
+  })
 
   for (const redirect of [
     {from: '/news', to: '/journal'},
