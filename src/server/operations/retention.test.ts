@@ -22,10 +22,6 @@ function databaseFixture() {
       deleteMany: vi.fn().mockResolvedValue({count: 1}),
       findMany: vi.fn().mockResolvedValue([{id: 'outbox-1'}]),
     },
-    passwordResetToken: {
-      deleteMany: vi.fn().mockResolvedValue({count: 1}),
-      findMany: vi.fn().mockResolvedValue([{id: 'reset-1'}]),
-    },
     rateLimitBucket: {
       deleteMany: vi.fn().mockResolvedValue({count: 2}),
       findMany: vi.fn().mockResolvedValue([
@@ -116,7 +112,6 @@ describe('retention service', () => {
       feedback: 2,
       inquiries: 1,
       outboxJobs: 1,
-      passwordResetTokens: 1,
       rateLimitBuckets: 2,
       sessions: 2,
       verificationTokens: 1,
@@ -137,7 +132,6 @@ describe('retention service', () => {
       feedback: 0,
       inquiries: 0,
       outboxJobs: 0,
-      passwordResetTokens: 0,
       rateLimitBuckets: 0,
       sessions: 0,
       verificationTokens: 0,

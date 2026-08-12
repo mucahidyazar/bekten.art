@@ -12,7 +12,6 @@ export type RetentionDatabase = Readonly<{
   feedback: RetentionDelegate<IdRow>
   inquiry: RetentionDelegate<IdRow>
   outboxJob: RetentionDelegate<IdRow>
-  passwordResetToken: RetentionDelegate<IdRow>
   rateLimitBucket: RetentionDelegate<RateLimitRow>
   session: RetentionDelegate<IdRow>
   verificationToken: RetentionDelegate<VerificationTokenRow>
@@ -23,7 +22,6 @@ export type RetentionSummary = Readonly<{
   feedback: number
   inquiries: number
   outboxJobs: number
-  passwordResetTokens: number
   rateLimitBuckets: number
   sessions: number
   verificationTokens: number
@@ -73,7 +71,6 @@ export function createRetentionService(
         outboxRows,
         webhookRows,
         verificationRows,
-        passwordResetRows,
         sessionRows,
       ] = await Promise.all([
         database.feedback.findMany({
@@ -115,12 +112,6 @@ export function createRetentionService(
           take: batchSize,
           where: {expires: {lt: now}},
         }),
-        database.passwordResetToken.findMany({
-          orderBy: {expiresAt: 'asc'},
-          select: {id: true},
-          take: batchSize,
-          where: {expiresAt: {lt: now}},
-        }),
         database.session.findMany({
           orderBy: {expires: 'asc'},
           select: {id: true},
@@ -155,7 +146,6 @@ export function createRetentionService(
                 },
               })
               .then(({count}) => count),
-        deleteIds(database.passwordResetToken, passwordResetRows),
         deleteIds(database.session, sessionRows),
       ] as const
 
@@ -166,7 +156,6 @@ export function createRetentionService(
         outboxJobs,
         emailWebhookEvents,
         verificationTokens,
-        passwordResetTokens,
         sessions,
       ] = await Promise.all(deletionTasks)
 
@@ -175,7 +164,6 @@ export function createRetentionService(
         feedback,
         inquiries,
         outboxJobs,
-        passwordResetTokens,
         rateLimitBuckets,
         sessions,
         verificationTokens,
