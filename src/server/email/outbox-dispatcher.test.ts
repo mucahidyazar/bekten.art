@@ -328,6 +328,27 @@ describe('outbox dispatcher', () => {
     )
   })
 
+  it('accepts the email query required by the NextAuth email callback', async () => {
+    const {dispatcher, mailer, tokens} = configuredDispatcher({
+      idempotencyKey: `studio.magic-link:${'b'.repeat(64)}`,
+      payload: {
+        expiresAt: '2026-08-10T12:10:00.000Z',
+        signInUrlEncrypted: 'v1.nonce.ciphertext.authentication-tag',
+        to: 'owner@example.com',
+      },
+      type: 'studio.magic-link.requested',
+    })
+
+    tokens.openStudioMagicLink.mockReturnValueOnce(
+      'https://bekten.art/api/auth/callback/email?callbackUrl=https%3A%2F%2Fbekten.art%2Fdashboard&email=owner%40example.com&token=plain-studio-token',
+    )
+
+    await expect(dispatcher.dispatchOne()).resolves.toEqual({
+      status: 'completed',
+    })
+    expect(mailer.sendStudioMagicLink).toHaveBeenCalledOnce()
+  })
+
   it('fails an unsupported job type permanently', async () => {
     const {dispatcher, store} = configuredDispatcher({type: 'unknown.job'})
 
