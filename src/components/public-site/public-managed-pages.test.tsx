@@ -182,7 +182,10 @@ describe('reference-faithful managed public pages', () => {
     expect(
       screen.getByRole('heading', {name: 'Sık sorulan sorular'}),
     ).toBeVisible()
-    expect(screen.getAllByRole('group')).toHaveLength(3)
+    expect(screen.getAllByRole('button', {expanded: false})).toHaveLength(3)
+    expect(
+      screen.getByRole('button', {name: /zaman çizelgesi/iu}),
+    ).toHaveAttribute('data-state', 'closed')
     expect(
       screen.getByRole('region', {name: 'Commission inquiry'}),
     ).toBeVisible()

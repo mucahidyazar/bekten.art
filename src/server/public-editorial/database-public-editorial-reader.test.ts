@@ -7,6 +7,8 @@ import type {PublicEditorialDatabase} from './database-public-editorial-reader'
 const IDS = {
   artworkA: '10000000-0000-4000-8000-000000000001',
   artworkB: '10000000-0000-4000-8000-000000000002',
+  artworkEnglishOnly: '10000000-0000-4000-8000-000000000003',
+  artworkTr: '10000000-0000-4000-8000-000000000004',
   collection: '20000000-0000-4000-8000-000000000001',
   exhibition: '30000000-0000-4000-8000-000000000001',
   journal: '40000000-0000-4000-8000-000000000001',
@@ -136,6 +138,7 @@ function row(id: string, overrides: Readonly<Record<string, unknown>> = {}) {
     publishedAt,
     slug: 'draft-row-slug',
     status: 'PUBLISHED',
+    translationGroupId: id,
     version: 3,
     ...overrides,
   }
@@ -146,11 +149,12 @@ function revision(
   entityId: string,
   snapshot: unknown,
   version = 2,
+  locale = 'en',
 ) {
   return {
     entityId,
     entityType,
-    locale: 'en',
+    locale,
     snapshot,
     version,
   }
@@ -312,6 +316,58 @@ describe('database public editorial reader', () => {
       expect.objectContaining({
         where: expect.objectContaining({id: {in: [IDS.artworkA]}}),
       }),
+    )
+  })
+
+  it('fills locale gaps from English without duplicating translated identities', async () => {
+    const translatedGroup = '90000000-0000-4000-8000-000000000001'
+    const englishOnlyGroup = '90000000-0000-4000-8000-000000000002'
+    const {reader} = fixture({
+      artworks: [
+        row(IDS.artworkA, {translationGroupId: translatedGroup}),
+        row(IDS.artworkTr, {
+          locale: 'tr',
+          translationGroupId: translatedGroup,
+        }),
+        row(IDS.artworkEnglishOnly, {
+          translationGroupId: englishOnlyGroup,
+        }),
+      ],
+      media: [publicMedia()],
+      revisions: [
+        revision(
+          'ARTWORK',
+          IDS.artworkA,
+          artworkSnapshot({slug: 'remembered-land', title: 'Remembered Land'}),
+        ),
+        revision(
+          'ARTWORK',
+          IDS.artworkTr,
+          artworkSnapshot({
+            locale: 'tr',
+            seo: {...seo, canonicalPath: '/tr/works/hatirlanan-toprak'},
+            slug: 'hatirlanan-toprak',
+            title: 'Hatırlanan Toprak',
+          }),
+          2,
+          'tr',
+        ),
+        revision(
+          'ARTWORK',
+          IDS.artworkEnglishOnly,
+          artworkSnapshot({slug: 'studio-light', title: 'Studio Light'}),
+        ),
+      ],
+    })
+
+    const result = await reader.listWorks('tr')
+
+    expect(result.map(item => [item.locale, item.title])).toEqual([
+      ['tr', 'Hatırlanan Toprak'],
+      ['en', 'Studio Light'],
+    ])
+    await expect(reader.getWork('tr', 'studio-light')).resolves.toEqual(
+      expect.objectContaining({locale: 'en', title: 'Studio Light'}),
     )
   })
 

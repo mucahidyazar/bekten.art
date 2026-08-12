@@ -170,6 +170,24 @@ tamamlanan kararlar silinmez.
       gönderi otomatik eser olmayacak. Seed fiyat üretmeyecek, source URL'yi
       yalnız hassas veri içermeyen audit metadata'sında tutacak ve mevcut Studio
       düzenlemesini asla ezmeyecek.
+- [x] **2026-08-12 — Editorial locale fallback:** Seçilen dilde yayımlanmış
+      varyant yoksa içerik önce İngilizce, İngilizce de yoksa ilk yayımlanmış
+      dilden gösterilecek. Ziyaretçinin URL'si ve public kabuğu seçtiği dilde
+      kalacak; fallback içeriğin `lang` değeri gerçek içerik dili olacak,
+      canonical gerçek kaynak varyanta dönecek ve hreflang yalnız var olan
+      çevirileri yayımlayacak.
+- [x] **2026-08-12 — Work detail çoklu medya:** Tek görsel bulunan eserde mevcut
+      framed detail kompozisyonu değişmeyecek. İki veya daha fazla yayımlanmış
+      görselde aynı çerçeve içinde klavye, dokunma, buton ve reduced-motion
+      destekli carousel açılacak.
+- [x] **2026-08-12 — Public navigation önceliği:** Header ana navigasyonunda
+      Collectors yerine public Studio yer alacak. Collectors footer'a taşınacak;
+      diğer ikincil public route'lar görünür iç linklerle erişilebilir kalacak.
+- [x] **2026-08-12 — Gerçek hero medya sınırı:** Home, Collections, About ve
+      Contact mevcut seçilmiş görsellerini koruyacak. Diğer public hero'lar
+      yalnız doğrulanmış `bekten_usubaliev` Instagram kayıtlarının READY/PUBLIC
+      Garage medyasını kullanacak; GPT üretimi editorial hero görselleri burada
+      kullanılmayacak.
 
 ## Bekleyen kullanıcı kararları
 

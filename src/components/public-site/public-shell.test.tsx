@@ -41,6 +41,19 @@ describe('editorial public shell', () => {
         }),
       ).toHaveAttribute('href', locale === 'en' ? '/about' : `/${locale}/about`)
       expect(
+        within(navigation).getByRole('link', {
+          name: /studio|stüdyo|студия|устакана/iu,
+        }),
+      ).toHaveAttribute(
+        'href',
+        locale === 'en' ? '/studio' : `/${locale}/studio`,
+      )
+      expect(
+        within(navigation).queryByRole('link', {
+          name: /collectors|koleksiyonerler|коллекционер/iu,
+        }),
+      ).toBeNull()
+      expect(
         within(navigation).getByRole('link', {name: inquire}),
       ).toHaveAttribute(
         'href',
@@ -146,6 +159,16 @@ describe('editorial public shell', () => {
     expect(
       within(footer).getByRole('link', {name: 'Private viewing'}),
     ).toHaveAttribute('href', '/private-viewings')
+    expect(
+      within(footer).getByRole('link', {name: 'Collectors'}),
+    ).toHaveAttribute('href', '/collectors')
+    expect(
+      within(footer).getByRole('link', {name: 'Exhibitions'}),
+    ).toHaveAttribute('href', '/exhibitions')
+    expect(within(footer).getByRole('link', {name: 'Journal'})).toHaveAttribute(
+      'href',
+      '/journal',
+    )
     expect(
       within(footer).queryByRole('link', {name: 'support@mucahid.dev'}),
     ).toBeNull()
