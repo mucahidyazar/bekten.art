@@ -355,6 +355,20 @@ describe('V2 public editorial list routes', () => {
   )
 
   it.each([
+    WorksPage,
+    AvailableWorksPage,
+    ExhibitionsPage,
+    JournalPage,
+    PressPage,
+  ] as const)('uses published artwork media in the %s archive hero', async Page => {
+    const view = render(await Page({params: params()}))
+    const hero = view.container.querySelector('[data-public-editorial-hero]')
+
+    expect(hero?.querySelector(`img[src*="${media.mediaObjectId}"]`)).not.toBeNull()
+    view.unmount()
+  })
+
+  it.each([
     [
       'Memory, land & home',
       CollectionsPage,

@@ -1,6 +1,8 @@
 import {render, screen} from '@testing-library/react'
 import {describe, expect, it} from 'vitest'
 
+import styles from './public-editorial-hero.module.css'
+
 import {PublicContainer} from './public-container'
 import {PublicEditorialHero} from './public-editorial-hero'
 
@@ -73,5 +75,19 @@ describe('shared public editorial layout primitives', () => {
       'data-title-density',
       'standard',
     )
+  })
+
+  it('exposes one shared hero-height class for every route composition', () => {
+    render(
+      <PublicEditorialHero
+        fallbackAlt="Artwork"
+        fallbackSrc="/img/heritage-landscape-hero.jpg"
+        paragraphs={['A concise introduction.']}
+        title="Studio"
+      />,
+    )
+
+    expect(screen.getByRole('banner')).toHaveClass(styles.hero)
+    expect(styles.hero).toBeTruthy()
   })
 })
