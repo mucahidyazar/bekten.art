@@ -6,6 +6,7 @@ import {PublicPageTransition} from '@/components/public-site/public-view-transit
 import {publicEditorialReader} from '@/server/public-editorial'
 
 import {
+  heroMedia,
   listMetadata,
   parsePublicParams,
   PublicArchiveSection,
@@ -34,7 +35,7 @@ export default async function WorksPage({params}: WorksPageProps) {
   return (
     <PublicPageTransition>
       <div className={styles.page}>
-        <PublicPageIntro {...copy} illustration="landscape" />
+        <PublicPageIntro {...copy} media={works[0] ? heroMedia(works[0]) : undefined} />
         <PublicArchiveSection
           accessibleName={publicRouteCopy[contentLocale].workArchive}
           light

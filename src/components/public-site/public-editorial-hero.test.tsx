@@ -1,10 +1,9 @@
 import {render, screen} from '@testing-library/react'
 import {describe, expect, it} from 'vitest'
 
-import styles from './public-editorial-hero.module.css'
-
 import {PublicContainer} from './public-container'
 import {PublicEditorialHero} from './public-editorial-hero'
+import styles from './public-editorial-hero.module.css'
 
 describe('shared public editorial layout primitives', () => {
   it('uses one canonical container contract without replacing semantic elements', () => {

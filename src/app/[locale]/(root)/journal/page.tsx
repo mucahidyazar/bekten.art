@@ -47,7 +47,7 @@ export default async function JournalPage({params}: JournalPageProps) {
 
   return (
     <div className={styles.page}>
-      <PublicPageIntro {...copy} illustration="landscape" />
+      <PublicPageIntro {...copy} media={featured ? heroMedia(featured) : undefined} />
       <PublicArchiveSection light>
         {featured ? (
           <>

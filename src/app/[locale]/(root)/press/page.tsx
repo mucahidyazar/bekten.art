@@ -32,6 +32,7 @@ export default async function PressPage({params}: PressPageProps) {
   const {contentLocale, locale} = await parsePublicParams(params)
   const copy = publicRouteCopy[contentLocale].press
   const entries = await publicEditorialReader.listPressEntries(contentLocale)
+  const [heroEntry] = entries
   const categories = ['FEATURE', 'INTERVIEW', 'REVIEW', 'NEWS'] as const
   const groups = categories
     .map(category => ({
@@ -42,7 +43,7 @@ export default async function PressPage({params}: PressPageProps) {
 
   return (
     <div className={styles.page}>
-      <PublicPageIntro {...copy} illustration="landscape" />
+      <PublicPageIntro {...copy} media={heroEntry ? heroMedia(heroEntry) : undefined} />
       <PublicArchiveSection light>
         {groups.length > 0 ? (
           groups.map(group => {

@@ -49,7 +49,7 @@ export default async function ExhibitionsPage({params}: ExhibitionsPageProps) {
 
   return (
     <div className={styles.page}>
-      <PublicPageIntro {...copy} illustration="landscape" />
+      <PublicPageIntro {...copy} media={featured ? heroMedia(featured) : undefined} />
       <PublicArchiveSection light>
         {featured ? (
           <>

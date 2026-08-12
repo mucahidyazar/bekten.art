@@ -5,6 +5,7 @@ import {PublicArtworkGrid} from '@/components/public-site/public-artwork-grid'
 import {publicEditorialReader} from '@/server/public-editorial'
 
 import {
+  heroMedia,
   listMetadata,
   parsePublicParams,
   PublicArchiveSection,
@@ -34,7 +35,7 @@ export default async function AvailableWorksPage({
 
   return (
     <div className={styles.page}>
-      <PublicPageIntro {...copy} illustration="landscape" />
+      <PublicPageIntro {...copy} media={works[0] ? heroMedia(works[0]) : undefined} />
       <PublicArchiveSection
         accessibleName={publicRouteCopy[contentLocale].availableSelection}
         light

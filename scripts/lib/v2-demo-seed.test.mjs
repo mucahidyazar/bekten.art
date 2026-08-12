@@ -252,11 +252,17 @@ describe('V2 demo seed', () => {
   })
 
   it('uses source-grounded public context without private legacy contact data', () => {
-    const serialized = JSON.stringify(createDemoSeedPlan())
-    const artist = createDemoSeedPlan().content.find(
+    const plan = createDemoSeedPlan()
+    const serialized = JSON.stringify(
+      plan.content.map(item => ({
+        row: item.row,
+        snapshot: item.revision.snapshot,
+      })),
+    )
+    const artist = plan.content.find(
       item => item.identity === 'PAGE:en:about',
     )
-    const exhibition = createDemoSeedPlan().content.find(
+    const exhibition = plan.content.find(
       item => item.identity === 'EXHIBITION:en:earth-memory',
     )
 

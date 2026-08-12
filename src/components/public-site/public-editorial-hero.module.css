@@ -142,7 +142,7 @@
 @media (max-width: 56rem) {
   .hero {
     grid-template-columns: 1fr;
-    min-height: auto;
+    min-height: 48rem;
     padding-block: clamp(2.5rem, 8vw, 5rem);
   }
 

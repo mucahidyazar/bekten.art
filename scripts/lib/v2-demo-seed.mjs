@@ -183,25 +183,25 @@ const copy = deepFreeze({
     collection: [
       'archive-of-earth',
       'Archive of Earth',
-      'A replaceable editorial collection exploring material memory, landscape, and inherited forms.',
+      'An editorial collection tracing material memory, landscape, and inherited forms.',
     ],
     exhibition: [
       'earth-memory',
       'My Soul Sings',
       'Landscapes, still lifes, and portraits',
-      'In February 2013, Al Hayat Gallery in Bishkek presented 36 paintings by Bekten Usubaliev, bringing together landscapes, still lifes, and portraits in an exhibition open through 7 March.',
+      'In January 2013, Al Hayat Gallery in Bishkek presented 36 paintings by Bekten Usubaliev, bringing together landscapes, still lifes, and portraits in an exhibition open through 9 February.',
     ],
     journal: [
       'from-the-studio',
       'From the studio',
-      'Notes on material, memory, and the pace of making.',
-      'A demonstration journal entry for testing long-form editorial rhythm. Every sentence can be replaced in Bekten Studio.',
+      'Notes on landscape, portraiture, teaching, and a practice in continual search.',
+      'Bekten Usubaliev’s documented practice moves between landscape, still life, portraiture, and scenes of everyday life. The subjects change, but close attention to people and place remains constant.\n\nHis path combines making and teaching. After graduating from the Repin Institute in 1989, he returned to Kyrgyzstan and began teaching at the S. A. Chuikov Kyrgyz State Art College.\n\nAt the 2013 exhibition “My Soul Sings” in Bishkek, thirty-six paintings brought these strands together. Usubaliev described a wish to preserve Kyrgyzstan’s beautiful places on canvas, while colleagues emphasized the recognizable character of his painting and his continuing creative search.\n\nThe archive extends beyond the studio: an Open Studio Tour in 2015 welcomed visitors into the artists’ working environment, and that same year a TÜRKSOY plein-air gathering in Aksaray brought together artists from eighteen countries.',
     ],
     pages: {
       about: [
         'The artist',
         'Practice',
-        'Bekten Usubaliev was born in 1958 in Kurmenty, Issyk-Kul. He studied at the Semyon Chuikov art school and later completed his training at the Repin Institute in Saint Petersburg.\n\nAfter returning to Kyrgyzstan in 1989, he began teaching at the national art school. His practice moves between portrait, landscape, memory, and everyday life.\n\nThis source-grounded Studio biography remains fully editable and should be reviewed with the artist before production publication.',
+        'Bekten Usubaliev is a Kyrgyz painter whose work moves between landscape, still life, portraiture, and everyday life, repeatedly returning to the people and places of Kyrgyzstan.\n\nBorn on 5 October 1958 in Kurmenty in the Issyk-Kul region, he studied at the S. A. Chuikov Art College in Frunze. From 1981 to 1983 he worked as an artist at the Goznak factory in Leningrad, and in 1989 graduated from the I. E. Repin Institute of Painting, Sculpture and Architecture. Since 1989 he has taught at the S. A. Chuikov Kyrgyz State Art College; in 1991 he became a member of the Union of Artists of the Kyrgyz Republic.\n\nHis 2013 solo exhibition “My Soul Sings” at Al Hayat Gallery assembled 36 paintings—landscapes, still lifes, and portraits. Contemporary accounts describe a recognizable painter in continual creative search; Usubaliev spoke of wanting to preserve Kyrgyzstan’s beautiful places on canvas.\n\nHis public practice includes the 2015 B’Art Open Studio Tour and a TÜRKSOY plein-air gathering in Aksaray with artists from 18 countries, where he made five paintings. Later group contexts include the Great Silk Road exhibition in Bishkek in 2021 and Spring Inspiration at Gallery M in 2023.',
       ],
       collectors: [
         'For collectors',
@@ -221,13 +221,13 @@ const copy = deepFreeze({
       studio: [
         'The studio',
         'Working archive',
-        'Bekten’s studio holds a working archive shaped by painting, drawing, teaching, and continual creative search. This demonstration profile intentionally contains no private address and can be replaced in Bekten Studio.',
+        'Bekten’s studio holds a working archive shaped by painting, drawing, teaching, and continual creative search.\n\nIn 2015, B’Art Contemporary’s Open Studio Tour welcomed more than 100 visitors to artists’ studios in a former Soviet-era art factory, including Usubaliev’s working environment.\n\nThe studio is presented here as a place where the artist’s practice and decades of teaching meet; private address details are intentionally not published.',
       ],
     },
     press: [
       'landscapes-remembered',
       'My Soul Sings opens in Bishkek',
-      'A 2013 report on the Al Hayat Gallery exhibition of 36 paintings by Bekten Usubaliev.',
+      'A January 2013 report on the Al Hayat Gallery exhibition of 36 paintings by Bekten Usubaliev.',
     ],
   },
   ky: {
@@ -251,25 +251,25 @@ const copy = deepFreeze({
     collection: [
       'jer-arkhivi',
       'Жер архиви',
-      'Материалдык эс, пейзаж жана мурасталган формаларды изилдеген өзгөртүлүүчү редакциялык коллекция.',
+      'Материалдык эс, пейзаж жана мурасталган формаларды изилдеген редакциялык коллекция.',
     ],
     exhibition: [
       'jer-es-tutumu',
       'Жаным ырдайт',
       'Пейзаждар, натюрморттор жана портреттер',
-      '2013-жылдын февралында Бишкектеги «Аль Хаят» галереясында Бектен Усубалиевдин 36 картинасы коюлуп, көргөзмө 7-мартка чейин уланган.',
+      '2013-жылдын январында Бишкектеги «Аль Хаят» галереясында Бектен Усубалиевдин пейзаж, натюрморт жана портреттен турган 36 картинасы коюлуп, көргөзмө 9-февралга чейин уланган.',
     ],
     journal: [
       'ustakanadan',
       'Устаканадан',
-      'Материал, эс жана жай чыгармачылык тууралуу жазуулар.',
-      'Узак форматтагы редакциялык ритмди сыноо үчүн демо журнал жазмасы. Ар бир сүйлөмдү Bekten Studio аркылуу алмаштырууга болот.',
+      'Пейзаж, портрет, окутуу жана тынымсыз чыгармачылык изденүү тууралуу жазуулар.',
+      'Бектен Усубалиевдин документтелген чыгармачылыгы пейзаж, натюрморт, портрет жана күнүмдүк турмуш көрүнүштөрүн камтыйт. Темалар өзгөргөнү менен адамдарга жана жерге кылдат мамиле туруктуу бойдон калат.\n\n1989-жылы Репин институтун бүтүргөндөн кийин Кыргызстанга кайтып келип, С. А. Чуйков атындагы Кыргыз мамлекеттик көркөм окуу жайында сабак бере баштаган.\n\n2013-жылкы «Жаным ырдайт» көргөзмөсү бул багыттарды 36 картинада бириктирген. Сүрөтчү Кыргызстандын кооз жерлерин полотнодо калтыргысы келерин айткан; кесиптештери анын таанымал живописин жана үзгүлтүксүз изденүүсүн белгилешкен.\n\n2015-жылкы ачык студия туру көрүүчүлөрдү сүрөтчүлөрдүн иш мейкиндигине киргизген, ошол эле жылы Аксарайдагы ТҮРКСОЙ пленэрине 18 өлкөнүн сүрөтчүлөрү катышкан.',
     ],
     pages: {
       about: [
         'Сүрөтчү',
         'Практика',
-        'Бектен Усубалиев 1958-жылы Ысык-Көлдүн Күрмөнтү айылында төрөлгөн. С. Чуйков атындагы көркөм окуу жайында жана Санкт-Петербургдагы Репин институтунда билим алган.\n\n1989-жылы Кыргызстанга кайтып келип, көркөм окуу жайында сабак бере баштаган. Бул Studio тексти сүрөтчү менен такталып, толугу менен өзгөртүлө алат.',
+        'Бектен Усубалиев — чыгармачылыгында пейзаж, натюрморт, портрет жана күнүмдүк турмушту бириктирген кыргыз живописчиси. Анын эмгектери Кыргызстандагы адамдарга жана жерлерге кайра-кайра кайрылат.\n\nАл 1958-жылдын 5-октябрында Ысык-Көл облусунун Күрмөнтү айылында төрөлгөн. Фрунзедеги С. А. Чуйков атындагы көркөм окуу жайында окуп, 1981–1983-жылдары Ленинграддагы Гознак фабрикасында сүрөтчү болуп иштеген. 1989-жылы И. Е. Репин атындагы живопись, скульптура жана архитектура институтун бүтүргөн. Ошол жылдан бери С. А. Чуйков атындагы Кыргыз мамлекеттик көркөм окуу жайында сабак берет; 1991-жылдан Кыргыз Республикасынын Сүрөтчүлөр союзунун мүчөсү.\n\n2013-жылы «Аль Хаят» галереясындагы «Жаным ырдайт» жеке көргөзмөсү пейзаж, натюрморт жана портреттен турган 36 картинаны бириктирген. Ошол учурда сүрөтчү Кыргызстандын кооз жерлерин полотнодо сактап калгысы келерин айткан.\n\nАнын коомдук чыгармачылык таржымалына 2015-жылкы B’Art ачык студия туру, 18 өлкөнүн сүрөтчүлөрү катышкан Аксарайдагы ТҮРКСОЙ пленэри, 2021-жылкы Улуу Жибек жолу көргөзмөсү жана 2023-жылкы «Жазгы илхам» көргөзмөсү кирет.',
       ],
       collectors: [
         'Коллекционерлер үчүн',
@@ -289,13 +289,13 @@ const copy = deepFreeze({
       studio: [
         'Устакана',
         'Иштөөчү архив',
-        'Чыныгы дарек, процесс жана архив менен алмаштырылуучу демо студия профили.',
+        'Бектендин устаканасы живопись, сүрөт, окутуу жана үзгүлтүксүз чыгармачылык изденүү калыптандырган иш архивин сактайт.\n\n2015-жылы B’Art Contemporary уюштурган ачык студия туру мурдагы советтик көркөм фабрикадагы сүрөтчүлөрдүн иш мейкиндигине 100дөн ашык көрүүчүнү алып келген; алардын арасында Усубалиевдин устаканасы да болгон.\n\nБул барак устакананы сүрөтчүнүн практикасы менен көп жылдык окутуусу жолуккан мейкиндик катары көрсөтөт; жеке дарек жарыяланбайт.',
       ],
     },
     press: [
       'estelgen-peizajdar',
       'Эсте калган пейзаждар',
-      'Редакциялык контекстти баштапкы жарыялоо менен байланыштырган демо басма материалы.',
+      '2013-жылы «Аль Хаят» галереясында өткөн 36 картинадан турган көргөзмө тууралуу материал.',
     ],
   },
   ru: {
@@ -319,25 +319,25 @@ const copy = deepFreeze({
     collection: [
       'arkhiv-zemli',
       'Архив земли',
-      'Редактируемая коллекция о материальной памяти, ландшафте и унаследованных формах.',
+      'Редакционная коллекция о материальной памяти, ландшафте и унаследованных формах.',
     ],
     exhibition: [
       'pamyat-zemli',
       'Моя душа поёт',
       'Пейзажи, натюрморты и портреты',
-      'В феврале 2013 года галерея «Аль Хаят» в Бишкеке представила 36 картин Бектена Усубалиева; выставка продолжалась до 7 марта.',
+      'В январе 2013 года галерея «Аль Хаят» в Бишкеке представила 36 картин Бектена Усубалиева — пейзажи, натюрморты и портреты; выставка продолжалась до 9 февраля.',
     ],
     journal: [
       'iz-masterskoy',
       'Из мастерской',
-      'Заметки о материале, памяти и ритме работы.',
-      'Демонстрационная журнальная запись для проверки длинного редакционного формата. Весь текст можно заменить в Bekten Studio.',
+      'Заметки о пейзаже, портрете, преподавании и непрерывном творческом поиске.',
+      'Документированная практика Бектена Усубалиева охватывает пейзаж, натюрморт, портрет и сцены повседневной жизни. Темы меняются, но внимательное отношение к людям и месту остаётся постоянным.\n\nПосле окончания Института имени Репина в 1989 году он вернулся в Кыргызстан и начал преподавать в Кыргызском государственном художественном училище имени С. А. Чуйкова.\n\nВыставка «Душа моя поёт» в 2013 году объединила 36 картин. Усубалиев говорил о желании запечатлеть красоту Кыргызстана на холсте, а коллеги отмечали узнаваемость его живописи и постоянный творческий поиск.\n\nВ 2015 году тур открытых студий познакомил публику с рабочей средой художников; в том же году пленэр ТЮРКСОЙ в Аксарае собрал участников из 18 стран.',
     ],
     pages: {
       about: [
         'Художник',
         'Практика',
-        'Бектен Усубалиев родился в 1958 году в Курменты Иссык-Кульской области. Учился в художественном училище имени С. Чуйкова и в Институте имени Репина в Санкт-Петербурге.\n\nВернувшись в Кыргызстан в 1989 году, он начал преподавать. Этот текст Studio полностью редактируется и должен быть согласован с художником.',
+        'Бектен Усубалиев — кыргызский живописец, работающий с пейзажем, натюрмортом, портретом и сценами повседневной жизни. Его произведения вновь и вновь обращаются к людям и местам Кыргызстана.\n\nОн родился 5 октября 1958 года в селе Курменты Иссык-Кульской области. Учился во Фрунзенском художественном училище имени С. А. Чуйкова, в 1981–1983 годах работал художником на фабрике Гознак в Ленинграде. В 1989 году окончил Институт живописи, скульптуры и архитектуры имени И. Е. Репина. С того же года преподаёт в Кыргызском государственном художественном училище имени С. А. Чуйкова; с 1991 года состоит в Союзе художников Кыргызской Республики.\n\nПерсональная выставка «Душа моя поёт» в галерее «Аль Хаят» в 2013 году объединила 36 пейзажей, натюрмортов и портретов. Усубалиев говорил о стремлении сохранить красоту Кыргызстана на холсте.\n\nСреди последующих публичных контекстов — тур открытых студий B’Art и пленэр ТЮРКСОЙ в Аксарае с художниками из 18 стран в 2015 году, выставка «Великий Шёлковый путь» в 2021-м и «Весеннее вдохновение» в Галерее М в 2023-м.',
       ],
       collectors: [
         'Коллекционерам',
@@ -357,13 +357,13 @@ const copy = deepFreeze({
       studio: [
         'Студия',
         'Рабочий архив',
-        'Демонстрационный профиль, который можно заменить реальным адресом, процессом и архивом.',
+        'Мастерская Бектена хранит рабочий архив, сформированный живописью, рисунком, преподаванием и постоянным творческим поиском.\n\nВ 2015 году тур открытых студий B’Art Contemporary привёл более 100 посетителей в рабочие пространства художников в здании бывшей советской художественной фабрики, включая мастерскую Усубалиева.\n\nЗдесь мастерская представлена как место встречи художественной практики и многолетнего преподавания; частный адрес не публикуется.',
       ],
     },
     press: [
       'zapomnennye-landshafty',
       'Запомненные ландшафты',
-      'Демонстрационный материал, связывающий редакционный контекст с оригинальной публикацией.',
+      'Материал о выставке 36 работ Бектена Усубалиева в галерее «Аль Хаят» в 2013 году.',
     ],
   },
   tr: {
@@ -387,25 +387,25 @@ const copy = deepFreeze({
     collection: [
       'toprak-arsivi',
       'Toprak Arşivi',
-      'Maddi hafıza, peyzaj ve miras kalan formları inceleyen değiştirilebilir bir editorial koleksiyon.',
+      'Maddi hafıza, peyzaj ve miras kalan formları izleyen editoryal bir koleksiyon.',
     ],
     exhibition: [
       'topragin-hafizasi',
       'Ruhum Şarkı Söylüyor',
       'Peyzajlar, natürmortlar ve portreler',
-      'Şubat 2013’te Bişkek’teki Al Hayat Galerisi, Bekten Usubaliev’in 36 resmini bir araya getiren ve 7 Mart’a kadar süren sergiyi açtı.',
+      'Ocak 2013’te Bişkek’teki Al Hayat Galerisi, Bekten Usubaliev’in peyzaj, natürmort ve portrelerden oluşan 36 resmini bir araya getirdi; sergi 9 Şubat’a kadar sürdü.',
     ],
     journal: [
       'atolyeden',
       'Atölyeden',
-      'Malzeme, hafıza ve üretimin ritmi üzerine notlar.',
-      'Uzun biçimli editorial ritmi sınamak için hazırlanmış demo yazı. Her cümle Bekten Studio üzerinden değiştirilebilir.',
+      'Peyzaj, portre, eğitim ve süren yaratıcı arayış üzerine notlar.',
+      'Bekten Usubaliev’in belgelenmiş pratiği peyzaj, natürmort, portre ve gündelik yaşam sahneleri arasında dolaşır. Konular değişse de insanlara ve mekâna gösterdiği dikkat sabit kalır.\n\n1989’da Repin Enstitüsü’nden mezun olduktan sonra Kırgızistan’a döndü ve S. A. Chuikov Kırgız Devlet Sanat Koleji’nde ders vermeye başladı.\n\n2013’teki “Ruhum Şarkı Söylüyor” sergisi bu yönleri 36 tabloda bir araya getirdi. Usubaliev, Kırgızistan’ın güzel yerlerini tuvale kaydetme isteğini anlatırken meslektaşları resimlerinin ayırt edici niteliğine ve bitmeyen yaratıcı arayışına dikkat çekti.\n\n2015’te açık stüdyo turu izleyicileri sanatçıların çalışma alanlarıyla buluşturdu; aynı yıl Aksaray’daki TÜRKSOY açık hava çalışması 18 ülkeden sanatçıları bir araya getirdi.',
     ],
     pages: {
       about: [
         'Sanatçı',
         'Pratik',
-        'Bekten Usubaliev 1958’de Issık Göl bölgesindeki Kurmenty’de doğdu. Semyon Chuikov sanat okulunda ve Saint Petersburg’daki Repin Enstitüsü’nde eğitim gördü.\n\n1989’da Kırgızistan’a dönerek sanat okulunda ders vermeye başladı. Bu Studio metni tamamen düzenlenebilir ve yayın öncesinde sanatçıyla doğrulanmalıdır.',
+        'Bekten Usubaliev; peyzaj, natürmort, portre ve gündelik yaşam sahneleri arasında çalışan Kırgız bir ressamdır. Yapıtları Kırgızistan’ın insanlarına ve mekânlarına tekrar tekrar döner.\n\n5 Ekim 1958’de Issık Göl bölgesindeki Kurmenty köyünde doğdu. Frunze’deki S. A. Chuikov Sanat Koleji’nde eğitim gördü; 1981–1983 arasında Leningrad’daki Goznak fabrikasında sanatçı olarak çalıştı. 1989’da I. E. Repin Resim, Heykel ve Mimarlık Enstitüsü’nden mezun oldu. Aynı yıldan bu yana S. A. Chuikov Kırgız Devlet Sanat Koleji’nde ders veriyor; 1991’den beri Kırgız Cumhuriyeti Sanatçılar Birliği üyesi.\n\n2013’te Al Hayat Galerisi’ndeki “Ruhum Şarkı Söylüyor” kişisel sergisi 36 peyzaj, natürmort ve portreyi buluşturdu. Usubaliev o dönemde Kırgızistan’ın güzel yerlerini tuvale kaydetmek istediğini söyledi.\n\nKamusal üretim çizgisinde 2015 B’Art Açık Stüdyo Turu, 18 ülkeden sanatçının katıldığı Aksaray TÜRKSOY buluşması, 2021’de Bişkek’teki Büyük İpek Yolu sergisi ve 2023’te Galeri M’deki Bahar İlhamı sergisi yer alıyor.',
       ],
       collectors: [
         'Koleksiyonerler için',
@@ -425,13 +425,13 @@ const copy = deepFreeze({
       studio: [
         'Stüdyo',
         'Çalışan arşiv',
-        'Gerçek adres, süreç ve arşivle değiştirilebilecek demo stüdyo profili.',
+        'Bekten’in stüdyosu resim, çizim, eğitim ve süren yaratıcı arayışın biçimlendirdiği çalışan bir arşiv barındırıyor.\n\n2015’te B’Art Contemporary’nin Açık Stüdyo Turu, eski bir Sovyet sanat fabrikasındaki sanatçı çalışma alanlarına 100’den fazla ziyaretçi getirdi; Usubaliev’in stüdyosu da bu turun parçasıydı.\n\nBu sayfa stüdyoyu sanat pratiği ile uzun yıllara yayılan eğitimin buluştuğu yer olarak ele alır; özel adres yayımlanmaz.',
       ],
     },
     press: [
       'hatirlanan-peyzajlar',
       'Hatırlanan Peyzajlar',
-      'Editorial bağlamı özgün yayına bağlayan demo basın kaydı.',
+      'Bekten Usubaliev’in 2013’te Al Hayat Galerisi’nde açılan 36 eserlik sergisi üzerine bir haber.',
     ],
   },
 })
@@ -470,8 +470,8 @@ function seo(locale, segment, slug, title, description) {
 function placement(entityId, entityType, mediaObject, index, altText) {
   const editable = {
     altText,
-    caption: 'Replaceable demonstration media',
-    credit: 'Bekten Studio demo',
+    caption: 'Editorial archive image',
+    credit: 'Bekten Studio archive',
     crop: 'ORIGINAL',
     displayOrder: 0,
     focalPoint: null,
@@ -504,6 +504,7 @@ function sharedRow(
   description,
   displayOrder,
   segment,
+  translationGroupId,
 ) {
   const metadata = seo(locale, segment, slug, title, description)
 
@@ -520,6 +521,7 @@ function sharedRow(
     slug,
     status: 'PUBLISHED',
     title,
+    translationGroupId,
     updatedAt: PUBLISHED_AT,
     version: 1,
   }
@@ -588,6 +590,18 @@ function buildContent() {
 
   for (const locale of ['en', 'tr', 'ru', 'ky']) {
     const localeCopy = copy[locale]
+    const groupId = (kind, order = 0) => {
+      const groupOffsets = {
+        artwork: 10,
+        collection: 1,
+        exhibition: 20,
+        journal: 30,
+        page: 40,
+        press: 50,
+      }
+
+      return uuid('9', groupOffsets[kind] + order)
+    }
     const collectionId = uuid('1', index)
     const [collectionSlug, collectionTitle, collectionDescription] =
       localeCopy.collection
@@ -600,6 +614,7 @@ function buildContent() {
         collectionDescription,
         0,
         'collections',
+        groupId('collection'),
       ),
       description: collectionDescription,
     }
@@ -632,6 +647,7 @@ function buildContent() {
           description,
           artworkOrder,
           'works',
+          groupId('artwork', artworkOrder),
         ),
         availability: artworkOrder === 2 ? 'AVAILABLE' : 'ON_REQUEST',
         collectionId,
@@ -686,12 +702,13 @@ function buildContent() {
         exhibitionBody,
         0,
         'exhibitions',
+        groupId('exhibition'),
       ),
       body: exhibitionBody,
       city: 'Bishkek',
       country: 'Kyrgyzstan',
-      endsAt: new Date('2013-03-07T00:00:00.000Z'),
-      startsAt: new Date('2013-02-14T00:00:00.000Z'),
+      endsAt: new Date('2013-02-09T00:00:00.000Z'),
+      startsAt: new Date('2013-01-19T00:00:00.000Z'),
       subtitle: exhibitionSubtitle,
       venue: 'Al Hayat Gallery',
     }
@@ -732,6 +749,7 @@ function buildContent() {
         journalExcerpt,
         0,
         'journal',
+        groupId('journal'),
       ),
       body: journalBody,
       excerpt: journalExcerpt,
@@ -761,8 +779,24 @@ function buildContent() {
     ).entries()) {
       const [title, eyebrow, body] = page
       const pageId = uuid('1', index)
+      const pageGroupOrder = [
+        'about',
+        'collectors',
+        'commission',
+        'private-viewings',
+        'studio',
+      ].indexOf(slug)
       const pageRow = {
-        ...sharedRow(pageId, locale, slug, title, body, pageOrder, ''),
+        ...sharedRow(
+          pageId,
+          locale,
+          slug,
+          title,
+          body,
+          pageOrder,
+          '',
+          groupId('page', pageGroupOrder),
+        ),
         body,
         eyebrow,
       }
@@ -798,9 +832,10 @@ function buildContent() {
         pressExcerpt,
         0,
         'press',
+        groupId('press'),
       ),
       category: 'FEATURE',
-      content: `${pressExcerpt} The linked source remains the authority; this Studio summary is editable.`,
+      content: `${pressExcerpt} The linked Vecherniy Bishkek report remains the authority for the exhibition record.`,
       description: pressExcerpt,
       outlet: 'Vecherniy Bishkek',
       publishedOn: new Date('2013-02-14T00:00:00.000Z'),
