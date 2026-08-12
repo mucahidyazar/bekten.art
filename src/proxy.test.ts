@@ -179,7 +179,9 @@ describe('internationalization proxy', () => {
     mocks.intlMiddleware.mockReturnValue(response)
 
     expect(proxy(request as never)).toBe(response)
-    expect(mocks.intlMiddleware).toHaveBeenCalledWith(request)
+    expect(mocks.intlMiddleware).toHaveBeenCalledWith(
+      expect.objectContaining({nextUrl: request.nextUrl}),
+    )
     expect(response.headers.set).toHaveBeenCalledWith(
       'Content-Security-Policy',
       expect.stringContaining("frame-ancestors 'none'"),
@@ -249,9 +251,7 @@ describe('internationalization proxy', () => {
     })
   })
 
-  it('keeps the original request URL while forwarding nonce headers through the next-intl rewrite', () => {
-    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'http://127.0.0.1:3000')
-
+  it('preserves the next-intl rewrite while forwarding nonce headers on the request', () => {
     const request = {
       headers: new Headers(),
       nextUrl: {pathname: '/works'},
@@ -260,26 +260,18 @@ describe('internationalization proxy', () => {
       'x-middleware-rewrite': 'http://localhost:3000/en/works',
     })
     const intlResponse = {headers: intlHeaders, ok: true}
-    const securedResponse = {headers: new Headers(), kind: 'rewrite'}
 
     mocks.intlMiddleware.mockReturnValue(intlResponse)
-    mocks.rewrite.mockReturnValue(securedResponse)
 
-    expect(proxy(request as never)).toBe(securedResponse)
-    expect(mocks.intlMiddleware).toHaveBeenCalledWith(request)
-    expect(mocks.rewrite).toHaveBeenCalledWith(
-      'http://127.0.0.1:3000/en/works',
-      {
-        headers: intlHeaders,
-        request: {headers: expect.any(Headers)},
-      },
-    )
+    expect(proxy(request as never)).toBe(intlResponse)
+    expect(mocks.rewrite).not.toHaveBeenCalled()
 
-    const forwardedHeaders = mocks.rewrite.mock.calls[0]?.[1]?.request
-      .headers as Headers
+    const forwardedRequest = mocks.intlMiddleware.mock.calls[0]?.[0] as {
+      headers: Headers
+    }
 
-    expect(forwardedHeaders.get('x-nonce')).toMatch(/^[a-f0-9]{32}$/u)
-    expect(forwardedHeaders.get('x-pathname')).toBe('/works')
-
+    expect(forwardedRequest).not.toBe(request)
+    expect(forwardedRequest.headers.get('x-nonce')).toMatch(/^[a-f0-9]{32}$/u)
+    expect(forwardedRequest.headers.get('x-pathname')).toBe('/works')
   })
 })

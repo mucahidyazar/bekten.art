@@ -106,49 +106,7 @@ function createSecurityContext(request: NextRequest) {
   return {
     headers,
     policy,
-    request,
-  }
-}
-
-function withSecurityRequestHeaders(
-  response: NextResponse,
-  requestHeaders: Headers,
-) {
-  if (!response.ok) return response
-
-  const rewriteDestination = response.headers.get('x-middleware-rewrite')
-  const init = {
-    headers: response.headers,
-    request: {headers: requestHeaders},
-  }
-
-  return rewriteDestination
-    ? NextResponse.rewrite(
-        canonicalInternalRewriteDestination(rewriteDestination),
-        init,
-      )
-    : NextResponse.next(init)
-}
-
-function canonicalInternalRewriteDestination(rewriteDestination: string) {
-  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.trim()
-
-  if (!configuredAppUrl) return rewriteDestination
-
-  try {
-    const destination = new URL(rewriteDestination)
-    const canonicalOrigin = new URL(configuredAppUrl)
-
-    if (!['http:', 'https:'].includes(canonicalOrigin.protocol)) {
-      return rewriteDestination
-    }
-
-    destination.protocol = canonicalOrigin.protocol
-    destination.host = canonicalOrigin.host
-
-    return destination.toString()
-  } catch {
-    return rewriteDestination
+    request: new NextRequest(request, {headers}),
   }
 }
 
@@ -221,10 +179,7 @@ export default function proxy(request: NextRequest) {
   }
 
   return withContentSecurityPolicy(
-    withSecurityRequestHeaders(
-      intlMiddleware(security.request),
-      security.headers,
-    ),
+    intlMiddleware(security.request),
     security.policy,
   )
 }
