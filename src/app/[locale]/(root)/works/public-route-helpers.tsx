@@ -126,6 +126,7 @@ function PublicEditorialList({
         <li key={item.id}>
           <PublicEditorialCard
             actionLabel={item.actionLabel ?? actionLabel}
+            contentLocale={item.contentLocale}
             description={item.description}
             eyebrow={item.eyebrow}
             href={item.href}
@@ -271,6 +272,7 @@ function listMetadata(
 
 type EditorialListItem = Readonly<{
   actionLabel?: string
+  contentLocale?: string
   description: string
   eyebrow: string
   href: string

@@ -36,6 +36,7 @@ export default async function JournalPage({params}: JournalPageProps) {
   const [featured, ...archive] = entries
 
   const journalItem = (entry: (typeof entries)[number]) => ({
+    contentLocale: entry.locale,
     description: entry.excerpt,
     eyebrow: publicDate(entry.publishedAt, locale),
     href: localizedPath(locale, `/journal/${entry.slug}`),
@@ -57,6 +58,7 @@ export default async function JournalPage({params}: JournalPageProps) {
             >
               <PublicEditorialCard
                 actionLabel={publicRouteCopy[contentLocale].readJournal}
+                contentLocale={featured.locale}
                 description={featured.excerpt}
                 eyebrow={publicDate(featured.publishedAt, locale)}
                 href={localizedPath(locale, `/journal/${featured.slug}`)}

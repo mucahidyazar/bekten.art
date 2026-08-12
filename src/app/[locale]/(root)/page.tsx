@@ -150,6 +150,7 @@ export default async function Home({params}: PageProps) {
     : null
   const editorialFeatures = [
     ...content.collections.slice(0, 1).map(entry => ({
+      contentLocale: entry.locale,
       description: entry.description,
       eyebrow: copy.collections,
       href: localizedPath(locale, `/collections/${entry.slug}`),
@@ -159,6 +160,7 @@ export default async function Home({params}: PageProps) {
       title: entry.title,
     })),
     ...content.exhibitions.slice(0, 1).map(entry => ({
+      contentLocale: entry.locale,
       description: entry.subtitle || entry.body,
       eyebrow: copy.exhibitions,
       href: localizedPath(locale, `/exhibitions/${entry.slug}`),
@@ -168,6 +170,7 @@ export default async function Home({params}: PageProps) {
       title: entry.title,
     })),
     ...content.journalEntries.slice(0, 1).map(entry => ({
+      contentLocale: entry.locale,
       description: entry.excerpt,
       eyebrow: copy.journal,
       href: localizedPath(locale, `/journal/${entry.slug}`),

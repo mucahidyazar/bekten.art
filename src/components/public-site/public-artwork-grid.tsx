@@ -70,7 +70,7 @@ export function PublicArtworkGrid({
 
         return (
           <li className={styles.artCard} key={work.id}>
-            <article>
+            <article lang={work.locale}>
               <Link
                 href={localizedPath(locale, `/works/${work.slug}`)}
                 transitionTypes={[...NAV_FORWARD_TRANSITION]}

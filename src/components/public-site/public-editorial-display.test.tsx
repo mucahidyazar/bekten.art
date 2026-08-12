@@ -59,6 +59,7 @@ describe('public editorial display', () => {
     ).toBeVisible()
     expect(screen.getByText('Oil on canvas')).toBeVisible()
     expect(screen.getByText('On request')).toBeVisible()
+    expect(screen.getByRole('article')).toHaveAttribute('lang', 'en')
     expect(screen.queryByText(/price|buy|cart|checkout/iu)).toBeNull()
   })
 
@@ -66,6 +67,7 @@ describe('public editorial display', () => {
     render(
       <PublicEditorialCard
         actionLabel="View exhibition"
+        contentLocale="tr"
         description="A new body of work shaped by memory."
         eyebrow="Exhibition · 2026"
         href="/en/exhibitions/echoes"
@@ -75,7 +77,7 @@ describe('public editorial display', () => {
       />,
     )
 
-    expect(screen.getByRole('article')).toBeVisible()
+    expect(screen.getByRole('article')).toHaveAttribute('lang', 'tr')
     expect(
       screen.getByRole('link', {name: /echoes of the steppe/iu}),
     ).toHaveAttribute('href', '/en/exhibitions/echoes')

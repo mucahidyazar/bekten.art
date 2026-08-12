@@ -60,6 +60,7 @@ export default async function CollectionsPage({params}: CollectionsPageProps) {
             >
               <PublicEditorialCard
                 actionLabel={publicRouteCopy[contentLocale].viewCollection}
+                contentLocale={featured.locale}
                 description={featured.description}
                 eyebrow={copy.kicker}
                 href={localizedPath(locale, `/collections/${featured.slug}`)}
@@ -81,6 +82,7 @@ export default async function CollectionsPage({params}: CollectionsPageProps) {
                   actionLabel={publicRouteCopy[contentLocale].viewCollection}
                   empty={copy.empty}
                   items={archive.map(collection => ({
+                    contentLocale: collection.locale,
                     description: collection.description,
                     eyebrow: copy.kicker,
                     href: localizedPath(

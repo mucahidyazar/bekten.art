@@ -36,6 +36,7 @@ export default async function ExhibitionsPage({params}: ExhibitionsPageProps) {
   const [featured, ...timeline] = exhibitions
 
   const exhibitionItem = (exhibition: (typeof exhibitions)[number]) => ({
+    contentLocale: exhibition.locale,
     description: exhibition.subtitle ?? exhibition.body,
     eyebrow: [exhibition.venue, publicDate(exhibition.startsAt, locale)]
       .filter(Boolean)
@@ -59,6 +60,7 @@ export default async function ExhibitionsPage({params}: ExhibitionsPageProps) {
             >
               <PublicEditorialCard
                 actionLabel={publicRouteCopy[contentLocale].viewExhibition}
+                contentLocale={featured.locale}
                 description={featured.subtitle ?? featured.body}
                 eyebrow={[featured.venue, publicDate(featured.startsAt, locale)]
                   .filter(Boolean)

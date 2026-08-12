@@ -11,6 +11,7 @@ import type {PublicEditorialMediaPlacement} from '@/server/public-editorial'
 
 type PublicEditorialCardProps = Readonly<{
   actionLabel?: string
+  contentLocale?: string
   description: string
   eyebrow: string
   href: string
@@ -22,6 +23,7 @@ type PublicEditorialCardProps = Readonly<{
 
 export function PublicEditorialCard({
   actionLabel,
+  contentLocale,
   description,
   eyebrow,
   href,
@@ -38,7 +40,10 @@ export function PublicEditorialCard({
         : ''
 
   return (
-    <article className={`${styles.editorialCard} ${variantClass}`.trim()}>
+    <article
+      className={`${styles.editorialCard} ${variantClass}`.trim()}
+      lang={contentLocale}
+    >
       <Link
         className={styles.editorialCardLink}
         href={href}

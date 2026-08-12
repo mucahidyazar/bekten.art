@@ -63,6 +63,7 @@ export default async function PressPage({params}: PressPageProps) {
                   actionLabel={publicRouteCopy[contentLocale].readPress}
                   empty={copy.empty}
                   items={group.entries.map(entry => ({
+                    contentLocale: entry.locale,
                     description: entry.excerpt,
                     eyebrow: [
                       entry.outlet,
