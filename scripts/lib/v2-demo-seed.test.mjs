@@ -202,6 +202,15 @@ describe('V2 demo seed', () => {
         .flatMap(item => item.placements)
         .every(placement => !Object.hasOwn(placement, 'focalPoint')),
     ).toBe(true)
+    expect(
+      plan.content.every(item => typeof item.row.translationGroupId === 'string'),
+    ).toBe(true)
+    expect(
+      plan.content
+        .filter(item => item.entityType === 'ARTWORK')
+        .reduce((groups, item) => groups.add(item.row.translationGroupId), new Set())
+        .size,
+    ).toBe(3)
   })
 
   it('maps generated heritage assets to the intended editable Studio records', () => {
@@ -252,11 +261,16 @@ describe('V2 demo seed', () => {
     )
 
     expect(artist?.row.body).toMatch(/1958/u)
+    expect(artist?.row.body).toMatch(/Goznak/u)
     expect(artist?.row.body).toMatch(/Repin/u)
+    expect(artist?.row.body).toMatch(/36 paintings/u)
+    expect(artist?.row.body).toMatch(/TÜRKSOY/u)
     expect(artist?.revision.snapshot.seo.canonicalPath).toBe('/about')
     expect(exhibition?.row.body).toMatch(/36 paintings/u)
     expect(exhibition?.row.venue).toBe('Al Hayat Gallery')
-    expect(serialized).not.toMatch(/gmail\.com|Tynystanov|Тыныстанов/iu)
+    expect(serialized).not.toMatch(
+      /demonstration|demo|replaceable|gmail\.com|Tynystanov|Тыныстанов/iu,
+    )
   })
 
   it('uploads deterministic assets and creates published rows, placements, revision and audit atomically', async () => {
