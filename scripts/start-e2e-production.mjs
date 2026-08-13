@@ -5,7 +5,7 @@ import {pathToFileURL} from 'node:url'
 
 function e2eServerEnvironment(environment = process.env) {
   const rawBaseUrl =
-    environment.PLAYWRIGHT_BASE_URL?.trim() || 'http://127.0.0.1:3000'
+    environment.PLAYWRIGHT_BASE_URL?.trim() || 'http://localhost:3000'
   let baseUrl
 
   try {

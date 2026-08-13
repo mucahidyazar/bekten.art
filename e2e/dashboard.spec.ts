@@ -9,7 +9,7 @@ import {prisma} from '../src/lib/db'
 const sessionToken = `e2e-${randomUUID()}`
 const studioEmail = 'e2e-owner@example.test'
 const dashboardBaseUrl =
-  process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3000'
+  process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
 
 test.beforeAll(async () => {
   const editor = await prisma.user.create({

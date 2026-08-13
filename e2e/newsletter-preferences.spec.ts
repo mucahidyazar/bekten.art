@@ -2,7 +2,7 @@ import {expect, test} from '@playwright/test'
 
 const token = 'v1.initialization-vector.encrypted.authentication-tag'
 const expectedAppOrigin =
-  process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3000'
+  process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
 const localeContracts = [
   {
     locale: 'en',

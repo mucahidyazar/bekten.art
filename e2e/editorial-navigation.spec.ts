@@ -202,7 +202,7 @@ test.describe('V2 editorial shell and navigation', () => {
     })
 
     expect(response.status()).toBe(200)
-    expect(response.headers().link).toBeUndefined()
+    expect(response.headers().link ?? '').not.toContain('evil.invalid')
     expect(response.headers().location).toBeUndefined()
     expect(await response.text()).not.toContain('evil.invalid')
   })

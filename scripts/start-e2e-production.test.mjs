@@ -21,6 +21,12 @@ afterEach(async () => {
 
 describe('production E2E server', () => {
   it('uses only a loopback test origin and derives the standalone bind address', () => {
+    expect(e2eServerEnvironment({})).toMatchObject({
+      HOSTNAME: 'localhost',
+      NEXTAUTH_URL: 'http://localhost:3000',
+      NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
+      PORT: '3000',
+    })
     expect(
       e2eServerEnvironment({
         PLAYWRIGHT_BASE_URL: 'http://127.0.0.1:4310',
