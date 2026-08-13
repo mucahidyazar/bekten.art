@@ -292,9 +292,15 @@ describe('V2 demo seed', () => {
     })
 
     expect(uploadAsset).toHaveBeenCalledWith(media)
+    expect(configured.database.mediaObject.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({displayName: true}),
+      }),
+    )
     expect(configured.database.mediaObject.createMany).toHaveBeenCalledWith({
       data: [
         expect.objectContaining({
+          displayName: media.filename,
           id: mediaId,
           objectKey: media.objectKey,
           provider: 'garage',
@@ -411,6 +417,7 @@ describe('V2 demo seed', () => {
     const staleMedia = {
       ...media,
       checksumSha256: '0'.repeat(64),
+      displayName: 'Stale display name',
       filename: 'stale.png',
       originalFilename: 'stale.png',
       provider: 'garage',
@@ -435,6 +442,7 @@ describe('V2 demo seed', () => {
     expect(configured.database.mediaObject.updateMany).toHaveBeenCalledWith({
       data: expect.objectContaining({
         checksumSha256: media.checksumSha256,
+        displayName: media.filename,
         filename: media.filename,
         provider: 'garage',
         status: 'READY',

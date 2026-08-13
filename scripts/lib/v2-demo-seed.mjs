@@ -890,6 +890,7 @@ export function createDemoSeedPlan() {
 function mediaRow(item) {
   return {
     checksumSha256: item.checksumSha256,
+    displayName: item.filename,
     filename: item.filename,
     height: item.height,
     id: item.id,
@@ -908,6 +909,7 @@ async function ensureMediaIdentities(database, mediaItems) {
   const existing = await database.mediaObject.findMany({
     select: {
       checksumSha256: true,
+      displayName: true,
       filename: true,
       height: true,
       id: true,
@@ -997,6 +999,7 @@ async function executeDemoSeedPlanUnchecked({
     const expected = mediaRow(item)
     const data = {
       checksumSha256: expected.checksumSha256,
+      displayName: expected.displayName,
       filename: expected.filename,
       height: expected.height,
       mimeType: expected.mimeType,
