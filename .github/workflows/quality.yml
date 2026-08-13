@@ -148,7 +148,7 @@ jobs:
             --env RESEND_WEBHOOK_SECRET="whsec_c21va2V0ZXN0" \
             --volume "$RUNNER_TEMP/bekten-ci-tls/ca.crt:/ci-ca.crt:ro" \
             bekten-art:ci
-          for attempt in $(seq 1 30); do
+          for attempt in $(seq 1 90); do
             if curl --fail --silent http://127.0.0.1:3000/api/ready >/dev/null; then
               exit 0
             fi

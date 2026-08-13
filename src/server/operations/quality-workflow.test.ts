@@ -18,6 +18,9 @@ describe('production quality workflow', () => {
     expect(workflow).toContain('MEDIA_S3_ENDPOINT="https://127.0.0.1:9443"')
     expect(workflow).toContain('NODE_EXTRA_CA_CERTS="/ci-ca.crt"')
     expect(workflow).toContain('/api/ready')
+    expect(workflow).toMatch(
+      /for attempt in \$\(seq 1 90\); do\n\s+if curl --fail --silent http:\/\/127\.0\.0\.1:3000\/api\/ready/u,
+    )
     expect(workflow).not.toContain('/api/health >/dev/null')
     expect(workflow).not.toMatch(/AUTH_GOOGLE_(?:ID|SECRET)/u)
   })
