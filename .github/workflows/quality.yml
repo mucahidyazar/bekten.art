@@ -79,7 +79,7 @@ jobs:
           docker run --detach --name bekten-minio --network host \
             --env MINIO_ROOT_USER="smoke-access" \
             --env MINIO_ROOT_PASSWORD="smoke-secret-value" \
-            quay.io/minio/minio:RELEASE.2025-09-06T17-38-46Z \
+            quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z \
             server /data --address :9000
           for attempt in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:9000/minio/health/live >/dev/null; then

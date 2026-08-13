@@ -12,7 +12,9 @@ describe('production quality workflow', () => {
   })
 
   it('smokes readiness against a real S3-compatible bucket', () => {
-    expect(workflow).toContain('quay.io/minio/minio:RELEASE.')
+    expect(workflow).toContain(
+      'quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z',
+    )
     expect(workflow).toContain('MEDIA_S3_ENDPOINT="https://127.0.0.1:9443"')
     expect(workflow).toContain('NODE_EXTRA_CA_CERTS="/ci-ca.crt"')
     expect(workflow).toContain('/api/ready')
