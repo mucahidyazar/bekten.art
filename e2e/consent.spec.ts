@@ -34,22 +34,24 @@ test.describe('consent mode and Google network gating', () => {
     })
     await page.goto('/')
 
-    const defaultConsent = await page.evaluate(() => {
-      const entries = (window.dataLayer ?? []).map(entry =>
-        Array.from(entry as ArrayLike<unknown>),
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const entries = (window.dataLayer ?? []).map(entry =>
+            Array.from(entry as ArrayLike<unknown>),
+          )
+
+          return entries.find(
+            entry => entry[0] === 'consent' && entry[1] === 'default',
+          )?.[2] as Record<string, string> | undefined
+        }),
       )
-
-      return entries.find(
-        entry => entry[0] === 'consent' && entry[1] === 'default',
-      )?.[2] as Record<string, string> | undefined
-    })
-
-    expect(defaultConsent).toMatchObject({
-      ad_personalization: 'denied',
-      ad_storage: 'denied',
-      ad_user_data: 'denied',
-      analytics_storage: 'denied',
-    })
+      .toMatchObject({
+        ad_personalization: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        analytics_storage: 'denied',
+      })
     await expect(page.locator('script#google-tag-manager')).toHaveCount(0)
     expect(gtmRequests).toEqual([])
 
