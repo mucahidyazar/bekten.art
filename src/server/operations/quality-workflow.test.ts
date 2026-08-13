@@ -17,7 +17,11 @@ describe('production quality workflow', () => {
     )
     expect(workflow).toContain('MEDIA_S3_ENDPOINT="https://127.0.0.1:9443"')
     expect(workflow).toContain('NODE_EXTRA_CA_CERTS="/ci-ca.crt"')
+    expect(workflow).toContain('proxy_set_header Host $http_host;')
     expect(workflow).toContain('/api/ready')
+    expect(workflow).toContain(
+      'curl --silent --show-error http://127.0.0.1:3000/api/ready || true',
+    )
     expect(workflow).toMatch(
       /for attempt in \$\(seq 1 90\); do\n\s+if curl --fail --silent http:\/\/127\.0\.0\.1:3000\/api\/ready/u,
     )
